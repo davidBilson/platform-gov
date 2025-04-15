@@ -23,12 +23,12 @@ const BusinessProfile = () => {
         <div className='mb-6'>
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
             {/* Company Logo Upload */}
-            <div className='relative w-22 h-22 bg-gray-300 border border-[#0b5f94] rounded-full flex items-center justify-center mx-auto sm:mx-0'>
+            <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
                 <IoMdImages size={40} className='text-white/70' />
               </div>
-              <button className='absolute bottom-0 right-0 z-50 h-7 w-7 bg-white rounded-full flex items-center justify-center border border-[#0b5f94]'>
-                <MdEdit size={14} className='text-[#0b5f94]' />
+              <button className='absolute bottom-0 right-0 z-50 h-7 w-7 bg-white rounded-full flex items-center justify-center border border-boldblue'>
+                <MdEdit size={14} className='text-boldblue' />
               </button>
             </div>
             
@@ -38,25 +38,25 @@ const BusinessProfile = () => {
                 type="text" 
                 placeholder="Company Name"
                 value="Company Name"
-                className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-4 text-sm pl-5 focus:outline-none focus:border-[#0b5f94]'
+                className='w-full border border-boldblue text-boldblue rounded p-4 text-sm pl-5 focus:outline-none focus:border-boldblue'
               />
             </div>
           </div>
           
           {/* Company Overview */}
-          <div className='mb-8 flex items-center justify-center py-3.5 px-5 rounded-md border border-[#0b5f94]'>
-            <p className='w-full text-[#0b5f94]'>Company Overview</p>
+          <div className='mb-8 flex items-center justify-center py-3.5 px-5 rounded-md border border-boldblue'>
+            <p className='w-full text-boldblue'>Company Overview</p>
           </div>
         </div>
         
-        <div className='border-t border-t-[#0b5f94] py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
+        <div className='border-t border-t-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:w-full sm:max-w-[120px]'>Location</h2>
           
           <div className='w-full'>
             {/* Country */}
             <div className='mb-4'>
                 <div className='relative'>
-                <select className='w-full border border-[#0b5f94] rounded p-3 appearance-none text-[#0b5f94] focus:outline-none focus:border-[#0b5f94] '>
+                <select className='w-full border border-boldblue rounded p-3 appearance-none text-boldblue focus:outline-none focus:border-boldblue '>
                     <option value="">Country</option>
                     <option value="us">United States</option>
                     <option value="ca">Canada</option>
@@ -76,13 +76,13 @@ const BusinessProfile = () => {
               type="text" 
               placeholder="Address 1"
               value={"Address 1"}
-              className='flex-1 border border-[#0b5f94] text-[#0b5f94] rounded p-3 focus:outline-none focus:border-[#009DDE]'
+              className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-brightblue'
             />
             <input 
               type="text" 
               placeholder="Address 2"
               value={"Address 2"}
-              className='flex-1 border border-[#0b5f94] text-[#0b5f94] rounded p-3 focus:outline-none focus:border-[#009DDE]'
+              className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-brightblue'
             />
           </div>
           
@@ -93,15 +93,15 @@ const BusinessProfile = () => {
                 type="text" 
                 placeholder="City" 
                 value={"City"}
-                className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 pr-10 focus:outline-none focus:border-[#0b5f94]'
+                className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline-none focus:border-boldblue'
                 />
               <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
-                <FaSearch size={14} className='text-[#0b5f94]' />
+                <FaSearch size={14} className='text-boldblue' />
               </div>
             </div>
             
             <div className='relative flex-1'>
-              <select className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 appearance-none focus:outline-none focus:border-[#009DDE]'>
+              <select className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-brightblue'>
                 <option value="">State</option>
                 <option value="ca">California</option>
                 <option value="tx">Texas</option>
@@ -118,25 +118,25 @@ const BusinessProfile = () => {
               type="text" 
               placeholder="ZIP Code"
               value={"ZIP Code"}
-              className='flex-1 border border-[#0b5f94] text-[#0b5f94] rounded p-3 focus:outline-none focus:border-[#009DDE]'
+              className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-brightblue'
               />
           </div>
             {/* Add Location Button */}
-            <button className='bg-[#0B5F94] text-white font-bold py-2 px-4 rounded'>
+            <button className='bg-boldblue text-white font-bold py-2 px-4 rounded'>
                 Add Location
             </button>
             </div>
           
         </div>
         
-        <div className='border-y border-y-[#0b5f94] py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
+        <div className='border-y border-y-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:max-w-[120px]'>Information</h2>
           
           <div className='w-full sm:w-auto'>
           {/* Industry */}
           <div className='mb-4'>
             <div className='relative'>
-              <select className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 appearance-none focus:outline-none focus:border-[#0b5f94]'>
+              <select className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-boldblue'>
                 <option value="">Industry</option>
                 <option value="tech">Technology</option>
                 <option value="healthcare">Healthcare</option>
@@ -153,7 +153,7 @@ const BusinessProfile = () => {
           {/* Company Size */}
           <div className='mb-4'>
             <div className='relative'>
-              <select className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 appearance-none focus:outline-none focus:border-[#0b5f94]'>
+              <select className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-boldblue'>
                 <option value="">Size</option>
                 <option value="1-10">1-10 employees</option>
                 <option value="11-50">11-50 employees</option>
@@ -175,10 +175,10 @@ const BusinessProfile = () => {
                 type="text" 
                 placeholder="Specializations"
                 value="Specializations"
-                className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 pr-10 focus:outline-none focus:border-[#009DDE]'
+                className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline-none focus:border-brightblue'
                 />
               <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
-                <FaSearch size={14} className='text-[#0b5f94]' />
+                <FaSearch size={14} className='text-boldblue' />
               </div>
             </div>
           </div>
@@ -187,7 +187,7 @@ const BusinessProfile = () => {
           </div>
             <div className='flex flex-wrap gap-2 self-end mb-6'>
                 {specializations.map((spec, index) => (
-                    <div key={index} className='bg-[#009DDE] text-white font-bold py-1 px-4 rounded-full'>
+                    <div key={index} className='bg-brightblue text-white font-bold py-1 px-4 rounded-full'>
                     {spec}
                 </div>
                 ))}

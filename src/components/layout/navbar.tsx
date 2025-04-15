@@ -32,20 +32,20 @@ useEffect(() => {
 }, []);
 
   return (
-    <div className='fixed top-0 left-0 w-full h-28 overflow-hidden flex items-center justify-center border-b-2 border-b-[#0B5F94] bg-white z-50'>
-        <nav className='w-full max-w-[1440px] m-auto flex items-center justify-evenly gap-12 px-6 lg:px-[45px] relative'>
+    <div className='fixed top-0 left-0 w-full h-28 overflow-hidden flex items-center justify-center border-b-2 border-b-boldblue bg-white z-50'>
+        <nav className='w-full max-w-maxWidth m-auto flex items-center justify-evenly gap-12 px-6 lg:px-[45px] relative'>
             
             <Image src={Logo} width={80} height={90} alt="GovLink Platform" />
             
             {/* Mobile menu toggle */}
             <div className="lg:hidden ml-auto">
-              <button onClick={() => setMobileMenu(!mobileMenu)} className="text-[#0B5F94]">
+              <button onClick={() => setMobileMenu(!mobileMenu)} className="text-boldblue">
                 <HiMenuAlt3 size={32} />
               </button>
             </div>
 
             {/* Desktop navigation */}
-            <ul className="hidden lg:flex items-center gap-[13px] w-fit text-[#0B5F94] font-bold text-[16px]">
+            <ul className="hidden lg:flex items-center gap-[13px] w-fit text-boldblue font-bold text-[16px]">
                 <li className="flex items-center gap-[5px] cursor-pointer">
                     <span>Jobs</span>
                     <span><IoMdArrowDropdown size={20} /></span>
@@ -105,8 +105,8 @@ useEffect(() => {
             
             {/* Mobile menu */}
             {mobileMenu && (
-              <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b-2 border-b-[#0B5F94] shadow-md py-4 z-50">
-                <ul className="flex flex-col items-center gap-5 text-[#0B5F94] font-bold text-[16px]">
+              <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-50">
+                <ul className="flex flex-col items-center gap-5 text-boldblue font-bold text-[16px]">
                   <li className="flex items-center gap-[5px]">
                       <span>Jobs</span>
                       <span><IoMdArrowDropdown size={20} /></span>

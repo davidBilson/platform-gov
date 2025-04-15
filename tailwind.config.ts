@@ -10,11 +10,11 @@ module.exports = {
       colors: {
         white: "#ffffff",
         black: "#000000",
-        boldblue: "#0B5F94",
+        'boldblue': "#0B5F94",
         brightblue: "#009DDE",
       },
       maxWidth: {
-        max: "1280px",
+        max: "1440px",
       },
     },
   },
