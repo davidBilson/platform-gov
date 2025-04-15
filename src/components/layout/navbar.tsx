@@ -33,7 +33,7 @@ useEffect(() => {
 
   return (
     <div className='fixed top-0 left-0 w-full h-28 overflow-hidden flex items-center justify-center border-b-2 border-b-[#0B5F94] bg-white z-50'>
-        <nav className='w-full max-w-[1440px] m-auto flex items-center justify-evenly gap-12 px-[45px] relative'>
+        <nav className='w-full max-w-[1440px] m-auto flex items-center justify-evenly gap-12 px-6 lg:px-[45px] relative'>
             
             <Image src={Logo} width={80} height={90} alt="GovLink Platform" />
             
