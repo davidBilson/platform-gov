@@ -50,7 +50,7 @@ const BusinessProfile = () => {
         </div>
         
         <div className='border-t border-t-[#0b5f94] py-6 flex items-start gap-[60px]'>
-          <h2 className='font-semibold text-xl mb-4'>Location</h2>
+          <h2 className='font-semibold text-xl mb-4 w-full max-w-[120px]' >Location</h2>
           
           <div>
             {/* Country */}
@@ -122,20 +122,22 @@ const BusinessProfile = () => {
               />
           </div>
             {/* Add Location Button */}
-            <button className='bg-[#009DDE] text-white font-bold py-2 px-4 rounded'>
+            <button className='bg-[#0B5F94] text-white font-bold py-2 px-4 rounded'>
                 Add Location
             </button>
             </div>
           
         </div>
         
-        <div className='border-t border-t-[#ccc] py-6'>
-          <h2 className='font-semibold text-xl mb-4'>Information</h2>
+        <div className='border-y w-fit border-y-[#0b5f94] py-6 flex items-start gap-[60px]'>
+          <h2 className='font-semibold text-xl mb-4 max-w-[120px]'>Information</h2>
           
+          <div>
+
           {/* Industry */}
           <div className='mb-4'>
             <div className='relative'>
-              <select className='w-full border border-gray-300 rounded p-3 appearance-none focus:outline-none focus:border-[#009DDE]'>
+              <select className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 appearance-none focus:outline-none focus:border-[#0b5f94]'>
                 <option value="">Industry</option>
                 <option value="tech">Technology</option>
                 <option value="healthcare">Healthcare</option>
@@ -152,7 +154,7 @@ const BusinessProfile = () => {
           {/* Company Size */}
           <div className='mb-4'>
             <div className='relative'>
-              <select className='w-full border border-gray-300 rounded p-3 appearance-none focus:outline-none focus:border-[#009DDE]'>
+              <select className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 appearance-none focus:outline-none focus:border-[#0b5f94]'>
                 <option value="">Size</option>
                 <option value="1-10">1-10 employees</option>
                 <option value="11-50">11-50 employees</option>
@@ -172,23 +174,25 @@ const BusinessProfile = () => {
             <div className='relative'>
               <input 
                 type="text" 
-                placeholder="Specializations" 
-                className='w-full border border-gray-300 rounded p-3 pr-10 focus:outline-none focus:border-[#009DDE]'
-              />
+                placeholder="Specializations"
+                value="Specializations"
+                className='w-full border border-[#0b5f94] text-[#0b5f94] rounded p-3 pr-10 focus:outline-none focus:border-[#009DDE]'
+                />
               <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
-                <FaSearch size={14} className='text-gray-400' />
+                <FaSearch size={14} className='text-[#0b5f94]' />
               </div>
             </div>
           </div>
           
           {/* Specialization Tags */}
-          <div className='flex flex-wrap gap-2'>
-            {specializations.map((spec, index) => (
-              <div key={index} className='bg-[#009DDE] text-white font-bold py-1 px-4 rounded-full'>
-                {spec}
-              </div>
-            ))}
-          </div>
+        </div>
+            <div className='flex flex-wrap gap-2 self-end mb-6'>
+                {specializations.map((spec, index) => (
+                    <div key={index} className='bg-[#009DDE] text-white font-bold py-1 px-4 rounded-full'>
+                    {spec}
+                </div>
+                ))}
+            </div>
         </div>
         
       </section>
