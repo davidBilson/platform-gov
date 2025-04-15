@@ -10,22 +10,26 @@ import { HiMenuAlt3 } from "react-icons/hi";
 const Navbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const contractorOptions = ["Contractors", "Businesses", "Both"];
   const [selectedOption, setSelectedOption] = useState("Contractors");
 
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+
+useEffect(() => {
+  function handleClickOutside(event: MouseEvent): void {
+    if (dropdownRef.current && event.target instanceof Node) {
+      if (!dropdownRef.current.contains(event.target)) {
         setContractorsDropdown(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  }
+  
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   return (
     <div className='fixed top-0 left-0 w-full h-28 overflow-hidden flex items-center justify-center border-b-2 border-b-[#0B5F94] bg-white z-50'>

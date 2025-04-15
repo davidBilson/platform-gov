@@ -1,4 +1,4 @@
-import OpenJobs from "@/components/home/openjobs";
+import OpenJobs from "@/components/business-profile/open-jobs";
 
 export default function Home() {
   return (
