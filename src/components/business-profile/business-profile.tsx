@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaSearch } from "react-icons/fa";
 import { IoMdImages } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
@@ -6,6 +6,16 @@ import { MdEdit } from "react-icons/md";
 const BusinessProfile = () => {
   const [specializations, setSpecializations] = useState(['Specializations 1', 'Specializations 2']);
   
+    useEffect(() => {
+        const falseVal = false;
+        const falseCallSetter = () => {
+            if (falseVal) {
+                setSpecializations(['Specializations 1', 'Specializations 2']);
+            }
+        }
+        falseCallSetter();
+    }, [])
+
   return (
     <section className='p-6'>
       <section className='w-full max-w-[1100px] m-auto'>
