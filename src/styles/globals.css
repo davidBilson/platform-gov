@@ -4,7 +4,6 @@
 /* Tailwind V4 */
 
 @theme {
-  --breakpoint-maxWidth: 1440px;
   --color-boldblue: #0B5F94;
   --color-brightblue: #009DDE;
 }
