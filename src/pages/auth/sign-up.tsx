@@ -1,33 +1,12 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+// src/pages/auth/signup.tsx or src/app/auth/signup/page.tsx (depending on your Next.js routing)
+import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
+import { FormData, FormErrors } from '@/types/auth';
+import { validateEmail, validatePhone, validatePassword } from '@/utils/validation';
+import { useFormValidation } from '@/hooks/useFormValidation';
+import { signupUser } from '@/services/authService';
 
-// Define types for form data and errors
-type UserType = 'contractor' | 'client';
-
-interface FormData {
-  userType: UserType;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  password: string;
-}
-
-interface FormErrors {
-  email: string;
-  phone_number: string;
-  password: string;
-}
-
-// API response type
-interface SignupResponse {
-  success: boolean;
-  message: string;
-  // Add other fields as needed based on your API
-}
-
-const Signup: React.FC = () => {
+const Signup = () => {
   const [formData, setFormData] = useState<FormData>({
     userType: 'contractor',
     first_name: '',
@@ -43,28 +22,13 @@ const Signup: React.FC = () => {
     password: '',
   });
 
-  const [isFormValid, setIsFormValid] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // Validate email with regex
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Validate phone number
-  const validatePhone = (phone: string): boolean => {
-    const phoneRegex = /^\+?[0-9]{10,15}$/;
-    return phoneRegex.test(phone);
-  };
-
-  // Validate password - at least 8 characters
-  const validatePassword = (password: string): boolean => {
-    return password.length >= 8;
-  };
+  
+  // Use custom hook for form validation
+  const isFormValid = useFormValidation(formData);
 
   // Handle input changes
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value, type } = e.target;
     
     setFormData(prev => ({
@@ -91,22 +55,6 @@ const Signup: React.FC = () => {
     }
   };
 
-  // Check if form is valid
-  useEffect(() => {
-    const { first_name, last_name, email, phone_number, password } = formData;
-    const isValid = 
-      first_name.trim() !== '' &&
-      last_name.trim() !== '' &&
-      email.trim() !== '' &&
-      phone_number.trim() !== '' &&
-      password.trim() !== '' &&
-      validateEmail(email) &&
-      validatePhone(phone_number) &&
-      validatePassword(password);
-    
-    setIsFormValid(isValid);
-  }, [formData]);
-
   // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -116,16 +64,11 @@ const Signup: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      // Mock API request - remove the return for actual implementation
-      return;
-      const response = await axios.post<SignupResponse>('/api/signup', formData);
-      console.log('Signup successful:', response.data);
-      // Handle successful signup (redirect, show success message, etc.)
+      // Using extracted service function
+      await signupUser(formData);
       alert('Verification email sent! Please check your inbox.');
     } catch (error) {
       console.error('Signup error:', error);
-      // Handle errors (display error message, etc.)
-      return;
       alert('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
