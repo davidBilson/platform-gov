@@ -9,7 +9,7 @@ const OpenJobs = () => {
 
   useEffect(() => {
     // Fetch all jobs from your API
-    fetch('http://localhost:5050/api/jobs')
+    fetch('https://platform-gov-backend.onrender.com/api/jobs')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
