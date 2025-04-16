@@ -27,7 +27,7 @@ const BusinessProfile = () => {
               <div className='absolute flex items-center justify-center w-full h-full'>
                 <IoMdImages size={40} className='text-white/70' />
               </div>
-              <button className='absolute bottom-0 right-0 z-50 h-7 w-7 bg-white rounded-full flex items-center justify-center border border-boldblue'>
+              <button className='absolute bottom-0 right-0 z-20 h-7 w-7 bg-white rounded-full flex items-center justify-center border border-boldblue'>
                 <MdEdit size={14} className='text-boldblue' />
               </button>
             </div>
