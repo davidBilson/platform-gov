@@ -1,5 +1,5 @@
-import BusinessProfile from "@/components/business-profile/business-profile";
-import OpenJobs from "@/components/business-profile/open-jobs";
+import BusinessProfile from "@/pages/_business-profile/business-profile";
+import OpenJobs from "@/pages/_business-profile/open-jobs";
 
 export default function Home() {
   return (

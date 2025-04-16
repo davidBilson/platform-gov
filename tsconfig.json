@@ -17,6 +17,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/_business-profile/open-jobs.js", "src/pages/_business-profile/business-profile.js"],
   "exclude": ["node_modules"]
 }
