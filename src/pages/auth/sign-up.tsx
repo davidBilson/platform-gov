@@ -76,7 +76,7 @@ const Signup = () => {
   };
 
   return (
-    <main className='pt-10 md:pt-20 px-3 md:px-6'>
+    <main className='pt-10 md:pt-20 px-5 md:px-6'>
       <section className='w-full max-w-2xl m-auto'>
         <h1 className='font-semibold text-lg md:text-xl text-center mb-6 md:mb-10'>Create Account</h1>
         

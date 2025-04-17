@@ -77,7 +77,7 @@ const Forgotpassword = () => {
   };
 
   return (
-    <main className='pt-10 md:pt-20 px-3 md:px-6'>
+    <main className='pt-10 md:pt-20 px-5 md:px-6'>
       <section className='w-full max-w-2xl m-auto'>
         <h1 className='font-semibold text-lg md:text-xl text-center mb-6'>Forgot Password</h1>
 
@@ -119,7 +119,7 @@ const Forgotpassword = () => {
           {isCodeSent && (
             <p className="text-center mt-2">
               <span 
-                className="text-boldblue text-sm font-bold cursor-pointer"
+                className="text-sm cursor-pointer"
                 onClick={handleResendCode}
               >
                 {"Didn't"} get a code? Resend
