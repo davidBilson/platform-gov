@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Verifyemail = () => {
+const Verification = () => {
   return (
     <main className='pt-10 md:pt-20 px-5 md:px-6'>
         <section className='w-full max-w-2xl m-auto'>
@@ -62,4 +62,4 @@ const Verifyemail = () => {
   )
 }
 
-export default Verifyemail;
+export default Verification;
