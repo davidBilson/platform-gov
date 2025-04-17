@@ -9,6 +9,11 @@ export interface FormData {
     password: string;
 }
 
+export interface LoginFormData {
+    email: string;
+    password: string;
+  }
+
 export interface FormErrors {
     email: string;
     phone_number: string;
@@ -19,3 +24,16 @@ export interface SignupResponse {
     success: boolean;
     message: string;
 }
+
+export interface LoginResponse {
+    success: boolean;
+    token?: string;
+    user?: {
+      id: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      userType: UserType;
+    };
+    message?: string;
+  }

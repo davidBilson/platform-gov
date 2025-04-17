@@ -172,9 +172,9 @@ const Signup = () => {
                 className={`w-full h-[50px] bg-white border ${formErrors.email && formData.email ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
                 required
               />
-              {formErrors.email && formData.email && (
+              {/* {formErrors.email && formData.email && (
                 <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>
-              )}
+              )} */}
             </div>
 
             <div className="relative">
@@ -188,9 +188,9 @@ const Signup = () => {
                 className={`w-full h-[50px] bg-white border ${formErrors.phone_number && formData.phone_number ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
                 required 
               />
-              {formErrors.phone_number && formData.phone_number && (
+              {/* {formErrors.phone_number && formData.phone_number && (
                 <p className="text-xs text-red-500 mt-1">{formErrors.phone_number}</p>
-              )}
+              )} */}
             </div>
             
             <div className="relative">
