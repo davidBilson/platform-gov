@@ -1,15 +1,43 @@
-// src/pages/auth/signup.jsx or src/app/auth/signup/page.jsx
-import React, { useState } from 'react';
-import { useRouter } from 'next/router'; // or 'next/navigation' for App Router
+import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import useAuthStore from '@/store/authStore';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
-const Signup = () => {
+type UserType = 'contractor' | 'client';
+
+interface SignupFormData {
+  userType: UserType;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  userId?: string;
+}
+
+interface SignupApiResponse {
+  data: {
+    userId: string;
+  };
+  message?: string;
+}
+
+interface ErrorResponse {
+  message?: string;
+}
+
+interface AuthStore {
+  setFormData: (data: SignupFormData) => void;
+  setUserId: (id: string) => void;
+  setVerificationStep: (step: string) => void;
+}
+
+const Signup: React.FC = () => {
   const router = useRouter();
-  const { setFormData, setUserId, setVerificationStep } = useAuthStore();
+  const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore() as AuthStore;
   
-  const [formData, setLocalFormData] = useState({
+  const [formData, setLocalFormData] = useState<SignupFormData>({
     userType: 'contractor',
     firstName: '',
     lastName: '',
@@ -18,11 +46,10 @@ const Signup = () => {
     password: '',
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
-  // Handle input changes
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value, type } = e.target;
     
     setLocalFormData(prev => ({
@@ -30,51 +57,51 @@ const Signup = () => {
       [name]: type === 'radio' ? e.target.value : value
     }));
     
-    // Clear error on input change
     if (errorMessage) setErrorMessage('');
   };
 
   // Submit form
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     setIsSubmitting(true);
     setErrorMessage('');
     
     try {
-      // Log request payload for debugging
-      console.log('Request payload:', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        password: formData.password,
-        role: formData.userType,
-      });
-      
       // Store data in Zustand
-      setFormData(formData);
+      setStoreFormData(formData);
       
-      // Call the backend API using axios
-    
-      const res = await axios.post('http://localhost:5050/api/auth/sign-up', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        password: formData.password,
-        role: formData.userType,
-      });
+      // Ensure environment variables are properly typed or use defaults
+      const apiHost = process.env.NEXT_PUBLIC_LOCAL_HOST || '';
+      const signupEndpoint = process.env.NEXT_PUBLIC_SIGNUP || '/api/signup';
       
-      console.log('Signup response:', res.data);
+      const res = await axios.post<SignupApiResponse>(
+        `${apiHost}${signupEndpoint}`, 
+        {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          password: formData.password,
+          role: formData.userType,
+        }
+      );
       
-      // Store the user ID for verification
-      setUserId(res.data.data.userId);
+      // Type assertion to ensure we have a proper response
+      const responseData = res.data as SignupApiResponse;
+      
+      // Ensure userId exists
+      if (!responseData.data?.userId) {
+        throw new Error('User ID not received from server');
+      }
+      
+      // Store user ID for verification
+      setUserId(responseData.data.userId);
       
       // Update Zustand store with user data
-      setFormData({
+      setStoreFormData({
         ...formData,
-        userId: res.data.data.userId,
+        userId: responseData.data.userId,
       });
       
       // Set verification step to email verification
@@ -86,24 +113,45 @@ const Signup = () => {
     } catch (error) {
       console.error('Signup error:', error);
       
-      // Extract error message from axios error
-      if (error.response) {
+      // TypeGuard for AxiosError
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ErrorResponse>;
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.log('Error data:', error.response.data);
-        console.log('Error status:', error.response.status);
-        
-        setErrorMessage(error.response.data.message || 'An error occurred during signup');
-      } else if (error.request) {
-        // The request was made but no response was received
-        setErrorMessage('No response from server. Please check your connection.');
+        if (axiosError.response) {
+          console.log('Error data:', axiosError.response.data);
+          console.log('Error status:', axiosError.response.status);
+          
+          const errorResponseData = axiosError.response.data as ErrorResponse;
+          setErrorMessage(errorResponseData.message || 'An error occurred during signup');
+        } else if (axiosError.request) {
+          // The request was made but no response was received
+          setErrorMessage('No response from server. Please check your connection.');
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          setErrorMessage(axiosError.message || 'An error occurred during signup');
+        }
       } else {
-        // Something happened in setting up the request that triggered an Error
-        setErrorMessage(error.message || 'An error occurred during signup');
+        // Handle non-axios errors
+        const err = error as Error;
+        setErrorMessage(err.message || 'An unexpected error occurred');
       }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Inline styles with proper TypeScript typing
+  const radioStyle: React.CSSProperties = {
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    width: '20px',
+    height: '20px',
+    borderRadius: '50%',
+    border: '1px solid #0B5F94',
+    backgroundColor: '#fff',
+    position: 'relative',
+    cursor: 'pointer',
   };
 
   return (
@@ -127,17 +175,7 @@ const Signup = () => {
                 value="contractor"
                 checked={formData.userType === 'contractor'}
                 onChange={handleChange}
-                style={{
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  border: '1px solid #0B5F94',
-                  backgroundColor: '#fff',
-                  position: 'relative',
-                  cursor: 'pointer',
-                }}
+                style={radioStyle}
                 className="checked:after:content-[''] checked:after:absolute checked:after:top-[3px] checked:after:left-[3px] checked:after:w-[12px] checked:after:h-[12px] checked:after:rounded-full checked:after:bg-boldblue"
               />
               <span className='text-sm'>
@@ -151,17 +189,7 @@ const Signup = () => {
                 value="client"
                 checked={formData.userType === 'client'}
                 onChange={handleChange}
-                style={{
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  border: '1px solid #0B5F94',
-                  backgroundColor: '#fff',
-                  position: 'relative',
-                  cursor: 'pointer',
-                }}
+                style={radioStyle}
                 className="checked:after:content-[''] checked:after:absolute checked:after:top-[3px] checked:after:left-[3px] checked:after:w-[12px] checked:after:h-[12px] checked:after:rounded-full checked:after:bg-boldblue"
               />
               <span className='text-sm'>

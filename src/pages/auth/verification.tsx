@@ -22,7 +22,7 @@ const Verification = () => {
   // Redirect if user hasn't completed the previous steps
   useEffect(() => {
     if (!userId) {
-      router.replace('/auth/signup');
+      router.replace('/auth/-up');
     }
   }, [userId, router]);
   
@@ -45,6 +45,7 @@ const Verification = () => {
     setIsLoading(true);
     
     try {
+        
       const response = await fetch('http://localhost:5050/api/auth/verify-email', {
         method: 'POST',
         headers: {
