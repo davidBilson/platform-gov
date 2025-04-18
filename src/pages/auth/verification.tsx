@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { useRouter } from 'next/router'; // or 'next/navigation' for App Router
 import useAuthStore from '@/store/authStore';
+import axios from 'axios';
 
 type VerificationStep = 'email' | 'phone' | 'completed';
 
@@ -73,23 +74,15 @@ const Verification: React.FC = () => {
       if (!userId) {
         throw new Error('User ID is missing');
       }
+
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const verifyEndpoint = process.env.NEXT_PUBLIC_VERIFY_EMAIL;
+      
         
-      const response = await fetch('http://localhost:5050/api/auth/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          code: verificationCode
-        }),
+      await axios.post<ApiResponse>(`${apiHost}${verifyEndpoint}`, {
+        userId,
+        code: verificationCode
       });
-      
-      const data: ApiResponse = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Email verification failed');
-      }
       
       setEmailVerified(true);
       setSuccess('Email verified successfully!');
@@ -98,8 +91,12 @@ const Verification: React.FC = () => {
       
     } catch (err) {
       console.error('Email verification error:', err);
-      const error = err as Error;
-      setError(error.message || 'Email verification failed. Please try again.');
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.message || 'Email verification failed. Please try again.');
+      } else {
+        const error = err as Error;
+        setError(error.message || 'Email verification failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -115,28 +112,19 @@ const Verification: React.FC = () => {
         throw new Error('User ID is missing');
       }
 
-      const response = await fetch('http://localhost:5050/api/auth/sendPhoneVerificationCode', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId
-        }),
+      await axios.post<ApiResponse>('http://localhost:5050/api/auth/verify-email', {
+        userId,
+        code: verificationCode
       });
-      
-      const data: ApiResponse = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send phone verification code');
-      }
-      
-      setSuccess('Verification code sent to your phone');
       
     } catch (err) {
       console.error('Phone verification error:', err);
-      const error = err as Error;
-      setError(error.message || 'Failed to send verification code. Please try again.');
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.message || 'Failed to send verification code. Please try again.');
+      } else {
+        const error = err as Error;
+        setError(error.message || 'Failed to send verification code. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -157,22 +145,10 @@ const Verification: React.FC = () => {
         throw new Error('User ID is missing');
       }
 
-      const response = await fetch('http://localhost:5050/api/auth/verifyPhone', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          code: verificationCode
-        }),
+      await axios.post<ApiResponse>('http://localhost:5050/api/auth/verifyPhone', {
+        userId,
+        code: verificationCode
       });
-      
-      const data: ApiResponse = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Phone verification failed');
-      }
       
       setPhoneVerified(true);
       setSuccess('Phone verified successfully!');
@@ -181,8 +157,12 @@ const Verification: React.FC = () => {
       
     } catch (err) {
       console.error('Phone verification error:', err);
-      const error = err as Error;
-      setError(error.message || 'Phone verification failed. Please try again.');
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.message || 'Phone verification failed. Please try again.');
+      } else {
+        const error = err as Error;
+        setError(error.message || 'Phone verification failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -205,26 +185,20 @@ const Verification: React.FC = () => {
         ? 'http://localhost:5050/api/auth/resendEmailVerification' 
         : 'http://localhost:5050/api/auth/resendPhoneVerification';
       
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
+      await axios.post<ApiResponse>(endpoint, {
+        userId
       });
-      
-      const data: ApiResponse = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to resend verification code');
-      }
       
       setSuccess(`Verification code resent to your ${verificationStep === 'email' ? 'email' : 'phone'}`);
       
     } catch (err) {
       console.error('Resend verification error:', err);
-      const error = err as Error;
-      setError(error.message || 'Failed to resend verification code. Please try again.');
+      if (axios.isAxiosError(err) && err.response) {
+        setError(err.response.data.message || 'Failed to resend verification code. Please try again.');
+      } else {
+        const error = err as Error;
+        setError(error.message || 'Failed to resend verification code. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
