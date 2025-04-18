@@ -1,66 +1,120 @@
 // src/pages/auth/signin.tsx or src/app/auth/signin/page.tsx
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, ChangeEvent } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { LoginFormData, FormErrors } from '@/types/auth';
-import { validateEmail } from '@/utils/validation';
-import { useLoginFormValidation } from '@/hooks/useLoginFormValidation';
-import { loginUser } from '@/services/authService';
+import axios, { AxiosError } from 'axios';
+import useAuthStore from '@/store/authStore';
 
-const Login = () => {
-  const [formData, setFormData] = useState<LoginFormData>({
+interface SignInFormData {
+  email: string;
+  password: string;
+}
+
+interface SignInApiResponse {
+  status: string;
+  message: string;
+  data?: {
+    user: {
+      _id: string;
+      name: string;
+      email: string;
+      phoneNumber: string;
+      role: string;
+      isEmailVerified: boolean;
+      isPhoneVerified: boolean;
+    }
+  };
+}
+
+interface ErrorResponse {
+  message?: string;
+}
+
+const SignIn = () => {
+  const router = useRouter();
+  const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore();
+  
+  const [formData, setLocalFormData] = useState<SignInFormData>({
     email: '',
     password: '',
-  });
-
-  const [formErrors, setFormErrors] = useState<FormErrors>({
-    email: '',
-    password: '',
-    phone_number: '', // Included to match the type but not used in login
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
-  // Use custom hook for form validation
-  const isFormValid = useLoginFormValidation(formData, formErrors);
-
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     
-    setFormData(prev => ({
+    setLocalFormData(prev => ({
       ...prev,
       [name]: value
     }));
-
-    // Validate fields as user types
-    if (name === 'email') {
-      setFormErrors(prev => ({
-        ...prev,
-        email: validateEmail(value) ? '' : 'Please enter a valid email address'
-      }));
-    } else if (name === 'password') {
-      setFormErrors(prev => ({
-        ...prev,
-        password: value.length > 0 ? '' : 'Password is required'
-      }));
-    }
+    
+    if (errorMessage) setErrorMessage('');
   };
 
-  // Handle form submission
+  // Submit form
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
-    if (!isFormValid) return;
-    
     setIsSubmitting(true);
+    setErrorMessage('');
     
     try {
-      await loginUser(formData);
-      // Handle successful login (redirect to dashboard, etc.)
-      console.log('Login successful');
+      // Ensure environment variables are properly typed or use defaults
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const signinEndpoint = process.env.NEXT_PUBLIC_SIGNIN;
+      
+      const res = await axios.post<SignInApiResponse>(
+        `${apiHost}${signinEndpoint}`, 
+        {
+          email: formData.email,
+          password: formData.password,
+        }
+      );
+      
+      const responseData = res.data;
+      
+      // Check if we have user data in the response
+      if (!responseData.data?.user?._id) {
+        console.warn('Response received but user data is missing:', responseData);
+        throw new Error('User data not received from server');
+      }
+      
+      const userData = responseData.data.user;
+      
+      // Update auth store with user data
+      setUserId(userData._id);
+      setFormData({
+        email: userData.email,
+        phoneNumber: userData.phoneNumber,
+        userType: userData.role
+      });
+      setEmailVerified(userData.isEmailVerified);
+      setPhoneVerified(userData.isPhoneVerified);
+      
+      if (!userData.isEmailVerified || !userData.isPhoneVerified) {
+        router.push('/auth/verification')
+      }
+      // Redirect to home page
+      router.push('/profile');
+      
     } catch (error) {
-      console.error('Login error:', error);
-      // Handle login error (show error message, etc.)
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<ErrorResponse>;
+        
+        if (axiosError.response) {
+          const errorResponseData = axiosError.response.data as ErrorResponse;
+          setErrorMessage(errorResponseData.message || 'Invalid email or password');
+        } else if (axiosError.request) {
+          setErrorMessage('No response from server. Please check your connection.');
+        } else {
+          setErrorMessage('Failed to process your request. Please try again.');
+        }
+      } else {
+        const err = error as Error;
+        setErrorMessage(err.message || 'An unexpected error occurred');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -69,48 +123,54 @@ const Login = () => {
   return (
     <main className='pt-10 md:pt-20 px-5 md:px-6'>
       <section className='w-full max-w-2xl m-auto'>
-        <h1 className='font-semibold text-lg md:text-xl text-center mb-6 md:mb-10'>Login</h1>
+        <h1 className='font-semibold text-lg md:text-xl text-center mb-6 md:mb-10'>Sign In</h1>
         
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-10">
-          <input
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 max-w-[300px] m-auto">
+            <p className="text-sm">{errorMessage}</p>
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 md:gap-6">
+          <input 
             type="email" 
             id="email" 
             name="email" 
             value={formData.email}
             onChange={handleChange}
             placeholder='Email'
-            className={`w-full max-w-[300px] m-auto h-[50px] bg-white border ${formErrors.email && formData.email ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
-            required
+            className='w-full max-w-[300px] m-auto h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+            required 
           />
           
-          <input
+          <input 
             type="password" 
             id="password" 
             name="password" 
             value={formData.password}
             onChange={handleChange}
             placeholder='Password'
-            className={`w-full max-w-[300px] m-auto h-[50px] bg-white border ${formErrors.password && formData.password ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
+            className='w-full max-w-[300px] m-auto h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
             required 
           />
           
           <div className='w-full flex flex-col gap-4 mt-2'>
             <button
-                type="submit"
-                disabled={!isFormValid || isSubmitting}
-                className={`px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer`}
-              >
-              {isSubmitting ? 'Please wait...' : 'Login'}
+              type="submit"
+              disabled={isSubmitting}
+              className='px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer disabled:opacity-70'
+            >
+              {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
             
-            <div className="text-center mt-5">
+            <div className="text-center mt-2">
               <Link href="/auth/forgot-password" className='text-xs md:text-sm font-medium text-boldblue underline cursor-pointer'>
                 Forgot Password?
               </Link>
             </div>
             
             <p className='text-center text-xs md:text-sm font-medium mt-2'>
-              {"Don't"} have an account yet? <Link href="/auth/sign-up" className='text-boldblue underline cursor-pointer'>Create Account</Link>
+              {"Don't"} have an account? <Link href="/auth/sign-up" className='text-boldblue underline cursor-pointer'>Create Account</Link>
             </p>
           </div>
         </form>
@@ -119,4 +179,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default SignIn;

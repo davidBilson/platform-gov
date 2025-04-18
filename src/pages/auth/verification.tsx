@@ -3,7 +3,8 @@ import { useRouter } from 'next/router'; // or 'next/navigation' for App Router
 import useAuthStore from '@/store/authStore';
 import axios from 'axios';
 
-type VerificationStep = 'email' | 'phone' | 'completed';
+// type VerificationStep = 'email' | 'phone' | 'completed';
+type VerificationStep = 'email' | 'completed';
 
 interface AuthStoreState {
   userId: string | null;
@@ -35,10 +36,10 @@ const Verification: React.FC = () => {
   const { 
     userId, 
     email, 
-    phoneNumber, 
+    // phoneNumber, 
     verificationStep, 
     setEmailVerified, 
-    setPhoneVerified,
+    // setPhoneVerified,
     setVerificationStep
   } = useAuthStore() as AuthStoreState;
   
@@ -77,7 +78,6 @@ const Verification: React.FC = () => {
 
       const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
       const verifyEndpoint = process.env.NEXT_PUBLIC_VERIFY_EMAIL;
-      
         
       await axios.post<ApiResponse>(`${apiHost}${verifyEndpoint}`, {
         userId,
@@ -87,7 +87,8 @@ const Verification: React.FC = () => {
       setEmailVerified(true);
       setSuccess('Email verified successfully!');
       setVerificationCode('');
-      setVerificationStep('phone');
+      // Modified: Skip phone verification and go directly to completed
+      setVerificationStep('completed');
       
     } catch (err) {
       console.error('Email verification error:', err);
@@ -102,6 +103,7 @@ const Verification: React.FC = () => {
     }
   };
   
+  /*
   const sendPhoneVerification = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     
@@ -112,10 +114,11 @@ const Verification: React.FC = () => {
         throw new Error('User ID is missing');
       }
 
-      await axios.post<ApiResponse>('http://localhost:5050/api/auth/verify-email', {
-        userId,
-        code: verificationCode
+      await axios.post<ApiResponse>('http://localhost:5050/api/auth/sendPhoneVerificationCode', {
+        userId
       });
+      
+      setSuccess('Verification code sent to your phone');
       
     } catch (err) {
       console.error('Phone verification error:', err);
@@ -167,10 +170,11 @@ const Verification: React.FC = () => {
       setIsLoading(false);
     }
   };
+  */
   
   const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
-    router.push('/auth/account-setup');
+    router.push('/profile/create');
   };
   
   const resendVerificationCode = async (): Promise<void> => {
@@ -180,16 +184,15 @@ const Verification: React.FC = () => {
       if (!userId) {
         throw new Error('User ID is missing');
       }
-
-      const endpoint = verificationStep === 'email' 
-        ? 'http://localhost:5050/api/auth/resendEmailVerification' 
-        : 'http://localhost:5050/api/auth/resendPhoneVerification';
       
-      await axios.post<ApiResponse>(endpoint, {
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const endpoint = process.env.NEXT_PUBLIC_RESEND_VERIFICATION_EMAIL;
+      
+      await axios.post<ApiResponse>(`${apiHost}${endpoint}`, {
         userId
       });
       
-      setSuccess(`Verification code resent to your ${verificationStep === 'email' ? 'email' : 'phone'}`);
+      setSuccess('Verification code resent to your email');
       
     } catch (err) {
       console.error('Resend verification error:', err);
@@ -204,6 +207,7 @@ const Verification: React.FC = () => {
     }
   };
   
+  /*
   const formatPhoneNumber = (phoneNum: string | null): string => {
     if (!phoneNum) return '';
     const cleaned = ('' + phoneNum).replace(/\D/g, '');
@@ -213,6 +217,7 @@ const Verification: React.FC = () => {
     }
     return phoneNum;
   };
+  */
 
   return (
     <main className='pt-10 md:pt-20 px-5 md:px-6'>
@@ -226,6 +231,7 @@ const Verification: React.FC = () => {
           </p>
         )}
         
+        {/*
         {verificationStep === 'phone' && !success.includes('sent to your phone') && (
           <p className="text-xl text-center mb-6">
             Your email has been verified, continue to phone verification
@@ -237,10 +243,11 @@ const Verification: React.FC = () => {
             Enter the verification code sent to {formatPhoneNumber(phoneNumber) || "(123) 123-1234"}
           </p>
         )}
+        */}
         
         {verificationStep === 'completed' && (
           <p className="text-xl text-center mb-6">
-            Both email and phone verified successfully! Continue to complete your account setup.
+            Email verified successfully! Continue to complete your account setup.
           </p>
         )}
         
@@ -255,8 +262,8 @@ const Verification: React.FC = () => {
         )}
         
         <form className="flex flex-col gap-4 md:gap-6">
-          {/* Verification code input field - shown for email and phone verification */}
-          {(verificationStep === 'email' || (verificationStep === 'phone' && success.includes('sent to your phone'))) && (
+          {/* Verification code input field - shown for email verification */}
+          {verificationStep === 'email' && (
             <div className="mb-4">
               <input
                 type="text" 
@@ -272,7 +279,7 @@ const Verification: React.FC = () => {
           )}
           
           {/* Resend code option */}
-          {(verificationStep === 'email' || (verificationStep === 'phone' && success.includes('sent to your phone'))) && (
+          {verificationStep === 'email' && (
             <p className="text-center mt-2">
               <span 
                 className="text-sm cursor-pointer hover:underline text-boldblue"
@@ -296,7 +303,8 @@ const Verification: React.FC = () => {
             </button>
           )}
           
-          {/* Send phone verification code button */}
+          {/*
+          // Send phone verification code button
           {verificationStep === 'phone' && !success.includes('sent to your phone') && (
             <button
               type="button"
@@ -308,7 +316,7 @@ const Verification: React.FC = () => {
             </button>
           )}
           
-          {/* Phone verification button */}
+          // Phone verification button
           {verificationStep === 'phone' && success.includes('sent to your phone') && (
             <button
               type="button"
@@ -319,6 +327,7 @@ const Verification: React.FC = () => {
               {isLoading ? 'Verifying...' : 'Verify'}
             </button>
           )}
+          */}
           
           {/* Continue to account creation button */}
           {verificationStep === 'completed' && (

@@ -1,52 +1,71 @@
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import axios, { AxiosError } from 'axios';
+import { useRouter } from 'next/router';
 
 interface ApiResponse {
   success: boolean;
   message?: string;
+  status?: string;
 }
 
-const Forgotpassword = () => {
+const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState<string>('');
-  const [code, setCode] = useState<string>('');
+  const [resetToken, setResetToken] = useState<string>('');
   const [isCodeSent, setIsCodeSent] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  
+  const router = useRouter();
 
   const handleEmailSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccessMessage('');
     
     try {
-      // Replace with your actual API endpoint
-      const response = await axios.post<ApiResponse>('/api/auth/forgot-password', { email });
-      if (!response.data.success) return;
-      setIsCodeSent(true);
-      setIsLoading(false);
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const endpoint = process.env.NEXT_PUBLIC_REQUEST_PASSWORD_RESET;
+      const response = await axios.post<ApiResponse>(`${apiHost}${endpoint}`, { email });
+      
+      if (response.data.success) {
+        setIsCodeSent(true);
+        setSuccessMessage('Reset code sent to your email');
+      } else {
+        // Even if email doesn't exist, we show the same message for security
+        setIsCodeSent(true);
+        setSuccessMessage('Reset code sent to your email if it exists in our system');
+      }
     } catch (err) {
-      const error = err as AxiosError;
-      console.log(error)
-      setError('Failed to send recovery code. Please try again.');
+      console.error('Error requesting password reset:', err);
+      setError('Something went wrong. Please try again later.');
+    } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCodeVerification = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleTokenVerification = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccessMessage('');
     
     try {
-      // Replace with your actual API endpoint
-      const response = await axios.post<ApiResponse>('/api/auth/verify-code', { email, code });
-      if (response) return;
-      // Redirect to password reset page or handle next step
-      window.location.href = `/reset-password?email=${encodeURIComponent(email)}&token=${encodeURIComponent(code)}`;
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const endpoint = process.env.NEXT_PUBLIC_VERIFY_RESET_TOKEN;
+      const response = await axios.post<ApiResponse>(`${apiHost}${endpoint}`, { 
+        email, 
+        resetToken 
+      });
+      
+      if (response.data.success) {
+        router.push(`/auth/reset-password?email=${email}&token=${resetToken}`);
+      }
     } catch (err) {
-      const error = err as AxiosError;
-      console.log(error)
-      setError('Invalid code. Please try again.');
+      const axiosError = err as AxiosError<ApiResponse>;
+      setError(axiosError.response?.data?.message || 'Invalid code. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -54,16 +73,19 @@ const Forgotpassword = () => {
   const handleResendCode = async (): Promise<void> => {
     setIsLoading(true);
     setError('');
+    setSuccessMessage('');
     
     try {
-      // Replace with your actual API endpoint
-      const response = await axios.post<ApiResponse>('/api/auth/resend-code', { email });
-      if (!response.data.success) return;
-      setIsLoading(false);
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const endpoint = process.env.NEXT_PUBLIC_REQUEST_PASSWORD_RESET;
+      const response = await axios.post<ApiResponse>(`${apiHost}${endpoint}`, { email });
+      if (response.data.success) {
+        setSuccessMessage('Reset code resent to your email');
+      }
     } catch (err) {
-      const error = err as AxiosError;
-      console.log(error)
+      console.error('Error resending code:', err);
       setError('Failed to resend code. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -72,8 +94,8 @@ const Forgotpassword = () => {
     setEmail(e.target.value);
   };
 
-  const handleCodeChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setCode(e.target.value);
+  const handleTokenChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    setResetToken(e.target.value);
   };
 
   return (
@@ -83,24 +105,28 @@ const Forgotpassword = () => {
 
         <p className="text-xl text-center mb-6">
           {isCodeSent 
-            ? `Enter the recovery code sent to ${email}` 
-            : 'Enter your email to receive a recovery code'}
+            ? `Enter the reset code sent to ${email}` 
+            : 'Enter your email to receive a password reset code'}
         </p>
 
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
 
-        <form className="flex flex-col gap-4 md:gap-6" onSubmit={isCodeSent ? handleCodeVerification : handleEmailSubmit}>
+        <form className="flex flex-col gap-4 md:gap-6" onSubmit={isCodeSent ? handleTokenVerification : handleEmailSubmit}>
           <div className="mb-4">
             {isCodeSent ? (
               <input
                 type="text" 
-                id="code" 
-                name="code" 
-                value={code}
-                onChange={handleCodeChange}
-                placeholder='Recovery code'
+                id="resetToken" 
+                name="resetToken" 
+                value={resetToken}
+                onChange={handleTokenChange}
+                placeholder='6-digit reset code'
                 className="w-full max-w-[300px] block m-auto h-[50px] bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
                 required
+                maxLength={6}
+                pattern="\d{6}"
+                title="Please enter the 6-digit code"
               />
             ) : (
               <input
@@ -119,25 +145,36 @@ const Forgotpassword = () => {
           {isCodeSent && (
             <p className="text-center mt-2">
               <span 
-                className="text-sm cursor-pointer"
+                className="text-sm text-boldblue cursor-pointer hover:underline"
                 onClick={handleResendCode}
               >
-                {"Didn't"} get a code? Resend
+                {"Didn't"} get a code? <span className="font-semibold">Resend</span>
               </span>
             </p>
           )}
           
           <button
             type="submit"
-            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer"
+            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer disabled:bg-gray-400"
             disabled={isLoading}
           >
             {isLoading ? 'Processing...' : isCodeSent ? 'Verify' : 'Submit'}
           </button>
         </form>
+
+        {isCodeSent && (
+          <p className="text-center mt-6">
+            <span 
+              className="text-sm text-boldblue cursor-pointer hover:underline"
+              onClick={() => setIsCodeSent(false)}
+            >
+              Use a different email
+            </span>
+          </p>
+        )}
       </section>
     </main>
   );
 };
 
-export default Forgotpassword;
+export default ForgotPassword;
