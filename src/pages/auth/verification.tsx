@@ -1,8 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { useRouter } from 'next/router'; // or 'next/navigation' for App Router
 import useAuthStore from '@/store/authStore';
 
-const Verification = () => {
+type VerificationStep = 'email' | 'phone' | 'completed';
+
+interface AuthStoreState {
+  userId: string | null;
+  email: string | null;
+  phoneNumber: string | null;
+  verificationStep: VerificationStep;
+  setEmailVerified: (verified: boolean) => void;
+  setPhoneVerified: (verified: boolean) => void;
+  setVerificationStep: (step: VerificationStep) => void;
+}
+
+interface VerificationData {
+  verified: boolean;
+  userId?: string;
+  email?: string;
+  phone?: string;
+  timestamp?: string;
+  expiresAt?: string;
+}
+
+interface ApiResponse {
+  message: string;
+  success: boolean;
+  data?: VerificationData;
+}
+
+const Verification: React.FC = () => {
   const router = useRouter();
   const { 
     userId, 
@@ -12,39 +39,40 @@ const Verification = () => {
     setEmailVerified, 
     setPhoneVerified,
     setVerificationStep
-  } = useAuthStore();
+  } = useAuthStore() as AuthStoreState;
   
-  const [verificationCode, setVerificationCode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [verificationCode, setVerificationCode] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
   
-  // Redirect if user hasn't completed the previous steps
   useEffect(() => {
     if (!userId) {
       router.replace('/auth/-up');
     }
   }, [userId, router]);
   
-  // Handle verification code input
-  const handleCodeChange = (e) => {
+  const handleCodeChange = (e: ChangeEvent<HTMLInputElement>): void => {
     setVerificationCode(e.target.value);
-    // Clear error/success messages when user starts typing
     setError('');
     setSuccess('');
   };
   
   // Handle email verification
-  const verifyEmail = async (e) => {
+  const verifyEmail = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     
     if (!verificationCode) {
-      return setError('Please enter the verification code');
+      setError('Please enter the verification code');
+      return;
     }
     
     setIsLoading(true);
     
     try {
+      if (!userId) {
+        throw new Error('User ID is missing');
+      }
         
       const response = await fetch('http://localhost:5050/api/auth/verify-email', {
         method: 'POST',
@@ -57,33 +85,36 @@ const Verification = () => {
         }),
       });
       
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       
       if (!response.ok) {
         throw new Error(data.message || 'Email verification failed');
       }
       
-      // Mark email as verified
       setEmailVerified(true);
       setSuccess('Email verified successfully!');
       setVerificationCode('');
       setVerificationStep('phone');
       
-    } catch (error) {
-      console.error('Email verification error:', error);
+    } catch (err) {
+      console.error('Email verification error:', err);
+      const error = err as Error;
       setError(error.message || 'Email verification failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Handle sending phone verification code
-  const sendPhoneVerification = async (e) => {
+  const sendPhoneVerification = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     
     setIsLoading(true);
     
     try {
+      if (!userId) {
+        throw new Error('User ID is missing');
+      }
+
       const response = await fetch('http://localhost:5050/api/auth/sendPhoneVerificationCode', {
         method: 'POST',
         headers: {
@@ -94,7 +125,7 @@ const Verification = () => {
         }),
       });
       
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       
       if (!response.ok) {
         throw new Error(data.message || 'Failed to send phone verification code');
@@ -102,25 +133,30 @@ const Verification = () => {
       
       setSuccess('Verification code sent to your phone');
       
-    } catch (error) {
-      console.error('Phone verification error:', error);
+    } catch (err) {
+      console.error('Phone verification error:', err);
+      const error = err as Error;
       setError(error.message || 'Failed to send verification code. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Handle phone verification
-  const verifyPhone = async (e) => {
+  const verifyPhone = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     
     if (!verificationCode) {
-      return setError('Please enter the verification code');
+      setError('Please enter the verification code');
+      return;
     }
     
     setIsLoading(true);
     
     try {
+      if (!userId) {
+        throw new Error('User ID is missing');
+      }
+
       const response = await fetch('http://localhost:5050/api/auth/verifyPhone', {
         method: 'POST',
         headers: {
@@ -132,38 +168,39 @@ const Verification = () => {
         }),
       });
       
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       
       if (!response.ok) {
         throw new Error(data.message || 'Phone verification failed');
       }
       
-      // Mark phone as verified
       setPhoneVerified(true);
       setSuccess('Phone verified successfully!');
       setVerificationCode('');
       setVerificationStep('completed');
       
-    } catch (error) {
-      console.error('Phone verification error:', error);
+    } catch (err) {
+      console.error('Phone verification error:', err);
+      const error = err as Error;
       setError(error.message || 'Phone verification failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Handle continue to account creation
-  const continueToAccountCreation = (e) => {
+  const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     router.push('/auth/account-setup');
   };
   
-  // Handle resend verification code
-  const resendVerificationCode = async () => {
+  const resendVerificationCode = async (): Promise<void> => {
     setIsLoading(true);
     
     try {
-      // Different endpoints based on verification step
+      if (!userId) {
+        throw new Error('User ID is missing');
+      }
+
       const endpoint = verificationStep === 'email' 
         ? 'http://localhost:5050/api/auth/resendEmailVerification' 
         : 'http://localhost:5050/api/auth/resendPhoneVerification';
@@ -176,7 +213,7 @@ const Verification = () => {
         body: JSON.stringify({ userId }),
       });
       
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       
       if (!response.ok) {
         throw new Error(data.message || 'Failed to resend verification code');
@@ -184,16 +221,16 @@ const Verification = () => {
       
       setSuccess(`Verification code resent to your ${verificationStep === 'email' ? 'email' : 'phone'}`);
       
-    } catch (error) {
-      console.error('Resend verification error:', error);
+    } catch (err) {
+      console.error('Resend verification error:', err);
+      const error = err as Error;
       setError(error.message || 'Failed to resend verification code. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Format phone number for display
-  const formatPhoneNumber = (phoneNum) => {
+  const formatPhoneNumber = (phoneNum: string | null): string => {
     if (!phoneNum) return '';
     const cleaned = ('' + phoneNum).replace(/\D/g, '');
     const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
@@ -276,7 +313,7 @@ const Verification = () => {
           {/* Email verification button */}
           {verificationStep === 'email' && (
             <button
-              type="submit"
+              type="button"
               onClick={verifyEmail}
               className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading || !verificationCode}
@@ -288,7 +325,7 @@ const Verification = () => {
           {/* Send phone verification code button */}
           {verificationStep === 'phone' && !success.includes('sent to your phone') && (
             <button
-              type="submit"
+              type="button"
               onClick={sendPhoneVerification}
               className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
@@ -300,7 +337,7 @@ const Verification = () => {
           {/* Phone verification button */}
           {verificationStep === 'phone' && success.includes('sent to your phone') && (
             <button
-              type="submit"
+              type="button"
               onClick={verifyPhone}
               className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading || !verificationCode}
@@ -312,7 +349,7 @@ const Verification = () => {
           {/* Continue to account creation button */}
           {verificationStep === 'completed' && (
             <button
-              type="submit"
+              type="button"
               onClick={continueToAccountCreation}
               className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors"
             >
