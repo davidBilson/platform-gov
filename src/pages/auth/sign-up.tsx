@@ -17,10 +17,13 @@ interface SignupFormData {
 }
 
 interface SignupApiResponse {
-  data: {
+  status: string;
+  message: string;
+  data?: {
     userId: string;
+    email?: string;
+    phoneNumber?: string;
   };
-  message?: string;
 }
 
 interface ErrorResponse {
@@ -72,8 +75,8 @@ const Signup: React.FC = () => {
       setStoreFormData(formData);
       
       // Ensure environment variables are properly typed or use defaults
-      const apiHost = process.env.NEXT_PUBLIC_LOCAL_HOST || '';
-      const signupEndpoint = process.env.NEXT_PUBLIC_SIGNUP || '/api/signup';
+      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
+      const signupEndpoint = process.env.NEXT_PUBLIC_SIGNUP;
       
       const res = await axios.post<SignupApiResponse>(
         `${apiHost}${signupEndpoint}`, 
@@ -87,11 +90,11 @@ const Signup: React.FC = () => {
         }
       );
       
-      // Type assertion to ensure we have a proper response
-      const responseData = res.data as SignupApiResponse;
+      const responseData = res.data;
       
-      // Ensure userId exists
+      // Check if we have a userId in the response
       if (!responseData.data?.userId) {
+        console.warn('Response received but userId is missing:', responseData);
         throw new Error('User ID not received from server');
       }
       
@@ -111,28 +114,19 @@ const Signup: React.FC = () => {
       router.push('/auth/verification');
       
     } catch (error) {
-      console.error('Signup error:', error);
-      
-      // TypeGuard for AxiosError
+      // If there's an error, check for specific messages like "Email already in use"
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ErrorResponse>;
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
+        
         if (axiosError.response) {
-          console.log('Error data:', axiosError.response.data);
-          console.log('Error status:', axiosError.response.status);
-          
           const errorResponseData = axiosError.response.data as ErrorResponse;
           setErrorMessage(errorResponseData.message || 'An error occurred during signup');
         } else if (axiosError.request) {
-          // The request was made but no response was received
           setErrorMessage('No response from server. Please check your connection.');
         } else {
-          // Something happened in setting up the request that triggered an Error
-          setErrorMessage(axiosError.message || 'An error occurred during signup');
+          setErrorMessage('Failed to process your request. Please try again.');
         }
       } else {
-        // Handle non-axios errors
         const err = error as Error;
         setErrorMessage(err.message || 'An unexpected error occurred');
       }
