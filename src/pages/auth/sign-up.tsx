@@ -1,75 +1,106 @@
-// src/pages/auth/signup.tsx or src/app/auth/signup/page.tsx (depending on your Next.js routing)
-import React, { useState, FormEvent } from 'react';
+// src/pages/auth/signup.jsx or src/app/auth/signup/page.jsx
+import React, { useState } from 'react';
+import { useRouter } from 'next/router'; // or 'next/navigation' for App Router
 import Link from 'next/link';
-import { FormData, FormErrors } from '@/types/auth';
-import { validateEmail, validatePhone, validatePassword } from '@/utils/validation';
-import { useFormValidation } from '@/hooks/useFormValidation';
-import { signupUser } from '@/services/authService';
+import useAuthStore from '@/store/authStore';
+import axios from 'axios';
 
 const Signup = () => {
-  const [formData, setFormData] = useState<FormData>({
-    userType: 'contractor',
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone_number: '',
-    password: '',
-  });
-
-  const [formErrors, setFormErrors] = useState<FormErrors>({
-    email: '',
-    phone_number: '',
-    password: '',
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const router = useRouter();
+  const { setFormData, setUserId, setVerificationStep } = useAuthStore();
   
-  // Use custom hook for form validation
-  const isFormValid = useFormValidation(formData);
+  const [formData, setLocalFormData] = useState({
+    userType: 'contractor',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    password: '',
+  });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  
   // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  const handleChange = (e) => {
     const { name, value, type } = e.target;
     
-    setFormData(prev => ({
+    setLocalFormData(prev => ({
       ...prev,
       [name]: type === 'radio' ? e.target.value : value
     }));
-
-    // Validate fields as user types
-    if (name === 'email') {
-      setFormErrors(prev => ({
-        ...prev,
-        email: validateEmail(value) ? '' : 'Please enter a valid email address'
-      }));
-    } else if (name === 'phone_number') {
-      setFormErrors(prev => ({
-        ...prev,
-        phone_number: validatePhone(value) ? '' : 'Please enter a valid phone number'
-      }));
-    } else if (name === 'password') {
-      setFormErrors(prev => ({
-        ...prev,
-        password: validatePassword(value) ? '' : 'Password must be at least 8 characters'
-      }));
-    }
+    
+    // Clear error on input change
+    if (errorMessage) setErrorMessage('');
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  // Submit form
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!isFormValid) return;
-    
     setIsSubmitting(true);
+    setErrorMessage('');
     
     try {
-      // Using extracted service function
-      await signupUser(formData);
-      alert('Verification email sent! Please check your inbox.');
+      // Log request payload for debugging
+      console.log('Request payload:', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        role: formData.userType,
+      });
+      
+      // Store data in Zustand
+      setFormData(formData);
+      
+      // Call the backend API using axios
+    
+      const res = await axios.post('http://localhost:5050/api/auth/sign-up', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        role: formData.userType,
+      });
+      
+      console.log('Signup response:', res.data);
+      
+      // Store the user ID for verification
+      setUserId(res.data.data.userId);
+      
+      // Update Zustand store with user data
+      setFormData({
+        ...formData,
+        userId: res.data.data.userId,
+      });
+      
+      // Set verification step to email verification
+      setVerificationStep('email');
+      
+      // Redirect to verification page
+      router.push('/auth/verification');
+      
     } catch (error) {
       console.error('Signup error:', error);
-      alert('An error occurred. Please try again.');
+      
+      // Extract error message from axios error
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log('Error data:', error.response.data);
+        console.log('Error status:', error.response.status);
+        
+        setErrorMessage(error.response.data.message || 'An error occurred during signup');
+      } else if (error.request) {
+        // The request was made but no response was received
+        setErrorMessage('No response from server. Please check your connection.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setErrorMessage(error.message || 'An error occurred during signup');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -79,6 +110,12 @@ const Signup = () => {
     <main className='pt-10 md:pt-20 px-5 md:px-6'>
       <section className='w-full max-w-2xl m-auto'>
         <h1 className='font-semibold text-lg md:text-xl text-center mb-6 md:mb-10'>Create Account</h1>
+        
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <p>{errorMessage}</p>
+          </div>
+        )}
         
         <form onSubmit={handleSubmit}>
           {/* User Type Selection */}
@@ -138,9 +175,9 @@ const Signup = () => {
             <div>
               <input 
                 type="text" 
-                id="first_name" 
-                name="first_name" 
-                value={formData.first_name}
+                id="firstName" 
+                name="firstName" 
+                value={formData.firstName}
                 onChange={handleChange}
                 placeholder='First name' 
                 className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
@@ -151,9 +188,9 @@ const Signup = () => {
             <div>
               <input 
                 type="text" 
-                id="last_name" 
-                name="last_name" 
-                value={formData.last_name}
+                id="lastName" 
+                name="lastName" 
+                value={formData.lastName}
                 onChange={handleChange}
                 placeholder='Last name' 
                 className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
@@ -161,7 +198,7 @@ const Signup = () => {
               />
             </div>
 
-            <div className="relative">
+            <div>
               <input 
                 type="email" 
                 id="email" 
@@ -169,31 +206,25 @@ const Signup = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder='Email'
-                className={`w-full h-[50px] bg-white border ${formErrors.email && formData.email ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
+                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required
               />
-              {/* {formErrors.email && formData.email && (
-                <p className="text-xs text-red-500 mt-1">{formErrors.email}</p>
-              )} */}
             </div>
 
-            <div className="relative">
+            <div>
               <input 
                 type="tel" 
-                id="phone_number" 
-                name="phone_number" 
-                value={formData.phone_number}
+                id="phoneNumber" 
+                name="phoneNumber" 
+                value={formData.phoneNumber}
                 onChange={handleChange}
                 placeholder='Phone'
-                className={`w-full h-[50px] bg-white border ${formErrors.phone_number && formData.phone_number ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
+                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required 
               />
-              {/* {formErrors.phone_number && formData.phone_number && (
-                <p className="text-xs text-red-500 mt-1">{formErrors.phone_number}</p>
-              )} */}
             </div>
             
-            <div className="relative">
+            <div>
               <input 
                 type="password" 
                 id="password" 
@@ -201,19 +232,16 @@ const Signup = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder='Password'
-                className={`w-full h-[50px] bg-white border ${formErrors.password && formData.password ? 'border-red-500' : 'border-boldblue'} rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
+                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required 
               />
-              {formErrors.password && formData.password && (
-                <p className="text-xs text-red-500 mt-1">{formErrors.password}</p>
-              )}
             </div>
             
             <div className='w-full h-[50px] flex items-center'>
               <button
                 type="submit"
-                disabled={!isFormValid || isSubmitting}
-                className={`px-5 py-[11px] min-w-[120px] ${isFormValid ? 'bg-boldblue' : 'bg-gray-400'} rounded-lg text-white text-sm font-semibold ${isFormValid ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                disabled={isSubmitting}
+                className='px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer'
               >
                 {isSubmitting ? 'Verifying...' : 'Verify Email'}
               </button>
