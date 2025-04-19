@@ -13,6 +13,7 @@ interface SignupFormData {
   email: string;
   phoneNumber: string;
   password: string;
+  confirmPassword: string; // Added confirm password field
   userId?: string;
 }
 
@@ -31,7 +32,7 @@ interface ErrorResponse {
 }
 
 interface AuthStore {
-  setFormData: (data: SignupFormData) => void;
+  setFormData: (data: Omit<SignupFormData, 'confirmPassword'>) => void;
   setUserId: (id: string) => void;
   setVerificationStep: (step: string) => void;
 }
@@ -47,6 +48,7 @@ const Signup: React.FC = () => {
     email: '',
     phoneNumber: '',
     password: '',
+    confirmPassword: '', // Initialize confirm password field
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -67,12 +69,27 @@ const Signup: React.FC = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage('Passwords do not match');
+      return;
+    }
+    
     setIsSubmitting(true);
     setErrorMessage('');
     
     try {
-      // Store data in Zustand
-      setStoreFormData(formData);
+      // Store data in Zustand (exclude confirmPassword as it's not needed in the API)
+      const formDataForStore = {
+        userType: formData.userType,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+      };
+      
+      setStoreFormData(formDataForStore);
       
       // Ensure environment variables are properly typed or use defaults
       const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
@@ -103,7 +120,7 @@ const Signup: React.FC = () => {
       
       // Update Zustand store with user data
       setStoreFormData({
-        ...formData,
+        ...formDataForStore,
         userId: responseData.data.userId,
       });
       
@@ -259,7 +276,20 @@ const Signup: React.FC = () => {
               />
             </div>
             
-            <div className='w-full h-12.5 flex items-center'>
+            <div>
+              <input 
+                type="password" 
+                id="confirmPassword" 
+                name="confirmPassword" 
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder='Confirm password'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                required 
+              />
+            </div>
+            
+            <div className='md:col-span-2 w-full h-12.5 flex items-center justify-center'>
               <button
                 type="submit"
                 disabled={isSubmitting}
