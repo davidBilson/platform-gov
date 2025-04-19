@@ -19,8 +19,6 @@ export interface WorkHistory {
   }
   
   export interface ProfileFormData {
-    firstName: string;
-    lastName: string;
     bio: string;
     ratePerHour: string;
     primaryPosition: string;

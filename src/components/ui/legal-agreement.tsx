@@ -5,11 +5,22 @@ import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 const Legalagreement = () => {
   const [agreed, setAgreed] = useState(false);
   const [accepted, setAccepted] = useState(false);
+  const [open, setOpen] = useState(true);
+
+  const closeModal = () => {
+    if (agreed && accepted) {
+      setOpen(false);
+    }
+  }
+
 
   return (
+    <>
+    {
+      open &&
     <section className='fixed top-0 left-0 w-full min-h-screen z-50 bg-black/50 flex items-center justify-center p-6'>
       <div className='w-full max-w-158 p-7.5 bg-white rounded-sm'>
-        <h1 className='mb-7.5 font-semibold text-xl'>Hire Contractor</h1>
+        {/* <h1 className='mb-7.5 font-semibold text-xl'>Hire Contractor</h1> */}
         <h2 className='mb-7.5 font-bold'>Legal Agreement</h2>
 
         <div className='mb-7.5 p-7.5 border border-boldblue rounded-lg'>
@@ -26,7 +37,7 @@ const Legalagreement = () => {
               checked={agreed}
               onChange={() => setAgreed(!agreed)}
               className='hidden'
-            />
+              />
             <span className='w-4 h-4 flex items-center justify-center'>
               {agreed ? (
                 <IoIosCheckmarkCircle className='text-boldblue w-4 h-4' />
@@ -44,7 +55,7 @@ const Legalagreement = () => {
               checked={accepted}
               onChange={() => setAccepted(!accepted)}
               className='hidden'
-            />
+              />
             <span className='w-4 h-4 flex items-center justify-center'>
               {accepted ? (
                 <IoIosCheckmarkCircle className='text-boldblue w-4 h-4' />
@@ -62,12 +73,16 @@ const Legalagreement = () => {
           <button
             className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg'
             disabled={!(agreed && accepted)}
-          >
-            Send Contract
+            onClick={closeModal}
+            >
+            Continue
+            {/* Send Contract  */}
           </button>
         </div>
       </div>
     </section>
+            }
+    </>
   );
 };
 

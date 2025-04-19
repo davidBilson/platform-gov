@@ -1,5 +1,5 @@
 'use client'
-import LegalAgreement from "@/components/ui/legal-agreement";
+// import LegalAgreement from "@/components/ui/legal-agreement";
 // import { useEffect } from 'react'
 // import { useRouter } from 'next/navigation'
 
@@ -12,7 +12,8 @@ export default function Home() {
 
   return (
     <main>
-      <LegalAgreement />
+      {/* <LegalAgreement /> */}
+      <h1>Home Page</h1>
     </main>
   )
 }
