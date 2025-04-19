@@ -93,7 +93,8 @@ const SignIn = () => {
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
       
-      if (!userData.isEmailVerified || !userData.isPhoneVerified) {
+      // if (!userData.isEmailVerified || !userData.isPhoneVerified) {
+      if (!userData.isEmailVerified) {
         router.push('/auth/verification')
       }
       // Redirect to home page
