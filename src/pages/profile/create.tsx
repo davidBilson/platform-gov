@@ -64,7 +64,7 @@ const CreateProfile = () => {
   
   // UI state
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
@@ -162,7 +162,7 @@ const CreateProfile = () => {
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      setError("Error fetching profile data");
+      // setError("Error fetching profile data");
     } finally {
       setIsLoading(false);
     }
@@ -327,7 +327,7 @@ const CreateProfile = () => {
     
     try {
       setIsLoading(true);
-      setError(null);
+      // setError(null);
       
       legalSetterOnce();
 
@@ -348,11 +348,11 @@ const CreateProfile = () => {
     } catch (error) {
       if (error instanceof AxiosError) {
         const errorMessage = error.response?.data?.message || "An error occurred while saving";
-        setError(errorMessage);
+        // setError(errorMessage);
         toast.error(errorMessage);
         console.error("Axios error saving profile:", error);
       } else {
-        setError("An unexpected error occurred");
+        // setError("An unexpected error occurred");
         toast.error("An unexpected error occurred");
         console.error("Unknown error:", error);
       }
@@ -837,9 +837,9 @@ const CreateProfile = () => {
         </div>
         
         {/* Error message */}
-        {error && (
+        {/* {error && (
           <div className="mt-5 text-red-500">{error}</div>
-        )}
+        )} */}
         
         {/* Sticky bottom action buttons */}
         <section className="flex items-center justify-center gap-2.5 py-7.5 px-6 fixed bottom-0 left-0 bg-skyblue w-full border-t border-t-boldblue">
