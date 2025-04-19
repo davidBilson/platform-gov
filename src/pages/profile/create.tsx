@@ -6,7 +6,7 @@ import { IoIosSearch } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
 import { generateId } from "@/utils/profile-utils";
-import { fetchProfile, saveProfile } from "@/pages/_api/profile-api";
+import { fetchProfile, saveProfile } from "@/api/profile-api";
 import useAuthStore from '@/store/authStore';
 import { AxiosError } from "axios";
 
