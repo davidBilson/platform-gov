@@ -1,30 +1,74 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { IoIosCheckmarkCircle } from "react-icons/io";
+import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 
 const Legalagreement = () => {
-  return (
-    <section>
-        <h1>{"Hire Contractor"}</h1>
-        <h2>Legal Agreement</h2>
-        <div>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, excepturi! Ut facere aperiam voluptates exercitationem repellat quaerat, reprehenderit, similique voluptatem explicabo esse vel libero accusamus blanditiis debitis repellendus qui quasi omnis praesentium mollitia voluptate. Voluptates qui eos ad et sunt provident totam corrupti. Delectus voluptatibus tempore temporibus, nam nulla maxime!</p>
-        </div>
-        <div>
-            <label htmlFor="">
-                <input type="checkbox" />
-                I agree
-            </label>
-            <label htmlFor="">
-                <input type="checkbox" />
-                I accept GovLink {"Global's"} commission terms
-            </label>
-        </div>
-        <div>
-            <button>Back</button>
-            <button>Cancel</button>
-            <button>Send Contract</button>
-        </div>
-    </section>
-  )
-}
+  const [agreed, setAgreed] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
-export default Legalagreement
+  return (
+    <section className='fixed top-0 left-0 w-full min-h-screen z-50 bg-black/50 flex items-center justify-center p-6'>
+      <div className='w-full max-w-158 p-7.5 bg-white rounded-sm'>
+        <h1 className='mb-7.5 font-semibold text-xl'>Hire Contractor</h1>
+        <h2 className='mb-7.5 font-bold'>Legal Agreement</h2>
+
+        <div className='mb-7.5 p-7.5 border border-boldblue rounded-lg'>
+          <p className="text-sm">
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit, excepturi! Ut facere aperiam voluptates exercitationem repellat quaerat, reprehenderit, similique voluptatem explicabo esse vel libero accusamus blanditiis debitis repellendus qui quasi omnis praesentium mollitia voluptate. Voluptates qui eos ad et sunt provident totam corrupti. Delectus voluptatibus tempore temporibus, nam nulla maxime!
+          </p>
+        </div>
+
+        <div className='mb-7.5 text-sm flex items-center gap-12.5'>
+          {/* I agree */}
+          <label className='flex items-center gap-1 cursor-pointer'>
+            <input
+              type='checkbox'
+              checked={agreed}
+              onChange={() => setAgreed(!agreed)}
+              className='hidden'
+            />
+            <span className='w-4 h-4 flex items-center justify-center'>
+              {agreed ? (
+                <IoIosCheckmarkCircle className='text-boldblue w-4 h-4' />
+              ) : (
+                <MdOutlineRadioButtonUnchecked className='text-boldblue w-4 h-4' />
+              )}
+            </span>
+            I agree
+          </label>
+
+          {/* I accept terms */}
+          <label className='flex items-center gap-1 cursor-pointer'>
+            <input
+              type='checkbox'
+              checked={accepted}
+              onChange={() => setAccepted(!accepted)}
+              className='hidden'
+            />
+            <span className='w-4 h-4 flex items-center justify-center'>
+              {accepted ? (
+                <IoIosCheckmarkCircle className='text-boldblue w-4 h-4' />
+              ) : (
+                <MdOutlineRadioButtonUnchecked className='text-boldblue w-4 h-4' />
+              )}
+            </span>
+            I accept GovLink {"Global's"} commission terms
+          </label>
+        </div>
+
+        <div className='flex items-center justify-center gap-2.5'>
+          <button className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg'>Back</button>
+          <button className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg'>Cancel</button>
+          <button
+            className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg'
+            disabled={!(agreed && accepted)}
+          >
+            Send Contract
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Legalagreement;
