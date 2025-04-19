@@ -98,7 +98,7 @@ const SignIn = () => {
         router.push('/auth/verification')
       }
       // Redirect to home page
-      router.push('/profile');
+      router.push('/profile/create');
       
     } catch (error) {
       if (axios.isAxiosError(error)) {
