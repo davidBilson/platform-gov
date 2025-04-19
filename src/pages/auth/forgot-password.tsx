@@ -122,7 +122,7 @@ const ForgotPassword: React.FC = () => {
                 value={resetToken}
                 onChange={handleTokenChange}
                 placeholder='6-digit reset code'
-                className="w-full max-w-[300px] block m-auto h-[50px] bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
                 required
                 maxLength={6}
                 pattern="\d{6}"
@@ -136,7 +136,7 @@ const ForgotPassword: React.FC = () => {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder='Email'
-                className="w-full max-w-[300px] block m-auto h-[50px] bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
                 required
               />
             )}

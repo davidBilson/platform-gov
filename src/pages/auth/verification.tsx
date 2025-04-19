@@ -272,7 +272,7 @@ const Verification: React.FC = () => {
                 value={verificationCode}
                 onChange={handleCodeChange}
                 placeholder='Verification Code'
-                className="w-full max-w-[300px] block m-auto h-[50px] bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
                 required
               />
             </div>

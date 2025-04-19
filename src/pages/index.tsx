@@ -1,11 +1,16 @@
-import BusinessProfile from "@/pages/_business-profile/business-profile";
-import OpenJobs from "@/pages/_business-profile/open-jobs";
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.push('/auth/sign-in')
+  }, [router])
+
   return (
-      <main>
-        <BusinessProfile />
-        <OpenJobs />
-      </main>
+    <main></main>
   )
 }

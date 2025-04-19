@@ -126,7 +126,7 @@ const SignIn = () => {
         <h1 className='font-semibold text-lg md:text-xl text-center mb-6 md:mb-10'>Sign In</h1>
         
         {errorMessage && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 max-w-[300px] m-auto">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 max-w-75 m-auto">
             <p className="text-sm">{errorMessage}</p>
           </div>
         )}
@@ -139,7 +139,7 @@ const SignIn = () => {
             value={formData.email}
             onChange={handleChange}
             placeholder='Email'
-            className='w-full max-w-[300px] m-auto h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+            className='w-full max-w-75 m-auto h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
             required 
           />
           
@@ -150,7 +150,7 @@ const SignIn = () => {
             value={formData.password}
             onChange={handleChange}
             placeholder='Password'
-            className='w-full max-w-[300px] m-auto h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+            className='w-full max-w-75 m-auto h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
             required 
           />
           

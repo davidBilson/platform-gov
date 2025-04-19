@@ -67,13 +67,13 @@ const Navbar = () => {
           <Image src={Logo} width={80} height={90} alt="GovLink Platform" />
           
           {/* Create Profile text in the middle */}
-          <div className="text-boldblue font-bold text-xl hidden lg:block absolute left-1/2 transform -translate-x-1/2">
-            Create Profile
+          <div className=" font-semibold text-xl hidden lg:block absolute left-1/2 transform -translate-x-1/2">
+            Create Public Profile
           </div>
           
           {/* Mobile view - Create Profile text */}
-          <div className="text-boldblue font-bold text-lg lg:hidden">
-            Create Profile
+          <div className=" font-semibold text-lg lg:hidden">
+            Create Public Profile
           </div>
           
           {/* Bell and profile icon on the right */}
@@ -120,15 +120,15 @@ const Navbar = () => {
 
             {/* Desktop navigation */}
             <ul className="hidden lg:flex items-center gap-[13px] w-fit text-boldblue font-bold text-[16px]">
-                <li className="flex items-center gap-[5px] cursor-pointer">
+                <li className="flex items-center gap-1.25 cursor-pointer">
                     <span>Jobs</span>
                     <span><IoMdArrowDropdown size={20} /></span>
                 </li>
-                <li className="flex items-center gap-[5px] cursor-pointer">
+                <li className="flex items-center gap-1.25 cursor-pointer">
                     <span>Manage Contractors</span>
                     <span><IoMdArrowDropdown size={20} /></span>
                 </li>
-                <li className="flex items-center gap-[5px] cursor-pointer">
+                <li className="flex items-center gap-1.25 cursor-pointer">
                     <span>Manage Contracts</span>
                     <span><IoMdArrowDropdown size={20} /></span>
                 </li>
@@ -138,11 +138,11 @@ const Navbar = () => {
             </ul>
 
             {/* Desktop search */}
-            <div className="hidden lg:flex w-full max-w-[250px] h-[50px] items-center py-[5px] pl-[20px] pr-[5px] border border-[#E1F5FD] rounded-sm text-[14px]">
+            <div className="hidden lg:flex w-full max-w-[250px] h-12.5 items-center py-1.25 pl-5 pr-1.25 border border-skyblue rounded-sm text-[14px]">
                 <input type='text' placeholder="search" className="outline-none w-1/2" />
                 <div className="relative w-1/2" ref={dropdownRef}>
                   <button 
-                    className="w-full bg-[#E1F5FD] border-none flex items-center justify-center p-2 rounded-full"
+                    className="w-full bg-skyblue border-none flex items-center justify-center p-2 rounded-full"
                     onClick={() => setContractorsDropdown(!contractorsDropdown)}
                   >
                       <span>{selectedOption}</span>
@@ -150,11 +150,11 @@ const Navbar = () => {
                   </button>
                   
                   {contractorsDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E1F5FD] rounded shadow-md z-10">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-skyblue rounded shadow-md z-10">
                       {contractorOptions.map((option) => (
                         <div 
                           key={option} 
-                          className="px-4 py-2 hover:bg-[#E1F5FD] cursor-pointer"
+                          className="px-4 py-2 hover:bg-skyblue cursor-pointer"
                           onClick={() => {
                             setSelectedOption(option);
                             setContractorsDropdown(false);
@@ -184,9 +184,9 @@ const Navbar = () => {
             {mobileSearch && (
               <div ref={searchRef} className="lg:hidden fixed top-28 left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-40">
                 <div className="px-6">
-                  <div className="w-full h-[50px] flex items-center py-[5px] pl-[20px] pr-[5px] border border-[#E1F5FD] rounded-sm text-[14px]">
+                  <div className="w-full h-12.5 flex items-center py-1.25 pl-5 pr-1.25 border border-skyblue rounded-sm text-[14px]">
                     <input type='text' placeholder="search" className="outline-none w-1/2" autoFocus />
-                    <button className="w-1/2 bg-[#E1F5FD] border-none flex items-center justify-center p-2 rounded-full">
+                    <button className="w-1/2 bg-skyblue border-none flex items-center justify-center p-2 rounded-full">
                       <span>{selectedOption}</span>
                       <span><IoMdArrowDropdown size={15} /></span>
                     </button>
@@ -199,15 +199,15 @@ const Navbar = () => {
             {mobileMenu && (
               <div className="lg:hidden fixed top-28 left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-40">
                 <ul className="flex flex-col items-center gap-5 text-boldblue font-bold text-[16px]">
-                  <li className="flex items-center gap-[5px]">
+                  <li className="flex items-center gap-1.25">
                       <span>Jobs</span>
                       <span><IoMdArrowDropdown size={20} /></span>
                   </li>
-                  <li className="flex items-center gap-[5px]">
+                  <li className="flex items-center gap-1.25">
                       <span>Manage Contractors</span>
                       <span><IoMdArrowDropdown size={20} /></span>
                   </li>
-                  <li className="flex items-center gap-[5px]">
+                  <li className="flex items-center gap-1.25">
                       <span>Manage Contracts</span>
                       <span><IoMdArrowDropdown size={20} /></span>
                   </li>

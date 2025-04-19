@@ -162,7 +162,7 @@ const Signup: React.FC = () => {
         <form onSubmit={handleSubmit}>
           {/* User Type Selection */}
           <div className='flex items-center justify-center gap-10 md:gap-20 mb-6 md:mb-10'>
-            <label className='flex items-center gap-[5px]'>
+            <label className='flex items-center gap-1.25'>
               <input 
                 type="radio" 
                 name="userType" 
@@ -176,7 +176,7 @@ const Signup: React.FC = () => {
                 Contractor
               </span>
             </label>
-            <label className='flex items-center gap-[5px]'>
+            <label className='flex items-center gap-1.25'>
               <input 
                 type="radio" 
                 name="userType" 
@@ -202,7 +202,7 @@ const Signup: React.FC = () => {
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder='First name' 
-                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required 
               />
             </div>
@@ -215,7 +215,7 @@ const Signup: React.FC = () => {
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder='Last name' 
-                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required 
               />
             </div>
@@ -228,7 +228,7 @@ const Signup: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder='Email'
-                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required
               />
             </div>
@@ -241,7 +241,7 @@ const Signup: React.FC = () => {
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 placeholder='Phone'
-                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required 
               />
             </div>
@@ -254,12 +254,12 @@ const Signup: React.FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder='Password'
-                className='w-full h-[50px] bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
                 required 
               />
             </div>
             
-            <div className='w-full h-[50px] flex items-center'>
+            <div className='w-full h-12.5 flex items-center'>
               <button
                 type="submit"
                 disabled={isSubmitting}

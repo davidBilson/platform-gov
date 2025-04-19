@@ -33,7 +33,7 @@ const BusinessProfile = () => {
 
   return (
     <section className='p-6'>
-      <section className='w-full max-w-[1100px] m-auto'>
+      <section className='w-full max-w-275 m-auto'>
         
         <div className='mb-6'>
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
@@ -56,7 +56,7 @@ const BusinessProfile = () => {
             </div>
             
             {/* Company Name */}
-            <div className='w-full sm:max-w-[300px] mt-4 sm:mt-0'>
+            <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
               <input 
                 type="text" 
                 placeholder="Company Name"

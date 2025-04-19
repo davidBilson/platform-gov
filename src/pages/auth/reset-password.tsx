@@ -181,20 +181,20 @@ const ResetPassword: React.FC = () => {
                 value={newPassword}
                 onChange={handlePasswordChange}
                 placeholder='New Password'
-                className={`w-full max-w-[300px] block m-auto h-[50px] bg-white border ${
+                className={`w-full max-w-75 block m-auto h-12.5 bg-white border ${
                   passwordErrors.length > 0 ? 'border-red-300' : 'border'
                 } rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
                 required
               />
-              {passwordErrors.length > 0 && (
-                <div className="text-xs text-red-500 mt-1 max-w-[300px] mx-auto">
+              {/* {passwordErrors.length > 0 && (
+                <div className="text-xs text-red-500 mt-1 max-w-75 mx-auto">
                   <ul className="list-disc pl-5">
                     {passwordErrors.map((error, index) => (
                       <li key={index}>{error}</li>
                     ))}
                   </ul>
                 </div>
-              )}
+              )} */}
             </div>
             
             <input
@@ -204,13 +204,13 @@ const ResetPassword: React.FC = () => {
               value={confirmPassword}
               onChange={handleConfirmPasswordChange}
               placeholder='Confirm Password'
-              className={`w-full max-w-[300px] block m-auto h-[50px] bg-white border ${
+              className={`w-full max-w-75 block m-auto h-12.5 bg-white border ${
                 confirmPassword && newPassword !== confirmPassword ? 'border-red-300' : 'border'
               } rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
               required
             />
             {confirmPassword && newPassword !== confirmPassword && (
-              <p className="text-xs text-red-500 mt-1 max-w-[300px] mx-auto">
+              <p className="text-xs text-red-500 mt-1 max-w-75 mx-auto">
                 Passwords do not match
               </p>
             )}

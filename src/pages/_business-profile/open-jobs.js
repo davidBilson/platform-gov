@@ -35,7 +35,7 @@ const OpenJobs = () => {
 
   return (
     <main className='p-6'>
-      <section className='w-full max-w-[1100px] m-auto'>
+      <section className='w-full max-w-275 m-auto'>
         {/* Open Jobs Section */}
         <article>
           <h2 className='font-semibold text-xl mb-[15px]'>Open Jobs</h2>
