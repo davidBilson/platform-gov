@@ -1,6 +1,6 @@
 
 "use client"
-import React, { useState, useRef, ChangeEvent, FormEvent, useEffect } from "react";
+import React, { useState, useRef, ChangeEvent, useEffect } from "react";
 import Image from "next/image";
 import { IoMdImages } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
@@ -73,8 +73,10 @@ const CreateProfile = () => {
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
-
+  
+  const [pendingSubmission, setPendingSubmission] = useState<boolean>(false);
   const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
+  const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -324,45 +326,101 @@ const CreateProfile = () => {
     called = true;
     setShowLegalAgreement(true);
   }
-  // Handle form submission
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      setIsLoading(true);
-      // setError(null);
-      
-      legalSetterOnce();
 
-      const response = await saveProfile(formData, userId, isProfileExists ? userId : null);
+
+// This effect monitors for when legal agreement is accepted while a submission is pending
+useEffect(() => {
+  // If we have a pending submission AND the user has accepted the agreement, proceed with submission
+  if (pendingSubmission && acceptedLegalAgreement && showLegalAgreement === false) {
+    // Reset the pending flag
+    setPendingSubmission(false);
+    // Proceed with actual submission
+    submitProfileData();
+  }
+}, [pendingSubmission, acceptedLegalAgreement, showLegalAgreement]);
+
+// The function that handles the actual API call and data processing
+const submitProfileData = async (): Promise<void> => {
+  try {
+    setIsLoading(true);
+    
+    if (!userId) {
+      toast.error("User ID is required to save profile");
+      return;
+    }
+    
+    if (!formData) {
+      toast.error("Form data is missing");
+      return;
+    }
+    
+    const response = await saveProfile(
+      formData, 
+      userId, 
+      isProfileExists && typeof userId === 'string' ? userId : null
+    );
+    
+    if (response?.data?.success) {
+      // If creating a new profile, save the profileId
+      if (!isProfileExists && response.data.data?._id) {
+        setProfileId(response.data.data._id);
+        setIsProfileExists(true);
+      }
       
-      if (response.data.success) {
-        // If creating a new profile, save the profileId
-        if (!isProfileExists && response.data.data?._id) {
-          setProfileId(response.data.data._id);
-          setIsProfileExists(true);
-        }
-        
-        toast.success(isProfileExists ? "Profile updated successfully" : "Profile created successfully");
-        
+      toast.success(isProfileExists ? "Profile updated successfully" : "Profile created successfully");
+      
+      try {
         // Refetch user profile to ensure we have the latest data
         await fetchUserProfile();
         router.push("/profile");
+      } catch (fetchError) {
+        console.error("Error fetching updated profile:", fetchError);
+        router.push("/profile");
       }
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.message || "An error occurred while saving";
-        // setError(errorMessage);
-        toast.error(errorMessage);
-        console.error("Axios error saving profile:", error);
-      } else {
-        // setError("An unexpected error occurred");
-        toast.error("An unexpected error occurred");
-        console.error("Unknown error:", error);
-      }
-    } finally {
-      setIsLoading(false);
+    } else {
+      const errorMessage = response?.data?.message || "Unknown error in response";
+      toast.error(errorMessage);
     }
+  } catch (error) {
+    // Error handling
+    if (error instanceof AxiosError) {
+      const statusCode = error.response?.status;
+      const errorMessage = error.response?.data?.message || "An error occurred while saving";
+      
+      if (statusCode === 401) {
+        toast.error("Authentication required. Please login again.");
+      } else if (statusCode === 403) {
+        toast.error("You don't have permission to perform this action");
+      } else {
+        toast.error(errorMessage);
+      }
+      
+      console.error(`Axios error (${statusCode}) saving profile:`, error);
+    } else if (error instanceof Error) {
+      toast.error(`Error: ${error.message}`);
+      console.error("Error saving profile:", error);
+    } else {
+      toast.error("An unexpected error occurred");
+      console.error("Unknown error:", error);
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
+    
+    // If legal agreement is already accepted, proceed immediately
+    if (acceptedLegalAgreement) {
+      submitProfileData();
+      return;
+    }
+    
+    // Legal agreement not yet accepted - show the modal and mark as pending
+    setPendingSubmission(true);
+    legalSetterOnce();
+    // Now wait for the useEffect to trigger when acceptedLegalAgreement becomes true
   };
 
   // Handle form cancellation
@@ -421,7 +479,14 @@ const CreateProfile = () => {
 
   return (
     <>
-    {showLegalAgreement && <Legalagreement />}
+    { 
+      showLegalAgreement && 
+      <Legalagreement
+        setShowLegalAgreement={setShowLegalAgreement} 
+        acceptedLegalAgreement={acceptedLegalAgreement}
+        setAcceptedLegalAgreement={setAcceptedLegalAgreement}
+      />
+      }
     <main className="p-6">
       <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
         {/* Bio */}

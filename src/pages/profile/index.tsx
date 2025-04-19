@@ -130,7 +130,7 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
   
   return (
     <main className="p-4 md:p-6">
-      <section className="w-full max-w-3xl mx-auto pb-32">
+      <section className="w-full max-w-275 mx-auto pb-32">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <p>Loading profile data...</p>

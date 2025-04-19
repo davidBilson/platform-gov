@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
 
-const Legalagreement = () => {
-  const [agreed, setAgreed] = useState(false);
-  const [accepted, setAccepted] = useState(false);
-  const [open, setOpen] = useState(true);
+interface LegalAgreementProps {
+  setShowLegalAgreement: (showLegalAgreement: boolean) => void;
+  setAcceptedLegalAgreement: (acceptedLegalAgreement: boolean) => void;
+  acceptedLegalAgreement: boolean;
+}
+
+const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAcceptedLegalAgreement } : LegalAgreementProps) => {
 
   const closeModal = () => {
-    if (agreed && accepted) {
-      setOpen(false);
+    if (!acceptedLegalAgreement) {
+      return;
     }
+    setShowLegalAgreement(false);
   }
 
 
   return (
-    <>
-    {
-      open &&
     <section className='fixed top-0 left-0 w-full min-h-screen z-50 bg-black/50 flex items-center justify-center p-6'>
       <div className='w-full max-w-158 p-7.5 bg-white rounded-sm'>
         {/* <h1 className='mb-7.5 font-semibold text-xl'>Hire Contractor</h1> */}
@@ -30,34 +30,17 @@ const Legalagreement = () => {
         </div>
 
         <div className='mb-7.5 text-sm flex items-center gap-12.5'>
-          {/* I agree */}
-          <label className='flex items-center gap-1 cursor-pointer'>
-            <input
-              type='checkbox'
-              checked={agreed}
-              onChange={() => setAgreed(!agreed)}
-              className='hidden'
-              />
-            <span className='w-4 h-4 flex items-center justify-center'>
-              {agreed ? (
-                <IoIosCheckmarkCircle className='text-boldblue w-4 h-4' />
-              ) : (
-                <MdOutlineRadioButtonUnchecked className='text-boldblue w-4 h-4' />
-              )}
-            </span>
-            I agree
-          </label>
 
           {/* I accept terms */}
           <label className='flex items-center gap-1 cursor-pointer'>
             <input
               type='checkbox'
-              checked={accepted}
-              onChange={() => setAccepted(!accepted)}
+              checked={acceptedLegalAgreement}
+              onChange={() => setAcceptedLegalAgreement(!acceptedLegalAgreement)}
               className='hidden'
               />
             <span className='w-4 h-4 flex items-center justify-center'>
-              {accepted ? (
+              {acceptedLegalAgreement ? (
                 <IoIosCheckmarkCircle className='text-boldblue w-4 h-4' />
               ) : (
                 <MdOutlineRadioButtonUnchecked className='text-boldblue w-4 h-4' />
@@ -78,7 +61,7 @@ const Legalagreement = () => {
 
           <button
             className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer active:opacity-70 disabled:cursor-not-allowed'
-            disabled={!(agreed && accepted)}
+            disabled={!(acceptedLegalAgreement)}
             onClick={closeModal}
           >
             Continue
@@ -88,8 +71,6 @@ const Legalagreement = () => {
         </div>
       </div>
     </section>
-            }
-    </>
   );
 };
 
