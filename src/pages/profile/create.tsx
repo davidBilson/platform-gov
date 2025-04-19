@@ -13,14 +13,17 @@ import useAuthStore from '@/store/authStore';
 import { AxiosError } from "axios";
 import { toast } from "react-hot-toast"; // Assuming you use toast for notifications
 import Legalagreement from "@/components/ui/legal-agreement";
+import { useRouter } from 'next/router';
 
 interface AuthStoreState {
   userId: string;
+  name: string;
 }
 
 const CreateProfile = () => {
+  const router = useRouter();
   // Get user ID from auth store
-  const { userId } = useAuthStore() as AuthStoreState;
+  const { userId, name } = useAuthStore() as AuthStoreState;
 
   // State for form data
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -344,6 +347,7 @@ const CreateProfile = () => {
         
         // Refetch user profile to ensure we have the latest data
         await fetchUserProfile();
+        router.push("/profile");
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -405,7 +409,7 @@ const CreateProfile = () => {
 
   // Handle preview - could be expanded in future
   const handlePreview = () => {
-    toast.success("Profile preview functionality coming soon");
+    router.push('/profile')
   };
 
   // Initialize textarea height on mount
@@ -452,7 +456,7 @@ const CreateProfile = () => {
               className="hidden" 
             />
           </div>
-          <p className="text-black font-semibold text-xl">{"First Name"} {"Last Name"}</p>
+          <p className="text-black font-semibold text-xl">{name}</p>
         </div>
   
         {/* About Me / Bio */}
@@ -846,21 +850,21 @@ const CreateProfile = () => {
           <button 
             type="button"
             onClick={handleCancel}
-            className="py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
+            className="cursor-pointer active:opacity-70 py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
           >
             Cancel
           </button>
           <button 
             type="button"
             onClick={handlePreview}
-            className="py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
+            className="cursor-pointer active:opacity-70  py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
           >
             Preview Public View
           </button>
           <button 
             type="submit"
             disabled={isLoading}
-            className="py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
+            className="cursor-pointer active:opacity-70 py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             {isLoading ? "Saving..." : "Save"}
           </button>

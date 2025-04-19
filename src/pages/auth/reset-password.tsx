@@ -218,7 +218,7 @@ const ResetPassword: React.FC = () => {
 
           <button
             type="submit"
-            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer disabled:bg-gray-400"
+            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer active:opacity-70 disabled:bg-gray-400"
             disabled={isLoading || passwordErrors.length > 0 || newPassword !== confirmPassword}
           >
             {isLoading ? 'Processing...' : 'Reset Password'}

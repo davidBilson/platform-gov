@@ -30,9 +30,23 @@ interface ErrorResponse {
   message?: string;
 }
 
+// Interface for AuthStore to match the zustand structure
+interface AuthStore {
+  setFormData: (data: {
+    role?: string;
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    userId?: string;
+  }) => void;
+  setUserId: (id: string) => void;
+  setEmailVerified: (status: boolean) => void;
+  setPhoneVerified: (status: boolean) => void;
+}
+
 const SignIn = () => {
   const router = useRouter();
-  const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore();
+  const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore() as AuthStore;
   
   const [formData, setLocalFormData] = useState<SignInFormData>({
     email: '',
@@ -83,22 +97,27 @@ const SignIn = () => {
       
       const userData = responseData.data.user;
       
-      // Update auth store with user data
+      // Update auth store with user data - now including name and role properly
       setUserId(userData._id);
       setFormData({
+        name: userData.name,         // Store the user's name
+        role: userData.role,         // Store as role (not userType)
         email: userData.email,
         phoneNumber: userData.phoneNumber,
-        userType: userData.role
+        userId: userData._id         // Also include userId in form data
       });
+      
+      // Set verification statuses
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
       
-      // if (!userData.isEmailVerified || !userData.isPhoneVerified) {
+      // Redirect based on verification status
       if (!userData.isEmailVerified) {
-        router.push('/auth/verification')
+        router.push('/auth/verification');
+      } else {
+        // Redirect to home page if verification is complete
+        router.push('/profile/create');
       }
-      // Redirect to home page
-      router.push('/profile/create');
       
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -159,7 +178,7 @@ const SignIn = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className='px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer disabled:opacity-70'
+              className='cursor-pointer active:opacity-70 px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold disabled:opacity-70'
             >
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>

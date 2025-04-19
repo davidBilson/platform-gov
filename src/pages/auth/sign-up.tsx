@@ -13,7 +13,7 @@ interface SignupFormData {
   email: string;
   phoneNumber: string;
   password: string;
-  confirmPassword: string; // Added confirm password field
+  confirmPassword: string;
   userId?: string;
 }
 
@@ -21,6 +21,8 @@ interface SignupApiResponse {
   status: string;
   message: string;
   data?: {
+    name?: string;
+    role?: string;
     userId: string;
     email?: string;
     phoneNumber?: string;
@@ -31,8 +33,16 @@ interface ErrorResponse {
   message?: string;
 }
 
+// Updated AuthStore interface to match the zustand store structure
 interface AuthStore {
-  setFormData: (data: Omit<SignupFormData, 'confirmPassword'>) => void;
+  setFormData: (data: {
+    role?: UserType;
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    password?: string;
+    userId?: string;
+  }) => void;
   setUserId: (id: string) => void;
   setVerificationStep: (step: string) => void;
 }
@@ -48,7 +58,7 @@ const Signup: React.FC = () => {
     email: '',
     phoneNumber: '',
     password: '',
-    confirmPassword: '', // Initialize confirm password field
+    confirmPassword: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -79,11 +89,10 @@ const Signup: React.FC = () => {
     setErrorMessage('');
     
     try {
-      // Store data in Zustand (exclude confirmPassword as it's not needed in the API)
+      // Store data in Zustand - using role and name as expected by the store
       const formDataForStore = {
-        userType: formData.userType,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        role: formData.userType,  // Use role instead of userType for the store
+        name: `${formData.firstName} ${formData.lastName}`,  // Concatenate name for the store
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         password: formData.password,
@@ -98,12 +107,13 @@ const Signup: React.FC = () => {
       const res = await axios.post<SignupApiResponse>(
         `${apiHost}${signupEndpoint}`, 
         {
+          // Send firstName and lastName separately to the backend
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           password: formData.password,
-          role: formData.userType,
+          role: formData.userType,  // Use userType for API submission
         }
       );
       
@@ -293,7 +303,7 @@ const Signup: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className='px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer'
+                className='cursor-pointer active:opacity-70 px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold'
               >
                 {isSubmitting ? 'Verifying...' : 'Verify Email'}
               </button>

@@ -70,16 +70,21 @@ const Legalagreement = () => {
         <div className='flex items-center justify-center gap-2.5'>
           {/* <button className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg'>Back</button> */}
           <button 
-          onClick={closeModal}
-          className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg'>Cancel</button>
+            onClick={closeModal}
+            className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer active:opacity-70'
+          >
+            Cancel
+          </button>
+
           <button
-            className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg'
+            className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer active:opacity-70 disabled:cursor-not-allowed'
             disabled={!(agreed && accepted)}
             onClick={closeModal}
-            >
+          >
             Continue
             {/* Send Contract  */}
           </button>
+
         </div>
       </div>
     </section>

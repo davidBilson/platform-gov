@@ -334,7 +334,7 @@ const Verification: React.FC = () => {
             <button
               type="button"
               onClick={continueToAccountCreation}
-              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors"
+              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer active:opacity-70 hover:bg-deepskyblue transition-colors"
             >
               Continue to account creation
             </button>

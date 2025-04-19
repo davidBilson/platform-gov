@@ -7,8 +7,7 @@ const useAuthStore = create(
     (set) => ({
       // User info
       userType: 'contractor',
-      firstName: '',
-      lastName: '',
+      name: '',
       email: '',
       phoneNumber: '',
       password: '',
@@ -62,9 +61,8 @@ const useAuthStore = create(
       
       // Reset all data
       resetAll: () => set({
-        userType: 'contractor',
-        firstName: '',
-        lastName: '',
+        role: 'contractor',
+        name: '',
         email: '',
         phoneNumber: '',
         password: '',
@@ -80,6 +78,8 @@ const useAuthStore = create(
       name: 'auth-storage',
       partialize: (state) => ({
         // Only persist these fields
+        role: state.role,
+        name: state.name,
         userId: state.userId,
         email: state.email,
         phoneNumber: state.phoneNumber,

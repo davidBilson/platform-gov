@@ -155,7 +155,7 @@ const ForgotPassword: React.FC = () => {
           
           <button
             type="submit"
-            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer disabled:bg-gray-400"
+            className=" cursor-pointer active:opacity-70 px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold disabled:bg-gray-400"
             disabled={isLoading}
           >
             {isLoading ? 'Processing...' : isCodeSent ? 'Verify' : 'Submit'}
