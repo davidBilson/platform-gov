@@ -572,6 +572,8 @@ const submitProfileData = async (): Promise<void> => {
                   type="text" 
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
+                  onFocus={() => setShowSkillsDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowSkillsDropdown(false), 200)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -633,6 +635,8 @@ const submitProfileData = async (): Promise<void> => {
                   type="text"
                   value={expertiseInput}
                   onChange={(e) => setExpertiseInput(e.target.value)}
+                  onFocus={() => setShowExpertiseDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowExpertiseDropdown(false), 200)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -695,6 +699,8 @@ const submitProfileData = async (): Promise<void> => {
                 <input 
                   type="text"
                   value={certificationInput}
+                  onFocus={() => setShowCertificationsDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowCertificationsDropdown(false), 200)}
                   onChange={(e) => setCertificationInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
