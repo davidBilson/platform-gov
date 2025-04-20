@@ -68,7 +68,6 @@ const CreateProfile = () => {
   // UI state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [error, setError] = useState<string | null>(null);
-  const [profileId, setProfileId] = useState<string | null>(null);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
@@ -83,43 +82,48 @@ const CreateProfile = () => {
 
   // Filter skills, expertise, and certifications based on input
   useEffect(() => {
-    console.log(profileId)
-    if (skillInput.trim()) {
-      const filtered = skillsList.filter(skill => 
-        skill.toLowerCase().includes(skillInput.toLowerCase())
-      );
-      setFilteredSkills(filtered);
-      setShowSkillsDropdown(true);
+
+    if (showSkillsDropdown) {
+      if (skillInput.trim()) {
+        // Filter the list when there's input
+        const filtered = skillsList.filter(skill => 
+          skill.toLowerCase().includes(skillInput.toLowerCase())
+        );
+        setFilteredSkills(filtered);
+      }
     } else {
-      setShowSkillsDropdown(false);
+      setFilteredSkills(skillsList);
     }
   }, [skillInput]);
 
-  useEffect(() => console.log(profileId),[profileId])
-
   useEffect(() => {
-    if (expertiseInput.trim()) {
-      const filtered = expertiseList.filter(exp => 
-        exp.toLowerCase().includes(expertiseInput.toLowerCase())
-      );
-      setFilteredExpertise(filtered);
-      setShowExpertiseDropdown(true);
+    if (showExpertiseDropdown) {
+      if (expertiseInput.trim()) {
+        // Filter the list when there's input
+        const filtered = expertiseList.filter(exp => 
+          exp.toLowerCase().includes(expertiseInput.toLowerCase())
+        );
+        setFilteredExpertise(filtered);
+      }
     } else {
-      setShowExpertiseDropdown(false);
+      setFilteredExpertise(expertiseList);
     }
   }, [expertiseInput]);
 
   useEffect(() => {
-    if (certificationInput.trim()) {
-      const filtered = certificationsList.filter(cert => 
-        cert.toLowerCase().includes(certificationInput.toLowerCase())
-      );
-      setFilteredCertifications(filtered);
-      setShowCertificationsDropdown(true);
-    } else {
-      setShowCertificationsDropdown(false);
+    if (showCertificationsDropdown) {
+      if (certificationInput.trim()) {
+        // Filter the list when there's input
+        const filtered = certificationsList.filter(cert => 
+          cert.toLowerCase().includes(certificationInput.toLowerCase())
+        );
+        setFilteredCertifications(filtered);
+      } else {
+        // Show all items when dropdown is open but no input
+        setFilteredCertifications(certificationsList);
+      }
     }
-  }, [certificationInput]);
+  }, [certificationInput, showCertificationsDropdown]);
 
 
   // Fetch the current user's profile
@@ -131,7 +135,6 @@ const CreateProfile = () => {
       if (response.success && response.data) {
         // Profile exists, populate form with fetched data
         const profileData = response.data;
-        setProfileId(profileData._id);
         setIsProfileExists(true);
         
         // Update form data with fetched profile
@@ -328,16 +331,16 @@ const CreateProfile = () => {
   }
 
 
-// This effect monitors for when legal agreement is accepted while a submission is pending
-useEffect(() => {
-  // If we have a pending submission AND the user has accepted the agreement, proceed with submission
-  if (pendingSubmission && acceptedLegalAgreement && showLegalAgreement === false) {
-    // Reset the pending flag
-    setPendingSubmission(false);
-    // Proceed with actual submission
-    submitProfileData();
-  }
-}, [pendingSubmission, acceptedLegalAgreement, showLegalAgreement]);
+  // This effect monitors for when legal agreement is accepted while a submission is pending
+  useEffect(() => {
+    // If we have a pending submission AND the user has accepted the agreement, proceed with submission
+    if (pendingSubmission && acceptedLegalAgreement && showLegalAgreement === false) {
+      // Reset the pending flag
+      setPendingSubmission(false);
+      // Proceed with actual submission
+      submitProfileData();
+    }
+  }, [pendingSubmission, acceptedLegalAgreement, showLegalAgreement]);
 
 // The function that handles the actual API call and data processing
 const submitProfileData = async (): Promise<void> => {
@@ -363,7 +366,6 @@ const submitProfileData = async (): Promise<void> => {
     if (response?.data?.success) {
       // If creating a new profile, save the profileId
       if (!isProfileExists && response.data.data?._id) {
-        setProfileId(response.data.data._id);
         setIsProfileExists(true);
       }
       
@@ -533,7 +535,7 @@ const submitProfileData = async (): Promise<void> => {
             onChange={handleInputChange}
             onInput={handleTextareaInput}
             rows={1}
-            className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 outline-none resize-none overflow-hidden"
+            className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden"
             placeholder="About Me/Bio"
           ></textarea>
         </div>
@@ -560,7 +562,7 @@ const submitProfileData = async (): Promise<void> => {
             name="primaryPosition"
             value={formData.primaryPosition}
             onChange={handleInputChange}
-            className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+            className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
             placeholder="Primary position/Title" 
           />
           
@@ -572,8 +574,10 @@ const submitProfileData = async (): Promise<void> => {
                   type="text" 
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
-                  onFocus={() => setShowSkillsDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowSkillsDropdown(false), 200)}
+                  onFocus={() => {
+                    setShowSkillsDropdown(true)
+                    setFilteredSkills(skillsList);}}
+                  onBlur={() => setShowSkillsDropdown(false)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -595,8 +599,8 @@ const submitProfileData = async (): Promise<void> => {
               </div>
               
               {/* Skills dropdown */}
-              {showSkillsDropdown && filteredSkills.length > 0 && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-auto">
+              {showSkillsDropdown && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar">
                   {filteredSkills.map((skill, idx) => (
                     <div 
                       key={`skill-option-${idx}`} 
@@ -635,7 +639,10 @@ const submitProfileData = async (): Promise<void> => {
                   type="text"
                   value={expertiseInput}
                   onChange={(e) => setExpertiseInput(e.target.value)}
-                  onFocus={() => setShowExpertiseDropdown(true)}
+                  onFocus={() => {
+                    setShowExpertiseDropdown(true)
+                    setFilteredExpertise(expertiseList);
+                  }}
                   onBlur={() => setTimeout(() => setShowExpertiseDropdown(false), 200)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -658,8 +665,8 @@ const submitProfileData = async (): Promise<void> => {
               </div>
               
               {/* Expertise dropdown */}
-              {showExpertiseDropdown && filteredExpertise.length > 0 && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-auto">
+              {showExpertiseDropdown && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar">
                   {filteredExpertise.map((exp, idx) => (
                     <div 
                       key={`expertise-option-${idx}`} 
@@ -699,8 +706,11 @@ const submitProfileData = async (): Promise<void> => {
                 <input 
                   type="text"
                   value={certificationInput}
-                  onFocus={() => setShowCertificationsDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowCertificationsDropdown(false), 200)}
+                  onFocus={() => {
+                    setShowCertificationsDropdown(true);
+                    setFilteredCertifications(certificationsList);
+                  }}
+                  onBlur={() => setShowCertificationsDropdown(false)}
                   onChange={(e) => setCertificationInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -723,8 +733,8 @@ const submitProfileData = async (): Promise<void> => {
               </div>
               
               {/* Certifications dropdown */}
-              {showCertificationsDropdown && filteredCertifications.length > 0 && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-auto">
+              {showCertificationsDropdown && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar">
                   {filteredCertifications.map((cert, idx) => (
                     <div 
                       key={`cert-option-${idx}`} 
@@ -779,7 +789,7 @@ const submitProfileData = async (): Promise<void> => {
                 type="text" 
                 value={work.title}
                 onChange={(e) => updateWorkHistory(work.id, 'title', e.target.value)}
-                className="placeholder:font-semibold mb-7.5 block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-157.5 px-5 py-4 outline-none" 
+                className="placeholder:font-semibold mb-7.5 block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-157.5 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Title" 
               />
   
@@ -788,7 +798,7 @@ const submitProfileData = async (): Promise<void> => {
                   type="text"
                   value={work.department}
                   onChange={(e) => updateWorkHistory(work.id, 'department', e.target.value)}
-                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 outline-none" 
+                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="Department/Agency" 
                 />
                 
@@ -818,7 +828,7 @@ const submitProfileData = async (): Promise<void> => {
                   type="text"
                   value={work.experienceLevel}
                   onChange={(e) => updateWorkHistory(work.id, 'experienceLevel', e.target.value)}
-                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 outline-none" 
+                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="Level of Dept Experience" 
                 />
               </div>
@@ -828,7 +838,7 @@ const submitProfileData = async (): Promise<void> => {
                   type="text"
                   value={work.location}
                   onChange={(e) => updateWorkHistory(work.id, 'location', e.target.value)}
-                  className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+                  className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="Location" 
                 />
               </div>
@@ -838,14 +848,14 @@ const submitProfileData = async (): Promise<void> => {
                   type="text"
                   value={work.fromDate}
                   onChange={(e) => updateWorkHistory(work.id, 'fromDate', e.target.value)}
-                  className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+                  className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="From" 
                 />
                 <input 
                   type="text"
                   value={work.toDate}
                   onChange={(e) => updateWorkHistory(work.id, 'toDate', e.target.value)}
-                  className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+                  className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="To" 
                 />
               </div>
@@ -856,7 +866,7 @@ const submitProfileData = async (): Promise<void> => {
             <button 
               type="button" 
               onClick={addWorkHistory}
-              className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold"
+              className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70"
             >
               Add More
             </button>
@@ -873,21 +883,21 @@ const submitProfileData = async (): Promise<void> => {
                 type="text"
                 value={degree.degree}
                 onChange={(e) => updateDegree(degree.id, 'degree', e.target.value)}
-                className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+                className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Degree" 
               />
               <input 
                 type="text"
                 value={degree.institution}
                 onChange={(e) => updateDegree(degree.id, 'institution', e.target.value)}
-                className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+                className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Institution" 
               />
               <input 
                 type="text"
                 value={degree.yearCompleted}
                 onChange={(e) => updateDegree(degree.id, 'yearCompleted', e.target.value)}
-                className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 outline-none" 
+                className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Year Completed" 
               />
               {formData.degrees.length > 1 && (
@@ -905,7 +915,7 @@ const submitProfileData = async (): Promise<void> => {
           <button 
             type="button"
             onClick={addDegree}
-            className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold"
+            className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70"
           >
             Add More
           </button>
@@ -921,21 +931,21 @@ const submitProfileData = async (): Promise<void> => {
           <button 
             type="button"
             onClick={handleCancel}
-            className="cursor-pointer active:opacity-70 py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
+            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
           >
             Cancel
           </button>
           <button 
             type="button"
             onClick={handlePreview}
-            className="cursor-pointer active:opacity-70  py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
+            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out  py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
           >
             Preview Public View
           </button>
           <button 
             type="submit"
             disabled={isLoading}
-            className="cursor-pointer active:opacity-70 py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
+            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             {isLoading ? "Saving..." : "Save"}
           </button>

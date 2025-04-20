@@ -5,10 +5,25 @@
 
 @theme {
   --color-boldblue: #0B5F94;
-  --color-brightblue: #009DDE;
   --color-skyblue: #E1F5FD;
   --color-deepskyblue: #009DDE;
   --color-aquagreen: #00A871;
+}
+
+/* Dropdown Scrollbar Styling */
+.dropdown-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  border-radius: 100px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Scrollbar background */
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #00A871; /* The scroll thumb */
+  border-radius: 8px;
+  border-radius: 100px;
 }
 
 @layer 

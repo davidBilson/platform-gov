@@ -122,7 +122,7 @@ const ForgotPassword: React.FC = () => {
                 value={resetToken}
                 onChange={handleTokenChange}
                 placeholder='6-digit reset code'
-                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium"
                 required
                 maxLength={6}
                 pattern="\d{6}"
@@ -136,7 +136,7 @@ const ForgotPassword: React.FC = () => {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder='Email'
-                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium"
                 required
               />
             )}
@@ -155,7 +155,7 @@ const ForgotPassword: React.FC = () => {
           
           <button
             type="submit"
-            className=" cursor-pointer active:opacity-70 px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold disabled:bg-gray-400"
+            className=" cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold disabled:bg-gray-400"
             disabled={isLoading}
           >
             {isLoading ? 'Processing...' : isCodeSent ? 'Verify' : 'Submit'}

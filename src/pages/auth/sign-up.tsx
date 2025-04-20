@@ -229,7 +229,7 @@ const Signup: React.FC = () => {
                 value={formData.firstName}
                 onChange={handleChange}
                 placeholder='First name' 
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required 
               />
             </div>
@@ -242,7 +242,7 @@ const Signup: React.FC = () => {
                 value={formData.lastName}
                 onChange={handleChange}
                 placeholder='Last name' 
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required 
               />
             </div>
@@ -255,7 +255,7 @@ const Signup: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder='Email'
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required
               />
             </div>
@@ -268,7 +268,7 @@ const Signup: React.FC = () => {
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 placeholder='Phone'
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required 
               />
             </div>
@@ -281,7 +281,7 @@ const Signup: React.FC = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder='Password'
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required 
               />
             </div>
@@ -294,7 +294,7 @@ const Signup: React.FC = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder='Confirm password'
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium'
+                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required 
               />
             </div>
@@ -303,7 +303,7 @@ const Signup: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className='cursor-pointer active:opacity-70 px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold'
+                className='cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold'
               >
                 {isSubmitting ? 'Verifying...' : 'Verify Email'}
               </button>

@@ -61,7 +61,7 @@ const BusinessProfile = () => {
                 type="text" 
                 placeholder="Company Name"
                 value={business.name || ""}
-                className='w-full border border-boldblue text-boldblue rounded p-4 text-sm pl-5 focus:outline-none focus:border-boldblue'
+                className='w-full border border-boldblue text-boldblue rounded p-4 text-sm pl-5 focus:outline focus:outline-boldblue'
               />
             </div>
           </div>
@@ -102,13 +102,13 @@ const BusinessProfile = () => {
                 type="text" 
                 placeholder="Address 1"
                 value={business.locations && business.locations[0] ? business.locations[0].address1 : ""}
-                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-brightblue'
+                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-deepskyblue'
               />
               <input 
                 type="text" 
                 placeholder="Address 2"
                 value={business.locations && business.locations[0] ? business.locations[0].address2 : ""}
-                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-brightblue'
+                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-deepskyblue'
               />
             </div>
             
@@ -128,7 +128,7 @@ const BusinessProfile = () => {
               
               <div className='relative flex-1'>
                 <select 
-                  className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-brightblue'
+                  className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-deepskyblue'
                   defaultValue={business.locations && business.locations[0] ? business.locations[0].state : ""}
                 >
                   <option value="">State</option>
@@ -149,7 +149,7 @@ const BusinessProfile = () => {
                 type="text" 
                 placeholder="ZIP Code"
                 value={business.locations && business.locations[0] ? business.locations[0].zipCode : ""}
-                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-brightblue'
+                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline-none focus:border-deepskyblue'
               />
             </div>
             {/* Add Location Button */}
@@ -210,7 +210,7 @@ const BusinessProfile = () => {
                 <input 
                   type="text" 
                   placeholder="Specializations"
-                  className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline-none focus:border-brightblue'
+                  className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline-none focus:border-deepskyblue'
                 />
                 <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
                   <FaSearch size={14} className='text-boldblue' />
@@ -222,7 +222,7 @@ const BusinessProfile = () => {
           {/* Specialization Tags */}
           <div className='flex flex-wrap gap-2 self-end mb-6'>
             {business.specializations && business.specializations.map((spec, index) => (
-              <div key={index} className='bg-brightblue text-white font-bold py-1 px-4 rounded-full'>
+              <div key={index} className='bg-deepskyblue text-white font-bold py-1 px-4 rounded-full'>
                 {spec}
               </div>
             ))}

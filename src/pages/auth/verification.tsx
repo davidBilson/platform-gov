@@ -272,7 +272,7 @@ const Verification: React.FC = () => {
                 value={verificationCode}
                 onChange={handleCodeChange}
                 placeholder='Verification Code'
-                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium"
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium"
                 required
               />
             </div>
@@ -296,7 +296,7 @@ const Verification: React.FC = () => {
             <button
               type="button"
               onClick={verifyEmail}
-              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer transition transform active:scale-95 hover:opacity-70 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading || !verificationCode}
             >
               {isLoading ? 'Verifying...' : 'Verify'}
@@ -334,7 +334,7 @@ const Verification: React.FC = () => {
             <button
               type="button"
               onClick={continueToAccountCreation}
-              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer active:opacity-70 hover:bg-deepskyblue transition-colors"
+              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out"
             >
               Continue to account creation
             </button>

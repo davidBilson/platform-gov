@@ -54,13 +54,13 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
           {/* <button className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg'>Back</button> */}
           <button 
             onClick={closeModal}
-            className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer active:opacity-70'
+            className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out'
           >
             Cancel
           </button>
 
           <button
-            className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer active:opacity-70 disabled:cursor-not-allowed'
+            className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:cursor-not-allowed'
             disabled={!(acceptedLegalAgreement)}
             onClick={closeModal}
           >

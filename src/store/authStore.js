@@ -12,53 +12,65 @@ const useAuthStore = create(
       phoneNumber: '',
       password: '',
       userId: null,
-      
+
       // Verification status
       isEmailVerified: false,
       isPhoneVerified: false,
-      
+
       // Current verification code input
       verificationCode: '',
-      
+
       // Verification step: 'email', 'phone', 'completed'
       verificationStep: 'email',
-      
+
       // Error handling
       error: null,
-      
+
+      // Loading state
+      isLoading: true,
+      setIsLoading: (loading) => set({ isLoading: loading }),
+
+      // Init auth on app load
+      initAuth: () => {
+        const storedUserId = localStorage.getItem('auth-storage')
+        const parsed = storedUserId ? JSON.parse(storedUserId) : null;
+        const userId = parsed?.state?.userId || null;
+        set({ userId, isLoading: false });
+      },
+
       // Set form data
       setFormData: (data) => set((state) => ({
         ...state,
         ...data
       })),
-      
+
       // Set user ID after initial registration
       setUserId: (userId) => set({ userId }),
-      
+
       // Set verification step
       setVerificationStep: (step) => set({ verificationStep: step }),
-      
+
       // Set verification code input
       setVerificationCode: (code) => set({ verificationCode: code }),
-      
+
       // Set email verification status
       setEmailVerified: (status) => set({ 
         isEmailVerified: status,
         verificationStep: status ? 'phone' : 'email'
       }),
-      
+
       // Set phone verification status
       setPhoneVerified: (status) => set({ 
         isPhoneVerified: status,
         verificationStep: status ? 'completed' : 'phone'
       }),
-      
+
       // Set error
       setError: (error) => set({ error }),
-      
+
       // Reset error
       resetError: () => set({ error: null }),
-      
+
       // Reset all data
       resetAll: () => set({
         role: 'contractor',

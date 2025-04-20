@@ -183,7 +183,7 @@ const ResetPassword: React.FC = () => {
                 placeholder='New Password'
                 className={`w-full max-w-75 block m-auto h-12.5 bg-white border ${
                   passwordErrors.length > 0 ? 'border-red-300' : 'border'
-                } rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
+                } rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium`}
                 required
               />
               {/* {passwordErrors.length > 0 && (
@@ -206,7 +206,7 @@ const ResetPassword: React.FC = () => {
               placeholder='Confirm Password'
               className={`w-full max-w-75 block m-auto h-12.5 bg-white border ${
                 confirmPassword && newPassword !== confirmPassword ? 'border-red-300' : 'border'
-              } rounded-lg py-4 pl-5 text-boldblue text-sm font-medium outline-none placeholder:font-medium`}
+              } rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium`}
               required
             />
             {confirmPassword && newPassword !== confirmPassword && (
@@ -218,7 +218,7 @@ const ResetPassword: React.FC = () => {
 
           <button
             type="submit"
-            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer active:opacity-70 disabled:bg-gray-400"
+            className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:bg-gray-400"
             disabled={isLoading || passwordErrors.length > 0 || newPassword !== confirmPassword}
           >
             {isLoading ? 'Processing...' : 'Reset Password'}
