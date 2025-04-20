@@ -1,7 +1,7 @@
 
 "use client"
 import React, { useState, useRef, ChangeEvent, useEffect } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { IoMdImages } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { IoIosSearch } from "react-icons/io";
@@ -161,8 +161,10 @@ const CreateProfile = () => {
             institution: "",
             yearCompleted: ""
           }],
-          profileImageUrl: profileData.profileImage || "",
-          profileImage: null
+          profileImageUrl: profileData.profileImage?.startsWith('/uploads') 
+            ? `${process.env.NEXT_PUBLIC_BASE_URL}${profileData.profileImage}`
+            : profileData.profileImage || "",
+          profileImage: profileData.profileImage || ""
         });
       } else {
         // Profile doesn't exist, keep default form values
@@ -198,79 +200,87 @@ const CreateProfile = () => {
     }));
   };
 
-  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files[0]) {
+    const file = e.target.files[0];
+    
+    // Create a preview for the UI using blob URL (this is temporary, just for display)
+    const previewUrl = URL.createObjectURL(file);
+    setFormData(prev => ({
+      ...prev,
+      profileImageUrl: previewUrl // For preview only
+    }));
+    
+    // Upload the file
+    try {
+      const formData = new FormData();
+      formData.append('profileImage', file);
       
-      // Create a preview for the UI
-      setFormData(prev => ({
-        ...prev,
-        profileImageUrl: URL.createObjectURL(file)
-      }));
-      
-      // Upload the file
-      try {
-        const formData = new FormData();
-        formData.append('profileImage', file);
-        
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_BASE_URL}${process.env.NEXT_PUBLIC_POST_PROFILE_PIC}`,
-          formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }
-        );
-        
-        // With axios, the response data is already parsed
-        const result = response.data;
-        
-        if (result.success) {
-          // Store the actual image path from the server
-          setFormData(prev => ({
-            ...prev,
-            profileImage: result.data.imagePath
-          }));
-        } else {
-          toast.error('Failed to upload image');
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}${process.env.NEXT_PUBLIC_POST_PROFILE_PIC}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-      } catch (error) {
-        toast.error('Error uploading image');
-        console.error('Error uploading image:', error);
+      );
+      
+      // With axios, the response data is already parsed
+      const result = response.data;
+      
+      if (result.success) {
+        // Store the actual image path from the server
+        setFormData(prev => ({
+          ...prev,
+          profileImage: result.data.imagePath  // This will be used when saving the profile
+        }));
+      } else {
+        toast.error('Failed to upload image');
       }
+    } catch (error) {
+      toast.error('Error uploading image');
+      console.error('Error uploading image:', error);
     }
-  };
+  }
+};
 
   // Handle click on profile image button
   const handleProfileImageClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Add tag (skill, expertise, certification)
-  const addTag = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
-    if (!value.trim()) return;
-    
-    // Check if the tag already exists
-    if (formData[type].includes(value.trim())) return;
-    
-    setFormData(prev => ({
-      ...prev,
-      [type]: [...prev[type], value.trim()]
-    }));
-    
-    // Clear the input and dropdown
-    if (type === 'skills') {
-      setSkillInput("");
-      setShowSkillsDropdown(false);
-    } else if (type === 'expertise') {
-      setExpertiseInput("");
-      setShowExpertiseDropdown(false);
-    } else if (type === 'certifications') {
-      setCertificationInput("");
-      setShowCertificationsDropdown(false);
-    }
-  };
+  // Replace your current addTag function with this:
+const addTag = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
+  if (!value.trim()) return;
+  
+  // Check if the tag already exists - if it does, remove it instead of adding
+  if (formData[type].includes(value.trim())) {
+    // Find index of the item
+    const index = formData[type].indexOf(value.trim());
+    // Remove the item
+    removeTag(type, index);
+    return;
+  }
+  
+  // Otherwise add as before
+  setFormData(prev => ({
+    ...prev,
+    [type]: [...prev[type], value.trim()]
+  }));
+  
+  // Clear the input and dropdown as before
+  if (type === 'skills') {
+    setSkillInput("");
+    setShowSkillsDropdown(false);
+  } else if (type === 'expertise') {
+    setExpertiseInput("");
+    setShowExpertiseDropdown(false);
+  } else if (type === 'certifications') {
+    setCertificationInput("");
+    setShowCertificationsDropdown(false);
+  }
+};
 
   // Remove tag
   const removeTag = (type: 'skills' | 'expertise' | 'certifications', index: number) => {
@@ -388,7 +398,9 @@ const submitProfileData = async (): Promise<void> => {
       toast.error("Form data is missing");
       return;
     }
-    
+    if (formData.profileImageUrl?.startsWith('blob:') && formData.profileImage) {
+      formData.profileImageUrl = formData.profileImage as unknown as string;
+    }
     const response = await saveProfile(
       formData, 
       userId, 
@@ -529,7 +541,7 @@ const submitProfileData = async (): Promise<void> => {
           <div className="relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
             <div className="absolute flex items-center justify-center w-full h-full">
               {formData?.profileImageUrl ? (
-                <Image 
+                <img 
                   src={formData.profileImageUrl}
                   alt="Profile"
                   width={88}

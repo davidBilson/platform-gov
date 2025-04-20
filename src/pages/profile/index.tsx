@@ -3,7 +3,6 @@ import { IoMdImages } from "react-icons/io";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import useAuthStore from '@/store/authStore';
 import { fetchProfile } from "@/api/profile-api";
-import Image from 'next/image';
 
 // Define proper TypeScript interfaces
 interface WorkHistoryItem {
@@ -12,11 +11,6 @@ interface WorkHistoryItem {
   rating: number;
   amount: string;
 }
-
-// interface Skill {
-//   name: string;
-//   level?: string;
-// }
 
 interface ProfileData {
   profileImage?: string;
@@ -134,6 +128,27 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
       </div>
     );
   };
+
+  // Function to get the proper profile image URL
+  const getProfileImageUrl = (): string => {
+    if (!profileData?.profileImage) return ''; // Return empty string instead of null
+    
+    // Handle blob URLs directly
+    if (profileData.profileImage.startsWith('blob:')) {
+      return profileData.profileImage;
+    }
+    
+    // Handle server paths that start with '/uploads'
+    if (profileData.profileImage.startsWith('/uploads')) {
+      return `${process.env.NEXT_PUBLIC_BASE_URL}${profileData.profileImage}`;
+    }
+    
+    // Handle full URLs or other formats
+    return profileData.profileImage;
+  };
+
+  // Check if profile image exists
+  const hasProfileImage = profileData?.profileImage ? true : false;
   
   return (
     <main className="p-4 md:p-6">
@@ -153,16 +168,13 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
                 {/* Image */}
                 <div className="relative w-20 h-20 sm:w-22 sm:h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
-                {profileData?.profileImage ? (
-                  <Image 
-                    src={profileData.profileImage.startsWith('blob:') 
-                      ? profileData.profileImage 
-                      : `${process.env.NEXT_PUBLIC_API_URL}${profileData.profileImage}`}
+                {hasProfileImage ? (
+                  <img 
+                    src={getProfileImageUrl()}
                     alt={`${name || 'User'}'s profile`}
-                    className="w-full h-full object-cover rounded-full"
+                    className="object-cover rounded-full"
                     width={88}
                     height={88}
-                    // Error handling code...
                   />
                 ) : (
                   <IoMdImages size={32} className="text-white/70" />
