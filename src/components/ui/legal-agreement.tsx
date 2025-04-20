@@ -15,6 +15,10 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
     }
     setShowLegalAgreement(false);
   }
+  const cancelLegalAgreement = () => {
+    setShowLegalAgreement(false);
+  }
+
 
 
   return (
@@ -53,7 +57,7 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
         <div className='flex items-center justify-center gap-2.5'>
           {/* <button className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg'>Back</button> */}
           <button 
-            onClick={closeModal}
+            onClick={cancelLegalAgreement}
             className='bg-white text-boldblue border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out'
           >
             Cancel

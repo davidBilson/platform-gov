@@ -496,9 +496,9 @@ const submitProfileData = async (): Promise<void> => {
           {/* Profile picture && Name */}
           <div className="relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
             <div className="absolute flex items-center justify-center w-full h-full">
-              {formData.profileImageUrl ? (
+              {formData?.profileImageUrl ? (
                 <Image 
-                  src={formData.profileImageUrl} 
+                  src={formData.profileImageUrl}
                   alt="Profile"
                   width={88}
                   height={88}
