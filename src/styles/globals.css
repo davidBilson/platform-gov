@@ -11,6 +11,11 @@
   --color-lightgray: #f1f1f1;
 }
 
+:root {
+  --toastify-container-width: fit-content;
+  --toastify-toast-width: 290px;
+}
+
 /* Dropdown Scrollbar Styling */
 .dropdown-scrollbar::-webkit-scrollbar {
   width: 4px;

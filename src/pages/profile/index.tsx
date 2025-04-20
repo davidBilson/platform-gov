@@ -153,26 +153,20 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
                 {/* Image */}
                 <div className="relative w-20 h-20 sm:w-22 sm:h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
-                  {profileData?.profileImage ? (
-                    <Image 
-                      src={profileData.profileImage} 
-                      alt={`${name || 'User'}'s profile`}
-                      className="w-full h-full object-cover rounded-full"
-                      width={88}
-                      height={88}
-                      onError={(e) => {
-                        // Handle image loading errors
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null;
-                        target.src = ''; // Could set a default image URL here
-                        // Show icon instead
-                        target.style.display = 'none';
-                        target.parentElement?.classList.add('has-error');
-                      }}
-                    />
-                  ) : (
-                    <IoMdImages size={32} className="text-white/70" />
-                  )}
+                {profileData?.profileImage ? (
+                  <Image 
+                    src={profileData.profileImage.startsWith('blob:') 
+                      ? profileData.profileImage 
+                      : `${process.env.NEXT_PUBLIC_API_URL}${profileData.profileImage}`}
+                    alt={`${name || 'User'}'s profile`}
+                    className="w-full h-full object-cover rounded-full"
+                    width={88}
+                    height={88}
+                    // Error handling code...
+                  />
+                ) : (
+                  <IoMdImages size={32} className="text-white/70" />
+                )}
                 </div>
                 {/* Name (now using the name from auth store) */}
                 <div className="text-center sm:text-left mt-2 sm:mt-0">

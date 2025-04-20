@@ -10,10 +10,10 @@ import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
 import { generateId } from "@/utils/profile-utils";
 import { fetchProfile, saveProfile, skillsList, expertiseList, certificationsList } from "@/api/profile-api";
 import useAuthStore from '@/store/authStore';
-import { AxiosError } from "axios";
-import { toast } from "react-hot-toast"; // Assuming you use toast for notifications
+import axios, { AxiosError } from "axios";
 import Legalagreement from "@/components/ui/legal-agreement";
 import { useRouter } from 'next/router';
+import { toast } from "react-toastify"
 
 interface AuthStoreState {
   userId: string;
@@ -198,15 +198,47 @@ const CreateProfile = () => {
     }));
   };
 
-  // Handle profile image selection
-  const handleProfileImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Create a preview for the UI
       setFormData(prev => ({
         ...prev,
-        profileImage: file,
         profileImageUrl: URL.createObjectURL(file)
       }));
+      
+      // Upload the file
+      try {
+        const formData = new FormData();
+        formData.append('profileImage', file);
+        
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_BASE_URL}${process.env.NEXT_PUBLIC_POST_PROFILE_PIC}`,
+          formData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+        
+        // With axios, the response data is already parsed
+        const result = response.data;
+        
+        if (result.success) {
+          // Store the actual image path from the server
+          setFormData(prev => ({
+            ...prev,
+            profileImage: result.data.imagePath
+          }));
+        } else {
+          toast.error('Failed to upload image');
+        }
+      } catch (error) {
+        toast.error('Error uploading image');
+        console.error('Error uploading image:', error);
+      }
     }
   };
 
@@ -374,7 +406,7 @@ const submitProfileData = async (): Promise<void> => {
       try {
         // Refetch user profile to ensure we have the latest data
         await fetchUserProfile();
-        router.push("/profile");
+        // router.push("/profile");
       } catch (fetchError) {
         console.error("Error fetching updated profile:", fetchError);
         router.push("/profile");
@@ -577,7 +609,7 @@ const submitProfileData = async (): Promise<void> => {
                   onFocus={() => {
                     setShowSkillsDropdown(true)
                     setFilteredSkills(skillsList);}}
-                  onBlur={() => setShowSkillsDropdown(false)}
+                    onBlur={() => setTimeout(() => setShowSkillsDropdown(false), 200)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -623,7 +655,7 @@ const submitProfileData = async (): Promise<void> => {
                 <button 
                   type="button"
                   onClick={() => removeTag('skills', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none"
+                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform hover:text-red-500"
                 >
                   <IoCloseOutline size={16} />
                 </button>
@@ -689,7 +721,7 @@ const submitProfileData = async (): Promise<void> => {
                 <button 
                   type="button"
                   onClick={() => removeTag('expertise', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none"
+                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform hover:text-red-500"
                 >
                   <IoCloseOutline size={16} />
                 </button>
@@ -710,7 +742,7 @@ const submitProfileData = async (): Promise<void> => {
                     setShowCertificationsDropdown(true);
                     setFilteredCertifications(certificationsList);
                   }}
-                  onBlur={() => setShowCertificationsDropdown(false)}
+                  onBlur={() => setTimeout(() => setShowCertificationsDropdown(false), 200)}
                   onChange={(e) => setCertificationInput(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -757,7 +789,7 @@ const submitProfileData = async (): Promise<void> => {
                 <button 
                   type="button"
                   onClick={() => removeTag('certifications', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none"
+                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform  hover:text-red-500"
                 >
                   <IoCloseOutline size={16} />
                 </button>

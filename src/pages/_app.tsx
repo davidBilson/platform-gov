@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/navbar";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import useAuthStore from "@/store/authStore";
+import { ToastContainer } from 'react-toastify';
 
 // Auth protection wrapper
 function AuthWrapper({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
 
   // Redirect logged-in users away from login/signup pages
   useEffect(() => {
+    
     if (!isLoading && userId && isAuthPage) {
       router.push('/');
     }
@@ -61,6 +63,19 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <Navbar />
+      <ToastContainer 
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        className={'text-xs font-bold'}
+      />
       <AuthWrapper>
         <Component {...pageProps} />
       </AuthWrapper>
