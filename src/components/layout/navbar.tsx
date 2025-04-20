@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from 'react';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { FiSearch } from "react-icons/fi";
 import { usePathname } from 'next/navigation';
+import authStore from "@/store/authStore";
 
 const Navbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
@@ -16,6 +17,8 @@ const Navbar = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const pathname = usePathname();
+
+  const { name } = authStore();
 
   const contractorOptions = ["Contractors", "Businesses", "Both"];
   const [selectedOption, setSelectedOption] = useState("Contractors");
@@ -83,7 +86,15 @@ const Navbar = () => {
             </div>
             <div>
               <p className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium">
-                {"KD"}
+              {(() => {
+                  if (name) {
+                    const [first, last] = name.toUpperCase().split(" ");
+                    const initials = (first?.[0] || "") + (last?.[0] || "");
+                    return initials || "KD";
+                  }
+                  return "KD";
+                })()
+              }
               </p>
             </div>
           </div>
@@ -176,7 +187,15 @@ const Navbar = () => {
             {/* Desktop profile icon */}
             <div className="hidden lg:block">
                 <p className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium">
-                    {"KD"}
+                {(() => {
+                  if (name) {
+                    const [first, last] = name.toUpperCase().split(" ");
+                    const initials = (first?.[0] || "") + (last?.[0] || "");
+                    return initials || "KD";
+                  }
+                  return "KD";
+                  })()
+                }
                 </p>
             </div>
             
@@ -218,7 +237,15 @@ const Navbar = () => {
                 
                 <div className="mt-6 flex justify-center">
                   <div className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium">
-                    {"KD"}
+                  {(() => {
+                      if (name) {
+                        const [first, last] = name.toUpperCase().split(" ");
+                        const initials = (first?.[0] || "") + (last?.[0] || "");
+                        return initials || "KD";
+                      }
+                      return "KD";
+                    })()
+                  }
                   </div>
                 </div>
               </div>

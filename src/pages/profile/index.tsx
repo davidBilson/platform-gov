@@ -3,6 +3,7 @@ import { IoMdImages } from "react-icons/io";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import useAuthStore from '@/store/authStore';
 import { fetchProfile } from "@/api/profile-api";
+import Image from 'next/image';
 
 // Define proper TypeScript interfaces
 interface WorkHistoryItem {
@@ -71,6 +72,12 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
       jobTitle: "UI Designer",
       dates: "03/2023 - 07/2023",
       rating: 4,
+      amount: "$850"
+    },
+    {
+      jobTitle: "UI Designer",
+      dates: "03/2023 - 07/2023",
+      rating: 2,
       amount: "$850"
     }
   ];
@@ -147,10 +154,12 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
                 {/* Image */}
                 <div className="relative w-20 h-20 sm:w-22 sm:h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
                   {profileData?.profileImage ? (
-                    <img 
+                    <Image 
                       src={profileData.profileImage} 
                       alt={`${name || 'User'}'s profile`}
                       className="w-full h-full object-cover rounded-full"
+                      width={88}
+                      height={88}
                       onError={(e) => {
                         // Handle image loading errors
                         const target = e.target as HTMLImageElement;
@@ -233,23 +242,23 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white rounded-lg">
                   <thead>
-                    <tr className="bg-gray-100 text-left">
-                      <th className="py-3 px-4 text-sm font-medium">Job Title</th>
-                      <th className="py-3 px-4 text-sm font-medium">Dates</th>
-                      <th className="py-3 px-4 text-sm font-medium">Rating</th>
-                      <th className="py-3 px-4 text-sm font-medium">Amount</th>
+                    <tr className="border-b border-b-black text-left font-bold">
+                      <th className="py-3 px-4">Job Title</th>
+                      <th className="py-3 px-4">Dates</th>
+                      <th className="py-3 px-4">Rating</th>
+                      <th className="py-3 px-4">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     {workHistory.length > 0 ? (
                       workHistory.map((job, index) => (
-                        <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                          <td className="py-3 px-4 text-sm">{job.jobTitle}</td>
-                          <td className="py-3 px-4 text-sm">{job.dates}</td>
+                        <tr key={index} className={index % 2 === 1 ? "bg-lightgray" : "bg-white"}>
+                          <td className="py-3 px-4">{job.jobTitle}</td>
+                          <td className="py-3 px-4 text-xs">{job.dates}</td>
                           <td className="py-3 px-4">
                             {renderRating(job.rating)}
                           </td>
-                          <td className="py-3 px-4 text-sm">{job.amount}</td>
+                          <td className="py-3 px-4">{job.amount}</td>
                         </tr>
                       ))
                     ) : (
