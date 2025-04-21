@@ -107,6 +107,10 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
     getProfileData();
   }, [userId, initialProfileId]);
 
+  useEffect(() => {
+    getProfileImageUrl();
+  },[profileData]);
+
   // Extract profile data with fallbacks
   const profession = profileData?.primaryPosition || 'Web Developer';
   const location = profileData?.workHistory?.[0]?.location || 'Remote';

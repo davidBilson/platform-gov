@@ -9,6 +9,7 @@ import { HiMenuAlt3 } from "react-icons/hi";
 import { FiSearch } from "react-icons/fi";
 import { usePathname } from 'next/navigation';
 import authStore from "@/store/authStore";
+import { useRouter } from "next/router";
 
 const Navbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
@@ -16,9 +17,14 @@ const Navbar = () => {
   const [mobileSearch, setMobileSearch] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
+  
   const pathname = usePathname();
-
   const { name } = authStore();
+  const router = useRouter();
+
+  const navigateToProfile = () => {
+    router.push('/profile');
+  }
 
   const contractorOptions = ["Contractors", "Businesses", "Both"];
   const [selectedOption, setSelectedOption] = useState("Contractors");
@@ -186,12 +192,12 @@ const Navbar = () => {
 
             {/* Desktop profile icon */}
             <div className="hidden lg:block">
-                <p className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium">
+                <p onClick={navigateToProfile} className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer">
                 {(() => {
                   if (name) {
                     const [first, last] = name.toUpperCase().split(" ");
                     const initials = (first?.[0] || "") + (last?.[0] || "");
-                    return initials || "KD";
+                    return initials || "";
                   }
                   return "KD";
                   })()
@@ -236,7 +242,7 @@ const Navbar = () => {
                 </ul>
                 
                 <div className="mt-6 flex justify-center">
-                  <div className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium">
+                  <div onClick={navigateToProfile} className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer">
                   {(() => {
                       if (name) {
                         const [first, last] = name.toUpperCase().split(" ");
