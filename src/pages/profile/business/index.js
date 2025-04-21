@@ -1,64 +1,59 @@
-import OpenJobs from './_open-jobs';
 import React, { useState, useEffect } from 'react';
-import { FaSearch } from "react-icons/fa";
 import { IoMdImages } from "react-icons/io";
-import { MdEdit } from "react-icons/md";
+import OpenJobs from './_open-jobs';
+import useAuthStore from '@/store/authStore';
 
-const Index = () => {
+const BusinessProfileIndex = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Mock data instead of API request
+  const { userId } = useAuthStore();
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+  
+  // Fetch business profile on component mount
   useEffect(() => {
-    // Simulate API loading delay
-    const timer = setTimeout(() => {
-      try {
-        // Mock business data
-        const mockBusinessData = {
-          id: 1,
-          name: "TechSolutions Inc.",
-          overview: "Leading provider of innovative technology solutions for businesses of all sizes.",
-          logo: "",
-          industry: "Technology",
-          size: "51-200",
-          specializations: ["Cloud Computing", "Data Analytics", "Cybersecurity"],
-          locations: [
-            {
-              id: 1,
-              country: "United States",
-              address1: "123 Tech Avenue",
-              address2: "Suite 400",
-              city: "Boston",
-              state: "MA",
-              zipCode: "02110"
-            }
-          ]
-        };
-        
-        setBusiness(mockBusinessData);
+    const fetchBusinessProfile = async () => {
+      if (!userId) {
         setLoading(false);
-      } catch (err) {
-        setError('Failed to load business data');
-        setLoading(false);
-        console.error('Error loading business data:', err);
+        setError('User ID is required to fetch profile');
+        return;
       }
-    }, 800); // Simulate a short loading time
-    
-    return () => clearTimeout(timer);
-  }, []);
+      
+      try {
+        setLoading(true);
+        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_BUSINESS_PROFILE?.replace(':id', userId);
+        const response = await fetch(`${BASE_URL}${apiEndpoint}`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          setBusiness(data.data);
+        } else {
+          setError('No business profile found.');
+        }
+      } catch (err) {
+        console.error('Error fetching business profile:', err);
+        setError('Failed to load business profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBusinessProfile();
+  }, [userId, BASE_URL]);
 
   if (loading) return <div className="p-6 text-center">Loading business profile...</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!business) return <div className="p-6 text-center">No business data found</div>;
+  if (!business) return <div className="p-6 text-center">No business profile found</div>;
 
   return (
     <section className='p-6'>
       <section className='w-full max-w-275 m-auto'>
         
+        {/* Company Logo and Name */}
         <div className='mb-6'>
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
-            {/* Company Logo Upload */}
+            {/* Company Logo */}
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
                 {business.logo ? (
@@ -71,188 +66,121 @@ const Index = () => {
                   <IoMdImages size={40} className='text-white/70' />
                 )}
               </div>
-              <button className='absolute bottom-0 right-0 z-20 h-7 w-7 bg-white rounded-full flex items-center justify-center border border-boldblue'>
-                <MdEdit size={14} className='text-boldblue' />
-              </button>
             </div>
             
             {/* Company Name */}
             <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
-              <input 
-                type="text" 
-                placeholder="Company Name"
-                value={business.name || ""}
-                className='w-full border border-boldblue text-boldblue rounded p-4 text-sm pl-5 focus:outline focus:outline-boldblue'
-              />
+              <h1 className='text-boldblue text-xl font-semibold'>
+                {business.name || "Company Name"}
+              </h1>
             </div>
           </div>
           
           {/* Company Overview */}
-          <div className='mb-8 flex items-center justify-center py-3.5 px-5 rounded-md border border-boldblue'>
-            <p className='w-full text-boldblue'>{business.overview || "Company Overview"}</p>
+          <div className='mb-8 py-3.5 px-5 rounded-md border border-boldblue'>
+            <p className='text-boldblue'>
+              {business.overview || "No company overview available."}
+            </p>
           </div>
         </div>
         
+        {/* Locations Section */}
         <div className='border-t border-t-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:w-full sm:max-w-[120px]'>Location</h2>
           
           <div className='w-full'>
-            {/* Country */}
-            <div className='mb-4'>
-              <div className='relative'>
-                <select 
-                  className='w-full border border-boldblue rounded p-3 appearance-none text-boldblue focus:outline-none focus:border-boldblue'
-                  defaultValue={business.locations && business.locations[0] ? business.locations[0].country : ""}
-                >
-                  <option value="">Country</option>
-                  <option value="United States">United States</option>
-                  <option value="Canada">Canada</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                </select>
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none'>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1L6 6L11 1" stroke="#666" strokeWidth="2" />
-                  </svg>
+            {business.locations && business.locations.map((location, index) => (
+              <div key={index} className={index > 0 ? 'mt-8 pt-4 border-t border-gray-200' : ''}>
+                {index > 0 && (
+                  <h3 className="font-medium mb-2">Location {index + 1}</h3>
+                )}
+                
+                {/* Location Details */}
+                <div className='mb-4'>
+                  <p className='text-boldblue font-medium'>
+                    {location.country || "Country not specified"}
+                  </p>
+                </div>
+                
+                {/* Address */}
+                <div className='mb-4'>
+                  <p className='text-boldblue'>
+                    {location.address1 && `${location.address1}, `}
+                    {location.address2}
+                  </p>
+                </div>
+                
+                {/* City, State, ZIP */}
+                <div className='mb-4'>
+                  <p className='text-boldblue'>
+                    {location.city && `${location.city}, `}
+                    {location.state && `${location.state} `}
+                    {location.zipCode}
+                  </p>
                 </div>
               </div>
-            </div>
-          
-            {/* Address */}
-            <div className='flex flex-col sm:flex-row gap-4 mb-4'>
-              <input 
-                type="text" 
-                placeholder="Address 1"
-                value={business.locations && business.locations[0] ? business.locations[0].address1 : ""}
-                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline focus:outline-boldblue'
-              />
-              <input 
-                type="text" 
-                placeholder="Address 2"
-                value={business.locations && business.locations[0] ? business.locations[0].address2 : ""}
-                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline focus:outline-boldblue'
-              />
-            </div>
+            ))}
             
-            {/* City, State, ZIP */}
-            <div className='flex flex-col sm:flex-row gap-4 mb-4'>
-              <div className='relative flex-1'>
-                <input 
-                  type="text" 
-                  placeholder="City" 
-                  value={business.locations && business.locations[0] ? business.locations[0].city : ""}
-                  className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline-none focus:border-boldblue'
-                />
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
-                  <FaSearch size={14} className='text-boldblue' />
-                </div>
-              </div>
-              
-              <div className='relative flex-1'>
-                <select 
-                  className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline focus:outline-boldblue'
-                  defaultValue={business.locations && business.locations[0] ? business.locations[0].state : ""}
-                >
-                  <option value="">State</option>
-                  <option value="MA">Massachusetts</option>
-                  <option value="CA">California</option>
-                  <option value="TX">Texas</option>
-                  <option value="NY">New York</option>
-                  <option value="IL">Illinois</option>
-                </select>
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none'>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1L6 6L11 1" stroke="#666" strokeWidth="2" />
-                  </svg>
-                </div>
-              </div>
-              
-              <input 
-                type="text" 
-                placeholder="ZIP Code"
-                value={business.locations && business.locations[0] ? business.locations[0].zipCode : ""}
-                className='flex-1 border border-boldblue text-boldblue rounded p-3 focus:outline focus:outline-boldblue'
-              />
-            </div>
-            {/* Add Location Button */}
-            <button className='bg-boldblue text-white font-bold py-2 px-4 rounded'>
-              Add Location
-            </button>
+            {(!business.locations || business.locations.length === 0) && (
+              <p className='text-boldblue italic'>No locations specified.</p>
+            )}
           </div>
         </div>
         
+        {/* Information Section */}
         <div className='border-y border-y-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:max-w-[120px]'>Information</h2>
           
-          <div className='w-full sm:w-auto'>
+          <div className='w-full'>
             {/* Industry */}
             <div className='mb-4'>
-              <div className='relative'>
-                <select 
-                  className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-boldblue'
-                  defaultValue={business.industry || ""}
-                >
-                  <option value="">Industry</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Healthcare">Healthcare</option>
-                  <option value="Finance">Finance</option>
-                </select>
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none'>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1L6 6L11 1" stroke="#666" strokeWidth="2" />
-                  </svg>
-                </div>
-              </div>
+              <h3 className='font-medium mb-1'>Industry</h3>
+              <p className='text-boldblue'>
+                {business.industry || "Not specified"}
+              </p>
             </div>
             
             {/* Company Size */}
             <div className='mb-4'>
-              <div className='relative'>
-                <select 
-                  className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-boldblue'
-                  defaultValue={business.size || ""}
-                >
-                  <option value="">Size</option>
-                  <option value="1-10">1-10 employees</option>
-                  <option value="11-50">11-50 employees</option>
-                  <option value="51-200">51-200 employees</option>
-                  <option value="201+">201+ employees</option>
-                </select>
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none'>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1L6 6L11 1" stroke="#666" strokeWidth="2" />
-                  </svg>
-                </div>
-              </div>
+              <h3 className='font-medium mb-1'>Size</h3>
+              <p className='text-boldblue'>
+                {business.size || "Not specified"}
+              </p>
             </div>
             
             {/* Specializations */}
             <div className='mb-4'>
-              <div className='relative'>
-                <input 
-                  type="text" 
-                  placeholder="Specializations"
-                  className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline focus:outline-boldblue'
-                />
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2'>
-                  <FaSearch size={14} className='text-boldblue' />
-                </div>
+              <h3 className='font-medium mb-1'>Specializations</h3>
+              <div className='flex flex-wrap gap-2'>
+                {business.specializations && business.specializations.length > 0 ? (
+                  business.specializations.map((spec, index) => (
+                    <div key={index} className='bg-deepskyblue text-white font-bold py-1 px-4 rounded-full'>
+                      {spec}
+                    </div>
+                  ))
+                ) : (
+                  <p className='text-boldblue italic'>No specializations listed.</p>
+                )}
               </div>
             </div>
           </div>
-          
-          {/* Specialization Tags */}
-          <div className='flex flex-wrap gap-2 self-end mb-6'>
-            {business.specializations && business.specializations.map((spec, index) => (
-              <div key={index} className='bg-deepskyblue text-white font-bold py-1 px-4 rounded-full'>
-                {spec}
-              </div>
-            ))}
-          </div>
+        </div>
+        
+        {/* Edit Button at Bottom */}
+        <div className='mt-8 flex justify-end'>
+          <a 
+            href="/profile/business/edit" 
+            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
+          >
+            Edit Profile
+          </a>
         </div>
       </section>
+      
+      {/* Open Jobs Section */}
       <OpenJobs />
     </section>
   );
 };
 
-export default Index;
+export default BusinessProfileIndex;
