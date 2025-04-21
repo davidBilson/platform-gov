@@ -9,9 +9,10 @@ import useAuthStore from "@/store/authStore";
 import { ToastContainer } from 'react-toastify';
 
 // Auth protection wrapper
+// Update this in your _app.tsx
 function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { userId, isLoading, initAuth } = useAuthStore();
+  const { userId, isLoading, initAuth } = useAuthStore();  // Removed verificationStep import
 
   const publicRoutes = [
     '/auth/sign-up',
@@ -40,9 +41,10 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   }, [userId, isPublicRoute, isLoading, router]);
 
   // Redirect logged-in users away from login/signup pages
+  // BUT MAKE EXCEPTION for verification page
   useEffect(() => {
-    
-    if (!isLoading && userId && isAuthPage) {
+    // Only redirect from auth pages if we're not on verification page
+    if (!isLoading && userId && isAuthPage && router.pathname !== '/auth/verification') {
       router.push('/');
     }
   }, [userId, isAuthPage, isLoading, router]);
