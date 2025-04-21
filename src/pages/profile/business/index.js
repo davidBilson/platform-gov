@@ -7,7 +7,6 @@ import Link from 'next/link';
 const BusinessProfileIndex = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [, setError] = useState(null);
   
   const { userId } = useAuthStore();
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -17,7 +16,6 @@ const BusinessProfileIndex = () => {
     const fetchBusinessProfile = async () => {
       if (!userId) {
         setLoading(false);
-        setError('User ID is required to fetch profile');
         return;
       }
       
@@ -29,12 +27,9 @@ const BusinessProfileIndex = () => {
         
         if (data.success && data.data) {
           setBusiness(data.data);
-        } else {
-          setError('No business profile found.');
         }
       } catch (err) {
         console.error('Error fetching business profile:', err);
-        setError('Failed to load business profile');
       } finally {
         setLoading(false);
       }
