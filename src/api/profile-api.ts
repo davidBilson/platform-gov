@@ -11,7 +11,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export const fetchProfile = async (userId: string) => {
   try {
     // Use the environment variable for the endpoint
-    const endpoint = process.env.NEXT_PUBLIC_GET_PROFILE?.replace(':id', userId) || `/api/profile/${userId}`;
+    const endpoint = process.env.NEXT_PUBLIC_FETCH_FREELANCER_PROFILE?.replace(':id', userId) || `/api/profile/${userId}`;
     const response = await axios.get(`${API_BASE_URL}${endpoint}`);
     return response.data;
   } catch (error) {
@@ -48,12 +48,11 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
     // Determine if creating or updating
     if (profileId) {
       // Update existing profile
-      const updateEndpoint = process.env.NEXT_PUBLIC_UPDATE_PROFILE?.replace(':id', userId) || 
-                            `/api/profile/update/${userId}`;
+      const updateEndpoint = process.env.NEXT_PUBLIC_UPDATE_FREELANCER_PROFILE?.replace(':id', userId);
       response = await axios.put(`${API_BASE_URL}${updateEndpoint}`, profileData);
     } else {
       // Create new profile
-      const createEndpoint = process.env.NEXT_PUBLIC_CREATE_PROFILE || '/api/profile/create';
+      const createEndpoint = process.env.NEXT_PUBLIC_CREATE_FREELANCER_PROFILE;
       response = await axios.post(`${API_BASE_URL}${createEndpoint}`, profileData);
     }
     

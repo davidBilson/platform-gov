@@ -1,30 +1,51 @@
+import OpenJobs from './_open-jobs';
 import React, { useState, useEffect } from 'react';
 import { FaSearch } from "react-icons/fa";
 import { IoMdImages } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
-import axios from 'axios';
 
-const BusinessProfile = () => {
+const Index = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Fetch business data on component mount
+  // Mock data instead of API request
   useEffect(() => {
-    const fetchBusiness = async () => {
+    // Simulate API loading delay
+    const timer = setTimeout(() => {
       try {
-        setLoading(true);
-        const response = await axios.get('https://platform-gov-backend.onrender.com/api/businesses/1');
-        setBusiness(response.data.data);
+        // Mock business data
+        const mockBusinessData = {
+          id: 1,
+          name: "TechSolutions Inc.",
+          overview: "Leading provider of innovative technology solutions for businesses of all sizes.",
+          logo: "",
+          industry: "Technology",
+          size: "51-200",
+          specializations: ["Cloud Computing", "Data Analytics", "Cybersecurity"],
+          locations: [
+            {
+              id: 1,
+              country: "United States",
+              address1: "123 Tech Avenue",
+              address2: "Suite 400",
+              city: "Boston",
+              state: "MA",
+              zipCode: "02110"
+            }
+          ]
+        };
+        
+        setBusiness(mockBusinessData);
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch business data');
+        setError('Failed to load business data');
         setLoading(false);
-        console.error('Error fetching business:', err);
+        console.error('Error loading business data:', err);
       }
-    };
+    }, 800); // Simulate a short loading time
     
-    fetchBusiness();
+    return () => clearTimeout(timer);
   }, []);
 
   if (loading) return <div className="p-6 text-center">Loading business profile...</div>;
@@ -229,8 +250,9 @@ const BusinessProfile = () => {
           </div>
         </div>
       </section>
+      <OpenJobs />
     </section>
   );
 };
 
-export default BusinessProfile;
+export default Index;

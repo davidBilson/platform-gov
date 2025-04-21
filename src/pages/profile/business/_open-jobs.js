@@ -8,22 +8,67 @@ const OpenJobs = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch all jobs from your API
-    fetch('https://platform-gov-backend.onrender.com/api/jobs')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        setJobs(data.data);
+    // Mock data instead of API request
+    const timer = setTimeout(() => {
+      try {
+        // Mock jobs data
+        const mockJobsData = [
+          {
+            id: 1,
+            title: "Frontend Developer",
+            description: "We are looking for a skilled frontend developer to join our team on a project for a government agency.",
+            category: "Web Development",
+            location: "Boston, MA",
+            workType: "Remote",
+            status: "open",
+            proposalsCount: 12,
+            postedAt: "2025-04-15T09:30:00Z"
+          },
+          {
+            id: 2,
+            title: "UI/UX Designer",
+            description: "Design user interfaces for our government services portal. Experience with accessibility standards required.",
+            category: "Design",
+            location: "Washington, DC",
+            workType: "Hybrid",
+            status: "open",
+            proposalsCount: 8,
+            postedAt: "2025-04-17T14:45:00Z"
+          },
+          {
+            id: 3,
+            title: "Backend Developer",
+            description: "Develop and maintain API services for our government client. Experience with Node.js and security protocols required.",
+            category: "Software Development",
+            location: "New York, NY",
+            workType: "On-site",
+            status: "active",
+            proposalsCount: 15,
+            postedAt: "2025-04-10T11:20:00Z"
+          },
+          {
+            id: 4,
+            title: "Data Analyst",
+            description: "Analyze and report on public data sets for a federal agency project.",
+            category: "Data Science",
+            location: "Remote",
+            workType: "Contract",
+            status: "active",
+            proposalsCount: 6,
+            postedAt: "2025-04-12T10:00:00Z"
+          }
+        ];
+        
+        setJobs(mockJobsData);
         setLoading(false);
-      })
-      .catch(error => {
-        setError(error.message);
+      } catch (err) {
+        setError("Failed to load jobs data");
         setLoading(false);
-      });
+        console.error('Error loading jobs data:', err);
+      }
+    }, 800); // Simulate a short loading time
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Filter jobs by status

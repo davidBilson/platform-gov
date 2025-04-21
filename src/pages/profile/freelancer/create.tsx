@@ -2,9 +2,8 @@
 "use client"
 import React, { useState, useRef, ChangeEvent, useEffect } from "react";
 // import Image from "next/image";
-import { IoMdImages } from "react-icons/io";
+import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
-import { IoIosSearch } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
 import { generateId } from "@/utils/profile-utils";
@@ -13,14 +12,14 @@ import useAuthStore from '@/store/authStore';
 import axios, { AxiosError } from "axios";
 import Legalagreement from "@/components/ui/legal-agreement";
 import { useRouter } from 'next/router';
-import { toast } from "react-toastify"
+import { toast } from "react-toastify";
 
 interface AuthStoreState {
   userId: string;
   name: string;
 }
 
-const CreateProfile = () => {
+const CreateFreelancerProfile = () => {
   const router = useRouter();
   // Get user ID from auth store
   const { userId, name } = useAuthStore() as AuthStoreState;
@@ -421,7 +420,7 @@ const submitProfileData = async (): Promise<void> => {
         // router.push("/profile");
       } catch (fetchError) {
         console.error("Error fetching updated profile:", fetchError);
-        router.push("/profile");
+        router.push("/profile/freelancer");
       }
     } else {
       const errorMessage = response?.data?.message || "Unknown error in response";
@@ -513,7 +512,7 @@ const submitProfileData = async (): Promise<void> => {
 
   // Handle preview - could be expanded in future
   const handlePreview = () => {
-    router.push('/profile')
+    router.push('/profile/freelancer')
   };
 
   // Initialize textarea height on mount
@@ -661,13 +660,13 @@ const submitProfileData = async (): Promise<void> => {
             {formData.skills.map((skill, index) => (
               <div 
                 key={`skill-${index}`} 
-                className="flex flex-row justify-between items-center px-[10px] py-[5px] gap-[10px] bg-deepskyblue rounded-[37px] text-xs text-white"
+                className="flex flex-row justify-between items-center px-2.5 py-1.25 gap-2.5 bg-deepskyblue rounded-[37px] text-xs text-white"
               >
                 {skill}
                 <button 
                   type="button"
                   onClick={() => removeTag('skills', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform hover:text-red-500"
+                  className="font-semibold text-sm ml-1 focus:outline-none hover:text-red-500 transition transform active:scale-95 cursor-pointer"
                 >
                   <IoCloseOutline size={16} />
                 </button>
@@ -727,13 +726,13 @@ const submitProfileData = async (): Promise<void> => {
             {formData.expertise.map((item, index) => (
               <div 
                 key={`expertise-${index}`} 
-                className="flex flex-row justify-between items-center px-[10px] py-[5px] gap-[10px] bg-deepskyblue rounded-[37px] text-xs text-white"
+                className="flex flex-row justify-between items-center px-2.5 py-1.25 gap-2.5 bg-deepskyblue rounded-[37px] text-xs text-white"
               >
                 {item}
                 <button 
                   type="button"
                   onClick={() => removeTag('expertise', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform hover:text-red-500"
+                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform active:scale-95 hover:text-red-500"
                 >
                   <IoCloseOutline size={16} />
                 </button>
@@ -795,13 +794,13 @@ const submitProfileData = async (): Promise<void> => {
             {formData.certifications.map((cert, index) => (
               <div 
                 key={`cert-${index}`} 
-                className="flex flex-row justify-between items-center px-[10px] py-[5px] gap-[10px] bg-aquagreen rounded-[37px] text-xs text-white"
+                className="flex flex-row justify-between items-center px-2.5 py-1.25 gap-2.5 bg-aquagreen rounded-[37px] text-xs text-white"
               >
                 {cert}
                 <button 
                   type="button"
                   onClick={() => removeTag('certifications', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform  hover:text-red-500"
+                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform active:scale-95  hover:text-red-500"
                 >
                   <IoCloseOutline size={16} />
                 </button>
@@ -822,7 +821,7 @@ const submitProfileData = async (): Promise<void> => {
                   <button 
                     type="button" 
                     onClick={() => removeWorkHistory(work.id)}
-                    className="text-red-500"
+                    className="text-red-500 transition transform active:scale-95 hover:opacity-70 cursor-pointer"
                   >
                     Remove
                   </button>
@@ -910,7 +909,7 @@ const submitProfileData = async (): Promise<void> => {
             <button 
               type="button" 
               onClick={addWorkHistory}
-              className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70"
+              className="text-sm px-4 py-[11px]  bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 cursor-pointer"
             >
               Add More
             </button>
@@ -948,7 +947,7 @@ const submitProfileData = async (): Promise<void> => {
                 <button 
                   type="button" 
                   onClick={() => removeDegree(degree.id)}
-                  className="text-red-500 px-2"
+                  className="text-red-500 px-2 transition transform active:scale-95 hover:opacity-70 cursor-pointer"
                 >
                   Remove
                 </button>
@@ -959,7 +958,7 @@ const submitProfileData = async (): Promise<void> => {
           <button 
             type="button"
             onClick={addDegree}
-            className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70"
+            className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 cursor-pointer"
           >
             Add More
           </button>
@@ -1000,4 +999,4 @@ const submitProfileData = async (): Promise<void> => {
   );
 };
 
-export default CreateProfile;
+export default CreateFreelancerProfile;
