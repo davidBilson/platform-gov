@@ -75,19 +75,16 @@ const CreateFreelancerProfile = () => {
 
   useEffect(() => {
     if (showSkillsDropdown) {
-      // Filter out already selected skills and then apply search filter
       const availableSkills = skillsList.filter(skill => 
         !formData.skills.includes(skill)
       );
       
       if (skillInput.trim()) {
-        // Apply search filter to available skills
         const filtered = availableSkills.filter(skill => 
           skill.toLowerCase().includes(skillInput.toLowerCase())
         );
         setFilteredSkills(filtered);
       } else {
-        // Show all available skills when input is empty
         setFilteredSkills(availableSkills);
       }
     } else {
@@ -97,19 +94,16 @@ const CreateFreelancerProfile = () => {
 
   useEffect(() => {
     if (showExpertiseDropdown) {
-      // Filter out already selected expertise items
       const availableExpertise = expertiseList.filter(exp => 
         !formData.expertise.includes(exp)
       );
       
       if (expertiseInput.trim()) {
-        // Apply search filter to available expertise
         const filtered = availableExpertise.filter(exp => 
           exp.toLowerCase().includes(expertiseInput.toLowerCase())
         );
         setFilteredExpertise(filtered);
       } else {
-        // Show all available expertise when input is empty
         setFilteredExpertise(availableExpertise);
       }
     } else {
@@ -117,22 +111,18 @@ const CreateFreelancerProfile = () => {
     }
   }, [expertiseInput, formData.expertise, showExpertiseDropdown]);
 
-    // And for certifications
     useEffect(() => {
       if (showCertificationsDropdown) {
-        // Filter out already selected certifications
         const availableCertifications = certificationsList.filter(cert => 
           !formData.certifications.includes(cert)
         );
         
         if (certificationInput.trim()) {
-          // Apply search filter to available certifications
           const filtered = availableCertifications.filter(cert => 
             cert.toLowerCase().includes(certificationInput.toLowerCase())
           );
           setFilteredCertifications(filtered);
         } else {
-          // Show all available certifications when input is empty
           setFilteredCertifications(availableCertifications);
         }
       } else {
