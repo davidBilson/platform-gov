@@ -9,6 +9,7 @@ type VerificationStep = 'email' | 'completed';
 interface AuthStoreState {
   userId: string | null;
   email: string | null;
+  role: string | null;
   phoneNumber: string | null;
   verificationStep: VerificationStep;
   setEmailVerified: (verified: boolean) => void;
@@ -35,7 +36,8 @@ const Verification: React.FC = () => {
   const router = useRouter();
   const { 
     userId, 
-    email, 
+    email,
+    role,
     // phoneNumber, 
     verificationStep, 
     setEmailVerified, 
@@ -174,7 +176,11 @@ const Verification: React.FC = () => {
   
   const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
-    router.push('/profile/create');
+    if (role === 'contractor') {
+      router.push('/profile/business');
+    } else if (role === 'client') {
+      router.push('/profile/freelancer');
+    }
   };
   
   const resendVerificationCode = async (): Promise<void> => {
