@@ -7,7 +7,7 @@ import Link from 'next/link';
 const BusinessProfileIndex = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   
   const { userId } = useAuthStore();
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -44,9 +44,13 @@ const BusinessProfileIndex = () => {
   }, [userId, BASE_URL]);
 
   if (loading) return <div className="p-6 text-center">Loading business profile...</div>;
-  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!business) return <div className="p-6 text-center">No business profile found</div>;
+  // if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+  if (!business) return <div className="p-6 text-center">
+    No business profile found. {" "}
+    <Link href="/profile/business/create" className="text-boldblue underline">Create a Business Profile</Link>
+  </div>;
 
+  {}
   return (
     <section className='p-6'>
       <section className='w-full max-w-275 m-auto'>
