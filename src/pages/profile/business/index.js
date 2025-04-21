@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IoMdImages } from "react-icons/io";
 import OpenJobs from './_open-jobs';
 import useAuthStore from '@/store/authStore';
+import Link from 'next/link';
 
 const BusinessProfileIndex = () => {
   const [business, setBusiness] = useState(null);
@@ -168,12 +169,12 @@ const BusinessProfileIndex = () => {
         
         {/* Edit Button at Bottom */}
         <div className='mt-8 flex justify-end'>
-          <a 
-            href="/profile/business/edit" 
+          <Link 
+            href="/profile/business/create" 
             className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             Edit Profile
-          </a>
+          </Link>
         </div>
       </section>
       
