@@ -74,45 +74,71 @@ const CreateFreelancerProfile = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-
     if (showSkillsDropdown) {
+      // Filter out already selected skills and then apply search filter
+      const availableSkills = skillsList.filter(skill => 
+        !formData.skills.includes(skill)
+      );
+      
       if (skillInput.trim()) {
-        const filtered = skillsList.filter(skill => 
+        // Apply search filter to available skills
+        const filtered = availableSkills.filter(skill => 
           skill.toLowerCase().includes(skillInput.toLowerCase())
         );
         setFilteredSkills(filtered);
+      } else {
+        // Show all available skills when input is empty
+        setFilteredSkills(availableSkills);
       }
     } else {
-      setFilteredSkills(skillsList);
+      setFilteredSkills(skillsList.filter(skill => !formData.skills.includes(skill)));
     }
-  }, [skillInput]);
+  }, [skillInput, formData.skills, showSkillsDropdown]);
 
   useEffect(() => {
     if (showExpertiseDropdown) {
+      // Filter out already selected expertise items
+      const availableExpertise = expertiseList.filter(exp => 
+        !formData.expertise.includes(exp)
+      );
+      
       if (expertiseInput.trim()) {
-        // Filter the list when there's input
-        const filtered = expertiseList.filter(exp => 
+        // Apply search filter to available expertise
+        const filtered = availableExpertise.filter(exp => 
           exp.toLowerCase().includes(expertiseInput.toLowerCase())
         );
         setFilteredExpertise(filtered);
+      } else {
+        // Show all available expertise when input is empty
+        setFilteredExpertise(availableExpertise);
       }
     } else {
-      setFilteredExpertise(expertiseList);
+      setFilteredExpertise(expertiseList.filter(exp => !formData.expertise.includes(exp)));
     }
-  }, [expertiseInput]);
+  }, [expertiseInput, formData.expertise, showExpertiseDropdown]);
 
-  useEffect(() => {
-    if (showCertificationsDropdown) {
-      if (certificationInput.trim()) {
-        const filtered = certificationsList.filter(cert => 
-          cert.toLowerCase().includes(certificationInput.toLowerCase())
+    // And for certifications
+    useEffect(() => {
+      if (showCertificationsDropdown) {
+        // Filter out already selected certifications
+        const availableCertifications = certificationsList.filter(cert => 
+          !formData.certifications.includes(cert)
         );
-        setFilteredCertifications(filtered);
+        
+        if (certificationInput.trim()) {
+          // Apply search filter to available certifications
+          const filtered = availableCertifications.filter(cert => 
+            cert.toLowerCase().includes(certificationInput.toLowerCase())
+          );
+          setFilteredCertifications(filtered);
+        } else {
+          // Show all available certifications when input is empty
+          setFilteredCertifications(availableCertifications);
+        }
       } else {
-        setFilteredCertifications(certificationsList);
+        setFilteredCertifications(certificationsList.filter(cert => !formData.certifications.includes(cert)));
       }
-    }
-  }, [certificationInput, showCertificationsDropdown]);
+    }, [certificationInput, formData.certifications, showCertificationsDropdown]);
 
 
   const fetchUserProfile = async () => {
