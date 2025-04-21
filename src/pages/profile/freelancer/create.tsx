@@ -1,7 +1,6 @@
 
 "use client"
 import React, { useState, useRef, ChangeEvent, useEffect } from "react";
-// import Image from "next/image";
 import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { IoCloseOutline } from "react-icons/io5";
@@ -21,10 +20,8 @@ interface AuthStoreState {
 
 const CreateFreelancerProfile = () => {
   const router = useRouter();
-  // Get user ID from auth store
   const { userId, name } = useAuthStore() as AuthStoreState;
 
-  // State for form data
   const [formData, setFormData] = useState<ProfileFormData>({
     bio: "",
     ratePerHour: "",
@@ -56,7 +53,6 @@ const CreateFreelancerProfile = () => {
     profileImageUrl: "",
   });
 
-  // State for search inputs and filtered results
   const [skillInput, setSkillInput] = useState<string>("");
   const [expertiseInput, setExpertiseInput] = useState<string>("");
   const [certificationInput, setCertificationInput] = useState<string>("");
@@ -64,9 +60,7 @@ const CreateFreelancerProfile = () => {
   const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   const [filteredCertifications, setFilteredCertifications] = useState<string[]>([]);
   
-  // UI state
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [error, setError] = useState<string | null>(null);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
@@ -79,12 +73,10 @@ const CreateFreelancerProfile = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter skills, expertise, and certifications based on input
   useEffect(() => {
 
     if (showSkillsDropdown) {
       if (skillInput.trim()) {
-        // Filter the list when there's input
         const filtered = skillsList.filter(skill => 
           skill.toLowerCase().includes(skillInput.toLowerCase())
         );
@@ -112,31 +104,26 @@ const CreateFreelancerProfile = () => {
   useEffect(() => {
     if (showCertificationsDropdown) {
       if (certificationInput.trim()) {
-        // Filter the list when there's input
         const filtered = certificationsList.filter(cert => 
           cert.toLowerCase().includes(certificationInput.toLowerCase())
         );
         setFilteredCertifications(filtered);
       } else {
-        // Show all items when dropdown is open but no input
         setFilteredCertifications(certificationsList);
       }
     }
   }, [certificationInput, showCertificationsDropdown]);
 
 
-  // Fetch the current user's profile
   const fetchUserProfile = async () => {
     try {
       setIsLoading(true);
       const response = await fetchProfile(userId);
       
       if (response.success && response.data) {
-        // Profile exists, populate form with fetched data
         const profileData = response.data;
         setIsProfileExists(true);
         
-        // Update form data with fetched profile
         setFormData({
           bio: profileData.bio || "",
           ratePerHour: profileData.ratePerHour?.toString() || "",
@@ -166,12 +153,10 @@ const CreateFreelancerProfile = () => {
           profileImage: profileData.profileImage || ""
         });
       } else {
-        // Profile doesn't exist, keep default form values
         setIsProfileExists(false);
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
-      // setError("Error fetching profile data");
     } finally {
       setIsLoading(false);
     }
@@ -225,14 +210,12 @@ const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) 
         }
       );
       
-      // With axios, the response data is already parsed
       const result = response.data;
       
       if (result.success) {
-        // Store the actual image path from the server
         setFormData(prev => ({
           ...prev,
-          profileImage: result.data.imagePath  // This will be used when saving the profile
+          profileImage: result.data.imagePath 
         }));
       } else {
         toast.error('Failed to upload image');
@@ -244,12 +227,11 @@ const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) 
   }
 };
 
-  // Handle click on profile image button
   const handleProfileImageClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Replace your current addTag function with this:
+// Updated addTag function
 const addTag = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
   if (!value.trim()) return;
   
@@ -268,16 +250,13 @@ const addTag = (type: 'skills' | 'expertise' | 'certifications', value: string) 
     [type]: [...prev[type], value.trim()]
   }));
   
-  // Clear the input and dropdown as before
+  // Clear the input but DO NOT close the dropdown
   if (type === 'skills') {
     setSkillInput("");
-    setShowSkillsDropdown(false);
   } else if (type === 'expertise') {
     setExpertiseInput("");
-    setShowExpertiseDropdown(false);
   } else if (type === 'certifications') {
     setCertificationInput("");
-    setShowCertificationsDropdown(false);
   }
 };
 
@@ -643,12 +622,17 @@ const submitProfileData = async (): Promise<void> => {
               
               {/* Skills dropdown */}
               {showSkillsDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar">
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
+                >
                   {filteredSkills.map((skill, idx) => (
                     <div 
                       key={`skill-option-${idx}`} 
                       className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
-                      onClick={() => addTag('skills', skill)}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur event from firing
+                        addTag('skills', skill);
+                      }}
                     >
                       {skill}
                     </div>
@@ -709,12 +693,17 @@ const submitProfileData = async (): Promise<void> => {
               
               {/* Expertise dropdown */}
               {showExpertiseDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar">
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
+                >
                   {filteredExpertise.map((exp, idx) => (
                     <div 
                       key={`expertise-option-${idx}`} 
                       className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
-                      onClick={() => addTag('expertise', exp)}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur event from firing
+                        addTag('expertise', exp);
+                      }}
                     >
                       {exp}
                     </div>
@@ -777,12 +766,17 @@ const submitProfileData = async (): Promise<void> => {
               
               {/* Certifications dropdown */}
               {showCertificationsDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar">
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
+                >
                   {filteredCertifications.map((cert, idx) => (
                     <div 
                       key={`cert-option-${idx}`} 
                       className="px-4 py-2 hover:bg-aquagreen hover:text-white cursor-pointer text-sm"
-                      onClick={() => addTag('certifications', cert)}
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur event from firing
+                        addTag('certifications', cert);
+                      }}
                     >
                       {cert}
                     </div>

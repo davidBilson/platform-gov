@@ -177,9 +177,9 @@ const Verification: React.FC = () => {
   const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     if (role === 'contractor') {
-      router.push('/profile/business/create');
-    } else if (role === 'client') {
       router.push('/profile/freelancer/create');
+    } else if (role === 'client') {
+      router.push('/profile/business/create');
     }
   };
   

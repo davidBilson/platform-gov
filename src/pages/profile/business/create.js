@@ -279,13 +279,13 @@ const CreateBusinessProfile = () => {
           </div>
           
           {/* Company Overview */}
-          <div className='mb-8 border border-boldblue rounded-md'>
+          <div className='mb-8 rounded-md'>
             <textarea
               name="overview"
               value={business.overview || ""}
               onChange={handleChange}
               placeholder="Company Overview"
-              className='w-full py-3.5 px-5 text-boldblue resize-none focus:outline focus:outline-boldblue rounded-md min-h-[80px]'
+              className='w-full py-3.5 px-5 text-boldblue resize-none border border-boldblue  focus:outline focus:outline-boldblue rounded-md min-h-[80px]'
             />
           </div>
         </div>

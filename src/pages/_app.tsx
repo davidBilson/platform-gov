@@ -36,7 +36,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   // Redirect if not authenticated and trying to access protected route
   useEffect(() => {
     if (!isLoading && !userId && !isPublicRoute) {
-      router.push('/auth/sign-in');
+      router.replace('/auth/sign-in');
     }
   }, [userId, isPublicRoute, isLoading, router]);
 
@@ -45,7 +45,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Only redirect from auth pages if we're not on verification page
     if (!isLoading && userId && isAuthPage && router.pathname !== '/auth/verification') {
-      router.push('/');
+      router.replace('/');
     }
   }, [userId, isAuthPage, isLoading, router]);
 
