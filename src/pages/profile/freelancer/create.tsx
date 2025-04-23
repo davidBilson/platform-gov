@@ -27,8 +27,8 @@ const CreateFreelancerProfile = () => {
     ratePerHour: "",
     primaryPosition: "",
     skills: [],
-    expertise: [],
     certifications: [],
+    expertise: [],
     workHistory: [
       {
         id: generateId(),
@@ -54,17 +54,17 @@ const CreateFreelancerProfile = () => {
   });
 
   const [skillInput, setSkillInput] = useState<string>("");
-  const [expertiseInput, setExpertiseInput] = useState<string>("");
   const [certificationInput, setCertificationInput] = useState<string>("");
   const [filteredSkills, setFilteredSkills] = useState<string[]>([]);
-  const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   const [filteredCertifications, setFilteredCertifications] = useState<string[]>([]);
+  const [expertiseInput, setExpertiseInput] = useState<string>("");
+  const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
-  const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
+  const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   
   const [pendingSubmission, setPendingSubmission] = useState<boolean>(false);
   const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
@@ -530,7 +530,7 @@ const submitProfileData = async (): Promise<void> => {
     <main className="p-6">
       <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
         {/* Bio */}
-        <div className="mb-7.5 pb-7.5 border-b border-b-boldblue flex flex-col sm:flex-row sm:items-center gap-5">
+        <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-col sm:flex-row sm:items-center gap-5">
           {/* Profile picture && Name */}
           <div className="relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
             <div className="absolute flex items-center justify-center w-full h-full">
@@ -565,7 +565,7 @@ const submitProfileData = async (): Promise<void> => {
         </div>
   
         {/* About Me / Bio */}
-        <div className="mb-7.5 pb-7.5 border-b border-b-boldblue">
+        <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <textarea
             ref={textareaRef}
             name="bio"
@@ -579,7 +579,7 @@ const submitProfileData = async (): Promise<void> => {
         </div>
   
         {/* Rate per hour */}
-        <div className="mb-7.5 pb-7.5 border-b border-b-boldblue">
+        <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
             <input 
               type="text" 
@@ -594,7 +594,7 @@ const submitProfileData = async (): Promise<void> => {
         </div>
   
         {/* Primary position/Title + Skills + Expertise */}
-        <div className="mb-7.5 pb-7.5 border-b border-b-boldblue">
+        <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <input 
             type="text" 
             name="primaryPosition"
@@ -727,7 +727,7 @@ const submitProfileData = async (): Promise<void> => {
                 </div>
               )}
             </div>
-            
+            {/* tags */}
             {formData.expertise.map((item, index) => (
               <div 
                 key={`expertise-${index}`} 
@@ -747,7 +747,7 @@ const submitProfileData = async (): Promise<void> => {
         </div>
   
         {/* Certification */}
-        <div className="mb-7.5 pb-7.5 border-b border-b-boldblue">
+        <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative w-full max-w-75">
               <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
