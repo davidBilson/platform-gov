@@ -6,13 +6,15 @@ const { locationList, jobCategoryList, requiredCertificationsList, requiredSkill
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, FiTrash, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
 const { DatePicker, AddMilestoneModal } = UI;
 import axios from 'axios';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 
   
 const CreateJob: React.FC = () => {
 
-    const { userId, role } = useAuthStore();
-    const router = useRouter();
+    const { userId 
+        // role 
+    } = useAuthStore();
+    // const router = useRouter();
 
     // data to be submitted to BE
     const [formData, setFormData] = useState<JobFormData>({
@@ -381,9 +383,10 @@ const CreateJob: React.FC = () => {
     }
   };
 
-  if (role !== 'client') {
-    return <div className='text-center text-boldblue pt-20'>You do not have permission to create a job. <button className='cursor-pointer outline-none border-none text-sm text-boldblue background-none underline' onClick={() => router.back() }>Go Back</button></div>;
-}
+//   if (role !== 'client') {
+//     return <div className='text-center text-boldblue pt-20'>You do not have permission to create a job. <button className='cursor-pointer outline-none border-none text-sm text-boldblue background-none underline' onClick={() => router.back() }>Go Back</button></div>;
+//     }
+
   return (
     <section className='p-6 pt-7.5'>
         <AddMilestoneModal 
