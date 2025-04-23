@@ -42,7 +42,6 @@ export interface AuthStore {
   setVerificationStep: (step: string) => void;
 }
 
-
 export interface SignInFormData {
   email: string;
   password: string;
