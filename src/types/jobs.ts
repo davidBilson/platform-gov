@@ -24,5 +24,3 @@ export interface Milestone {
     retainerFrequency: string;
     retainerDuration: number;
 }
-
-

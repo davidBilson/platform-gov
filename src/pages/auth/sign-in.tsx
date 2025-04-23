@@ -4,45 +4,47 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
 import useAuthStore from '@/store/authStore';
+import { SignInFormData, SignInApiResponse, ErrorResponse, AuthStore } from '@/types/auth';
 
-interface SignInFormData {
-  email: string;
-  password: string;
-}
 
-interface SignInApiResponse {
-  status: string;
-  message: string;
-  data?: {
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-      phoneNumber: string;
-      role: string;
-      isEmailVerified: boolean;
-      isPhoneVerified: boolean;
-    }
-  };
-}
+// interface SignInFormData {
+//   email: string;
+//   password: string;
+// }
 
-interface ErrorResponse {
-  message?: string;
-}
+// interface SignInApiResponse {
+//   status: string;
+//   message: string;
+//   data?: {
+//     user: {
+//       _id: string;
+//       name: string;
+//       email: string;
+//       phoneNumber: string;
+//       role: string;
+//       isEmailVerified: boolean;
+//       isPhoneVerified: boolean;
+//     }
+//   };
+// }
 
-// Interface for AuthStore to match the zustand structure
-interface AuthStore {
-  setFormData: (data: {
-    role?: string;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    userId?: string;
-  }) => void;
-  setUserId: (id: string) => void;
-  setEmailVerified: (status: boolean) => void;
-  setPhoneVerified: (status: boolean) => void;
-}
+// interface ErrorResponse {
+//   message?: string;
+// }
+
+// // Interface for AuthStore to match the zustand structure
+// interface AuthStore {
+//   setFormData: (data: {
+//     role?: string;
+//     name?: string;
+//     email?: string;
+//     phoneNumber?: string;
+//     userId?: string;
+//   }) => void;
+//   setUserId: (id: string) => void;
+//   setEmailVerified: (status: boolean) => void;
+//   setPhoneVerified: (status: boolean) => void;
+// }
 
 const SignIn = () => {
   const router = useRouter();

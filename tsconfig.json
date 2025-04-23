@@ -17,6 +17,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/profile/business/open-jobs.js", "src/pages/_business-profile/business-profile.js", "src/utils/profile-utils.js", "src/pages/profile/business/create.js", "src/pages/profile/business/index.js", "src/pages/job/create.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/profile/business/open-jobs.js", "src/pages/_business-profile/business-profile.js", "src/utils/profiles/profile-utils.js", "src/pages/profile/business/create.js", "src/pages/profile/business/index.js", "src/pages/job/create.tsx"],
   "exclude": ["node_modules"]
 }

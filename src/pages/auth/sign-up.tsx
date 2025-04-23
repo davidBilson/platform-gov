@@ -4,48 +4,8 @@ import Link from 'next/link';
 import useAuthStore from '@/store/authStore';
 import axios, { AxiosError } from 'axios';
 
-type UserType = 'contractor' | 'client';
+import { SignupFormData, SignupApiResponse, ErrorResponse,  AuthStore } from '@/types/auth';
 
-interface SignupFormData {
-  userType: UserType;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  confirmPassword: string;
-  userId?: string;
-}
-
-interface SignupApiResponse {
-  status: string;
-  message: string;
-  data?: {
-    name?: string;
-    role?: string;
-    userId: string;
-    email?: string;
-    phoneNumber?: string;
-  };
-}
-
-interface ErrorResponse {
-  message?: string;
-}
-
-// Updated AuthStore interface to match the zustand store structure
-interface AuthStore {
-  setFormData: (data: {
-    role?: UserType;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    password?: string;
-    userId?: string;
-  }) => void;
-  setUserId: (id: string) => void;
-  setVerificationStep: (step: string) => void;
-}
 
 const Signup: React.FC = () => {
   const router = useRouter();

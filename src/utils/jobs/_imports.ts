@@ -35,7 +35,7 @@ import {
 // Datepicker & Modal
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import AddMilestoneModal from './_addMilestoneModal';
+import AddMilestoneModal from '@/pages/job/create/_addMilestoneModal';
 
 // Types
 export type { JobFormData, Milestone } from "@/types/jobs";

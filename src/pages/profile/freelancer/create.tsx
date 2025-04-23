@@ -5,7 +5,7 @@ import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
 import { IoCloseOutline } from "react-icons/io5";
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
-import { generateId } from "@/utils/profile-utils";
+import { generateId } from "@/utils/profiles/profile-utils";
 import { fetchProfile, saveProfile, skillsList, expertiseList, certificationsList } from "@/api/profile-api";
 import useAuthStore from '@/store/authStore';
 import axios, { AxiosError } from "axios";

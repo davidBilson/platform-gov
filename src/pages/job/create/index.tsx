@@ -1,6 +1,6 @@
 import useAuthStore from '@/store/authStore';
-import { ReactLib, Data, Icons, UI } from './_imports';
-import type { JobFormData, Milestone } from './_imports';
+import { ReactLib, Data, Icons, UI } from '@/utils/jobs/_imports';
+import type { JobFormData, Milestone } from '@/utils/jobs/_imports';
 const { React, useState, useEffect, useRef } = ReactLib;
 const { locationList, jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, FiTrash, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
@@ -11,29 +11,28 @@ import { useRouter } from 'next/router';
   
 const CreateJob: React.FC = () => {
 
-    
     const { userId, role } = useAuthStore();
     const router = useRouter();
 
-  // data to be submitted to BE
-  const [formData, setFormData] = useState<JobFormData>({
-    userId: userId,
-    location: "",
-    jobCategory: "",
-    jobTitle: "",
-    description: "",
-    requiredSkills: [],
-    requiredCertifications: [],
-    requiresRegisteredLobbyist: false,
-    employmentType: 'full-time',
-    paymentType: 'hourly',
-    price: 0,
-    milestones: [],
-    startDate: null,
-    retainerAmount: 0,
-    retainerFrequency: 'Week',
-    retainerDuration: 1,
-  });
+    // data to be submitted to BE
+    const [formData, setFormData] = useState<JobFormData>({
+        userId: userId,
+        location: "",
+        jobCategory: "",
+        jobTitle: "",
+        description: "",
+        requiredSkills: [],
+        requiredCertifications: [],
+        requiresRegisteredLobbyist: false,
+        employmentType: 'full-time',
+        paymentType: 'hourly',
+        price: 0,
+        milestones: [],
+        startDate: null,
+        retainerAmount: 0,
+        retainerFrequency: 'Week',
+        retainerDuration: 1,
+    });
 
 
     // modal state
@@ -42,125 +41,125 @@ const CreateJob: React.FC = () => {
     const datePickerRef = useRef(null);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  // Form state management
-  const [requiredSkillInput, setRequiredSkillInput] = useState<string>("");
-  const [requiredCertificationInput, setRequiredCertificationInput] = useState<string>("");
-  const [filteredRequiredSkills, setFilteredRequiredSkills] = useState<string[]>([]);
-  const [filteredRequiredCertifications, setFilteredRequiredCertifications] = useState<string[]>([]);
+    // Form state management
+    const [requiredSkillInput, setRequiredSkillInput] = useState<string>("");
+    const [requiredCertificationInput, setRequiredCertificationInput] = useState<string>("");
+    const [filteredRequiredSkills, setFilteredRequiredSkills] = useState<string[]>([]);
+    const [filteredRequiredCertifications, setFilteredRequiredCertifications] = useState<string[]>([]);
   
-//   retainer
-const [showRetainerFrequencyDropdown, setShowRetainerFrequencyDropdown] = useState<boolean>(false);
-const [retainerFrequencyInput, setRetainerFrequencyInput] = useState<string>('Week');
-const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
+    //   retainer
+    const [showRetainerFrequencyDropdown, setShowRetainerFrequencyDropdown] = useState<boolean>(false);
+    const [retainerFrequencyInput, setRetainerFrequencyInput] = useState<string>('Week');
+    const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
 
-  // Dropdowns state
-  const [showRequiredCertificationsDropdown, setShowRequiredCertificationsDropdown] = useState<boolean>(false);
-  const [showRequiredSkillsDropdown, setShowRequiredSkillsDropdown] = useState<boolean>(false);
-  const [showJobCategoryDropdown, setShowJobCategoryDropdown] = useState<boolean>(false);
-  const [showLocationDropdown, setShowLocationDropdown] = useState<boolean>(false);
-  
-  // Input values
-  const [locationInput, setLocationInput] = useState<string>("");
-  const [jobCategoryInput, setJobCategoryInput] = useState<string>("");
-  
-  // Filtered options
-  const [filteredLocation, setFilteredLocation] = useState<string[]>([]);
-  const [filteredJobCategory, setFilteredJobCategory] = useState<string[]>([]);
-  
-  // Retainer Handlers
-  const handleRetainerAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setFormData(prev => ({
-      ...prev,
-      retainerAmount: value
-    }));
-  };
-  
-  const handleRetainerDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 1;
-    setFormData(prev => ({
-      ...prev,
-      retainerDuration: value
-    }));
-  };
-  
-  const handleRetainerFrequencyChange = (frequency: string) => {
-    setFormData(prev => ({
-      ...prev,
-      retainerFrequency: frequency
-    }));
-    setRetainerFrequencyInput(frequency);
-    setShowRetainerFrequencyDropdown(false);
-  };
-
-  // Event Handlers
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-
-    const { name, value } = e.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: checked
-    }));
-  };
-
-  const handleEmploymentTypeChange = (type: 'full-time' | 'part-time') => {
-    setFormData(prev => ({
-      ...prev,
-      employmentType: type
-    }));
-  };
-
-  const handlePaymentTypeChange = (type: 'hourly' | 'fixed-price' | 'retainer') => {
-    setFormData(prev => ({
-      ...prev,
-      paymentType: type
-    }));
-  };
-
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setFormData(prev => ({
-      ...prev,
-      price: value
-    }));
-    updateMilestonePrices(value);
-  };
-
-  const updateMilestonePrices = (price: number) => {
-    if (formData.paymentType === 'fixed-price' && formData.milestones.length > 0) {
-      const pricePerMilestone = price / formData.milestones.length;
-      setFormData(prev => ({
+    // Dropdowns state
+    const [showRequiredCertificationsDropdown, setShowRequiredCertificationsDropdown] = useState<boolean>(false);
+    const [showRequiredSkillsDropdown, setShowRequiredSkillsDropdown] = useState<boolean>(false);
+    const [showJobCategoryDropdown, setShowJobCategoryDropdown] = useState<boolean>(false);
+    const [showLocationDropdown, setShowLocationDropdown] = useState<boolean>(false);
+    
+    // Input values
+    const [locationInput, setLocationInput] = useState<string>("");
+    const [jobCategoryInput, setJobCategoryInput] = useState<string>("");
+    
+    // Filtered options
+    const [filteredLocation, setFilteredLocation] = useState<string[]>([]);
+    const [filteredJobCategory, setFilteredJobCategory] = useState<string[]>([]);
+    
+    // Retainer Handlers
+    const handleRetainerAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value) || 0;
+        setFormData(prev => ({
         ...prev,
-        milestones: prev.milestones.map(milestone => ({
-          ...milestone,
-          price: pricePerMilestone
-        }))
-      }));
-    } else if (formData.paymentType === 'retainer' || formData.paymentType === 'hourly') {
-      setFormData(prev => ({
+        retainerAmount: value
+        }));
+    };
+  
+    const handleRetainerDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value) || 1;
+        setFormData(prev => ({
         ...prev,
-        milestones: prev.milestones.map(milestone => ({
-          ...milestone,
-          price: price
-        }))
-      }));
-    }
-  };
+        retainerDuration: value
+        }));
+    };
+  
+    const handleRetainerFrequencyChange = (frequency: string) => {
+        setFormData(prev => ({
+        ...prev,
+        retainerFrequency: frequency
+        }));
+        setRetainerFrequencyInput(frequency);
+        setShowRetainerFrequencyDropdown(false);
+    };
 
-//   milestone
-  const addMilestone = () => {
-    setIsModalOpen(true);
-  };
+    // Event Handlers
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+        const { name, value } = e.target;
+
+        setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        }));
+
+    };
+
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setFormData(prev => ({
+        ...prev,
+        [name]: checked
+        }));
+    };
+
+    const handleEmploymentTypeChange = (type: 'full-time' | 'part-time') => {
+        setFormData(prev => ({
+        ...prev,
+        employmentType: type
+        }));
+    };
+
+    const handlePaymentTypeChange = (type: 'hourly' | 'fixed-price' | 'retainer') => {
+        setFormData(prev => ({
+        ...prev,
+        paymentType: type
+        }));
+    };
+
+    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseFloat(e.target.value) || 0;
+        setFormData(prev => ({
+        ...prev,
+        price: value
+        }));
+        updateMilestonePrices(value);
+    };
+
+    const updateMilestonePrices = (price: number) => {
+        if (formData.paymentType === 'fixed-price' && formData.milestones.length > 0) {
+        const pricePerMilestone = price / formData.milestones.length;
+        setFormData(prev => ({
+            ...prev,
+            milestones: prev.milestones.map(milestone => ({
+            ...milestone,
+            price: pricePerMilestone
+            }))
+        }));
+        } else if (formData.paymentType === 'retainer' || formData.paymentType === 'hourly') {
+        setFormData(prev => ({
+            ...prev,
+            milestones: prev.milestones.map(milestone => ({
+            ...milestone,
+            price: price
+            }))
+        }));
+        }
+    };
+
+    //   milestone
+    const addMilestone = () => {
+        setIsModalOpen(true);
+    };
 
   const handleMilestoneSubmit =  (milestoneData: {
     description: string;
@@ -201,100 +200,100 @@ const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
     setIsModalOpen(false);
   };
 
-  const removeMilestone = (id: number) => {
-    const updatedMilestones = formData.milestones.filter(milestone => milestone.id !== id);
-    
-    // If fixed-price and there are still milestones, recalculate price per milestone
-    if (formData.paymentType === 'fixed-price' && updatedMilestones.length > 0) {
-      const pricePerMilestone = formData.price / updatedMilestones.length;
-      const recalculatedMilestones = updatedMilestones.map(milestone => ({
-        ...milestone,
-        price: pricePerMilestone
-      }));
-      
-      setFormData(prev => ({
+    const removeMilestone = (id: number) => {
+        const updatedMilestones = formData.milestones.filter(milestone => milestone.id !== id);
+        
+        // If fixed-price and there are still milestones, recalculate price per milestone
+        if (formData.paymentType === 'fixed-price' && updatedMilestones.length > 0) {
+        const pricePerMilestone = formData.price / updatedMilestones.length;
+        const recalculatedMilestones = updatedMilestones.map(milestone => ({
+            ...milestone,
+            price: pricePerMilestone
+        }));
+        
+        setFormData(prev => ({
+            ...prev,
+            milestones: recalculatedMilestones
+        }));
+        } else {
+        setFormData(prev => ({
+            ...prev,
+            milestones: updatedMilestones
+        }));
+        }
+    };
+
+    const updateMilestoneDescription = (id: number, description: string) => {
+        setFormData(prev => ({
         ...prev,
-        milestones: recalculatedMilestones
-      }));
-    } else {
-      setFormData(prev => ({
+        milestones: prev.milestones.map(milestone => 
+            milestone.id === id ? { ...milestone, description } : milestone
+        )
+        }));
+    };
+
+    const updateMilestoneDueDate = (id: number, dueDate: Date | null) => {
+        setFormData(prev => ({
         ...prev,
-        milestones: updatedMilestones
-      }));
-    }
-  };
+        milestones: prev.milestones.map(milestone => 
+            milestone.id === id ? { ...milestone, dueDate } : milestone
+        )
+        }));
+    };
 
-  const updateMilestoneDescription = (id: number, description: string) => {
-    setFormData(prev => ({
-      ...prev,
-      milestones: prev.milestones.map(milestone => 
-        milestone.id === id ? { ...milestone, description } : milestone
-      )
-    }));
-  };
+    // Tag Management
+    const addTag = (type: 'requiredSkills' | 'requiredCertifications', value: string) => {
+        if (!value.trim()) return;
+        
+        // Check if the tag already exists - if it does, remove it instead of adding
+        if (formData[type].includes(value.trim())) {
+        // Find index of the item
+        const index = formData[type].indexOf(value.trim());
+        // Remove the item
+        removeTag(type, index);
+        return;
+        }
+        
+        // Otherwise add as before
+        setFormData(prev => ({
+        ...prev,
+        [type]: [...prev[type], value.trim()]
+        }));
+        
+        // Clear the input but DO NOT close the dropdown
+        if (type === 'requiredSkills') {
+        setRequiredSkillInput("");
+        } else if (type === 'requiredCertifications') {
+        setRequiredCertificationInput("");
+        }
+    };
 
-  const updateMilestoneDueDate = (id: number, dueDate: Date | null) => {
-    setFormData(prev => ({
-      ...prev,
-      milestones: prev.milestones.map(milestone => 
-        milestone.id === id ? { ...milestone, dueDate } : milestone
-      )
-    }));
-  };
+    const removeTag = (type: 'requiredSkills' | 'requiredCertifications', index: number) => {
+        setFormData(prev => ({
+        ...prev,
+        [type]: prev[type].filter((_, i) => i !== index)
+        }));
+    };
 
-  // Tag Management
-  const addTag = (type: 'requiredSkills' | 'requiredCertifications', value: string) => {
-    if (!value.trim()) return;
-    
-    // Check if the tag already exists - if it does, remove it instead of adding
-    if (formData[type].includes(value.trim())) {
-      // Find index of the item
-      const index = formData[type].indexOf(value.trim());
-      // Remove the item
-      removeTag(type, index);
-      return;
-    }
-    
-    // Otherwise add as before
-    setFormData(prev => ({
-      ...prev,
-      [type]: [...prev[type], value.trim()]
-    }));
-    
-    // Clear the input but DO NOT close the dropdown
-    if (type === 'requiredSkills') {
-      setRequiredSkillInput("");
-    } else if (type === 'requiredCertifications') {
-      setRequiredCertificationInput("");
-    }
-  };
-
-  const removeTag = (type: 'requiredSkills' | 'requiredCertifications', index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index)
-    }));
-  };
-
-  // Dropdown effects
-  useEffect(() => {
-    if (showRequiredSkillsDropdown) {
-      const availableSkills = requiredSkillsList.filter(skill => 
-        !formData.requiredSkills.includes(skill)
-      );
-      
-      if (requiredSkillInput.trim()) {
-        const filtered = availableSkills.filter(skill => 
-          skill.toLowerCase().includes(requiredSkillInput.toLowerCase())
+    // Dropdown effects
+    useEffect(() => {
+        if (showRequiredSkillsDropdown) {
+        const availableSkills = requiredSkillsList.filter(skill => 
+            !formData.requiredSkills.includes(skill)
         );
-        setFilteredRequiredSkills(filtered);
-      } else {
-        setFilteredRequiredSkills(availableSkills);
-      }
-    } else {
-      setFilteredRequiredSkills(requiredSkillsList.filter(skill => !formData.requiredSkills.includes(skill)));
-    }
-  }, [requiredSkillInput, formData.requiredSkills, showRequiredSkillsDropdown]);
+        
+        if (requiredSkillInput.trim()) {
+            const filtered = availableSkills.filter(skill => 
+            skill.toLowerCase().includes(requiredSkillInput.toLowerCase())
+            );
+            setFilteredRequiredSkills(filtered);
+        } else {
+            setFilteredRequiredSkills(availableSkills);
+        }
+        } else {
+        setFilteredRequiredSkills(requiredSkillsList.filter(skill => !formData.requiredSkills.includes(skill)));
+        }
+    }, [requiredSkillInput, formData.requiredSkills, showRequiredSkillsDropdown]);
 
   useEffect(() => {
     if (showRequiredCertificationsDropdown) {
@@ -955,4 +954,4 @@ const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
   )
 }
 
-export default CreateJob
+export default CreateJob;

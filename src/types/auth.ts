@@ -1,39 +1,69 @@
+// @/types/auth.ts
+
 export type UserType = 'contractor' | 'client';
 
-export interface FormData {
-    userType: UserType;
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone_number: string;
-    password: string;
+export interface SignupFormData {
+  userType: UserType;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+  userId?: string;
 }
 
-export interface LoginFormData {
-    email: string;
-    password: string;
-  }
-
-export interface FormErrors {
-    email: string;
-    phone_number: string;
-    password: string;
+export interface SignupApiResponse {
+  status: string;
+  message: string;
+  data?: {
+    name?: string;
+    role?: string;
+    userId: string;
+    email?: string;
+    phoneNumber?: string;
+  };
 }
 
-export interface SignupResponse {
-    success: boolean;
-    message: string;
+export interface ErrorResponse {
+  message?: string;
 }
 
-export interface LoginResponse {
-    success: boolean;
-    token?: string;
-    user?: {
-      id: string;
+// ✅ SignIn Specific Types
+
+export interface SignInFormData {
+  email: string;
+  password: string;
+}
+
+export interface SignInApiResponse {
+  status: string;
+  message: string;
+  data?: {
+    user: {
+      _id: string;
+      name: string;
       email: string;
-      first_name: string;
-      last_name: string;
-      userType: UserType;
+      phoneNumber: string;
+      role: UserType;
+      isEmailVerified: boolean;
+      isPhoneVerified: boolean;
     };
-    message?: string;
-  }
+  };
+}
+
+// ✅ Unified AuthStore type for both SignUp and SignIn
+export interface AuthStore {
+  setFormData: (data: {
+    role?: UserType;
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    password?: string;
+    userId?: string;
+  }) => void;
+  setUserId: (id: string) => void;
+  setVerificationStep?: (step: string) => void;
+  setEmailVerified?: (status: boolean) => void;
+  setPhoneVerified?: (status: boolean) => void;
+}
