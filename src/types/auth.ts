@@ -29,7 +29,19 @@ export interface ErrorResponse {
   message?: string;
 }
 
-// ✅ SignIn Specific Types
+export interface AuthStore {
+  setFormData: (data: {
+    role?: UserType;
+    name?: string;
+    email?: string;
+    phoneNumber?: string;
+    password?: string;
+    userId?: string;
+  }) => void;
+  setUserId: (id: string) => void;
+  setVerificationStep: (step: string) => void;
+}
+
 
 export interface SignInFormData {
   email: string;
@@ -50,20 +62,4 @@ export interface SignInApiResponse {
       isPhoneVerified: boolean;
     };
   };
-}
-
-// ✅ Unified AuthStore type for both SignUp and SignIn
-export interface AuthStore {
-  setFormData: (data: {
-    role?: UserType;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    password?: string;
-    userId?: string;
-  }) => void;
-  setUserId: (id: string) => void;
-  setVerificationStep?: (step: string) => void;
-  setEmailVerified?: (status: boolean) => void;
-  setPhoneVerified?: (status: boolean) => void;
 }
