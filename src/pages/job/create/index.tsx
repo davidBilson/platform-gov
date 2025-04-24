@@ -6,6 +6,8 @@ const { locationList, jobCategoryList, requiredCertificationsList, requiredSkill
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, FiTrash, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
 const { DatePicker, AddMilestoneModal } = UI;
 import axios from 'axios';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
 // import { useRouter } from 'next/router';
 
   
@@ -36,6 +38,9 @@ const CreateJob: React.FC = () => {
         retainerDuration: 1,
     });
 
+    const router = useRouter()
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -360,17 +365,26 @@ const CreateJob: React.FC = () => {
   }, [formData.paymentType]);
 
   // Form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (e: React.FormEvent ) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+      
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+      const createJobEndpoint =process.env.NEXT_PUBLIC_CREATE_JOBS;
     try {
+        console.log(baseURL);
+        console.log(createJobEndpoint);
       // Prepare data for API submission
-      const response = await axios.post('/api/jobs', formData);
+      const response = await axios.post(`${baseURL}${createJobEndpoint}`, formData);
       console.log('Job created successfully:', response.data);
+      toast.success('Job created successfully');
+      router.push('/')
       // Handle success (redirect, show message, etc.)
     } catch (error) {
       console.error('Error creating job:', error);
-      // Handle error (show error message, etc.)
+      toast.error('Error creating job');
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -396,10 +410,10 @@ const CreateJob: React.FC = () => {
             paymentType={formData.paymentType}
             defaultPrice={formData.price}
         />
-      <section className='w-full max-w-275 m-auto pb-32'>
+      <section className='w-full max-w-275 m-auto pb-64'>
         <h1 className='pb-7.5 font-semibold text-xl'>Create Job</h1>
         {/* Create Job Form */}
-        <form onSubmit={handleSubmit}>
+        <form id="createJobForm" onSubmit={handleSubmit}>
           {/* Job Category */}
           <div className="relative w-full max-w-75 mb-7.5">
             <div className="w-full max-w-75 flex justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
@@ -945,12 +959,19 @@ const CreateJob: React.FC = () => {
           >
             Cancel
           </button>
-          <button 
-            type="submit"
-            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
-          >
-            {"Submit"}
-          </button>
+          <button
+            type="submit" form="createJobForm"
+            disabled={isSubmitting}
+            className="w-22.5 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
+        >
+            {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                </div>
+            ) : (
+                "Submit"
+            )}
+        </button>
         </section>
         </section>
     </section>
