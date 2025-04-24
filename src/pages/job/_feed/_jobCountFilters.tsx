@@ -10,7 +10,7 @@ interface JobCountFiltersProps {
 }
 
 const JobCountFilters: React.FC<JobCountFiltersProps> = ({ 
-  jobCount = 245, 
+  jobCount = 0, 
   activeFilters = [
     { id: 'jobType', name: 'Job Type' },
     { id: 'securityClearance', name: 'Security Clearance' }

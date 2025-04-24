@@ -1,10 +1,13 @@
 import React from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { JobListProps } from '@/types/jobs';
+import { FaRegHourglass } from "react-icons/fa6";
+import { FaLocationDot } from "react-icons/fa6";
+import Link from 'next/link';
 
 const JobList: React.FC<JobListProps> = ({ job }) => {
   // Calculate time since job was posted
-  const postedTime = formatDistanceToNow(new Date(job.createdAt), { addSuffix: true });
+  const postedTime = format(new Date(job.createdAt), 'M/d/yyyy h:mm a');
   
   // Format payment information based on payment type
   const getPaymentInfo = (): string => {
@@ -25,30 +28,25 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
   };
 
   return (
-    <section className="border-t border-gray-200 pt-4">
+    <section className="border-b border-b-lightblue pt-7.5 pb-10">
       <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-        <p>Posted {postedTime}</p>
-        <div>
-          <button className="text-blue-500 font-semibold mr-2">Apply</button> | 
-          <button className="text-blue-500 font-semibold ml-2">Save</button>
+        <p className='text-xs font-semibold text-boldblue'>Posted {postedTime}</p>
+        <div className='text-boldblue'>
+          <button className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Apply</button> | 
+          <button className="text-sm font-bold ml-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Save</button>
         </div>
       </div>
       
-      <h3 className="text-lg font-medium mb-2">{job.jobTitle}</h3>
+      <h3 className="text-xl font-semibold mb-3.75">{job.jobTitle}</h3>
       
-      <div className="flex flex-wrap items-center gap-4 mb-4 text-sm">
-        <div className="flex items-center">
-          <svg className="w-5 h-5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+      <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
+        <div className="flex items-center gap-1.25">
+          <FaRegHourglass size={15} />
           {getPaymentInfo()} | {job.employmentType}
         </div>
         
-        <div className="flex items-center">
-          <svg className="w-5 h-5 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
+        <div className="flex items-center gap-1.25">
+          <FaLocationDot size={15} />
           {job.location}
         </div>
       </div>
@@ -57,9 +55,9 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
         {truncateDescription(job.description)}
       </p>
       
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-5.5 mb-3.75">
         {job.requiredSkills.map((skill, index) => (
-          <span key={`skill-${index}`} className="bg-blue-500 text-white text-xs rounded-full px-3 py-1">
+          <span key={`skill-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-3 py-1">
             {skill}
           </span>
         ))}
@@ -71,13 +69,14 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
         ))}
       </div>
       
-      <div className="flex items-center">
-        <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold mr-2">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
-          </svg>
+      <div className="flex items-center gap-5">
+        <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
+          {
+            job.clientLogo &&
+            <img src={job.clientLogo} alt={job.clientName} width={35} height={35} className="rounded-full" />
+          }
         </div>
-        <span className="font-medium">{job.userRole === 'individual' ? 'Individual' : 'Company'}</span>
+        <Link href="" className="font-semibold text-sm hover:underline">{job.clientName}</Link>
       </div>
     </section>
   );

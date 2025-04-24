@@ -39,6 +39,15 @@ export interface JobList {
   createdAt: string;
   retainerAmount?: number;
   retainerFrequency?: string;
+
+  // New client-related fields
+  clientName: string;
+  clientLogo: string;
+  clientIndustry: string;
+  clientCompanySize: string;
+  clientSpecializations: string[]; // Assuming it's always an array of strings
+  clientLocation: string[];        // Also assuming it's an array of strings
+  clientAccountAge: string;        // ISO string format
 }
 
 export interface JobListProps {
@@ -46,6 +55,15 @@ export interface JobListProps {
 }
 
 export interface Jobs {
+    // New client-related fields
+    clientName: string;
+    clientLogo: string;
+    clientIndustry: string;
+    clientCompanySize: string;
+    clientSpecializations: string[]; // Assuming it's always an array of strings
+    clientLocation: string[];        // Also assuming it's an array of strings
+    clientAccountAge: string; 
+    
   _id: string;
   jobTitle: string;
   description: string;
