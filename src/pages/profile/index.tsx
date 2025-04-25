@@ -1,7 +1,7 @@
 import useAuthStore from '@/store/authStore'
 import React from 'react'
-import BusinessProfile from './business'
-import FreelancerProfile from './freelancer'
+import BusinessProfile from './_business'
+import FreelancerProfile from './_freelancer'
 
 const Index = () => {
 

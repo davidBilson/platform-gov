@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IoMdImages } from "react-icons/io";
+import { FaEdit } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import useAuthStore from '@/store/authStore';
 import { fetchProfile } from "@/api/profile-api";
@@ -239,6 +240,8 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
                 </div>
               </div>
             </div>
+
+            <Link href="/profile/create" className='text-xs flex items-center gap-1.5 hover:underline hover:text-deepskyblue text-boldblue active:text-skyblue cursor-pointer'><FaEdit /> Edit Profile</Link>
 
             {/* Description */}
             <div className='py-5'>
