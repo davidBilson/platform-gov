@@ -11,16 +11,21 @@ import { usePathname } from 'next/navigation';
 import authStore from "@/store/authStore";
 import { useRouter } from "next/router";
 
-
 const UserNavbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
+  const [jobsDropdown, setJobsDropdown] = useState(false);
+  const [contractsDropdown, setContractsDropdown] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const jobsDropdownRef = useRef<HTMLLIElement | null>(null);
+  const contractsDropdownRef = useRef<HTMLLIElement | null>(null);
+
   const searchRef = useRef<HTMLDivElement | null>(null);
   
   const pathname = usePathname();
-  const { name } = authStore();
+  const { name, role } = authStore();
   const router = useRouter();
 
   const navigateToProfile = () => {
@@ -41,6 +46,18 @@ const UserNavbar = () => {
       if (dropdownRef.current && event.target instanceof Node) {
         if (!dropdownRef.current.contains(event.target)) {
           setContractorsDropdown(false);
+        }
+      }
+      
+      if (jobsDropdownRef.current && event.target instanceof Node) {
+        if (!jobsDropdownRef.current.contains(event.target)) {
+          setJobsDropdown(false);
+        }
+      }
+      
+      if (contractsDropdownRef.current && event.target instanceof Node) {
+        if (!contractsDropdownRef.current.contains(event.target)) {
+          setContractsDropdown(false);
         }
       }
       
@@ -138,18 +155,57 @@ const UserNavbar = () => {
 
             {/* Desktop navigation */}
             <ul className="hidden lg:flex items-center gap-[13px] w-fit text-boldblue font-bold">
-                <li className="flex items-center gap-1.25 cursor-pointer">
-                    <span>Jobs</span>
-                    <span><IoMdArrowDropdown size={20} /></span>
+                {/* Jobs dropdown */}
+                <li className="flex items-center gap-1.25 cursor-pointer relative" ref={jobsDropdownRef}>
+                    <div onClick={() => setJobsDropdown(!jobsDropdown)} className="flex items-center gap-1.25">
+                      <span>Jobs</span>
+                      <span><IoMdArrowDropdown size={20} /></span>
+                    </div>
+                    
+                    {jobsDropdown && (
+                      <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-skyblue rounded shadow-md z-10">
+                        <Link href="/" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Find Jobs
+                        </Link>
+                        {role === 'client' && (
+                          <Link href="/job/create" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                            Create Jobs
+                          </Link>
+                        )}
+                      </div>
+                    )}
                 </li>
+                
                 <li className="flex items-center gap-1.25 cursor-pointer">
                     <span>Manage Contractors</span>
                     <span><IoMdArrowDropdown size={20} /></span>
                 </li>
-                <li className="flex items-center gap-1.25 cursor-pointer">
-                    <span>Manage Contracts</span>
-                    <span><IoMdArrowDropdown size={20} /></span>
+                
+                {/* Manage Contracts dropdown */}
+                <li className="flex items-center gap-1.25 cursor-pointer relative" ref={contractsDropdownRef}>
+                    <div onClick={() => setContractsDropdown(!contractsDropdown)} className="flex items-center gap-1.25">
+                      <span>Manage Contracts</span>
+                      <span><IoMdArrowDropdown size={20} /></span>
+                    </div>
+                    
+                    {contractsDropdown && (
+                      <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-skyblue rounded shadow-md z-10">
+                        <Link href="/contracts/active" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Active Contracts
+                        </Link>
+                        <Link href="/contracts/open" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Open Contracts
+                        </Link>
+                        <Link href="/contracts/pending" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Pending Contracts
+                        </Link>
+                        <Link href="/contracts/closed" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Closed Contracts
+                        </Link>
+                      </div>
+                    )}
                 </li>
+                
                 <li className="cursor-pointer">
                     <Link href={"/"}>Messages</Link>
                 </li>
@@ -225,18 +281,63 @@ const UserNavbar = () => {
             {mobileMenu && (
               <div className="lg:hidden fixed top-28 left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-40">
                 <ul className="flex flex-col items-center gap-5 text-boldblue font-bold text-[16px]">
-                  <li className="flex items-center gap-1.25">
+                  {/* Mobile Jobs dropdown */}
+                  <li className="relative">
+                    <div 
+                      className="flex items-center gap-1.25"
+                      onClick={() => setJobsDropdown(!jobsDropdown)}
+                    >
                       <span>Jobs</span>
                       <span><IoMdArrowDropdown size={20} /></span>
+                    </div>
+                    
+                    {jobsDropdown && (
+                      <div className="mt-2 bg-white rounded shadow-md z-10 flex flex-col items-center">
+                        <Link href="/jobs/find" className="py-2 text-sm text-boldblue hover:underline">
+                          Find Jobs
+                        </Link>
+                        {role === 'client' && (
+                          <Link href="/jobs/create" className="py-2 text-sm text-boldblue hover:underline">
+                            Create Jobs
+                          </Link>
+                        )}
+                      </div>
+                    )}
                   </li>
+                  
                   <li className="flex items-center gap-1.25">
                       <span>Manage Contractors</span>
                       <span><IoMdArrowDropdown size={20} /></span>
                   </li>
-                  <li className="flex items-center gap-1.25">
+                  
+                  {/* Mobile Contracts dropdown */}
+                  <li className="relative">
+                    <div 
+                      className="flex items-center gap-1.25"
+                      onClick={() => setContractsDropdown(!contractsDropdown)}
+                    >
                       <span>Manage Contracts</span>
                       <span><IoMdArrowDropdown size={20} /></span>
+                    </div>
+                    
+                    {contractsDropdown && (
+                      <div className="mt-2 bg-white rounded shadow-md z-10 flex flex-col items-center">
+                        <Link href="/contracts/open" className="py-2 text-sm text-boldblue hover:underline">
+                          Open Contracts
+                        </Link>
+                        <Link href="/contracts/active" className="py-2 text-sm text-boldblue hover:underline">
+                          Active Contracts
+                        </Link>
+                        <Link href="/contracts/pending" className="py-2 text-sm text-boldblue hover:underline">
+                          Pending Contracts
+                        </Link>
+                        <Link href="/contracts/closed" className="py-2 text-sm text-boldblue hover:underline">
+                          Closed Contracts
+                        </Link>
+                      </div>
+                    )}
                   </li>
+                  
                   <li>
                       <Link href={"/"}>Messages</Link>
                   </li>

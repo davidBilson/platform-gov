@@ -22,7 +22,7 @@ export interface Milestone {
     startDate: Date | null;
     retainerAmount: number;
     retainerFrequency: string;
-    retainerDuration: number;
+    retainerDuration: number | null;
 }
 
 export interface JobList {

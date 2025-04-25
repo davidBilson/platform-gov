@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import useAuthStore from "@/store/authStore";
 import { ToastContainer } from 'react-toastify';
-import Logo from "@/components/ui/logo";
+// import Logo from "@/components/ui/logo";
 
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
@@ -17,7 +17,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     '/auth/sign-up',
     '/auth/sign-in',
     '/auth/forgot-password',
-    '/reset-password',
+    '/auth/reset-password',
     '/auth/verification',
     '/'
   ];
@@ -26,7 +26,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     publicRoutes.includes(router.pathname) ||
     publicRoutes.some(route => router.pathname.startsWith(route + '/'));
 
-    const isAuthPage = ['/auth/sign-in', '/auth/sign-up'].includes(router.pathname);
+    // const isAuthPage = ['/auth/sign-in', '/auth/sign-up'].includes(router.pathname);
     const isVerificationPage = router.pathname === '/auth/verification';
   
     // Initialize auth on first load

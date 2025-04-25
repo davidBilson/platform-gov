@@ -4,8 +4,12 @@ import { JobListProps } from '@/types/jobs';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import Link from 'next/link';
+import useAuthStore from '@/store/authStore';
 
 const JobList: React.FC<JobListProps> = ({ job }) => {
+
+  const { userId } = useAuthStore()
+
   // Calculate time since job was posted
   const postedTime = format(new Date(job.createdAt), 'M/d/yyyy h:mm a');
   
@@ -31,11 +35,14 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
     <section className="border-b border-b-lightblue pt-7.5 pb-10">
       <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
         <p className='text-xs font-semibold text-boldblue'>Posted {postedTime}</p>
-        <div className='text-boldblue'>
-          {/* when user clicks on apply, it should navigate to /job/apply and take the job._id with it to that route */}
-          <Link href={`/job/apply?id=${job._id}`} className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">Apply</Link> | 
-          <button className="text-sm font-bold ml-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Save</button>
-        </div>
+        {
+          userId &&
+          <div className='text-boldblue'>
+            {/* when user clicks on apply, it should navigate to /job/apply and take the job._id with it to that route */}
+            <Link href={`/job/apply?id=${job._id}`} className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">Apply</Link> | 
+            <button className="text-sm font-bold ml-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Save</button>
+          </div>
+        }
       </div>
       
       <h3 className="text-xl font-semibold mb-3.75">{job.jobTitle}</h3>
