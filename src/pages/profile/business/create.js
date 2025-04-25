@@ -207,21 +207,14 @@ const CreateBusinessProfile = () => {
       }
     } catch (err) {
       console.error('Error saving business profile:', err);
+      return toast.error('Error saving business profile');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // const handleCancel = () => {
-  //   // Confirm before canceling changes
-  //   if (window.confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-  //     // Redirect or reset form
-  //     router.back();
-  //   }
-  // };
-
   const handlePreview = () => {
-    router.push('/profile/business')
+    router.push('/profile')
   };
 
   // Handle specialization input with enter key

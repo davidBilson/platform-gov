@@ -3,6 +3,7 @@ import { IoMdImages } from "react-icons/io";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import useAuthStore from '@/store/authStore';
 import { fetchProfile } from "@/api/profile-api";
+import Link from "next/link";
 
 // Define proper TypeScript interfaces
 interface WorkHistoryItem {
@@ -41,7 +42,7 @@ interface ProfileProps {
   initialProfileId?: string;
 }
 
-const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
+const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   // Get user data from auth store - add proper typing
   const { userId, name } = useAuthStore() as { userId: string | null; name: string | null };
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
@@ -153,6 +154,11 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
 
   // Check if profile image exists
   const hasProfileImage = profileData?.profileImage ? true : false;
+
+  if (!profileData) return <div className="p-6 text-center">
+  Profile not found. {" "}
+  <Link href="/profile/create" className="text-boldblue underline">Create a profile</Link>
+</div>;
   
   return (
     <main className="p-4 md:p-6">
@@ -289,4 +295,4 @@ const Index: React.FC<ProfileProps> = ({ initialProfileId }) => {
   );
 };
 
-export default Index;
+export default FreelancerProfile;

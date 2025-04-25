@@ -204,9 +204,9 @@ const Verification: React.FC = () => {
   const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
     if (role === 'contractor') {
-      router.push('/profile/freelancer/create');
+      router.push('/profile/create');
     } else if (role === 'client') {
-      router.push('/profile/business/create');
+      router.push('/profile/create');
     } else {
       toast.error('Unable to determine your account type. Please contact support.');
     }

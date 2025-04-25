@@ -507,7 +507,7 @@ const submitProfileData = async (): Promise<void> => {
 
   // Handle preview - could be expanded in future
   const handlePreview = () => {
-    router.push('/profile/freelancer')
+    router.push('/profile')
   };
 
   // Initialize textarea height on mount

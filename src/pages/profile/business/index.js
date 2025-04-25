@@ -4,7 +4,7 @@ import OpenJobs from './_open-jobs';
 import useAuthStore from '@/store/authStore';
 import Link from 'next/link';
 
-const BusinessProfileIndex = () => {
+const BusinessProfile = () => {
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -41,8 +41,8 @@ const BusinessProfileIndex = () => {
   if (loading) return <div className="p-6 text-center">Loading business profile...</div>;
   // if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (!business) return <div className="p-6 text-center">
-    No business profile found. {" "}
-    <Link href="/profile/business/create" className="text-boldblue underline">Create a Business Profile</Link>
+    Profile not found. {" "}
+    <Link href="/profile/create" className="text-boldblue underline">Create a profile</Link>
   </div>;
 
   {}
@@ -169,7 +169,7 @@ const BusinessProfileIndex = () => {
         {/* Edit Button at Bottom */}
         <div className='mt-8 flex justify-end'>
           <Link 
-            href="/profile/business/create" 
+            href="/profile/create" 
             className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             Edit Profile
@@ -183,4 +183,4 @@ const BusinessProfileIndex = () => {
   );
 };
 
-export default BusinessProfileIndex;
+export default BusinessProfile;
