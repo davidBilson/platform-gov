@@ -5,7 +5,9 @@ import { RiCheckboxBlankCircleLine } from 'react-icons/ri';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaCheckCircle } from "react-icons/fa";
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { Jobs } from '@/types/jobs';
+import useAuthStore from '@/store/authStore';
 
 interface ApplicationProps {
   job: Jobs;
@@ -13,16 +15,17 @@ interface ApplicationProps {
 }
 
 const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
+
+  const { userId } = useAuthStore();
+
   const [formData, setFormData] = useState({
     coverLetter: '',
     proposedRate: '',
-    attachments: [],
+    attachment: null as File | null,
     acknowledgment: false,
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -32,33 +35,96 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
     }));
   };
   
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
       setFormData(prev => ({
         ...prev,
-        attachments: [...prev.attachments, ...Array.from(e.target.files || [])],
+        attachment: files[0],
       }));
     }
   };
   
-  const removeAttachment = (index: number) => {
+  const removeAttachment = () => {
     setFormData(prev => ({
       ...prev,
-      attachments: prev.attachments.filter((_, i) => i !== index),
+      attachment: null,
     }));
   };
   
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.coverLetter) {
+      toast.error("Please provide a cover letter");
+      return;
+    }
+    
+    if (!formData.proposedRate) {
+      toast.error("Please provide your proposed rate");
+      return;
+    }
+    
+    if (!formData.acknowledgment) {
+      toast.error("Please acknowledge that you have the required certifications");
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Submit logic here
-    await axios.post()
-    setTimeout(() => {
+    try {
+      // Create form data for file upload
+      const formDataToSubmit = new FormData();
+      formDataToSubmit.append('userId', userId);
+      formDataToSubmit.append('jobId', job._id);
+      formDataToSubmit.append('coverLetter', formData.coverLetter);
+      formDataToSubmit.append('proposedRate', formData.proposedRate);
+      formDataToSubmit.append('acknowledgment', String(formData.acknowledgment));
+      
+      if (formData.attachment) {
+        formDataToSubmit.append('attachment', formData.attachment);
+      }
+      
+      // Submit application data
+      await axios.post('/api/applications/submit', formDataToSubmit, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      toast.success("Application submitted successfully!");
+      
+      // Close after successful submission
+      setTimeout(() => {
+        setIsSubmitting(false);
+        onClose();
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast.error("Failed to submit application. Please try again.");
       setIsSubmitting(false);
-      // Close after successful submission if desired
-      onClose();
-    }, 2000);
+    }
+  };
+  
+  const handleSaveDraft = () => {
+    try {
+      // Save draft implementation would go here
+      toast.success("Draft saved successfully!");
+    } catch (error) {
+      toast.error("Failed to save draft. Please try again.");
+      console.log(error)
+    }
+  };
+  
+  const handleDeleteDraft = () => {
+    try {
+      // Delete draft implementation would go here
+      toast.success("Draft deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete draft. Please try again.");
+      console.log(error)
+    }
   };
 
   return (
@@ -107,37 +173,34 @@ const handleSubmit = async (e) => {
               </div>
             </div>
             
-            {/* Attach certification documents */}
+            {/* Attach certification document */}
             <div className="mb-5 md:mb-7.5">
-              <label className="block text-xs md:text-sm text-boldblue font-semibold mb-2">Attach certification documents</label>
+              <label className="block text-xs md:text-sm text-boldblue font-semibold mb-2">Attach certification document</label>
               <div className="w-full max-w-fit border border-boldblue rounded-lg px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm text-white bg-boldblue">
                 <label className="flex items-center cursor-pointer">
                   <input 
                     type="file" 
-                    multiple
                     onChange={handleFileChange}
                     className="hidden" 
                   />
                   <FiPaperclip size={18} className="mr-2" />
-                  <span className="text-white">Attach files</span>
+                  <span className="text-white">Attach file</span>
                 </label>
               </div>
               
-              {/* Display attached files */}
-              {formData.attachments.length > 0 && (
-                <div className="mt-3 space-y-2">
-                  {formData.attachments.map((file: File, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white p-2 rounded">
-                      <span className="text-xs md:text-sm truncate max-w-[80%]">{file.name}</span>
-                      <button 
-                        type="button"
-                        onClick={() => removeAttachment(index)}
-                        className="focus:outline-none text-red-500"
-                      >
-                        <IoCloseOutline size={20} />
-                      </button>
-                    </div>
-                  ))}
+              {/* Display attached file */}
+              {formData.attachment && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between bg-white p-2 rounded">
+                    <span className="text-xs md:text-sm truncate max-w-[80%]">{formData.attachment.name}</span>
+                    <button 
+                      type="button"
+                      onClick={removeAttachment}
+                      className="focus:outline-none text-red-500"
+                    >
+                      <IoCloseOutline size={20} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -174,7 +237,7 @@ const handleSubmit = async (e) => {
             {/* action buttons */}
             <div className='flex flex-wrap items-center justify-center gap-2 md:gap-2.5'>
               <button 
-              onClick={onClose}
+                onClick={onClose}
                 type="button"
                 className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 border bg-white border-boldblue text-boldblue text-xs md:text-sm font-semibold rounded-lg"
               >
@@ -182,12 +245,14 @@ const handleSubmit = async (e) => {
               </button>
               <button 
                 type="button"
+                onClick={handleDeleteDraft}
                 className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 border bg-white border-boldblue text-boldblue text-xs md:text-sm font-semibold rounded-lg"
               >
                 Delete Draft
               </button>
               <button 
                 type="button"
+                onClick={handleSaveDraft}
                 className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 border bg-white border-boldblue text-boldblue text-xs md:text-sm font-semibold rounded-lg"
               >
                 Save Draft

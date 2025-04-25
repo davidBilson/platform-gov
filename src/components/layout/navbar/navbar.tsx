@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import AdminNavbar from './_AdminNavbar';
+import AdminNavbar from './_adminNavbar';
 import UserNavbar from './_userNavbar';
 import GuestNavbar from './_guestNavbar';
 import useAuthStore from '@/store/authStore';

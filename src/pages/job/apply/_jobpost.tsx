@@ -10,6 +10,12 @@ interface JobPostProps {
   onApply: () => void;
 }
 
+// Define a type for location object
+interface LocationObject {
+  city?: string;
+  state?: string;
+}
+
 const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
   // Format the date
   const postedDate = job.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
@@ -24,6 +30,17 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
       return `Retainer | $${job.retainerAmount}/${job.retainerFrequency.toLowerCase()}`;
     }
     return '';
+  };
+
+  // Helper function to safely get client location
+  const getClientLocation = (): string => {
+    if (Array.isArray(job.clientLocation) && job.clientLocation.length > 0) {
+      const locationObj = job.clientLocation[0] as unknown as LocationObject;
+      if (locationObj && typeof locationObj === 'object' && 'city' in locationObj && 'state' in locationObj) {
+        return `${locationObj.city}, ${locationObj.state}`;
+      }
+    }
+    return job.location;
   };
 
   return (
@@ -51,7 +68,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
       
       {/* Description section */}
       <div className="pb-7.5 border-b border-b-gray-300">
-        <p className="text-black whitespace-pre-line">{job.description}</p>
+        <p className="text-black whitespace-pre-line">{String(job.description)}</p>
       </div>
       
       {/* Skills and Certifications section */}
@@ -118,11 +135,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
           
           <div>
             <p className="text-gray-500 text-sm">Location</p>
-            <p className="font-medium">
-              {job.clientLocation && job.clientLocation[0] ? 
-                `${job.clientLocation[0]?.city}, ${job.clientLocation[0]?.state}` : 
-                job.location}
-            </p>
+            <p className="font-medium">{getClientLocation()}</p>
           </div>
           
           <div>
@@ -133,7 +146,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
           {job.jobCategory && (
             <div>
               <p className="text-gray-500 text-sm">Job Category</p>
-              <p className="font-medium">{job.jobCategory}</p>
+              <p className="font-medium">{String(job.jobCategory)}</p>
             </div>
           )}
         </div>
