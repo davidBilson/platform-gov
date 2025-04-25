@@ -86,8 +86,11 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         formDataToSubmit.append('attachment', formData.attachment);
       }
       
-      // Submit application data
-      await axios.post('/api/applications/submit', formDataToSubmit, {
+      // Submit application data using environment variables
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+      const sendApplicationEndpoint = process.env.NEXT_PUBLIC_CREATE_JOB_APPLICATION;
+      
+      await axios.post(`${baseURL}${sendApplicationEndpoint}`, formDataToSubmit, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -100,9 +103,15 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         setIsSubmitting(false);
         onClose();
       }, 2000);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting application:', error);
-      toast.error("Failed to submit application. Please try again.");
+      
+      // Check if the error is an Axios error response
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to submit application. Please try again.");
+      }
       setIsSubmitting(false);
     }
   };
