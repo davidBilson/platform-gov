@@ -1,7 +1,7 @@
 # Style Guide
 
 ## Click Effect For Buttons
-transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out
+transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer
 
 ## Hover Effect For Buttons
 hover:opacity-70 transition duration-300 ease-in-out

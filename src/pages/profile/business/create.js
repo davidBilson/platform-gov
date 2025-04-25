@@ -43,7 +43,7 @@ const CreateBusinessProfile = () => {
       
       try {
         setLoading(true);
-        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_BUSINESS_PROFILE?.replace(':id', userId);
+        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
         const response = await fetch(`${BASE_URL}${apiEndpoint}`);
         const data = await response.json();
         
@@ -170,8 +170,8 @@ const CreateBusinessProfile = () => {
     setIsLoading(true);
     
     try {
-      const createApiEndpoint = process.env.NEXT_PUBLIC_CREATE_BUSINESS_PROFILE;
-      const updateApiEndpoint = process.env.NEXT_PUBLIC_UPDATE_BUSINESS_PROFILE?.replace(':id', userId);
+      const createApiEndpoint = process.env.NEXT_PUBLIC_CREATE_CLIENT_PROFILE;
+      const updateApiEndpoint = process.env.NEXT_PUBLIC_UPDATE_CLIENT_PROFILE?.replace(':id', userId);
 
       const endpoint = business._id 
         ? `${BASE_URL}${updateApiEndpoint}`

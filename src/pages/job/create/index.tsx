@@ -8,7 +8,7 @@ const { DatePicker, AddMilestoneModal } = UI;
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-// import { useRouter } from 'next/router';
+import { FaCheckCircle } from "react-icons/fa";
 
   
 const CreateJob: React.FC = () => {
@@ -614,7 +614,7 @@ const CreateJob: React.FC = () => {
               className="hidden" 
             />
             {formData.requiresRegisteredLobbyist ? (
-              <RiCheckboxBlankCircleFill 
+              <FaCheckCircle 
                 color='#0B5F94' 
                 size={20}
                 onClick={() => setFormData(prev => ({ ...prev, requiresRegisteredLobbyist: false }))}

@@ -6,12 +6,12 @@ const useAuthStore = create(
   persist(
     (set) => ({
       // User info
-      userType: 'contractor',
+      userType: '',
       name: '',
       email: '',
       phoneNumber: '',
       password: '',
-      userId: null,
+      userId: '',
 
       // Verification status
       isEmailVerified: false,
@@ -73,7 +73,7 @@ const useAuthStore = create(
 
       // Reset all data
       resetAll: () => set({
-        role: 'contractor',
+        role: '',
         name: '',
         email: '',
         phoneNumber: '',

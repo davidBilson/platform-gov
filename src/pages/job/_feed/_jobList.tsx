@@ -32,7 +32,8 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
       <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
         <p className='text-xs font-semibold text-boldblue'>Posted {postedTime}</p>
         <div className='text-boldblue'>
-          <button className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Apply</button> | 
+          {/* when user clicks on apply, it should navigate to /job/apply and take the job._id with it to that route */}
+          <Link href={`/job/apply?id=${job._id}`} className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">Apply</Link> | 
           <button className="text-sm font-bold ml-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Save</button>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { usePathname } from 'next/navigation';
 import authStore from "@/store/authStore";
 import { useRouter } from "next/router";
 
-const Navbar = () => {
+const UserNavbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
@@ -26,7 +26,7 @@ const Navbar = () => {
     router.push('/profile');
   }
 
-  const contractorOptions = ["Contractors", "Businesses", "Both"];
+  const contractorOptions = ["Contractors", "Clients"];
   const [selectedOption, setSelectedOption] = useState("Contractors");
 
   // Check if current path is an auth route
@@ -136,7 +136,7 @@ const Navbar = () => {
             </div>
 
             {/* Desktop navigation */}
-            <ul className="hidden lg:flex items-center gap-[13px] w-fit text-boldblue font-bold text-[16px]">
+            <ul className="hidden lg:flex items-center gap-[13px] w-fit text-boldblue font-bold">
                 <li className="flex items-center gap-1.25 cursor-pointer">
                     <span>Jobs</span>
                     <span><IoMdArrowDropdown size={20} /></span>
@@ -261,4 +261,4 @@ const Navbar = () => {
   );
 }
 
-export default Navbar;
+export default UserNavbar;

@@ -21,7 +21,7 @@ const BusinessProfileIndex = () => {
       
       try {
         setLoading(true);
-        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_BUSINESS_PROFILE?.replace(':id', userId);
+        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
         const response = await fetch(`${BASE_URL}${apiEndpoint}`);
         const data = await response.json();
         

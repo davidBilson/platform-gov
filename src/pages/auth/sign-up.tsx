@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import Link from 'next/link';
 import useAuthStore from '@/store/authStore';
 import axios, { AxiosError } from 'axios';
@@ -8,7 +8,7 @@ import { SignupFormData, SignupApiResponse, ErrorResponse,  AuthStore } from '@/
 
 
 const Signup: React.FC = () => {
-  const router = useRouter();
+  // const router = useRouter();
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore() as AuthStore;
   
   const [formData, setLocalFormData] = useState<SignupFormData>({
@@ -79,27 +79,30 @@ const Signup: React.FC = () => {
       
       const responseData = res.data;
       
-      // Check if we have a userId in the response
+      
+      if (responseData.data?.userId) {
+        // Store user ID for verification
+        setUserId(responseData.data.userId);
+        
+        // Update Zustand store with user data
+        setStoreFormData({
+          ...formDataForStore,
+          userId: responseData.data.userId,
+        });
+        
+        // Set verification step to email verification
+        setVerificationStep('email');
+        
+        // Redirect to verification page - Replace the router.push with immediate navigation
+        window.location.href = '/auth/verification';  // This forces a complete page load, bypassing Next.js client-side routing
+        return; // Prevent further execution
+      }
+      
       if (!responseData.data?.userId) {
         console.warn('Response received but userId is missing:', responseData);
         throw new Error('User ID not received from server');
       }
-      
-      // Store user ID for verification
-      setUserId(responseData.data.userId);
-      
-      // Update Zustand store with user data
-      setStoreFormData({
-        ...formDataForStore,
-        userId: responseData.data.userId,
-      });
-      
-      // Set verification step to email verification
-      setVerificationStep('email');
-      
-      // Redirect to verification page
-      router.push('/auth/verification');
-      
+
     } catch (error) {
       // If there's an error, check for specific messages like "Email already in use"
       if (axios.isAxiosError(error)) {
