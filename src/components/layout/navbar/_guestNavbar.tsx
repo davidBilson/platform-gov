@@ -6,9 +6,11 @@ import { FiSearch } from "react-icons/fi";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useRouter } from 'next/router';
+import { useFeedStore } from "@/store/feedStore"
+
 
 // Define types for state and refs
-type ContractorOption = "Contractors" | "Clients";
+type ContractorOption = "Jobs" | "Contractors";
 
 const GuestNavbar: React.FC = () => {
 
@@ -20,11 +22,12 @@ const GuestNavbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   
-  const contractorOptions: ContractorOption[] = ["Contractors", "Clients"];
-  const [selectedOption, setSelectedOption] = useState<ContractorOption>("Contractors");
+  const contractorOptions: ContractorOption[] = ["Jobs", "Contractors"];
+  const [selectedOption, setSelectedOption] = useState<ContractorOption>("Jobs");
 
   const pathname = usePathname();
   const isAuthRoute = pathname?.startsWith('/auth') || false;
+  const { setFeedType } = useFeedStore();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
@@ -114,7 +117,10 @@ const GuestNavbar: React.FC = () => {
                       <div 
                         key={option} 
                         className="px-4 py-2 hover:bg-skyblue cursor-pointer"
-                        onClick={() => handleOptionSelect(option)}
+                        onClick={() => {
+                          handleOptionSelect(option);
+                          setFeedType(option);
+                        }}
                         role="option"
                         aria-selected={selectedOption === option}
                       >

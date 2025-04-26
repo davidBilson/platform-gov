@@ -7,15 +7,16 @@ import { Jobs, PaginationInfo, JobsResponse } from '@/types/jobs';
 import { IoReload } from "react-icons/io5";
 
 const JobFeed: React.FC = () => {
-  
   const [jobs, setJobs] = useState<Jobs[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<Jobs[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<PaginationInfo>({ total: 0, page: 1, limit: 10, pages: 0 });
+  const [, setPagination] = useState<PaginationInfo>({ total: 0, page: 1, limit: 10, pages: 0 });
+  const [activeFilters, setActiveFilters] = useState<Array<{id: string, name: string}>>([]);
+  const [searchPerformed, setSearchPerformed] = useState<boolean>(false);
   
   const fetchJobs = async () => {
     try {
-      
       setLoading(true);
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
@@ -25,6 +26,7 @@ const JobFeed: React.FC = () => {
       
       if (response.data.success) {
         setJobs(response.data.data);
+        setFilteredJobs(response.data.data); // Initialize filtered jobs with all jobs
         setPagination(response.data.pagination);
       } else {
         throw new Error('Failed to fetch jobs');
@@ -42,14 +44,42 @@ const JobFeed: React.FC = () => {
     fetchJobs();
   }, []);
 
+  // Handle filter changes
+  const handleFilterChange = (newFilteredJobs: Jobs[]) => {
+    setFilteredJobs(newFilteredJobs);
+    setSearchPerformed(true);
+  };
+
+  // Handle removing a filter
+  const handleRemoveFilter = (filterId: string) => {
+    const updatedFilters = activeFilters.filter(filter => filter.id !== filterId);
+    setActiveFilters(updatedFilters);
+    
+    // If all filters are removed, reset to original jobs
+    if (updatedFilters.length === 0) {
+      setFilteredJobs(jobs);
+      setSearchPerformed(false);
+    }
+  };
+
   return (
     <main className="container mx-auto p-6">
-      <JobFilter />
-      <JobCountFilters jobCount={pagination.total} />
+      <JobFilter 
+        jobs={jobs} 
+        onFilterChange={handleFilterChange} 
+        setActiveFilters={setActiveFilters} 
+        loading={loading}
+      />
       
-      {jobs && jobs.length > 0 ? (
+      <JobCountFilters 
+        jobCount={filteredJobs.length} 
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveFilter}
+      />
+      
+      {filteredJobs.length > 0 ? (
         <div className="space-y-6">
-          {jobs.map(job => (
+          {filteredJobs.map(job => (
             <JobList key={job._id} job={job} />
           ))}
         </div>
@@ -65,6 +95,10 @@ const JobFeed: React.FC = () => {
           <button onClick={() => fetchJobs()} className="bg-aquagreen text-white px-4 py-2 flex items-center gap-2 rounded-lg mx-auto text-sm mt-7.5 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out">
             Retry <IoReload />
           </button>
+        </div>
+      ) : searchPerformed ? (
+        <div className="flex justify-center py-8 text-boldblue">
+          <p>No jobs matched your search.</p>
         </div>
       ) : (
         <div className="flex justify-center py-8">

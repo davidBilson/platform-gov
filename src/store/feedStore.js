@@ -4,32 +4,34 @@ import { persist } from 'zustand/middleware'
 
 // Create the base store
 const createBaseStore = (set, get) => ({
-  feedType: 'jobs', // default feed type (not persisted)
+  feedType: 'Jobs', // default feed type (not persisted)
   savedSearches: [], // Array to store saved searches (persisted)
-  
+
   setFeedType: (type) => {
     if (type === 'Contractors' || type === 'Jobs') {
       set({ feedType: type })
     }
   },
-  
+
   // Add a new saved search
   addSavedSearch: (search) => {
     const { savedSearches } = get()
-    // Check if search already exists to avoid duplicates
     const exists = savedSearches.some(
-      item => item.query === search.query && item.feedType === search.feedType
+      item => item.query === search.query &&
+              item.feedType === search.feedType &&
+              item.filters === search.filters
     )
-    
+
     if (!exists) {
       set({
         savedSearches: [
           ...savedSearches,
-          { 
+          {
             id: Date.now(), // Use timestamp as unique ID
-            query: search.query,
-            feedType: search.feedType,
-            name: search.name || search.query // Use provided name or default to query
+            query: search.query || '',
+            feedType: search.feedType || 'Jobs',
+            name: search.name || search.query || 'Unnamed Search',
+            filters: search.filters || '' // Store filters as JSON string
           }
         ]
       })
@@ -37,7 +39,7 @@ const createBaseStore = (set, get) => ({
     }
     return false
   },
-  
+
   // Remove a saved search by ID
   removeSavedSearch: (id) => {
     const { savedSearches } = get()
@@ -45,7 +47,7 @@ const createBaseStore = (set, get) => ({
       savedSearches: savedSearches.filter(search => search.id !== id)
     })
   },
-  
+
   // Get saved searches filtered by feed type
   getSavedSearchesByFeedType: (feedType) => {
     return get().savedSearches.filter(search => search.feedType === feedType)
@@ -59,9 +61,8 @@ export const useFeedStore = create(
     {
       name: 'feed-storage',
       getStorage: () => localStorage,
-      partialize: (state) => ({ 
-        savedSearches: state.savedSearches 
-        // Only savedSearches will be persisted, feedType will not
+      partialize: (state) => ({
+        savedSearches: state.savedSearches
       })
     }
   )

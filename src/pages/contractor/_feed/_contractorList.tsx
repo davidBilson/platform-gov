@@ -10,7 +10,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
   }
 
   // Truncate description if it's too long
-  const truncateBio = (text: string, maxLength = 400): string => {
+  const truncateBio = (text: string, maxLength = 200): string => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };

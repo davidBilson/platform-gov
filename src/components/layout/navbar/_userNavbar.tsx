@@ -27,7 +27,7 @@ const UserNavbar = () => {
   
   const pathname = usePathname();
   const { name, role } = authStore();
-  const { setFeedType } = useFeedStore()
+  const { setFeedType } = useFeedStore();
   const router = useRouter();
 
   const navigateToProfile = () => {
