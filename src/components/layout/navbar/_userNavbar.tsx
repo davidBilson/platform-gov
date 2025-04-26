@@ -11,6 +11,7 @@ import { usePathname } from 'next/navigation';
 import authStore from "@/store/authStore";
 import { useRouter } from "next/router";
 import { useFeedStore } from "@/store/feedStore"
+import { FiLogOut } from "react-icons/fi";
 
 const UserNavbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
@@ -146,9 +147,10 @@ const UserNavbar = () => {
                   </Link>
                   <button 
                     onClick={handleSignOut}
-                    className="w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
+                    className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
                   >
                     Sign Out
+                    <FiLogOut size={20} />
                   </button>
                 </div>
               )}
@@ -308,9 +310,10 @@ const UserNavbar = () => {
                     </Link>
                     <button 
                       onClick={handleSignOut}
-                      className="w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
+                      className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
                     >
                       Sign Out
+                      <FiLogOut size={20} />
                     </button>
                   </div>
                 )}
@@ -424,9 +427,10 @@ const UserNavbar = () => {
                       </Link>
                       <button 
                         onClick={handleSignOut}
-                        className="w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
+                        className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
                       >
                         Sign Out
+                        <FiLogOut size={20} />
                       </button>
                     </div>
                   )}
