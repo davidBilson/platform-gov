@@ -1,26 +1,18 @@
-import React from 'react';
+import React from 'react'
+import { ContractorListProps } from '@/types/contractors';
 
-interface JobCountFiltersProps {
-  jobCount?: number;
-  activeFilters?: Array<{
-    id: string;
-    name: string;
-  }>;
-  onRemoveFilter?: (filterId: string) => void;
-}
 
-const JobCountFilters: React.FC<JobCountFiltersProps> = ({ 
-  jobCount = 0, 
-  activeFilters = [
+const ContractorCountFilters: React.FC<ContractorListProps> = ({ contractors }) => {
+
+  const activeFilters = [
     { id: 'jobType', name: 'Job Type' },
     { id: 'securityClearance', name: 'Security Clearance' }
-  ],
-  onRemoveFilter = () => {} 
-}) => {
+  ]
+
   return (
     <section className="flex gap-4 flex-wrap mb-4">
-      <h2 className="font-bold text-lg">{jobCount} Jobs</h2>
-      <div className="flex items-center">
+      <h2 className="font-bold text-lg">{contractors.length > 0 ? contractors.length : "0"} Contractors</h2>
+      <div className=" flex items-center">
         <span className="text-gray-600 mr-2">Filters:</span>
         
         {/* Filter pills */}
@@ -30,7 +22,6 @@ const JobCountFilters: React.FC<JobCountFiltersProps> = ({
               {filter.name}
               <button 
                 className="ml-1 focus:outline-none"
-                onClick={() => onRemoveFilter(filter.id)}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -41,7 +32,7 @@ const JobCountFilters: React.FC<JobCountFiltersProps> = ({
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default JobCountFilters;
+export default ContractorCountFilters

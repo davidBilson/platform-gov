@@ -1,6 +1,6 @@
 "use client"
-import Logo from "@/assets/logo.svg"
-import Image from 'next/image'
+import Logo from "@/components/ui/logo"
+// import Image from 'next/image'
 import Link from 'next/link'
 import { IoMdArrowDropdown } from "react-icons/io";
 import { FaBell } from "react-icons/fa6";
@@ -10,6 +10,7 @@ import { FiSearch } from "react-icons/fi";
 import { usePathname } from 'next/navigation';
 import authStore from "@/store/authStore";
 import { useRouter } from "next/router";
+import { useFeedStore } from "@/store/feedStore"
 
 const UserNavbar = () => {
   const [contractorsDropdown, setContractorsDropdown] = useState(false);
@@ -26,14 +27,15 @@ const UserNavbar = () => {
   
   const pathname = usePathname();
   const { name, role } = authStore();
+  const { setFeedType } = useFeedStore()
   const router = useRouter();
 
   const navigateToProfile = () => {
     router.push('/profile');
   }
 
-  const contractorOptions = ["Contractors", "Clients"];
-  const [selectedOption, setSelectedOption] = useState("Contractors");
+  const jobAndContractorOptions = ["Jobs", "Contractors"];
+  const [selectedOption, setSelectedOption] = useState("Jobs");
 
   // Check if current path is an auth route
   const isAuthRoute = pathname?.startsWith('/auth');
@@ -79,7 +81,7 @@ const UserNavbar = () => {
     return (
       <div className='fixed top-0 left-0 w-full h-28 overflow-visible flex items-center justify-center border-b-2 border-b-boldblue bg-white z-50'>
         <nav className='w-full max-w-maxWidth flex items-center justify-center'>
-          <Image src={Logo} width={80} height={90} alt="GovLink Platform" />
+            <Logo />
         </nav>
       </div>
     );
@@ -91,7 +93,7 @@ const UserNavbar = () => {
       <div className='fixed top-0 left-0 w-full h-28 overflow-visible flex items-center justify-center border-b-2 border-b-boldblue bg-white z-50'>
         <nav className='w-full max-w-maxWidth m-auto flex items-center justify-between px-6 lg:px-[45px] relative'>
           {/* Logo on the left */}
-          <Image src={Logo} width={80} height={90} alt="GovLink Platform" />
+          <Logo />
           
           {/* Create Profile text in the middle */}
           <div className=" font-semibold text-xl hidden lg:block absolute left-1/2 transform -translate-x-1/2">
@@ -133,7 +135,7 @@ const UserNavbar = () => {
         <nav className='w-full max-w-maxWidth m-auto flex items-center justify-between px-6 lg:px-[45px] relative'>
             
             {/* Logo */}
-            <Image src={Logo} width={80} height={90} alt="GovLink Platform" />
+            <Logo />
             
             {/* Mobile icons */}
             <div className="lg:hidden flex items-center gap-4">
@@ -225,13 +227,14 @@ const UserNavbar = () => {
                   
                   {contractorsDropdown && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-skyblue rounded shadow-md z-10">
-                      {contractorOptions.map((option) => (
+                      {jobAndContractorOptions.map((option) => (
                         <div 
                           key={option} 
                           className="px-4 py-2 hover:bg-skyblue cursor-pointer"
                           onClick={() => {
                             setSelectedOption(option);
                             setContractorsDropdown(false);
+                            setFeedType(option);
                           }}
                         >
                           {option}
