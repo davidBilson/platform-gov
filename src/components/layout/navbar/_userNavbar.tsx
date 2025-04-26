@@ -18,20 +18,23 @@ const UserNavbar = () => {
   const [contractsDropdown, setContractsDropdown] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
+  const [profileDropdown, setProfileDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const jobsDropdownRef = useRef<HTMLLIElement | null>(null);
   const contractsDropdownRef = useRef<HTMLLIElement | null>(null);
+  const profileDropdownRef = useRef<HTMLDivElement | null>(null);
 
   const searchRef = useRef<HTMLDivElement | null>(null);
   
   const pathname = usePathname();
-  const { name, role } = authStore();
+  const { name, role, resetAll } = authStore();
   const { setFeedType } = useFeedStore();
   const router = useRouter();
 
-  const navigateToProfile = () => {
-    router.push('/profile');
+  const handleSignOut = () => {
+    resetAll();
+    router.push('/auth/sign-in');
   }
 
   const jobAndContractorOptions = ["Jobs", "Contractors"];
@@ -41,7 +44,7 @@ const UserNavbar = () => {
   const isAuthRoute = pathname?.startsWith('/auth');
   
   // Check if current path is the profile creation route
-  const isProfileCreateRoute = pathname === '/profile/create';
+  const isProfileCreateRoute = pathname === '/profile/edit';
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
@@ -66,6 +69,12 @@ const UserNavbar = () => {
       if (searchRef.current && event.target instanceof Node) {
         if (!searchRef.current.contains(event.target)) {
           setMobileSearch(false);
+        }
+      }
+
+      if (profileDropdownRef.current && event.target instanceof Node) {
+        if (!profileDropdownRef.current.contains(event.target)) {
+          setProfileDropdown(false);
         }
       }
     }
@@ -110,8 +119,11 @@ const UserNavbar = () => {
             <div className="text-boldblue">
               <FaBell color="#0B5F94" size={24} />
             </div>
-            <div>
-              <p className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium">
+            <div ref={profileDropdownRef} className="relative">
+              <p 
+                onClick={() => setProfileDropdown(!profileDropdown)} 
+                className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+              >
               {(() => {
                   if (name) {
                     const [first, last] = name.toUpperCase().split(" ");
@@ -122,6 +134,24 @@ const UserNavbar = () => {
                 })()
               }
               </p>
+              
+              {/* Profile dropdown menu */}
+              {profileDropdown && (
+                <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10">
+                  <Link href="/profile" className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                    Profile
+                  </Link>
+                  <Link href="/profile/edit" className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                    Edit Profile
+                  </Link>
+                  <button 
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </nav>
@@ -250,19 +280,40 @@ const UserNavbar = () => {
                 <FaBell color="#0B5F94" size={32} />
             </div>
 
-            {/* Desktop profile icon */}
-            <div className="hidden lg:block">
-                <p onClick={navigateToProfile} className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer">
+            {/* Desktop profile icon with dropdown */}
+            <div className="hidden lg:block relative" ref={profileDropdownRef}>
+                <p 
+                  onClick={() => setProfileDropdown(!profileDropdown)} 
+                  className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+                >
                 {(() => {
                   if (name) {
                     const [first, last] = name.toUpperCase().split(" ");
                     const initials = (first?.[0] || "") + (last?.[0] || "");
-                    return initials || "";
+                    return initials || "KD";
                   }
                   return "KD";
                   })()
                 }
                 </p>
+                
+                {/* Profile dropdown menu */}
+                {profileDropdown && (
+                  <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10">
+                    <Link href="/profile" className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                      Profile
+                    </Link>
+                    <Link href="/profile/edit" className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                      Edit Profile
+                    </Link>
+                    <button 
+                      onClick={handleSignOut}
+                      className="w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
             </div>
             
             {/* Mobile search dropdown */}
@@ -346,8 +397,11 @@ const UserNavbar = () => {
                   </li>
                 </ul>
                 
-                <div className="mt-6 flex justify-center">
-                  <div onClick={navigateToProfile} className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer">
+                <div className="mt-6 flex justify-center relative" ref={profileDropdownRef}>
+                  <div 
+                    onClick={() => setProfileDropdown(!profileDropdown)} 
+                    className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+                  >
                   {(() => {
                       if (name) {
                         const [first, last] = name.toUpperCase().split(" ");
@@ -358,6 +412,24 @@ const UserNavbar = () => {
                     })()
                   }
                   </div>
+                  
+                  {/* Mobile profile dropdown menu */}
+                  {profileDropdown && (
+                    <div className="absolute top-full mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10">
+                      <Link href="/profile" className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                        Profile
+                      </Link>
+                      <Link href="/profile/edit" className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                        Edit Profile
+                      </Link>
+                      <button 
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

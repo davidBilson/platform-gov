@@ -42,7 +42,7 @@ const BusinessProfile = () => {
   // if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (!business) return <div className="p-6 text-center">
     Profile not found. {" "}
-    <Link href="/profile/create" className="text-boldblue underline">Create a profile</Link>
+    <Link href="/profile/edit" className="text-boldblue underline">Create a profile</Link>
   </div>;
 
   {}
@@ -169,7 +169,7 @@ const BusinessProfile = () => {
         {/* Edit Button at Bottom */}
         <div className='mt-8 flex justify-end'>
           <Link 
-            href="/profile/create" 
+            href="/profile/edit" 
             className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             Edit Profile

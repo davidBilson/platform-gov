@@ -158,7 +158,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
 
   if (!profileData) return <div className="p-6 text-center">
   Profile not found. {" "}
-  <Link href="/profile/create" className="text-boldblue underline">Create a profile</Link>
+  <Link href="/profile/edit" className="text-boldblue underline">Create a profile</Link>
 </div>;
   
   return (
@@ -241,7 +241,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
               </div>
             </div>
 
-            <Link href="/profile/create" className='w-fit text-xs flex items-center gap-1.5 hover:underline hover:text-deepskyblue text-boldblue active:text-skyblue cursor-pointer'><FaEdit /> Edit Profile</Link>
+            <Link href="/profile/edit" className='w-fit text-xs flex items-center gap-1.5 hover:underline hover:text-deepskyblue text-boldblue active:text-skyblue cursor-pointer'><FaEdit /> Edit Profile</Link>
 
             {/* Description */}
             <div className='py-5'>

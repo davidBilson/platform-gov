@@ -3,7 +3,7 @@ import useAuthStore from '@/store/authStore';
 import CreateBusinessProfile from './_business/create';
 import CreateFreelancerProfile from './_freelancer/create';
 
-const Create = () => {
+const Edit = () => {
 
     const {userId, role } = useAuthStore()
   
@@ -25,4 +25,4 @@ const Create = () => {
     
 }
 
-export default Create;
+export default Edit;
