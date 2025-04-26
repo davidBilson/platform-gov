@@ -4,9 +4,14 @@ import JobPost from './_jobpost';
 import Application from './_application';
 import axios from 'axios';
 import { Jobs } from '@/types/jobs';
+import useAuthStore from '@/store/authStore';
+import { toast } from 'react-toastify';
 
 const JobPostApplication = () => {
   const router = useRouter();
+
+  const { userId, role } = useAuthStore();
+
   const { id: jobId } = router.query;
   
   const [showApplication, setShowApplication] = useState(false);
@@ -16,6 +21,9 @@ const JobPostApplication = () => {
   
   // Function to show the application form
   const handleApply = () => {
+    if (userId && role === "client") {
+      return toast.error('Unauthorized! Sign up as a contractor to apply')
+    }
     setShowApplication(true);
   };
   
