@@ -166,7 +166,7 @@ const GuestNavbar: React.FC = () => {
               </button>
               <button 
                 onClick={() => router.push('/auth/sign-up')}
-                className='bg-boldblue py-2 px-5 rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer'
+                className='bg-boldblue w-30 py-2 px-5 rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer'
                 type="button"
               >
                 Sign up
