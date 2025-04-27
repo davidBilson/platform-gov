@@ -6,46 +6,27 @@ import GuestNavbar from './_guestNavbar';
 import useAuthStore from '@/store/authStore';
 import { usePathname } from 'next/navigation';
 
-// Define user type constants to avoid string literals
-type UserType = 'admin' | 'client' | 'contractor' | null;
-
 const Navbar: React.FC = () => {
-  // Get authentication state from the auth store
   const { userId, userType } = useAuthStore();
+  const pathname = usePathname() || '';
   
-  const pathname = usePathname();
-  
-  // Ensure userType conforms to our defined type
-  const typedUserType: UserType = userType as UserType;
-  
-  // Check if user is authenticated
-  const isAuthenticated: boolean = !!userId;
-  
-  // Check if current path is the home page, an auth route, or privacy policy
-  const isHomeOrAuthRoute: boolean = pathname === '/' || pathname?.startsWith('/auth') || false;
-  
-  // Check if current path is an admin route
-  const isAdminRoute: boolean = pathname?.startsWith('/admin') || false;
-  
-  // Check if current path is privacy policy page
-  const isPrivacyPolicy: boolean = pathname === '/privacy-policy';
-  
-  // Determine which navbar to render based on user authentication, type, and route
-  const shouldShowAdminNavbar: boolean = isAuthenticated && typedUserType === 'admin' && isAdminRoute;
-  // const shouldShowUserNavbar: boolean = isAuthenticated && (typedUserType === 'client' || typedUserType === 'contractor');
-  const shouldShowGuestNavbar: boolean = (!isAuthenticated && isHomeOrAuthRoute) || (!isAuthenticated && isPrivacyPolicy);
+  // Function to determine which navbar to render
+  const renderNavbar = () => {
+    // Special case for admin routes
+    if (pathname.startsWith('/admin') && userId && userType === 'admin') {
+      return <AdminNavbar />;
+    }
+    
+    // Special case for privacy policy
+    if (pathname === '/privacy-policy') {
+      return userId ? <UserNavbar /> : <GuestNavbar />;
+    }
+    
+    // For all other routes, authenticated users see UserNavbar, guests see GuestNavbar
+    return userId ? <UserNavbar /> : <GuestNavbar />;
+  };
 
-  return (
-    <>
-      {
-        shouldShowGuestNavbar ?
-        <GuestNavbar /> :
-        shouldShowAdminNavbar ?
-        <AdminNavbar /> :
-        <UserNavbar />
-      }
-    </>
-  );
+  return renderNavbar();
 };
 
 export default Navbar;

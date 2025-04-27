@@ -81,7 +81,7 @@ const GuestNavbar: React.FC = () => {
     );
   }
   
-  if (pathname === '/') {
+  if (pathname === '/' || pathname === '/privacy-policy') {
     return (
       <div className='fixed top-0 left-0 w-full h-28 overflow-visible flex items-center justify-center border-b-2 border-b-boldblue bg-white z-50'>
         <nav className='w-full max-w-maxWidth m-auto flex items-center justify-between px-6 lg:px-[45px] relative'>
