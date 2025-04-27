@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import useAuthStore from "@/store/authStore";
 import { ToastContainer } from 'react-toastify';
-// import Logo from "@/components/ui/logo";
 
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
@@ -66,13 +65,6 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     }
   }, [userId, router.pathname, isLoading, router, verificationStep]);
 
-  // if (isLoading) {
-  //   return <div className="fixed top-0 left-0 flex items-center justify-center h-screen animate-pulse">
-  //           <Logo />
-  //          </div>;
-  // }
-
-  // Lazy load children only when allowed
   return isPublicRoute || userId ? <>{children}</> : null;
 }
 

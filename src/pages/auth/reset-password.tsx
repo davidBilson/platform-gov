@@ -147,17 +147,30 @@ const ResetPassword: React.FC = () => {
     }
   };
   
-  if (isVerifying) {
-    return (
-      <main className='pt-10 md:pt-20 px-5 md:px-6'>
-        <section className='w-full max-w-2xl m-auto'>
-          <h1 className='font-semibold text-lg md:text-xl text-center mb-6'>Reset Password</h1>
-          <p className="text-center">Verifying your reset link...</p>
-          {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+  // if (isVerifying) {
+  //   return (
+  //     <main className='pt-10 md:pt-20 px-5 md:px-6'>
+  //       <section className='w-full max-w-2xl m-auto'>
+  //         <h1 className='font-semibold text-lg md:text-xl text-center mb-6'>Reset Password</h1>
+  //         <p className="text-center">Verifying your reset link...</p>
+  //         {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+  //       </section>
+  //     </main>
+  //   );
+  // }
+
+    // Handle the loading state
+    if (isVerifying) {
+      return (
+        <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
+          <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
+            <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+            </div>
+          </section>
         </section>
-      </main>
-    );
-  }
+      );
+    }
   
   return (
     <main className='pt-10 pb-20 md:pt-20 px-5 md:px-6'>

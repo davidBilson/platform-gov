@@ -210,10 +210,7 @@ const UserNavbar = () => {
                     )}
                 </li>
                 
-                <li className="flex items-center gap-1.25 cursor-pointer">
-                    <span>Manage Contractors</span>
-                    <span><IoMdArrowDropdown size={20} /></span>
-                </li>
+                
                 
                 {/* Manage Contracts dropdown */}
                 <li className="flex items-center gap-1.25 cursor-pointer relative" ref={contractsDropdownRef}>
@@ -224,6 +221,9 @@ const UserNavbar = () => {
                     
                     {contractsDropdown && (
                       <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-skyblue rounded shadow-md z-10">
+                        <Link href="/proposals" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Proposals
+                        </Link>
                         <Link href="/contracts/active" className="block px-4 py-3 text-sm text-boldblue hover:underline">
                           Active Contracts
                         </Link>
@@ -238,6 +238,11 @@ const UserNavbar = () => {
                         </Link>
                       </div>
                     )}
+                </li>
+
+                <li className="flex items-center gap-1.25 cursor-pointer">
+                    <span>Manage Contractors</span>
+                    <span><IoMdArrowDropdown size={20} /></span>
                 </li>
                 
                 <li className="cursor-pointer">
@@ -362,10 +367,7 @@ const UserNavbar = () => {
                     )}
                   </li>
                   
-                  <li className="flex items-center gap-1.25">
-                      <span>Manage Contractors</span>
-                      <span><IoMdArrowDropdown size={20} /></span>
-                  </li>
+                 
                   
                   {/* Mobile Contracts dropdown */}
                   <li className="relative">
@@ -379,11 +381,14 @@ const UserNavbar = () => {
                     
                     {contractsDropdown && (
                       <div className="mt-2 bg-white rounded shadow-md z-10 flex flex-col items-center">
-                        <Link href="/contracts/open" className="py-2 text-sm text-boldblue hover:underline">
-                          Open Contracts
+                        <Link href="/proposals" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                          Proposals
                         </Link>
                         <Link href="/contracts/active" className="py-2 text-sm text-boldblue hover:underline">
                           Active Contracts
+                        </Link>
+                        <Link href="/contracts/open" className="py-2 text-sm text-boldblue hover:underline">
+                          Open Contracts
                         </Link>
                         <Link href="/contracts/pending" className="py-2 text-sm text-boldblue hover:underline">
                           Pending Contracts
@@ -393,6 +398,11 @@ const UserNavbar = () => {
                         </Link>
                       </div>
                     )}
+                  </li>
+
+                  <li className="flex items-center gap-1.25">
+                      <span>Manage Contractors</span>
+                      <span><IoMdArrowDropdown size={20} /></span>
                   </li>
                   
                   <li>

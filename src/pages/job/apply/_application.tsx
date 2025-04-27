@@ -8,7 +8,25 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Jobs } from '@/types/jobs';
 import useAuthStore from '@/store/authStore';
-import useApplicationDraftsStore from '@/store/applicationDraftStore';
+
+interface ApplicationDraft {
+  _id: string;
+  jobId: string | { _id: string; [key: string]: string }; // Allow jobId to be either a string or an object
+  freelancerId: string;
+  coverLetter?: string;
+  proposedRate?: string | number;
+  certificationAcknowledgment?: boolean;
+  attachments?: Array<{
+    filename: string;
+    originalName: string;
+    fileSize: number;
+    fileType: string;
+    fileUrl: string;
+  }>;
+  status: 'draft';
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface ApplicationProps {
   job: Jobs;
@@ -16,8 +34,8 @@ interface ApplicationProps {
 }
 
 const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
+  
   const { userId } = useAuthStore();
-  const { saveDraft, deleteDraft, getDraftByJobId } = useApplicationDraftsStore();
 
   const [formData, setFormData] = useState({
     coverLetter: '',
@@ -27,19 +45,67 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [savedAttachments, setSavedAttachments] = useState<Array<{
+    filename: string;
+    originalName: string;
+    fileSize: number;
+    fileType: string;
+    fileUrl: string;
+  }>>([]);
 
   // Load saved draft if available
   useEffect(() => {
-    const savedDraft = getDraftByJobId(job._id);
-    if (savedDraft) {
-      setFormData({
-        coverLetter: savedDraft.coverLetter || '',
-        proposedRate: savedDraft.proposedRate || '',
-        attachment: null, // File objects can't be persisted, so we reset this
-        acknowledgment: savedDraft.acknowledgment || false,
-      });
+    const fetchSavedDraft = async () => {
+      try {
+        setIsLoading(true);
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+        const endPoint = process.env.NEXT_PUBLIC_GET_JOB_APPLICATION_BY_CONTRACTOR_ID?.replace(':id', userId)
+        
+        const response = await axios.get(`${baseURL}${endPoint}`);
+        
+        if (response.data.success) {
+  
+          const drafts = response.data.data.filter((app: ApplicationDraft) => {
+            // Handle both cases: when jobId is an object with _id or when it's a string
+            const appJobId = typeof app.jobId === 'object' ? app.jobId._id : app.jobId;
+            return appJobId === job._id && app.status === 'draft';
+          });
+          
+          if (drafts.length > 0) {
+            const savedDraft = drafts[0];
+            setDraftId(savedDraft._id);
+            
+            // Populate form data with saved draft
+            setFormData({
+              coverLetter: savedDraft.coverLetter || '',
+              proposedRate: savedDraft.proposedRate?.toString() || '',
+              attachment: null, // File objects can't be persisted
+              acknowledgment: savedDraft.certificationAcknowledgment || false,
+            });
+            
+            // Save any attachments for display
+            if (savedDraft.attachments && savedDraft.attachments.length > 0) {
+              setSavedAttachments(savedDraft.attachments);
+            }
+            
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching saved draft:', error);
+        toast.error("Failed to load saved draft.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (userId && job._id) {
+      fetchSavedDraft();
+    } else {
+      setIsLoading(false);
     }
-  }, [job._id, getDraftByJobId]);
+  }, [job._id, userId]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -64,6 +130,26 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
       ...prev,
       attachment: null,
     }));
+  };
+  
+  const removeSavedAttachment = async (filename: string) => {
+    try {
+      // Remove the attachment from UI
+      setSavedAttachments(prev => prev.filter(attachment => attachment.filename !== filename));
+      
+      // If we have a draft ID, update the draft on the server
+      if (draftId) {
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+        await axios.patch(`${baseURL}/applications/update-draft-attachments/${draftId}`, {
+          userId,
+          action: 'remove',
+          filename
+        });
+      }
+    } catch (error) {
+      console.error('Error removing attachment:', error);
+      toast.error("Failed to remove attachment. Please try again.");
+    }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,7 +198,9 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
       toast.success("Application submitted successfully!");
       
       // Delete draft after successful submission
-      deleteDraft(job._id);
+      if (draftId) {
+        await handleDeleteDraft();
+      }
       
       // Close after successful submission
       setTimeout(() => {
@@ -132,26 +220,65 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
     }
   };
   
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
     try {
-      // Save form data to Zustand store
-      saveDraft({
-        jobId: job._id,
-        coverLetter: formData.coverLetter,
-        proposedRate: formData.proposedRate,
-        acknowledgment: formData.acknowledgment
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+      const saveDraftEndpoint = process.env.NEXT_PUBLIC_SAVE_JOB_APPLICATION_DRAFT;
+      
+      // Create form data for saving draft
+      const formDataToSave = new FormData();
+      formDataToSave.append('userId', userId);
+      formDataToSave.append('jobId', job._id);
+      formDataToSave.append('coverLetter', formData.coverLetter);
+      formDataToSave.append('proposedRate', formData.proposedRate);
+      formDataToSave.append('acknowledgment', String(formData.acknowledgment));
+      
+      if (formData.attachment) {
+        formDataToSave.append('attachment', formData.attachment);
+      }
+      
+      const response = await axios.post(`${baseURL}${saveDraftEndpoint}`, formDataToSave, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
-      toast.success("Draft saved successfully!");
+      
+      if (response.data.success) {
+        setDraftId(response.data.data._id);
+        
+        // Update saved attachments if there are any new ones
+        if (response.data.data.attachments && response.data.data.attachments.length > 0) {
+          setSavedAttachments(response.data.data.attachments);
+        }
+        
+        toast.success("Draft saved successfully!");
+      }
     } catch (error) {
+      console.error('Error saving draft:', error);
       toast.error("Failed to save draft. Please try again.");
-      console.log(error);
     }
   };
   
-  const handleDeleteDraft = () => {
+  const handleDeleteDraft = async () => {
     try {
-      // Delete draft from Zustand store
-      deleteDraft(job._id);
+      if (!draftId) {
+        // If there's no draft ID, just clear the form
+        setFormData({
+          coverLetter: '',
+          proposedRate: '',
+          attachment: null,
+          acknowledgment: false,
+        });
+        setSavedAttachments([]);
+        return;
+      }
+      
+      const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+      const deleteDraftEndpoint = process.env.NEXT_PUBLIC_DELETE_JOB_APPLICATION_DRAFT?.replace(':id', job._id);
+      
+      await axios.delete(`${baseURL}${deleteDraftEndpoint}`, {
+        data: { userId }
+      });
       
       // Reset form data
       setFormData({
@@ -161,12 +288,27 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         acknowledgment: false,
       });
       
+      setSavedAttachments([]);
+      setDraftId(null);
       toast.info("Draft deleted successfully!");
     } catch (error) {
+      console.error('Error deleting draft:', error);
       toast.error("Failed to delete draft. Please try again.");
-      console.log(error);
     }
   };
+
+  //  TREASURE ISLOADING
+  if (isLoading) {
+    return (
+      <section className='h-screen w-full fixed top-0 left-0 z-50 bg-red-500 flex items-center justify-end'>
+        <section className='w-full h-screen bg-skyblue p-4 md:p-7.5 overflow-y-auto'>
+          <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+          </div>
+        </section>
+      </section>
+    );
+  }
 
   return (
     <section className='h-screen w-full fixed top-0 left-0 z-50 bg-red-500 flex items-center justify-end'>
@@ -242,6 +384,25 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
                       <IoCloseOutline size={20} />
                     </button>
                   </div>
+                </div>
+              )}
+              
+              {/* Display saved attachments */}
+              {savedAttachments.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs md:text-sm text-boldblue font-semibold mb-2">Saved Attachments:</p>
+                  {savedAttachments.map((attachment, index) => (
+                    <div key={index} className="flex items-center justify-between bg-white p-2 rounded mb-2">
+                      <span className="text-xs md:text-sm truncate max-w-[80%]">{attachment.originalName}</span>
+                      <button 
+                        type="button"
+                        onClick={() => removeSavedAttachment(attachment.filename)}
+                        className="focus:outline-none text-red-500"
+                      >
+                        <IoCloseOutline size={20} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

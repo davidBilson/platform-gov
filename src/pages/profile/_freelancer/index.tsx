@@ -155,7 +155,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   const hasProfileImage = profileData?.profileImage ? true : false;
   
   return (
-    <main className="p-4 md:p-6">
+    <main className="p-5 pb-20 md:p-6">
       <section className="w-full max-w-275 mx-auto pb-32">
         {loading ? (
           <div className="flex justify-center items-center h-64">

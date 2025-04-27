@@ -17,7 +17,6 @@ const JobPostApplication = () => {
   const [showApplication, setShowApplication] = useState(false);
   const [job, setJob] = useState<Jobs | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // Function to show the application form
   const handleApply = () => {
@@ -61,7 +60,6 @@ const JobPostApplication = () => {
         throw new Error('Failed to fetch job details');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred');
       console.error('Error fetching job details:', err);
     } finally {
       setLoading(false);
@@ -70,12 +68,15 @@ const JobPostApplication = () => {
 
   // Handle the loading state
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading job details...</div>;
-  }
-
-  // Handle errors
-  if (error) {
-    return <div className="flex justify-center items-center min-h-screen text-red-500">Error: {error}</div>;
+    return (
+      <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
+        <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
+          <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+          </div>
+        </section>
+      </section>
+    );
   }
 
   // Handle case where job data is not available
