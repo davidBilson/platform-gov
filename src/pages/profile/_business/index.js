@@ -3,15 +3,16 @@ import { IoMdImages } from "react-icons/io";
 import OpenJobs from './_open-jobs';
 import useAuthStore from '@/store/authStore';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
 const BusinessProfile = () => {
-  const [business, setBusiness] = useState(null);
+  const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   
   const { userId } = useAuthStore();
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   
-  // Fetch business profile on component mount
+  // Fetch client profile on component mount
   useEffect(() => {
     const fetchBusinessProfile = async () => {
       if (!userId) {
@@ -26,10 +27,10 @@ const BusinessProfile = () => {
         const data = await response.json();
         
         if (data.success && data.data) {
-          setBusiness(data.data);
+          setClient(data.data);
         }
       } catch (err) {
-        console.error('Error fetching business profile:', err);
+        console.error('Error fetching client profile:', err);
       } finally {
         setLoading(false);
       }
@@ -38,14 +39,14 @@ const BusinessProfile = () => {
     fetchBusinessProfile();
   }, [userId, BASE_URL]);
 
-  if (loading) return <div className="p-6 text-center">Loading business profile...</div>;
-  // if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!business) return <div className="p-6 text-center">
-    Profile not found. {" "}
-    <Link href="/profile/edit" className="text-boldblue underline">Create a profile</Link>
-  </div>;
+  useEffect(() => {
+    if(!client) {
+      toast.info('You are yet to create a profile!')
+    }
+  }, [client])
 
-  {}
+  if (loading) return <div className="p-6 text-center">Loading client profile...</div>;
+
   return (
     <section className='p-6'>
       <section className='w-full max-w-275 m-auto'>
@@ -56,10 +57,10 @@ const BusinessProfile = () => {
             {/* Company Logo */}
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
-                {business.logo ? (
+                {client.logo ? (
                   <img 
-                    src={business.logo} 
-                    alt={`${business.name} logo`} 
+                    src={client.logo} 
+                    alt={`${client.name} logo`} 
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
@@ -71,7 +72,7 @@ const BusinessProfile = () => {
             {/* Company Name */}
             <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
               <h1 className='text-boldblue text-xl font-semibold'>
-                {business.name || "Company Name"}
+                {client.name || "Company Name"}
               </h1>
             </div>
           </div>
@@ -79,7 +80,7 @@ const BusinessProfile = () => {
           {/* Company Overview */}
           <div className='mb-8 py-3.5 px-5 rounded-md border border-boldblue'>
             <p className='text-boldblue'>
-              {business.overview || "No company overview available."}
+              {client.overview || "No company overview available."}
             </p>
           </div>
         </div>
@@ -89,7 +90,7 @@ const BusinessProfile = () => {
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:w-full sm:max-w-[120px]'>Location</h2>
           
           <div className='w-full'>
-            {business.locations && business.locations.map((location, index) => (
+            {client.locations && client.locations.map((location, index) => (
               <div key={index} className={index > 0 ? 'mt-8 pt-4 border-t border-gray-200' : ''}>
                 {index > 0 && (
                   <h3 className="font-medium mb-2">Location {index + 1}</h3>
@@ -121,7 +122,7 @@ const BusinessProfile = () => {
               </div>
             ))}
             
-            {(!business.locations || business.locations.length === 0) && (
+            {(!client.locations || client.locations.length === 0) && (
               <p className='text-boldblue italic'>No locations specified.</p>
             )}
           </div>
@@ -136,7 +137,7 @@ const BusinessProfile = () => {
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Industry</h3>
               <p className='text-boldblue'>
-                {business.industry || "Not specified"}
+                {client.industry || "Not specified"}
               </p>
             </div>
             
@@ -144,7 +145,7 @@ const BusinessProfile = () => {
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Size</h3>
               <p className='text-boldblue'>
-                {business.size || "Not specified"}
+                {client.size || "Not specified"}
               </p>
             </div>
             
@@ -152,8 +153,8 @@ const BusinessProfile = () => {
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Specializations</h3>
               <div className='flex flex-wrap gap-2'>
-                {business.specializations && business.specializations.length > 0 ? (
-                  business.specializations.map((spec, index) => (
+                {client.specializations && client.specializations.length > 0 ? (
+                  client.specializations.map((spec, index) => (
                     <div key={index} className='bg-deepskyblue text-white font-bold py-1 px-4 rounded-full'>
                       {spec}
                     </div>

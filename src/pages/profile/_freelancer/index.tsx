@@ -5,6 +5,7 @@ import { MdStar, MdStarBorder } from "react-icons/md";
 import useAuthStore from '@/store/authStore';
 import { fetchProfile } from "@/api/profile-api";
 import Link from "next/link";
+import { toast } from 'react-toastify';
 
 // Define proper TypeScript interfaces
 interface WorkHistoryItem {
@@ -48,34 +49,33 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   const { userId, name } = useAuthStore() as { userId: string | null; name: string | null };
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   
   // Table data for work history
   const workHistory: WorkHistoryItem[] = [
-    {
-      jobTitle: "Web Developer",
-      dates: "12/12/2023 - 02/2024",
-      rating: 2,
-      amount: "$500"
-    },
-    {
-      jobTitle: "Frontend Engineer",
-      dates: "08/2023 - 11/2023",
-      rating: 3,
-      amount: "$1,200"
-    },
-    {
-      jobTitle: "UI Designer",
-      dates: "03/2023 - 07/2023",
-      rating: 4,
-      amount: "$850"
-    },
-    {
-      jobTitle: "UI Designer",
-      dates: "03/2023 - 07/2023",
-      rating: 2,
-      amount: "$850"
-    }
+    // {
+    //   jobTitle: "Web Developer",
+    //   dates: "12/12/2023 - 02/2024",
+    //   rating: 2,
+    //   amount: "$500"
+    // },
+    // {
+    //   jobTitle: "Frontend Engineer",
+    //   dates: "08/2023 - 11/2023",
+    //   rating: 3,
+    //   amount: "$1,200"
+    // },
+    // {
+    //   jobTitle: "UI Designer",
+    //   dates: "03/2023 - 07/2023",
+    //   rating: 4,
+    //   amount: "$850"
+    // },
+    // {
+    //   jobTitle: "UI Designer",
+    //   dates: "03/2023 - 07/2023",
+    //   rating: 2,
+    //   amount: "$850"
+    // }
   ];
 
   // Fetch profile data on component mount
@@ -94,12 +94,9 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
         
         if (response?.success && response?.data) {
           setProfileData(response.data);
-        } else {
-          // Handle unsuccessful API response
-          setError(response?.error || 'Failed to load profile data');
         }
+        
       } catch (err) {
-        setError('Failed to load profile data');
         console.error('Error fetching profile:', err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
@@ -112,6 +109,12 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   useEffect(() => {
     getProfileImageUrl();
   },[profileData]);
+
+  useEffect(() => {
+    if(!profileData) {
+      toast.info('You are yet to create a profile!')
+    }
+  }, [profileData])
 
   // Extract profile data with fallbacks
   const profession = profileData?.primaryPosition || 'Web Developer';
@@ -155,11 +158,6 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
 
   // Check if profile image exists
   const hasProfileImage = profileData?.profileImage ? true : false;
-
-  if (!profileData) return <div className="p-6 text-center">
-  Profile not found. {" "}
-  <Link href="/profile/edit" className="text-boldblue underline">Create a profile</Link>
-</div>;
   
   return (
     <main className="p-4 md:p-6">
@@ -168,8 +166,6 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
           <div className="flex justify-center items-center h-64">
             <p>Loading profile data...</p>
           </div>
-        ) : error ? (
-          <div className="text-red-500 text-center p-4">{error}</div>
         ) : (
           <>
             {/* Bio */}
@@ -241,7 +237,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
               </div>
             </div>
 
-            <Link href="/profile/edit" className='w-fit text-xs flex items-center gap-1.5 hover:underline hover:text-deepskyblue text-boldblue active:text-skyblue cursor-pointer'><FaEdit /> Edit Profile</Link>
+            <Link href="/profile/edit" className='w-fit text-xs flex items-center gap-1.5 hover:underline hover:text-deepskyblue text-boldblue active:text-skyblue cursor-pointer pt-6'><FaEdit /> Edit Profile</Link>
 
             {/* Description */}
             <div className='py-5'>
