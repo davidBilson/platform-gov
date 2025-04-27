@@ -19,7 +19,8 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/verification',
-    '/'
+    '/',
+    '/privacy-policy'
   ];
 
   const isPublicRoute =
