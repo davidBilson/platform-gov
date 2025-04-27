@@ -95,8 +95,9 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
         if (response?.success && response?.data) {
           setProfileData(response.data);
         }
-        
+
       } catch (err) {
+        toast.error('Error fetching profile')
         console.error('Error fetching profile:', err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
@@ -109,12 +110,6 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   useEffect(() => {
     getProfileImageUrl();
   },[profileData]);
-
-  useEffect(() => {
-    if(!profileData) {
-      toast.info('You are yet to create a profile!')
-    }
-  }, [profileData])
 
   // Extract profile data with fallbacks
   const profession = profileData?.primaryPosition || 'Web Developer';
