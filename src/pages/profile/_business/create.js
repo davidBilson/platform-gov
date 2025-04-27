@@ -463,14 +463,14 @@ const CreateBusinessProfile = () => {
                   placeholder="Specializations"
                   value={newSpecialization}
                   onChange={(e) => setNewSpecialization(e.target.value)}
-                  onKeyPress={handleSpecializationKeyPress}
+                  onKeyDown={handleSpecializationKeyPress}
                   className='w-full border border-boldblue text-boldblue rounded p-3 pr-10 focus:outline focus:outline-boldblue'
                 />
                 <button
                   onClick={handleAddSpecialization}
-                  className='absolute right-3 top-1/2 transform -translate-y-1/2'
+                  className='absolute right-3 top-1/2 transform -translate-y-1/2 text-sm font-semibold text-boldblue'
                 >
-                  <FaSearch size={14} className='text-boldblue' />
+                  Add
                 </button>
               </div>
             </div>
