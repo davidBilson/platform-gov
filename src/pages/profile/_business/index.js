@@ -40,10 +40,10 @@ const BusinessProfile = () => {
   }, [userId, BASE_URL]);
 
   useEffect(() => {
-    if(!client) {
+    if(!client && !loading) {
       toast.info('You are yet to create a profile!')
     }
-  }, [client])
+  }, [client, loading]);
 
   if (loading) return <div className="p-6 text-center">Loading client profile...</div>;
 
@@ -57,7 +57,7 @@ const BusinessProfile = () => {
             {/* Company Logo */}
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
-                {client.logo ? (
+                {client && client.logo ? (
                   <img 
                     src={client.logo} 
                     alt={`${client.name} logo`} 
@@ -72,7 +72,7 @@ const BusinessProfile = () => {
             {/* Company Name */}
             <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
               <h1 className='text-boldblue text-xl font-semibold'>
-                {client.name || "Company Name"}
+                {client?.name || "Company Name"}
               </h1>
             </div>
           </div>
@@ -80,7 +80,7 @@ const BusinessProfile = () => {
           {/* Company Overview */}
           <div className='mb-8 py-3.5 px-5 rounded-md border border-boldblue'>
             <p className='text-boldblue'>
-              {client.overview || "No company overview available."}
+              {client?.overview || "No company overview available."}
             </p>
           </div>
         </div>
@@ -90,39 +90,39 @@ const BusinessProfile = () => {
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:w-full sm:max-w-[120px]'>Location</h2>
           
           <div className='w-full'>
-            {client.locations && client.locations.map((location, index) => (
-              <div key={index} className={index > 0 ? 'mt-8 pt-4 border-t border-gray-200' : ''}>
-                {index > 0 && (
-                  <h3 className="font-medium mb-2">Location {index + 1}</h3>
-                )}
-                
-                {/* Location Details */}
-                <div className='mb-4'>
-                  <p className='text-boldblue font-medium'>
-                    {location.country || "Country not specified"}
-                  </p>
+            {client && client.locations && client.locations.length > 0 ? (
+              client.locations.map((location, index) => (
+                <div key={index} className={index > 0 ? 'mt-8 pt-4 border-t border-gray-200' : ''}>
+                  {index > 0 && (
+                    <h3 className="font-medium mb-2">Location {index + 1}</h3>
+                  )}
+                  
+                  {/* Location Details */}
+                  <div className='mb-4'>
+                    <p className='text-boldblue font-medium'>
+                      {location.country || "Country not specified"}
+                    </p>
+                  </div>
+                  
+                  {/* Address */}
+                  <div className='mb-4'>
+                    <p className='text-boldblue'>
+                      {location.address1 && `${location.address1}, `}
+                      {location.address2}
+                    </p>
+                  </div>
+                  
+                  {/* City, State, ZIP */}
+                  <div className='mb-4'>
+                    <p className='text-boldblue'>
+                      {location.city && `${location.city}, `}
+                      {location.state && `${location.state} `}
+                      {location.zipCode}
+                    </p>
+                  </div>
                 </div>
-                
-                {/* Address */}
-                <div className='mb-4'>
-                  <p className='text-boldblue'>
-                    {location.address1 && `${location.address1}, `}
-                    {location.address2}
-                  </p>
-                </div>
-                
-                {/* City, State, ZIP */}
-                <div className='mb-4'>
-                  <p className='text-boldblue'>
-                    {location.city && `${location.city}, `}
-                    {location.state && `${location.state} `}
-                    {location.zipCode}
-                  </p>
-                </div>
-              </div>
-            ))}
-            
-            {(!client.locations || client.locations.length === 0) && (
+              ))
+            ) : (
               <p className='text-boldblue italic'>No locations specified.</p>
             )}
           </div>
@@ -137,7 +137,7 @@ const BusinessProfile = () => {
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Industry</h3>
               <p className='text-boldblue'>
-                {client.industry || "Not specified"}
+                {client?.industry || "Not specified"}
               </p>
             </div>
             
@@ -145,7 +145,7 @@ const BusinessProfile = () => {
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Size</h3>
               <p className='text-boldblue'>
-                {client.size || "Not specified"}
+                {client?.size || "Not specified"}
               </p>
             </div>
             
@@ -153,7 +153,7 @@ const BusinessProfile = () => {
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Specializations</h3>
               <div className='flex flex-wrap gap-2'>
-                {client.specializations && client.specializations.length > 0 ? (
+                {client?.specializations && client.specializations.length > 0 ? (
                   client.specializations.map((spec, index) => (
                     <div key={index} className='bg-deepskyblue text-white font-bold py-1 px-4 rounded-full'>
                       {spec}
@@ -173,7 +173,7 @@ const BusinessProfile = () => {
             href="/profile/edit" 
             className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
-            Edit Profile
+            {client ? "Edit Profile" : "Create Profile"}
           </Link>
         </div>
       </section>
