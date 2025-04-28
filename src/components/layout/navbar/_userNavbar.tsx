@@ -30,7 +30,7 @@ const UserNavbar = () => {
   
   const pathname = usePathname();
   const { name, role, resetAll } = authStore();
-  const { setFeedType } = useFeedStore();
+  const { setFeedType, feedType } = useFeedStore();
   const router = useRouter();
 
   const handleSignOut = () => {
@@ -39,7 +39,7 @@ const UserNavbar = () => {
   }
 
   const jobAndContractorOptions = ["Jobs", "Contractors"];
-  const [selectedOption, setSelectedOption] = useState("Jobs");
+  const [, setSelectedOption] = useState(feedType);
 
   // Check if current path is an auth route
   const isAuthRoute = pathname?.startsWith('/auth');
@@ -264,7 +264,7 @@ const UserNavbar = () => {
                     className="w-full bg-skyblue border-none flex items-center justify-center p-2 rounded-full"
                     onClick={() => setContractorsDropdown(!contractorsDropdown)}
                   >
-                      <span>{selectedOption}</span>
+                      <span>{feedType}</span>
                       <span>
                         {contractorsDropdown ? <IoMdArrowDropup size={15} /> : <IoMdArrowDropdown size={15} />}
                       </span>
@@ -342,7 +342,7 @@ const UserNavbar = () => {
                       className="w-1/2 bg-skyblue border-none flex items-center justify-center p-2 rounded-full"
                       onClick={() => setContractorsDropdown(!contractorsDropdown)}
                     >
-                      <span>{selectedOption}</span>
+                      <span>{feedType}</span>
                       <span>
                         {contractorsDropdown ? <IoMdArrowDropup size={15} /> : <IoMdArrowDropdown size={15} />}
                       </span>
