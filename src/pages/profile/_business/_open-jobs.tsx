@@ -1,75 +1,102 @@
+import useAuthStore from '@/store/authStore';
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRegHourglass } from "react-icons/fa6";
 
-const OpenJobs = () => {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// Define TypeScript interfaces based on the example response
+interface ClientLocation {
+  country: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  _id: string;
+}
+
+interface Milestone {
+  id: number;
+  description: string;
+  price: number;
+  dueDate: string | null;
+  _id?: string; // MongoDB might add this
+}
+
+interface Job {
+  _id: string;
+  userId: string;
+  clientName: string;
+  clientLogo: string;
+  clientIndustry: string;
+  clientCompanySize: string;
+  clientSpecializations: string[];
+  clientLocation: ClientLocation[];
+  clientAccountAge: string;
+  userRole: string;
+  location: string;
+  jobCategory: string;
+  jobTitle: string;
+  description: string;
+  requiredSkills: string[];
+  requiredCertifications: string[];
+  requiresRegisteredLobbyist: boolean;
+  employmentType: string;
+  paymentType: string;
+  price: number;
+  milestones: Milestone[];
+  startDate: string;
+  retainerAmount: number;
+  retainerFrequency: string;
+  retainerDuration: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  proposalsCount: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: Job[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+const OpenJobs: React.FC = () => {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const { userId } = useAuthStore();
 
   useEffect(() => {
-    // Mock data instead of API request
-    const timer = setTimeout(() => {
+    const fetchJobs = async (): Promise<void> => {
       try {
-        // Mock jobs data
-        const mockJobsData = [
-          {
-            id: 1,
-            title: "Frontend Developer",
-            description: "We are looking for a skilled frontend developer to join our team on a project for a government agency.",
-            category: "Web Development",
-            location: "Boston, MA",
-            workType: "Remote",
-            status: "open",
-            proposalsCount: 12,
-            postedAt: "2025-04-15T09:30:00Z"
-          },
-          {
-            id: 2,
-            title: "UI/UX Designer",
-            description: "Design user interfaces for our government services portal. Experience with accessibility standards required.",
-            category: "Design",
-            location: "Washington, DC",
-            workType: "Hybrid",
-            status: "open",
-            proposalsCount: 8,
-            postedAt: "2025-04-17T14:45:00Z"
-          },
-          {
-            id: 3,
-            title: "Backend Developer",
-            description: "Develop and maintain API services for our government client. Experience with Node.js and security protocols required.",
-            category: "Software Development",
-            location: "New York, NY",
-            workType: "On-site",
-            status: "active",
-            proposalsCount: 15,
-            postedAt: "2025-04-10T11:20:00Z"
-          },
-          {
-            id: 4,
-            title: "Data Analyst",
-            description: "Analyze and report on public data sets for a federal agency project.",
-            category: "Data Science",
-            location: "Remote",
-            workType: "Contract",
-            status: "active",
-            proposalsCount: 6,
-            postedAt: "2025-04-12T10:00:00Z"
-          }
-        ];
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+        const endpoint = process.env.NEXT_PUBLIC_GET_JOB_BY_USERID?.replace(':id', userId);
+        const response = await axios.get<ApiResponse>(`${baseURL}${endpoint}`
+        );
         
-        setJobs(mockJobsData);
-        setLoading(false);
+        if (response.data.success) {
+          setJobs(response.data.data);
+        } else {
+          setError('Failed to fetch jobs');
+        }
       } catch (err) {
-        setError("Failed to load jobs data");
+        setError('Error connecting to the server');
+        console.error('Error fetching jobs:', err);
+      } finally {
         setLoading(false);
-        console.error('Error loading jobs data:', err);
       }
-    }, 800); // Simulate a short loading time
-    
-    return () => clearTimeout(timer);
-  }, []);
+    };
+
+    fetchJobs();
+  }, [userId]);
 
   // Filter jobs by status
   const openJobs = jobs.filter(job => job.status === 'open');
@@ -82,18 +109,18 @@ const OpenJobs = () => {
     <main className='p-6'>
       <section className='w-full max-w-275 m-auto'>
         {/* Open Jobs Section */}
-        <article>
+        <article className='border-b border-b-[#ccc] pb-10 mb-8'>
           <h2 className='font-semibold text-xl mb-[15px]'>Open Jobs</h2>
           
           {openJobs.length === 0 ? (
             <p>No open jobs at the moment.</p>
           ) : (
             openJobs.map(job => (
-              <div key={job.id} className='border-b border-b-[#ccc] pb-10 mb-8'>
+              <div key={job._id} className='border-b border-b-[#ccc] pb-10 mb-8'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2'>
                   {/* date and time job was posted */}
                   <p className="text-[12px] text-[#808080]">
-                    Posted {new Date(job.postedAt).toLocaleDateString()} {new Date(job.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    Posted {new Date(job.createdAt).toLocaleDateString()} {new Date(job.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>
 
                   {/* number of proposals */}
@@ -102,20 +129,20 @@ const OpenJobs = () => {
                   </button>
                 </div>
 
-                <p className='text-sm mb-[15px] font-semibold'>Job Category</p>
-                <h3 className='font-semibold text-xl mb-[15px]'>{job.title}</h3>
+                <p className='text-sm mb-[15px] font-semibold'>{job.jobCategory}</p>
+                <h3 className='font-semibold text-xl mb-[15px]'>{job.jobTitle}</h3>
 
                 <div className='mb-[15px] flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-10 text-sm'>
                   <div className='flex items-center gap-2'>
                     <FaRegHourglass size={18} />
                     <p>
-                      {job.location} | {job.workType}
+                      {job.employmentType} | {job.paymentType}
                     </p>
                   </div>
                   <div className='flex items-center gap-2'>
                     <FaLocationDot size={18} />
                     <p>
-                      {job.location} | {job.workType}
+                      {job.location}
                     </p>
                   </div>
                 </div>
@@ -123,7 +150,7 @@ const OpenJobs = () => {
                 <p className='text-[16px] mb-[15px]'>{job.description}</p>
 
                 <button disabled className='bg-[#009DDE] text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
-                  {job.category}
+                  {job.jobCategory}
                 </button>
               </div>
             ))
@@ -138,11 +165,11 @@ const OpenJobs = () => {
             <p>No active jobs at the moment.</p>
           ) : (
             activeJobs.map(job => (
-              <div key={job.id} className='border-b border-b-[#ccc] pb-10 mb-8'>
+              <div key={job._id} className='border-b border-b-[#ccc] pb-10 mb-8'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2'>
                   {/* date and time job was posted */}
                   <p className="text-[12px] text-[#808080]">
-                    Posted {new Date(job.postedAt).toLocaleDateString()} {new Date(job.postedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    Posted {new Date(job.createdAt).toLocaleDateString()} {new Date(job.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>
 
                   {/* number of proposals */}
@@ -151,20 +178,20 @@ const OpenJobs = () => {
                   </button>
                 </div>
 
-                <p className='text-sm mb-[15px] font-semibold'>Job Category</p>
-                <h3 className='font-semibold text-xl mb-[15px]'>{job.title}</h3>
+                <p className='text-sm mb-[15px] font-semibold'>{job.jobCategory}</p>
+                <h3 className='font-semibold text-xl mb-[15px]'>{job.jobTitle}</h3>
 
                 <div className='mb-[15px] flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-10 text-sm'>
                   <div className='flex items-center gap-2'>
                     <FaRegHourglass size={18} />
                     <p>
-                      {job.location} | {job.workType}
+                      {job.employmentType} | {job.paymentType}
                     </p>
                   </div>
                   <div className='flex items-center gap-2'>
                     <FaLocationDot size={18} />
                     <p>
-                      {job.location} | {job.workType}
+                      {job.location}
                     </p>
                   </div>
                 </div>
@@ -172,7 +199,7 @@ const OpenJobs = () => {
                 <p className='text-[16px] mb-[15px]'>{job.description}</p>
 
                 <button disabled className='bg-[#009DDE] text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
-                  {job.category}
+                  {job.jobCategory}
                 </button>
               </div>
             ))
