@@ -6,6 +6,7 @@ import useAuthStore from '@/store/authStore';
 import { fetchProfile } from "@/api/profile-api";
 import Link from "next/link";
 import { toast } from 'react-toastify';
+import Image from 'next/image';
 
 // Define proper TypeScript interfaces
 interface WorkHistoryItem {
@@ -169,12 +170,12 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
               {/* Image and Name+Loc+Profession */}
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
                 {/* Image */}
-                <div className="relative w-20 h-20 sm:w-22 sm:h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
+                <div className="w-22 h-22 overflow-hidden bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
                 {hasProfileImage ? (
-                  <img 
+                  <Image 
                     src={getProfileImageUrl()}
                     alt={`${name || 'User'}'s profile`}
-                    className="object-cover rounded-full"
+                    className="h-22 w-22 overflow-hidden rounded-full object-cover flex items-center justify-center"
                     width={88}
                     height={88}
                   />
