@@ -1,82 +1,10 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { FaTimes } from 'react-icons/fa';
-
-// Define TypeScript interfaces for our data structures
-interface Attachment {
-  _id: string;
-  filename: string;
-  originalName: string;
-  fileSize: number;
-  fileType: string;
-  fileUrl: string;
-  uploadedAt: string;
-}
-
-interface JobDetails {
-  _id: string;
-  userId: string;
-  clientId?: string;
-  clientName: string;
-  clientLogo: string;
-  location: string;
-  jobCategory: string;
-  jobTitle: string;
-  description: string;
-  employmentType: string;
-  paymentType: string;
-  price: number;
-  retainerAmount: number;
-  retainerFrequency: string;
-  retainerDuration: number;
-  status: string;
-  createdAt: string;
-}
-
-interface ProposedMilestone {
-  description: string;
-  price: number;
-  dueDate: string;
-}
-
-interface Interview {
-  scheduledDate: string;
-  meetingLink: string;
-  notes: string;
-  completed: boolean;
-}
-
-interface ProposalData {
-  _id: string;
-  jobId: JobDetails;
-  freelancerId: string;
-  freelancerProfileId: string;
-  coverLetter: string;
-  proposedRate: number;
-  proposedMilestones: ProposedMilestone[];
-  proposedRetainerAmount?: number;
-  proposedRetainerFrequency?: string;
-  proposedRetainerDuration?: number;
-  availableStartDate?: string;
-  availability: string;
-  customAvailabilityNote?: string;
-  relevantSkills: string[];
-  relevantExperience?: string;
-  attachments: Attachment[];
-  certificationAcknowledgment: boolean;
-  status: string;
-  clientNotes?: string;
-  interviews: Interview[];
-  messageThreadId?: string;
-  createdAt: string;
-  updatedAt: string;
-  viewedAt?: string;
-  lastStatusChangeAt: string;
-  draftExpiresAt: string | null;
-}
+import { Application } from '@/types/proposals';
 
 interface ProposalModalProps {
-  proposal: ProposalData;
+  proposal: Application;
   onClose: () => void;
 }
 
@@ -103,6 +31,9 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
     }
   };
 
+  // Check if jobId is an object
+  const jobDetails = typeof proposal.jobId === 'object' ? proposal.jobId : null;
+
   return (
     <section 
       className='fixed top-0 left-0 w-full h-screen p-6 flex items-center justify-center bg-black/50 bg-opacity-50 z-50'
@@ -118,7 +49,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
         
         <div className="space-y-6">
           <div className="border-b pb-4">
-            <h2 className="text-2xl font-semibold mb-2">{proposal.jobId.jobTitle}</h2>
+            <h2 className="text-2xl font-semibold mb-2">{jobDetails?.jobTitle || "Job Title"}</h2>
             <p className="text-sm text-gray-500">
               Applied on {formatDate(proposal.createdAt)}
             </p>
@@ -126,7 +57,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
           
           <div className="border-b pb-4">
             <h3 className="font-semibold text-lg mb-2">Cover Letter</h3>
-            <p className="whitespace-pre-line">{proposal.coverLetter}</p>
+            <p className="whitespace-pre-line">{proposal.coverLetter || "No cover letter provided"}</p>
           </div>
           
           <div className="border-b pb-4">
@@ -149,7 +80,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
           
           <div className="border-b pb-4">
             <h3 className="font-semibold text-lg mb-2">Attachments</h3>
-            {proposal.attachments.length === 0 ? (
+            {!proposal.attachments || proposal.attachments.length === 0 ? (
               <p className="text-gray-600">No attachments</p>
             ) : (
               <ul className="space-y-2">

@@ -3,79 +3,7 @@ import React, { useState } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import { format } from 'date-fns';
 import ProposalModal from './_proposalModal';
-
-// Define TypeScript interfaces
-interface Attachment {
-  _id: string;
-  filename: string;
-  originalName: string;
-  fileSize: number;
-  fileType: string;
-  fileUrl: string;
-  uploadedAt: string;
-}
-
-interface JobDetails {
-  _id: string;
-  userId: string;
-  clientId?: string;
-  clientName: string;
-  clientLogo: string;
-  location: string;
-  jobCategory: string;
-  jobTitle: string;
-  description: string;
-  employmentType: string;
-  paymentType: string;
-  price: number;
-  retainerAmount: number;
-  retainerFrequency: string;
-  retainerDuration: number;
-  status: string;
-  createdAt: string;
-}
-
-interface ProposedMilestone {
-  description: string;
-  price: number;
-  dueDate: string;
-}
-
-interface Interview {
-  scheduledDate: string;
-  meetingLink: string;
-  notes: string;
-  completed: boolean;
-}
-
-interface Application {
-  _id: string;
-  jobId: JobDetails;
-  freelancerId: string;
-  freelancerProfileId: string;
-  coverLetter: string;
-  proposedRate: number;
-  proposedMilestones: ProposedMilestone[];
-  proposedRetainerAmount?: number;
-  proposedRetainerFrequency?: string;
-  proposedRetainerDuration?: number;
-  availableStartDate?: string;
-  availability: string;
-  customAvailabilityNote?: string;
-  relevantSkills: string[];
-  relevantExperience?: string;
-  attachments: Attachment[];
-  certificationAcknowledgment: boolean;
-  status: string;
-  clientNotes?: string;
-  interviews: Interview[];
-  messageThreadId?: string;
-  createdAt: string;
-  updatedAt: string;
-  viewedAt?: string;
-  lastStatusChangeAt: string;
-  draftExpiresAt: string | null;
-}
+import { Application } from '@/types/proposals';
 
 interface PendingProposalsProps {
   applications: Application[];
@@ -121,7 +49,7 @@ const PendingProposals: React.FC<PendingProposalsProps> = ({ applications = [] }
             </p>
             
             <h3 className="text-xl font-semibold mb-3.75">
-              {application.jobId?.jobTitle || "Job Title"}
+              {typeof application.jobId === 'object' ? application.jobId.jobTitle : "Job Title"}
             </h3>
             
             <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
@@ -132,12 +60,12 @@ const PendingProposals: React.FC<PendingProposalsProps> = ({ applications = [] }
               
               <div className="flex items-center gap-1.25">
                 <FaLocationDot size={15} />
-                {application.jobId?.location || "Remote"}
+                {typeof application.jobId === 'object' ? application.jobId.location : "Remote"}
               </div>
             </div>
 
             <p className="text-gray-600 mb-3.75">
-              {truncateDescription(application.jobId?.description || "No description provided")}
+              {truncateDescription(typeof application.jobId === 'object' ? application.jobId.description : "No description provided")}
             </p>
 
             <div className='flex items-center flex-wrap gap-2.5 mb-3.75'>
@@ -153,18 +81,17 @@ const PendingProposals: React.FC<PendingProposalsProps> = ({ applications = [] }
             <div className="flex items-center gap-5">
               <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
                 <img 
-                  src={application.jobId?.clientLogo} 
-                  alt={application.jobId?.clientName || "Client"} 
+                  src={typeof application.jobId === 'object' ? application.jobId.clientLogo : ""} 
+                  alt={typeof application.jobId === 'object' ? application.jobId.clientName : "Client"} 
                   width={35} 
                   height={35} 
                   className="rounded-full" 
                 />
               </div>
               <Link 
-                // href={`/client-profile/${application.jobId?.clientId}`} 
                 href={''}
                 className="font-semibold text-sm hover:underline">
-                {application.jobId?.clientName || "Client"}
+                {typeof application.jobId === 'object' ? application.jobId.clientName : "Client"}
               </Link>
             </div>
           </article>
