@@ -18,8 +18,8 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     '/auth/forgot-password',
     '/auth/reset-password',
     '/auth/verification',
-    '/',
-    '/privacy-policy'
+    '/privacy-policy',
+    '/'
   ];
 
   const isPublicRoute =
@@ -45,20 +45,21 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   // Handle redirection for verification flow
   useEffect(() => {
     if (!isLoading) {
-      // If user is logged in but still on signup page, redirect to verification or home
+
       if (userId && router.pathname === '/auth/sign-up') {
-        // If verification is not completed, go to verification page
+
         if (verificationStep !== 'completed') {
           router.replace('/auth/verification');
         } else {
           router.replace('/');
         }
+        
       } 
-      // If user is on verification page but has no userId, redirect to signup
+
       else if (isVerificationPage && !userId) {
         router.replace('/auth/sign-up');
       }
-      // If user is logged in and on login page, redirect to home
+
       else if (userId && router.pathname === '/auth/sign-in') {
         router.replace('/');
       }
