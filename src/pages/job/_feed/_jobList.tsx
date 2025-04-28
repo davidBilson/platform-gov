@@ -78,7 +78,7 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
       </div>
       
       <div className="flex items-center gap-5">
-        <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
+        <div className="w-8.75 h-8.75 overflow-hidden rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
           {
             job.clientLogo &&
             <img src={job.clientLogo} alt={job.clientName} width={35} height={35} className="rounded-full w-full h-full object-cover object-center" />
