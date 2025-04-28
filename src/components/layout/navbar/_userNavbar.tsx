@@ -2,7 +2,7 @@
 import Logo from "@/components/ui/logo"
 // import Image from 'next/image'
 import Link from 'next/link'
-import { IoMdArrowDropdown } from "react-icons/io";
+import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io"; // Added IoMdArrowDropup
 import { FaBell } from "react-icons/fa6";
 import { useState, useRef, useEffect } from 'react';
 import { HiMenuAlt3 } from "react-icons/hi";
@@ -193,7 +193,9 @@ const UserNavbar = () => {
                 <li className="flex items-center gap-1.25 cursor-pointer relative" ref={jobsDropdownRef}>
                     <div onClick={() => setJobsDropdown(!jobsDropdown)} className="flex items-center gap-1.25">
                       <span>Jobs</span>
-                      <span><IoMdArrowDropdown size={20} /></span>
+                      <span>
+                        {jobsDropdown ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}
+                      </span>
                     </div>
                     
                     {jobsDropdown && (
@@ -216,7 +218,9 @@ const UserNavbar = () => {
                 <li className="flex items-center gap-1.25 cursor-pointer relative" ref={contractsDropdownRef}>
                     <div onClick={() => setContractsDropdown(!contractsDropdown)} className="flex items-center gap-1.25">
                       <span>Manage Contracts</span>
-                      <span><IoMdArrowDropdown size={20} /></span>
+                      <span>
+                        {contractsDropdown ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}
+                      </span>
                     </div>
                     
                     {contractsDropdown && (
@@ -242,7 +246,9 @@ const UserNavbar = () => {
 
                 <li className="flex items-center gap-1.25 cursor-pointer">
                     <span>Manage Contractors</span>
-                    <span><IoMdArrowDropdown size={20} /></span>
+                    <span>
+                      <IoMdArrowDropdown size={20} />
+                    </span>
                 </li>
                 
                 <li className="cursor-pointer">
@@ -259,7 +265,9 @@ const UserNavbar = () => {
                     onClick={() => setContractorsDropdown(!contractorsDropdown)}
                   >
                       <span>{selectedOption}</span>
-                      <span><IoMdArrowDropdown size={15} /></span>
+                      <span>
+                        {contractorsDropdown ? <IoMdArrowDropup size={15} /> : <IoMdArrowDropdown size={15} />}
+                      </span>
                   </button>
                   
                   {contractorsDropdown && (
@@ -330,9 +338,14 @@ const UserNavbar = () => {
                 <div className="px-6">
                   <div className="w-full h-12.5 flex items-center py-1.25 pl-5 pr-1.25 border border-skyblue rounded-sm text-[14px]">
                     <input type='text' placeholder="search" className="outline-none w-1/2" autoFocus />
-                    <button className="w-1/2 bg-skyblue border-none flex items-center justify-center p-2 rounded-full">
+                    <button 
+                      className="w-1/2 bg-skyblue border-none flex items-center justify-center p-2 rounded-full"
+                      onClick={() => setContractorsDropdown(!contractorsDropdown)}
+                    >
                       <span>{selectedOption}</span>
-                      <span><IoMdArrowDropdown size={15} /></span>
+                      <span>
+                        {contractorsDropdown ? <IoMdArrowDropup size={15} /> : <IoMdArrowDropdown size={15} />}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -350,7 +363,9 @@ const UserNavbar = () => {
                       onClick={() => setJobsDropdown(!jobsDropdown)}
                     >
                       <span>Jobs</span>
-                      <span><IoMdArrowDropdown size={20} /></span>
+                      <span>
+                        {jobsDropdown ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}
+                      </span>
                     </div>
                     
                     {jobsDropdown && (
@@ -376,7 +391,9 @@ const UserNavbar = () => {
                       onClick={() => setContractsDropdown(!contractsDropdown)}
                     >
                       <span>Manage Contracts</span>
-                      <span><IoMdArrowDropdown size={20} /></span>
+                      <span>
+                        {contractsDropdown ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}
+                      </span>
                     </div>
                     
                     {contractsDropdown && (
@@ -402,7 +419,9 @@ const UserNavbar = () => {
 
                   <li className="flex items-center gap-1.25">
                       <span>Manage Contractors</span>
-                      <span><IoMdArrowDropdown size={20} /></span>
+                      <span>
+                        <IoMdArrowDropdown size={20} />
+                      </span>
                   </li>
                   
                   <li>
