@@ -205,7 +205,7 @@ const UserNavbar = () => {
                         </Link>
                         {role === 'client' && (
                           <Link href="/job/create" className="block px-4 py-3 text-sm text-boldblue hover:underline">
-                            Create Jobs
+                            Create Job
                           </Link>
                         )}
                       </div>
@@ -375,7 +375,7 @@ const UserNavbar = () => {
                         </Link>
                         {role === 'client' && (
                           <Link href="/jobs/create" className="py-2 text-sm text-boldblue hover:underline">
-                            Create Jobs
+                            Create Job
                           </Link>
                         )}
                       </div>
