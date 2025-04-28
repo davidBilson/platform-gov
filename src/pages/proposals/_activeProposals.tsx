@@ -71,7 +71,7 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
             <div className='flex items-center flex-wrap gap-2.5 mb-3.75'>
               <button 
                 onClick={() => openProposalModal(application)}
-                className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out'
+                className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out cursor-pointer'
               >
                 View proposal
               </button>
