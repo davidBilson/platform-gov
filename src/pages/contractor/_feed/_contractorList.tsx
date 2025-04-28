@@ -37,7 +37,6 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
         {contractors.map((contractor) => (
           <div 
             key={contractor._id} 
-            // className='border-b border-b-deepskyblue pb-7.5'
           >
 
             {/* *********** 1 *********** */}
