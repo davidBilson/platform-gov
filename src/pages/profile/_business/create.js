@@ -261,12 +261,12 @@ const CreateBusinessProfile = () => {
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
             {/* Company Logo Upload */}
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
-              <div className='absolute flex items-center justify-center w-full h-full'>
+              <div className='w-22 h-22 border border-boldblue rounded-full overflow-hidden absolute flex items-center justify-center'>
                 {business.logo ? (
                   <img 
                     src={business.logo} 
                     alt={`${business.name || 'Company'} logo`} 
-                    className="w-full h-full object-cover rounded-full"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <IoMdImages size={40} className='text-white/70' />

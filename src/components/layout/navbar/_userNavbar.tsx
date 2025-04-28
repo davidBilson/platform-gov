@@ -200,7 +200,7 @@ const UserNavbar = () => {
                     
                     {jobsDropdown && (
                       <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-skyblue rounded shadow-md z-10">
-                        <Link href="/" className="block px-4 py-3 text-sm text-boldblue hover:underline">
+                        <Link onClick={() => setFeedType('Jobs')} href="/" className="block px-4 py-3 text-sm text-boldblue hover:underline">
                           Find Jobs
                         </Link>
                         {role === 'client' && (
@@ -370,7 +370,7 @@ const UserNavbar = () => {
                     
                     {jobsDropdown && (
                       <div className="mt-2 bg-white rounded shadow-md z-10 flex flex-col items-center">
-                        <Link href="/jobs/find" className="py-2 text-sm text-boldblue hover:underline">
+                        <Link href="/jobs/find" onClick={() => setFeedType('Jobs')} className="py-2 text-sm text-boldblue hover:underline">
                           Find Jobs
                         </Link>
                         {role === 'client' && (
@@ -381,7 +381,7 @@ const UserNavbar = () => {
                       </div>
                     )}
                   </li>
-                  
+                 
                   {/* Mobile Contracts dropdown */}
                   <li className="relative">
                     <div 

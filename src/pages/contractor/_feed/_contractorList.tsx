@@ -2,6 +2,7 @@ import React from 'react';
 import { ContractorListProps } from '@/types/contractors';
 import { FaUser } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
+import Image from 'next/image';
 
 
 const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
@@ -42,26 +43,34 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
             {/* *********** 1 *********** */}
             <div className='flex flex-col md:flex-row items-start gap-4 md:gap-18.25 mb-6 md:mb-10.25'>
                 {/* *********** 1a *********** */}
-                <div className='flex items-start gap-4.25 w-full md:max-w-[20%]'>
-                  {contractor.profileImage ? (
-                    <img 
-                    src={contractor.profileImage} 
-                    alt={`${contractor.primaryPosition} profile`} 
-                    className='w-16 h-16 md:w-[87px] md:h-[87px] object-cover object-center overflow-hidden rounded-full border border-boldblue'
-                    />
-                  ) : 
-                  <div className='text-white flex items-center justify-center w-16 h-16 md:w-[87px] md:h-[87px] rounded-full bg-boldblue border border-boldblue'>
-                      <FaUser size={24} className="md:text-4xl" />
-                    </div>
-                  }
+                <div className='flex items-center  gap-4.25 w-full md:max-w-[20%] h-26  '>
+                  
+                  <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center overflow-hidden'>
+                    {contractor.profileImage ? (
+                      <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center'>
+                        <Image
+                          src={contractor.profileImage} 
+                          alt={`${contractor.primaryPosition} profile`}
+                          width={76}
+                          height={76}
+                          className='h-19 w-19 overflow-hidden rounded-full object-cover flex items-center justify-center'
+                          />
+                      </div>
+                      ) : 
+                      <div className='text-white flex items-center justify-center w-16 h-16 md:w-[87px] md:h-[87px] rounded-full bg-boldblue border border-boldblue'>
+                        <FaUser size={24} className="md:text-4xl" />
+                      </div>
+                    }
+                  </div>
 
-                  <div className='flex flex-col items-start gap-1 md:gap-2.5'>
+                  <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 w-1/2 h-full'>
                     <p className="text-lg md:text-xl font-semibold">
                       {contractor.user.name.split(' ')[0]} {contractor.user.name.split(' ')[1]?.charAt(0)}.
                     </p>
                     <p className='text-xs font-bold'>{contractor.primaryPosition ?? "Profession"}</p>
                     <p className='text-xs font-bold'>{"Location"}</p>
                   </div>
+
                 </div>
 
                 {/* *********** 1b *********** */}
