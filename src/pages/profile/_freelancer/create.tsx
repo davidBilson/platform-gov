@@ -137,8 +137,8 @@ const CreateFreelancerProfile = () => {
       const response = await fetchProfile(userId);
       
       if (response.success && response.data) {
-        const profileData = response.data;
         setIsProfileExists(true);
+        const profileData = response.data;
         
         setFormData({
           bio: profileData.bio || "",
@@ -168,11 +168,16 @@ const CreateFreelancerProfile = () => {
             : profileData.profileImage || "",
           profileImage: profileData.profileImage || ""
         });
+
+        return { success: true, data: response.data };
+
       } else {
         setIsProfileExists(false);
+        return { success: false };
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
+      return { success: false };
     } finally {
       setIsLoading(false);
     }
@@ -506,20 +511,21 @@ const submitProfileData = async (): Promise<void> => {
   };
 
   // Handle preview - could be expanded in future
-  const handlePreview = () => {
-    // Check if profile exists or if essential data is filled
-    const hasRequiredData = isProfileExists || (
-      formData.bio.trim() !== "" && 
-      formData.primaryPosition.trim() !== "" &&
-      formData.ratePerHour.trim() !== ""
-    );
-    
-    if (!hasRequiredData) {
-      toast.error("Please save your profile before previewing public view");
+  const handlePreview = async () => {
+    // First check if we already know the profile exists
+    if (isProfileExists) {
+      router.push('/profile');
       return;
     }
     
-    router.push('/profile');
+    // If we're not sure, fetch the latest profile data
+    const profileResult = await fetchUserProfile();
+    
+    if (profileResult.success) {
+      router.push('/profile');
+    } else {
+      toast.error("Please save your profile before previewing public view");
+    }
   };
 
   // Initialize textarea height on mount

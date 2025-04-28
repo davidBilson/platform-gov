@@ -37,31 +37,36 @@ const CreateBusinessProfile = () => {
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   // Fetch business profile on component mount
-  useEffect(() => {
-    const fetchBusinessProfile = async () => {
-      if (!userId) return;
+  const fetchBusinessProfile = async () => {
+    if (!userId) return;
+    
+    try {
+      setLoading(true);
+      const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
+      const response = await fetch(`${BASE_URL}${apiEndpoint}`);
+      const data = await response.json();
       
-      try {
-        setLoading(true);
-        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
-        const response = await fetch(`${BASE_URL}${apiEndpoint}`);
-        const data = await response.json();
-        
-        if (data.success && data.data) {
-          setBusiness(data.data);
-        } else {
-          // No profile found, keep the default empty state
-          console.log("No business profile found. Ready to create one.");
-        }
-      } catch (err) {
-        console.error('Error fetching business profile:', err);
-      } finally {
-        setLoading(false);
+      if (data.success && data.data) {
+        setBusiness(data.data);
+        return data.data;
+      } else {
+        // No profile found, keep the default empty state
+        console.log("No business profile found. Ready to create one.");
+        return null;
       }
-    };
+    } catch (err) {
+      console.error('Error fetching business profile:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchBusinessProfile();
-  }, [userId, BASE_URL]);
+  useEffect(() => {
+    if (userId) {
+      fetchBusinessProfile();
+    }
+  }, [userId]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -212,23 +217,15 @@ const CreateBusinessProfile = () => {
       setIsLoading(false);
     }
   };
-
-  const isProfileEmpty = (business) => {
-    return (
-      !business._id &&  // Check if profile has never been saved
-      (!business.name || business.name.trim() === '') &&
-      (!business.overview || business.overview.trim() === '') &&
-      (!business.industry || business.industry === '') &&
-      (!business.size || business.size === '')
-    );
-  };
   
-  // Modified handlePreview function
-  const handlePreview = () => {
-    if (isProfileEmpty(business)) {
+  const handlePreview = async () => {
+    const profileData = await fetchBusinessProfile();
+    
+    if (!profileData || !profileData._id) {
       toast.error('Please save your profile before previewing');
       return;
     }
+    
     router.push('/profile');
   };
 
