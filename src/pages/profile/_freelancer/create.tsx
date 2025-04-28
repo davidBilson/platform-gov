@@ -133,7 +133,7 @@ const CreateFreelancerProfile = () => {
 
   const fetchUserProfile = async () => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       const response = await fetchProfile(userId);
       
       if (response.success && response.data) {
