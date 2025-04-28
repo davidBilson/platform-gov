@@ -81,7 +81,7 @@ const JobList: React.FC<JobListProps> = ({ job }) => {
         <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
           {
             job.clientLogo &&
-            <img src={job.clientLogo} alt={job.clientName} width={35} height={35} className="rounded-full" />
+            <img src={job.clientLogo} alt={job.clientName} width={35} height={35} className="rounded-full w-full h-full object-cover object-center" />
           }
         </div>
         <Link href="" className="font-semibold text-sm hover:underline">{job.clientName}</Link>

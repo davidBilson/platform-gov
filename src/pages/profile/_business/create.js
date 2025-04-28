@@ -213,8 +213,23 @@ const CreateBusinessProfile = () => {
     }
   };
 
+  const isProfileEmpty = (business) => {
+    return (
+      !business._id &&  // Check if profile has never been saved
+      (!business.name || business.name.trim() === '') &&
+      (!business.overview || business.overview.trim() === '') &&
+      (!business.industry || business.industry === '') &&
+      (!business.size || business.size === '')
+    );
+  };
+  
+  // Modified handlePreview function
   const handlePreview = () => {
-    router.push('/profile')
+    if (isProfileEmpty(business)) {
+      toast.error('Please save your profile before previewing');
+      return;
+    }
+    router.push('/profile');
   };
 
   // Handle specialization input with enter key

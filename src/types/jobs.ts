@@ -105,3 +105,22 @@ export interface JobsResponse {
   data: Jobs[];
   pagination: PaginationInfo;
 }
+
+export interface ApplicationDraft {
+  _id: string;
+  jobId: string | { _id: string; [key: string]: string }; // Allow jobId to be either a string or an object
+  freelancerId: string;
+  coverLetter?: string;
+  proposedRate?: string | number;
+  certificationAcknowledgment?: boolean;
+  attachments?: Array<{
+    filename: string;
+    originalName: string;
+    fileSize: number;
+    fileType: string;
+    fileUrl: string;
+  }>;
+  status: 'draft';
+  createdAt: string;
+  updatedAt: string;
+}

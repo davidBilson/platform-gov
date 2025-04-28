@@ -1,15 +1,15 @@
 
 "use client"
-import React, { useState, useRef, ChangeEvent, useEffect } from "react";
-import { IoMdImages, IoIosSearch } from "react-icons/io";
-import { MdEdit } from "react-icons/md";
-import { IoCloseOutline } from "react-icons/io5";
-import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
-import { generateId } from "@/utils/profiles/profile-utils";
 import { fetchProfile, saveProfile, skillsList, expertiseList, certificationsList } from "@/api/profile-api";
+import React, { useState, useRef, ChangeEvent, useEffect } from "react";
+import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
+import Legalagreement from "@/components/ui/legal-agreement";
+import { generateId } from "@/utils/profiles/profile-utils";
+import { IoMdImages, IoIosSearch } from "react-icons/io";
+import { IoCloseOutline } from "react-icons/io5";
 import useAuthStore from '@/store/authStore';
 import axios, { AxiosError } from "axios";
-import Legalagreement from "@/components/ui/legal-agreement";
+import { MdEdit } from "react-icons/md";
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
 
@@ -507,7 +507,19 @@ const submitProfileData = async (): Promise<void> => {
 
   // Handle preview - could be expanded in future
   const handlePreview = () => {
-    router.push('/profile')
+    // Check if profile exists or if essential data is filled
+    const hasRequiredData = isProfileExists || (
+      formData.bio.trim() !== "" && 
+      formData.primaryPosition.trim() !== "" &&
+      formData.ratePerHour.trim() !== ""
+    );
+    
+    if (!hasRequiredData) {
+      toast.error("Please save your profile before previewing public view");
+      return;
+    }
+    
+    router.push('/profile');
   };
 
   // Initialize textarea height on mount

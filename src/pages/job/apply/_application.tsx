@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { IoCloseOutline } from 'react-icons/io5';
 import { FiPaperclip } from 'react-icons/fi';
@@ -8,25 +9,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Jobs } from '@/types/jobs';
 import useAuthStore from '@/store/authStore';
-
-interface ApplicationDraft {
-  _id: string;
-  jobId: string | { _id: string; [key: string]: string }; // Allow jobId to be either a string or an object
-  freelancerId: string;
-  coverLetter?: string;
-  proposedRate?: string | number;
-  certificationAcknowledgment?: boolean;
-  attachments?: Array<{
-    filename: string;
-    originalName: string;
-    fileSize: number;
-    fileType: string;
-    fileUrl: string;
-  }>;
-  status: 'draft';
-  createdAt: string;
-  updatedAt: string;
-}
+import { ApplicationDraft } from '@/types/jobs';
 
 interface ApplicationProps {
   job: Jobs;
@@ -55,6 +38,8 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
     fileUrl: string;
   }>>([]);
 
+  const [hasSubmittedApplication, setHasSubmittedApplication] = useState(false);
+
   // Load saved draft if available
   useEffect(() => {
     const fetchSavedDraft = async () => {
@@ -67,29 +52,43 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         
         if (response.data.success) {
   
-          const drafts = response.data.data.filter((app: ApplicationDraft) => {
-            // Handle both cases: when jobId is an object with _id or when it's a string
+          // Check if user already has a submitted application
+          const submittedApps = response.data.data.filter((app: ApplicationDraft) => {
             const appJobId = typeof app.jobId === 'object' ? app.jobId._id : app.jobId;
-            return appJobId === job._id && app.status === 'draft';
+            return appJobId === job._id && app.status !== 'draft';
           });
           
-          if (drafts.length > 0) {
-            const savedDraft = drafts[0];
-            setDraftId(savedDraft._id);
-            
-            // Populate form data with saved draft
-            setFormData({
-              coverLetter: savedDraft.coverLetter || '',
-              proposedRate: savedDraft.proposedRate?.toString() || '',
-              attachment: null, // File objects can't be persisted
-              acknowledgment: savedDraft.certificationAcknowledgment || false,
+          if (submittedApps.length > 0) {
+            setHasSubmittedApplication(true);
+            toast.info("You have already submitted an application for this job.");
+          }
+          
+          // Look for drafts only if there's no submitted application
+          if (submittedApps.length === 0) {
+            const drafts = response.data.data.filter((app: ApplicationDraft) => {
+              const appJobId = typeof app.jobId === 'object' ? app.jobId._id : app.jobId;
+              return appJobId === job._id && app.status === 'draft';
             });
             
-            // Save any attachments for display
-            if (savedDraft.attachments && savedDraft.attachments.length > 0) {
-              setSavedAttachments(savedDraft.attachments);
+            if (drafts.length > 0) {
+              const savedDraft = drafts[0];
+              setDraftId(savedDraft._id);
+              
+              // Populate form data with saved draft
+              setFormData({
+                coverLetter: savedDraft.coverLetter || '',
+                proposedRate: savedDraft.proposedRate?.toString() || '',
+                attachment: null, // File objects can't be persisted
+                acknowledgment: savedDraft.certificationAcknowledgment || false,
+              });
+              
+              // Save any attachments for display
+              if (savedDraft.attachments && savedDraft.attachments.length > 0) {
+                setSavedAttachments(savedDraft.attachments);
+              }
+              
+              toast.info("Loaded your saved draft application.");
             }
-            
           }
         }
       } catch (error) {
@@ -134,10 +133,8 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   
   const removeSavedAttachment = async (filename: string) => {
     try {
-      // Remove the attachment from UI
       setSavedAttachments(prev => prev.filter(attachment => attachment.filename !== filename));
       
-      // If we have a draft ID, update the draft on the server
       if (draftId) {
         const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
         await axios.patch(`${baseURL}/applications/update-draft-attachments/${draftId}`, {
@@ -145,6 +142,7 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           action: 'remove',
           filename
         });
+        toast.success("Attachment removed successfully.");
       }
     } catch (error) {
       console.error('Error removing attachment:', error);
@@ -189,24 +187,23 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
       const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
       const sendApplicationEndpoint = process.env.NEXT_PUBLIC_CREATE_JOB_APPLICATION;
       
-      await axios.post(`${baseURL}${sendApplicationEndpoint}`, formDataToSubmit, {
+      const response = await axios.post(`${baseURL}${sendApplicationEndpoint}`, formDataToSubmit, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      toast.success("Application submitted successfully!");
-      
-      // Delete draft after successful submission
-      if (draftId) {
-        await handleDeleteDraft();
+      if (response.data.success) {
+        toast.success(response.data.message || "Application submitted successfully!");
+        
+        setDraftId(null);
+        setHasSubmittedApplication(true);
+        
+        setTimeout(() => {
+          setIsSubmitting(false);
+          onClose();
+        }, 2000);
       }
-      
-      // Close after successful submission
-      setTimeout(() => {
-        setIsSubmitting(false);
-        onClose();
-      }, 2000);
     } catch (error: unknown) {
       console.error('Error submitting application:', error);
       
@@ -221,6 +218,11 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   };
   
   const handleSaveDraft = async () => {
+    if (hasSubmittedApplication) {
+      toast.info("You have already submitted an application for this job.");
+      return;
+    }
+    
     try {
       const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
       const saveDraftEndpoint = process.env.NEXT_PUBLIC_SAVE_JOB_APPLICATION_DRAFT;
@@ -251,11 +253,14 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           setSavedAttachments(response.data.data.attachments);
         }
         
-        toast.success("Draft saved successfully!");
+        toast.success(response.data.message || "Draft saved successfully!");
       }
     } catch (error) {
       console.error('Error saving draft:', error);
-      toast.error("Failed to save draft. Please try again.");
+      
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      }
     }
   };
   
@@ -276,24 +281,32 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
       const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
       const deleteDraftEndpoint = process.env.NEXT_PUBLIC_DELETE_JOB_APPLICATION_DRAFT?.replace(':id', job._id);
       
-      await axios.delete(`${baseURL}${deleteDraftEndpoint}`, {
+      const response = await axios.delete(`${baseURL}${deleteDraftEndpoint}`, {
         data: { userId }
       });
       
-      // Reset form data
-      setFormData({
-        coverLetter: '',
-        proposedRate: '',
-        attachment: null,
-        acknowledgment: false,
-      });
-      
-      setSavedAttachments([]);
-      setDraftId(null);
-      toast.info("Draft deleted successfully!");
+      if (response.data.success) {
+        // Reset form data
+        setFormData({
+          coverLetter: '',
+          proposedRate: '',
+          attachment: null,
+          acknowledgment: false,
+        });
+        
+        setSavedAttachments([]);
+        setDraftId(null);
+        toast.info(response.data.message || "Draft deleted successfully!");
+      }
     } catch (error) {
       console.error('Error deleting draft:', error);
-      toast.error("Failed to delete draft. Please try again.");
+      
+      // Display the specific error message if available
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Failed to delete draft. Please try again.");
+      }
     }
   };
 
@@ -304,6 +317,27 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         <section className='w-full h-screen bg-skyblue p-4 md:p-7.5 overflow-y-auto'>
           <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+          </div>
+        </section>
+      </section>
+    );
+  }
+
+  if (hasSubmittedApplication) {
+    return (
+      <section className='h-screen w-full fixed top-0 left-0 z-50 bg-skyblue flex items-center justify-end'>
+        <section className='w-full h-screen bg-skyblue p-4 md:p-7.5 overflow-y-auto'>
+          <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex flex-col items-center justify-center h-full'>
+            <FaCheckCircle size={50} color="#0B5F94" className="mb-4" />
+            <h2 className="text-xl font-bold text-boldblue mb-2">Application Submitted</h2>
+            <p className="text-center text-boldblue mb-6">You have already submitted an application for this job.</p>
+            <button 
+              onClick={onClose}
+              type="button"
+              className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
+            >
+              Close
+            </button>
           </div>
         </section>
       </section>
