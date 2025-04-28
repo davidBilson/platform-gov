@@ -382,8 +382,6 @@ const UserNavbar = () => {
                     )}
                   </li>
                   
-                 
-                  
                   {/* Mobile Contracts dropdown */}
                   <li className="relative">
                     <div 
