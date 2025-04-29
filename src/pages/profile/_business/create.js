@@ -341,6 +341,7 @@ const CreateBusinessProfile = () => {
                       <option value="United States">United States</option>
                       <option value="Canada">Canada</option>
                       <option value="United Kingdom">United Kingdom</option>
+                      <option value="Australia">Australia</option>
                     </select>
                     <div className='absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none'>
                       <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -1,14 +1,16 @@
 
 "use client"
-import { fetchProfile, saveProfile, skillsList, expertiseList, certificationsList } from "@/api/profile-api";
-import React, { useState, useRef, ChangeEvent, useEffect } from "react";
+import { fetchProfile, skillsList, expertiseList, certificationsList } from "@/api/profile-api";
+import { 
+  handleTextAreaInput, handleInputChange, handleProfileImageChange, addTag, removeTag, addWorkHistory, updateWorkHistory, removeWorkHistory, addDegree, updateDegree, removeDegree, submitProfileData } 
+from "@/utils/profiles/profile.contractor";
+import React, { useState, useRef, useEffect, ChangeEvent } from "react";
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
 import Legalagreement from "@/components/ui/legal-agreement";
-import { generateId } from "@/utils/profiles/profile-utils";
+import { generateId } from "@/utils/profiles/profile.contractor";
 import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
 import useAuthStore from '@/store/authStore';
-import axios, { AxiosError } from "axios";
 import { MdEdit } from "react-icons/md";
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
@@ -130,7 +132,6 @@ const CreateFreelancerProfile = () => {
       }
     }, [certificationInput, formData.certifications, showCertificationsDropdown]);
 
-
   const fetchUserProfile = async () => {
     try {
       // setIsLoading(true);
@@ -182,186 +183,63 @@ const CreateFreelancerProfile = () => {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     if (userId) {
       fetchUserProfile();
     }
   }, [userId]);
 
-  // Handle auto-resize of textarea
-  const handleTextareaInput = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
+  const handleTextAreaInputWrapper = () => {
+    handleTextAreaInput(textareaRef);
   };
 
-  // Handle basic input changes
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleInputChangeWrapper = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    handleInputChange(e, setFormData);
   };
 
-const handleProfileImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files && e.target.files[0]) {
-    const file = e.target.files[0];
-    
-    // Create a preview for the UI using blob URL (this is temporary, just for display)
-    const previewUrl = URL.createObjectURL(file);
-    setFormData(prev => ({
-      ...prev,
-      profileImageUrl: previewUrl // For preview only
-    }));
-    
-    // Upload the file
-    try {
-      const formData = new FormData();
-      formData.append('profileImage', file);
-      
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}${process.env.NEXT_PUBLIC_POST_PROFILE_PIC}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      
-      const result = response.data;
-      
-      if (result.success) {
-        setFormData(prev => ({
-          ...prev,
-          profileImage: result.data.imagePath 
-        }));
-      } else {
-        toast.error('Failed to upload image');
-      }
-    } catch (error) {
-      toast.error('Error uploading image');
-      console.error('Error uploading image:', error);
-    }
-  }
-};
+  const handleProfileImageChangeWrapper = async (e: ChangeEvent<HTMLInputElement>) => {
+    await handleProfileImageChange(e, setFormData);
+  };
 
   const handleProfileImageClick = () => {
     fileInputRef.current?.click();
   };
 
-// Updated addTag function
-const addTag = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
-  if (!value.trim()) return;
-  
-  // Check if the tag already exists - if it does, remove it instead of adding
-  if (formData[type].includes(value.trim())) {
-    // Find index of the item
-    const index = formData[type].indexOf(value.trim());
-    // Remove the item
-    removeTag(type, index);
-    return;
-  }
-  
-  // Otherwise add as before
-  setFormData(prev => ({
-    ...prev,
-    [type]: [...prev[type], value.trim()]
-  }));
-  
-  // Clear the input but DO NOT close the dropdown
-  if (type === 'skills') {
-    setSkillInput("");
-  } else if (type === 'expertise') {
-    setExpertiseInput("");
-  } else if (type === 'certifications') {
-    setCertificationInput("");
-  }
+const addTagWrapper = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
+  const setInputFunc = type === 'skills' ? setSkillInput : 
+                      type === 'expertise' ? setExpertiseInput : 
+                      type === 'certifications' ? setCertificationInput : null;
+  addTag(type, value, formData, setFormData, setInputFunc);
 };
 
-  // Remove tag
-  const removeTag = (type: 'skills' | 'expertise' | 'certifications', index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index)
-    }));
-  };
+const removeTagWrapper = (type: 'skills' | 'expertise' | 'certifications', index: number) => {
+  removeTag(type, index, setFormData);
+};
 
-  // Add work history entry
-  const addWorkHistory = () => {
-    const newWorkHistory: WorkHistory = {
-      id: generateId(),
-      title: "",
-      department: "",
-      departmentType: "",
-      experienceLevel: "",
-      location: "",
-      fromDate: "",
-      toDate: ""
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      workHistory: [...prev.workHistory, newWorkHistory]
-    }));
-  };
+const addWorkHistoryWrapper = () => {
+  addWorkHistory(setFormData);
+};
 
-  // Update work history entry
-  const updateWorkHistory = (id: string, field: keyof WorkHistory, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      workHistory: prev.workHistory.map(item => 
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    }));
-  };
+const updateWorkHistoryWrapper = (id: string, field: keyof WorkHistory, value: string) => {
+  updateWorkHistory(id, field, value, setFormData);
+};
 
-  // Remove work history entry
-  const removeWorkHistory = (id: string) => {
-    if (formData.workHistory.length <= 1) return; // Keep at least one entry
-    
-    setFormData(prev => ({
-      ...prev,
-      workHistory: prev.workHistory.filter(item => item.id !== id)
-    }));
-  };
+const removeWorkHistoryWrapper = (id: string) => {
+  removeWorkHistory(id, formData, setFormData);
+};
 
-  // Add degree entry
-  const addDegree = () => {
-    const newDegree: Degree = {
-      id: generateId(),
-      degree: "",
-      institution: "",
-      yearCompleted: ""
-    };
-    
-    setFormData(prev => ({
-      ...prev,
-      degrees: [...prev.degrees, newDegree]
-    }));
-  };
+const addDegreeWrapper = () => {
+  addDegree(setFormData);
+};
 
-  // Update degree entry
-  const updateDegree = (id: string, field: keyof Degree, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      degrees: prev.degrees.map(item => 
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    }));
-  };
+const updateDegreeWrapper = (id: string, field: keyof Degree, value: string) => {
+  updateDegree(id, field, value, setFormData);
+};
 
-  // Remove degree entry
-  const removeDegree = (id: string) => {
-    if (formData.degrees.length <= 1) return; // Keep at least one entry
-    
-    setFormData(prev => ({
-      ...prev,
-      degrees: prev.degrees.filter(item => item.id !== id)
-    }));
-  };
+const removeDegreeWrapper = (id: string) => {
+  removeDegree(id, formData, setFormData);
+};
 
   let called = false;
 
@@ -384,89 +262,35 @@ const addTag = (type: 'skills' | 'expertise' | 'certifications', value: string) 
   }, [pendingSubmission, acceptedLegalAgreement, showLegalAgreement]);
 
 // The function that handles the actual API call and data processing
-const submitProfileData = async (): Promise<void> => {
-  try {
-    setIsLoading(true);
-    
-    if (!userId) {
-      toast.error("User ID is required to save profile");
-      return;
-    }
-    
-    if (!formData) {
-      toast.error("Form data is missing");
-      return;
-    }
-    if (formData.profileImageUrl?.startsWith('blob:') && formData.profileImage) {
-      formData.profileImageUrl = formData.profileImage as unknown as string;
-    }
-    const response = await saveProfile(
-      formData, 
-      userId, 
-      isProfileExists && typeof userId === 'string' ? userId : null
-    );
-    
-    if (response?.data?.success) {
-      // If creating a new profile, save the profileId
-      if (!isProfileExists && response.data.data?._id) {
-        setIsProfileExists(true);
-      }
-      
-      toast.success(isProfileExists ? "Profile updated successfully" : "Profile created successfully");
-      
-      try {
-        // Refetch user profile to ensure we have the latest data
-        await fetchUserProfile();
-        // router.push("/profile");
-      } catch (fetchError) {
-        console.error("Error fetching updated profile:", fetchError);
-        router.push("/profile/freelancer");
-      }
-    } else {
-      const errorMessage = response?.data?.message || "Unknown error in response";
-      toast.error(errorMessage);
-    }
-  } catch (error) {
-    // Error handling
-    if (error instanceof AxiosError) {
-      const statusCode = error.response?.status;
-      const errorMessage = error.response?.data?.message || "An error occurred while saving";
-      
-      if (statusCode === 401) {
-        toast.error("Authentication required. Please login again.");
-      } else if (statusCode === 403) {
-        toast.error("You don't have permission to perform this action");
-      } else {
-        toast.error(errorMessage);
-      }
-      
-      console.error(`Axios error (${statusCode}) saving profile:`, error);
-    } else if (error instanceof Error) {
-      toast.error(`Error: ${error.message}`);
-      console.error("Error saving profile:", error);
-    } else {
-      toast.error("An unexpected error occurred");
-      console.error("Unknown error:", error);
-    }
-  } finally {
-    setIsLoading(false);
-  }
+// Submit profile data
+const submitProfileDataWrapper = async () => {
+  await submitProfileData(
+    formData, 
+    userId, 
+    isProfileExists, 
+    setIsLoading, 
+    setIsProfileExists, 
+    toast, 
+    router, 
+    fetchUserProfile
+  );
 };
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent): void => {
-    e.preventDefault();
-    
-    // If legal agreement is already accepted, proceed immediately
-    if (acceptedLegalAgreement) {
-      submitProfileData();
-      return;
-    }
-    
-    // Legal agreement not yet accepted - show the modal and mark as pending
-    setPendingSubmission(true);
-    legalSetterOnce();
-    // Now wait for the useEffect to trigger when acceptedLegalAgreement becomes true
-  };
+
+
+const handleSubmit = (e: React.FormEvent): void => {
+  e.preventDefault();
+  
+  // If legal agreement is already accepted, proceed immediately
+  if (acceptedLegalAgreement) {
+    submitProfileDataWrapper();
+    return;
+  }
+  
+  // Legal agreement not yet accepted - show the modal and mark as pending
+  setPendingSubmission(true);
+  legalSetterOnce();
+  // Now wait for the useEffect to trigger when acceptedLegalAgreement becomes true
+};
 
   // Handle form cancellation
   const handleCancel = () => {
@@ -531,7 +355,7 @@ const submitProfileData = async (): Promise<void> => {
   // Initialize textarea height on mount
   useEffect(() => {
     if (formData.bio && textareaRef.current) {
-      handleTextareaInput();
+      handleTextAreaInput();
     }
   }, [formData.bio]);
 
@@ -572,7 +396,7 @@ const submitProfileData = async (): Promise<void> => {
             <input 
               type="file" 
               ref={fileInputRef}
-              onChange={handleProfileImageChange}
+              onChange={handleProfileImageChangeWrapper}
               accept="image/*"
               className="hidden" 
             />
@@ -586,8 +410,8 @@ const submitProfileData = async (): Promise<void> => {
             ref={textareaRef}
             name="bio"
             value={formData.bio}
-            onChange={handleInputChange}
-            onInput={handleTextareaInput}
+            onChange={handleInputChangeWrapper}
+            onInput={handleTextAreaInputWrapper}
             rows={1}
             className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden"
             placeholder="About Me/Bio"
@@ -601,7 +425,7 @@ const submitProfileData = async (): Promise<void> => {
               type="text" 
               name="ratePerHour"
               value={formData.ratePerHour}
-              onChange={handleInputChange}
+              onChange={handleInputChangeWrapper}
               className="outline-none placeholder:font-semibold w-[80%]" 
               placeholder="Rate per hour" 
             />
@@ -644,7 +468,7 @@ const submitProfileData = async (): Promise<void> => {
                 <button 
                   type="button" 
                   onClick={() => {
-                    if (skillInput) addTag('skills', skillInput);
+                    if (skillInput) addTagWrapper('skills', skillInput);
                   }}
                   className="focus:outline-none"
                 >
@@ -681,7 +505,7 @@ const submitProfileData = async (): Promise<void> => {
                 {skill}
                 <button 
                   type="button"
-                  onClick={() => removeTag('skills', index)}
+                  onClick={() => removeTagWrapper('skills', index)}
                   className="font-semibold text-sm ml-1 focus:outline-none hover:text-red-500 transition transform active:scale-95 cursor-pointer"
                 >
                   <IoCloseOutline size={16} />
@@ -846,7 +670,7 @@ const submitProfileData = async (): Promise<void> => {
                 {formData.workHistory.length > 1 && (
                   <button 
                     type="button" 
-                    onClick={() => removeWorkHistory(work.id)}
+                    onClick={() => removeWorkHistoryWrapper(work.id)}
                     className="text-red-500 transition transform active:scale-95 hover:opacity-70 cursor-pointer"
                   >
                     Remove
@@ -857,7 +681,7 @@ const submitProfileData = async (): Promise<void> => {
               <input 
                 type="text" 
                 value={work.title}
-                onChange={(e) => updateWorkHistory(work.id, 'title', e.target.value)}
+                onChange={(e) => updateWorkHistoryWrapper(work.id, 'title', e.target.value)}
                 className="placeholder:font-semibold mb-7.5 block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-157.5 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Title" 
               />
@@ -866,7 +690,7 @@ const submitProfileData = async (): Promise<void> => {
                 <input 
                   type="text"
                   value={work.department}
-                  onChange={(e) => updateWorkHistory(work.id, 'department', e.target.value)}
+                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'department', e.target.value)}
                   className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="Department/Agency" 
                 />
@@ -878,7 +702,7 @@ const submitProfileData = async (): Promise<void> => {
                     name={`department-type-${work.id}`} 
                     value="state" 
                     checked={work.departmentType === "state"}
-                    onChange={() => updateWorkHistory(work.id, 'departmentType', 'state')}
+                    onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', 'state')}
                   />
                   <label htmlFor={`state-${work.id}`}>State</label>
                   
@@ -888,7 +712,7 @@ const submitProfileData = async (): Promise<void> => {
                     name={`department-type-${work.id}`} 
                     value="federal" 
                     checked={work.departmentType === "federal"}
-                    onChange={() => updateWorkHistory(work.id, 'departmentType', 'federal')}
+                    onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', 'federal')}
                   />
                   <label htmlFor={`federal-${work.id}`}>Federal</label>
                 </div>
@@ -896,7 +720,7 @@ const submitProfileData = async (): Promise<void> => {
                 <input 
                   type="text"
                   value={work.experienceLevel}
-                  onChange={(e) => updateWorkHistory(work.id, 'experienceLevel', e.target.value)}
+                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'experienceLevel', e.target.value)}
                   className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="Level of Dept Experience" 
                 />
@@ -906,7 +730,7 @@ const submitProfileData = async (): Promise<void> => {
                 <input 
                   type="text"
                   value={work.location}
-                  onChange={(e) => updateWorkHistory(work.id, 'location', e.target.value)}
+                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'location', e.target.value)}
                   className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="Location" 
                 />
@@ -916,14 +740,14 @@ const submitProfileData = async (): Promise<void> => {
                 <input 
                   type="text"
                   value={work.fromDate}
-                  onChange={(e) => updateWorkHistory(work.id, 'fromDate', e.target.value)}
+                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'fromDate', e.target.value)}
                   className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="From" 
                 />
                 <input 
                   type="text"
                   value={work.toDate}
-                  onChange={(e) => updateWorkHistory(work.id, 'toDate', e.target.value)}
+                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'toDate', e.target.value)}
                   className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                   placeholder="To" 
                 />
@@ -934,7 +758,7 @@ const submitProfileData = async (): Promise<void> => {
           <div>
             <button 
               type="button" 
-              onClick={addWorkHistory}
+              onClick={addWorkHistoryWrapper}
               className="text-sm px-4 py-[11px]  bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 cursor-pointer"
             >
               Add More
@@ -951,28 +775,28 @@ const submitProfileData = async (): Promise<void> => {
               <input 
                 type="text"
                 value={degree.degree}
-                onChange={(e) => updateDegree(degree.id, 'degree', e.target.value)}
+                onChange={(e) => updateDegreeWrapper(degree.id, 'degree', e.target.value)}
                 className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Degree" 
               />
               <input 
                 type="text"
                 value={degree.institution}
-                onChange={(e) => updateDegree(degree.id, 'institution', e.target.value)}
+                onChange={(e) => updateDegreeWrapper(degree.id, 'institution', e.target.value)}
                 className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Institution" 
               />
               <input 
                 type="text"
                 value={degree.yearCompleted}
-                onChange={(e) => updateDegree(degree.id, 'yearCompleted', e.target.value)}
+                onChange={(e) => updateDegreeWrapper(degree.id, 'yearCompleted', e.target.value)}
                 className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
                 placeholder="Year Completed" 
               />
               {formData.degrees.length > 1 && (
                 <button 
                   type="button" 
-                  onClick={() => removeDegree(degree.id)}
+                  onClick={() => removeDegreeWrapper(degree.id)}
                   className="text-red-500 px-2 transition transform active:scale-95 hover:opacity-70 cursor-pointer"
                 >
                   Remove
@@ -983,19 +807,13 @@ const submitProfileData = async (): Promise<void> => {
           
           <button 
             type="button"
-            onClick={addDegree}
+            onClick={addDegreeWrapper}
             className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 cursor-pointer"
           >
             Add More
           </button>
         </div>
         
-        {/* Error message */}
-        {/* {error && (
-          <div className="mt-5 text-red-500">{error}</div>
-        )} */}
-        
-        {/* Sticky bottom action buttons */}
         <section className="flex items-center justify-center gap-2.5 py-7.5 px-6 fixed bottom-0 left-0 bg-skyblue w-full border-t border-t-boldblue">
           <button 
             type="button"

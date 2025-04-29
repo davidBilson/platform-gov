@@ -1,0 +1,5 @@
+export const australiaStates = [
+    'New South Wales', 'Victoria', 'Queensland', 'Western Australia', 'South Australia', 
+    'Tasmania', 'Australian Capital Territory', 'Northern Territory'
+  ];
+  
