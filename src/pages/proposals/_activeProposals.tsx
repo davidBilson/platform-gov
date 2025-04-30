@@ -55,7 +55,7 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
             <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
               <div className="flex items-center gap-1.25">
                 <FaRegHourglass size={15} />
-                {`Hourly | $${application.proposedRate}`} | {application.availability || "Full-time"}
+                {`Hourly | $${application.proposedRate}`} | {application.availability || "Full Time"}
               </div>
               
               <div className="flex items-center gap-1.25">

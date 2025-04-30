@@ -31,7 +31,7 @@ const CreateJob: React.FC = () => {
         requiredSkills: [],
         requiredCertifications: [],
         requiresRegisteredLobbyist: false,
-        employmentType: 'full-time',
+        employmentType: 'Full Time',
         paymentType: 'hourly',
         price: 0,
         milestones: [],
@@ -142,7 +142,7 @@ const CreateJob: React.FC = () => {
         }));
     };
 
-    const handleEmploymentTypeChange = (type: 'full-time' | 'part-time') => {
+    const handleEmploymentTypeChange = (type: 'Full Time' | 'part-time') => {
         setFormData(prev => ({
         ...prev,
         employmentType: type
@@ -663,7 +663,7 @@ const CreateJob: React.FC = () => {
             <div className='flex items-center text-sm gap-2.25 mb-7.5'>
               Full-time
               <span className='w-full flex items-center border border-deepskyblue max-w-14.5 rounded-full'>
-                {formData.employmentType === 'full-time' ? (
+                {formData.employmentType === 'Full Time' ? (
                   <RiCheckboxBlankCircleFill 
                     color='#0B5F94' 
                     size={25} 
@@ -675,7 +675,7 @@ const CreateJob: React.FC = () => {
                     color='#0B5F94' 
                     size={25} 
                     className="cursor-pointer ml-auto"
-                    onClick={() => handleEmploymentTypeChange('full-time')}
+                    onClick={() => handleEmploymentTypeChange('Full Time')}
                   />
                 )}
               </span>

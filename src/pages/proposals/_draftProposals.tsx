@@ -64,7 +64,7 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
       'custom': 'Custom'
     };
     
-    return availability ? availabilityMap[availability] || 'Full-time' : 'Full-time';
+    return availability ? availabilityMap[availability] || 'Full Time' : 'Full Time';
   };
 
   return (

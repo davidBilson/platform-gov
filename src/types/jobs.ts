@@ -15,7 +15,7 @@ export interface Milestone {
     requiredSkills: string[];
     requiredCertifications: string[];
     requiresRegisteredLobbyist: boolean;
-    employmentType: 'full-time' | 'part-time';
+    employmentType: 'Full Time' | 'part-time';
     paymentType: 'hourly' | 'fixed-price' | 'retainer';
     price: number;
     milestones: Milestone[];
