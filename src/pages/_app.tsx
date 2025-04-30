@@ -64,7 +64,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
         router.replace('/');
       }
     }
-  }, [userId, router.pathname, isLoading, router, verificationStep]);
+  }, [userId, router.pathname, isLoading, router, verificationStep, isVerificationPage]);
 
   return isPublicRoute || userId ? <>{children}</> : null;
 }

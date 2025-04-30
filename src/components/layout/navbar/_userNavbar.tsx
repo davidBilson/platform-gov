@@ -5,7 +5,6 @@ import { FaBell } from "react-icons/fa6";
 import { useState, useRef } from 'react';
 import { HiMenuAlt3 } from "react-icons/hi";
 import { FiSearch } from "react-icons/fi";
-import { usePathname } from 'next/navigation';
 import authStore from "@/store/authStore";
 import { useRouter } from "next/router";
 import { useFeedStore } from "@/store/feedStore"
@@ -26,10 +25,10 @@ const UserNavbar = () => {
 
   const searchRef = useRef(null);
   
-  const pathname = usePathname();
+  const router = useRouter();
+  const pathname = router.pathname;
   const { name, role, resetAll } = authStore();
   const { setFeedType, feedType } = useFeedStore();
-  const router = useRouter();
 
   const handleSignOut = () => {
     resetAll();
@@ -38,7 +37,6 @@ const UserNavbar = () => {
 
   // Function to handle navigation with dropdown closing
   const handleNavigation = (path: string, feedTypeValue?: string) => {
-    // If a feed type is provided, set it
     if (feedTypeValue) {
       setFeedType(feedTypeValue);
     }
@@ -48,11 +46,15 @@ const UserNavbar = () => {
     setContractsDropdown(false);
     setContractorsDropdown(false);
     setMobileMenu(false);
+
+    if (router.pathname === '/' && path === '/') {
+      router.replace('/', undefined, { shallow: true });
+      return;
+    }
     
-    // Use setTimeout to ensure the navigation happens after state updates
-    setTimeout(() => {
+    if (router.pathname !== path) {
       router.push(path);
-    }, 0);
+    }
   };
 
   const jobAndContractorOptions = ["Jobs", "Contractors"];
@@ -114,9 +116,14 @@ const UserNavbar = () => {
               
               {/* Profile dropdown menu - always in DOM but hidden with CSS */}
               <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${profileDropdown ? 'block' : 'hidden'}`}>
-                <a onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                <button 
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleNavigation('/profile')
+                  }} 
+                  className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                   Profile
-                </a>
+                </button>
                 <a onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                   Edit Profile
                 </a>
@@ -289,12 +296,12 @@ const UserNavbar = () => {
                 
                 {/* Profile dropdown menu - always in DOM but hidden with CSS */}
                 <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${profileDropdown ? 'block' : 'hidden'}`}>
-                  <a onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                  <button onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                     Profile
-                  </a>
-                  <a onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                  </button>
+                  <span onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                     Edit Profile
-                  </a>
+                  </span>
                   <button 
                     onClick={handleSignOut}
                     className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"

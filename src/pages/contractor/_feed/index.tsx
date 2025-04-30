@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import ContractorList from './_contractorList';
 import ContractorFilter, { FilterOptions } from './_contractorFilter';
@@ -216,9 +216,9 @@ const ContractorFeed: React.FC = () => {
     setActiveFilters(newActiveFilters);
   };
 
-  const handleFilterChange = (filters: FilterOptions) => {
+  const handleFilterChange = useCallback((filters: FilterOptions) => {
     setCurrentFilters(filters);
-  };
+  }, []);
   
   const handleRemoveFilter = (filterId: string) => {
     const updatedFilters = { ...currentFilters };

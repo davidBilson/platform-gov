@@ -243,7 +243,6 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     domainFocus,
     domainDetail,
     loading,
-    onFilterChange
   ]);
 
   // Handle saved search selection
