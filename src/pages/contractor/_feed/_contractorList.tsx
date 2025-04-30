@@ -3,6 +3,7 @@ import { ContractorListProps } from '@/types/contractors';
 import { FaUser } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import Image from 'next/image';
+import { IoLocationOutline } from 'react-icons/io5';
 
 
 const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
@@ -67,7 +68,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
                       {contractor.user.name.split(' ')[0]} {contractor.user.name.split(' ')[1]?.charAt(0)}.
                     </p>
                     <p className='text-xs font-bold'>{contractor.primaryPosition ?? "Profession"}</p>
-                    <p className='text-xs font-bold'>{"Location"}</p>
+                    <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
                   </div>
 
                 </div>

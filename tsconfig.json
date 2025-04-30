@@ -17,6 +17,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/profile/_business/open-jobs.js", "src/pages/_business-profile/business-profile.js", "src/utils/profiles/profile.contractor.utils.js", "src/pages/profile/_business/create.js", "src/pages/profile/_business/index.js", "src/pages/job/create.tsx", "src/store/feedStore.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/profile/_business/open-jobs.js", "src/pages/_business-profile/business-profile.js", "src/utils/profiles/profile.contractor.utils.js", "src/pages/profile/_business/create.js", "src/pages/profile/_business/index.js", "src/pages/job/create.tsx", "src/store/feedStore.js", "src/utils/getLocations/getAllCountriesAndStates.js"],
   "exclude": ["node_modules"]
 }

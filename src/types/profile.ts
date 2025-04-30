@@ -29,6 +29,11 @@ export interface WorkHistory {
     degrees: Degree[];
     profileImage?: File | null;
     profileImageUrl?: string;
+    firmAffiliation: string; // 'independent' or firm name
+    location: {
+      country: string;
+      state: string;
+    };
   }
   
   export interface CreateProfileProps {

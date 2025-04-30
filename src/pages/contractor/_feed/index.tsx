@@ -11,17 +11,18 @@ const ContractorFeed: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<{id: string, name: string, value: string}[]>([]);
-  const [savedSearches, setSavedSearches] = useState<string[]>(['Government IT', 'Cybersecurity Experts']);
   const [currentFilters, setCurrentFilters] = useState<FilterOptions>({
     searchTerm: '',
     profession: '',
     securityClearance: '',
-    skills: '',
-    expertise: '',
+    skillsAndExpertise: '',
     certifications: '',
     requireGovtExperience: false,
-    govtType: null,
-    department: ''
+    governmentType: '',
+    department: '',
+    location: '',
+    domainFocus: '',
+    domainDetail: ''
   });
 
   useEffect(() => {
@@ -56,99 +57,161 @@ const ContractorFeed: React.FC = () => {
   }, [currentFilters, contractors]);
 
   const applyFilters = (filters: FilterOptions) => {
-    // Start with all contractors
     let filtered = [...contractors];
     const newActiveFilters: {id: string, name: string, value: string}[] = [];
-    
-    // Apply search term filter
+  
+    // Search Term
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
       filtered = filtered.filter(contractor => 
         contractor.user.name.toLowerCase().includes(searchLower) ||
         contractor.primaryPosition?.toLowerCase().includes(searchLower) ||
-        contractor.bio.toLowerCase().includes(searchLower) ||
-        contractor.skills.some(skill => skill.toLowerCase().includes(searchLower)) ||
-        contractor.expertise.some(exp => exp.toLowerCase().includes(searchLower)) ||
-        contractor.certifications.some(cert => cert.toLowerCase().includes(searchLower))
+        contractor.bio.toLowerCase().includes(searchLower)
       );
-      newActiveFilters.push({ id: 'searchTerm', name: 'Search', value: filters.searchTerm });
+      newActiveFilters.push({ 
+        id: 'searchTerm', 
+        name: 'Search', 
+        value: filters.searchTerm 
+      });
     }
-    
-    // Apply profession filter
+  
+    // Profession
     if (filters.profession) {
       filtered = filtered.filter(contractor => 
         contractor.primaryPosition?.toLowerCase() === filters.profession.toLowerCase()
       );
-      newActiveFilters.push({ id: 'profession', name: 'Profession', value: filters.profession });
+      newActiveFilters.push({ 
+        id: 'profession', 
+        name: 'Profession', 
+        value: filters.profession 
+      });
     }
-    
-    // Apply security clearance filter - This would need work history data to filter properly
+  
+    // Security Clearance
     if (filters.securityClearance) {
-      // For demo purposes, just add it to the active filters
-      newActiveFilters.push({ id: 'securityClearance', name: 'Security Clearance', value: filters.securityClearance });
-    }
-    
-    // Apply skills filter
-    if (filters.skills) {
       filtered = filtered.filter(contractor => 
-        contractor.skills.some(skill => 
-          skill.toLowerCase() === filters.skills.toLowerCase()
-        )
+        contractor.securityClearance?.toLowerCase() === filters.securityClearance.toLowerCase()
       );
-      newActiveFilters.push({ id: 'skills', name: 'Skill', value: filters.skills });
+      newActiveFilters.push({ 
+        id: 'securityClearance', 
+        name: 'Clearance', 
+        value: filters.securityClearance 
+      });
     }
-    
-    // Apply expertise filter
-    if (filters.expertise) {
+  
+    // Skills & Expertise
+    if (filters.skillsAndExpertise) {
+      const searchLower = filters.skillsAndExpertise.toLowerCase();
       filtered = filtered.filter(contractor => 
-        contractor.expertise.some(exp => 
-          exp.toLowerCase() === filters.expertise.toLowerCase()
-        )
+        contractor.skills.some(skill => skill.toLowerCase().includes(searchLower)) ||
+        contractor.expertise.some(exp => exp.toLowerCase().includes(searchLower))
       );
-      newActiveFilters.push({ id: 'expertise', name: 'Expertise', value: filters.expertise });
+      newActiveFilters.push({ 
+        id: 'skillsAndExpertise', 
+        name: 'Skills', 
+        value: filters.skillsAndExpertise 
+      });
     }
-    
-    // Apply certifications filter
+  
+    // Certifications
     if (filters.certifications) {
       filtered = filtered.filter(contractor => 
         contractor.certifications.some(cert => 
-          cert.toLowerCase() === filters.certifications.toLowerCase()
+          cert.toLowerCase().includes(filters.certifications.toLowerCase())
         )
       );
-      newActiveFilters.push({ id: 'certifications', name: 'Certification', value: filters.certifications });
+      newActiveFilters.push({ 
+        id: 'certifications', 
+        name: 'Certifications', 
+        value: filters.certifications 
+      });
     }
-    
-    // Apply government experience filter
+  
+    // Government Experience
     if (filters.requireGovtExperience) {
       filtered = filtered.filter(contractor => 
-        contractor.workHistory.some(job => 
-          job.departmentType === 'Government' || 
+        contractor.workHistory?.some(job => 
+          job.departmentType === 'Government' ||
           job.department?.toLowerCase().includes('government')
         )
       );
-      newActiveFilters.push({ id: 'govtExperience', name: 'Government Experience', value: '' });
+      newActiveFilters.push({ 
+        id: 'requireGovtExperience', 
+        name: 'Govt Experience', 
+        value: 'Required' 
+      });
     }
-    
-    // Apply government type filter
-    if (filters.govtType) {
+  
+    // Government Type
+    if (filters.governmentType) {
       filtered = filtered.filter(contractor => 
-        contractor.workHistory.some(job => 
-          job.departmentType?.toLowerCase() === filters.govtType?.toLowerCase()
+        contractor.workHistory?.some(job => 
+          job.departmentType?.toLowerCase() === filters.governmentType.toLowerCase()
         )
       );
-      newActiveFilters.push({ id: 'govtType', name: 'Government Type', value: filters.govtType });
+      newActiveFilters.push({ 
+        id: 'governmentType', 
+        name: 'Govt Type', 
+        value: filters.governmentType 
+      });
     }
-    
-    // Apply department filter
+  
+    // Department
     if (filters.department) {
       filtered = filtered.filter(contractor => 
-        contractor.workHistory.some(job => 
+        contractor.workHistory?.some(job => 
           job.department?.toLowerCase().includes(filters.department.toLowerCase())
         )
       );
-      newActiveFilters.push({ id: 'department', name: 'Department', value: filters.department });
+      newActiveFilters.push({ 
+        id: 'department', 
+        name: 'Department', 
+        value: filters.department 
+      });
     }
-    
+  
+    // Location
+    if (filters.location) {
+      filtered = filtered.filter(contractor => 
+        contractor.location?.state.toLowerCase().includes(filters.location.toLowerCase()) ||
+        contractor.location?.country.toLowerCase().includes(filters.location.toLowerCase())
+      );
+      newActiveFilters.push({ 
+        id: 'location', 
+        name: 'Location', 
+        value: filters.location 
+      });
+    }
+  
+    // Domain Focus
+    if (filters.domainFocus) {
+      filtered = filtered.filter(contractor => 
+        contractor.workHistory?.some(job => 
+          job.departmentType?.toLowerCase().includes(filters.domainFocus.toLowerCase())
+        )
+      );
+      newActiveFilters.push({ 
+        id: 'domainFocus', 
+        name: 'Domain', 
+        value: filters.domainFocus 
+      });
+    }
+  
+    // Domain Detail
+    if (filters.domainDetail) {
+      filtered = filtered.filter(contractor => 
+        contractor.workHistory?.some(job => 
+          job.department?.toLowerCase().includes(filters.domainDetail.toLowerCase()) ||
+          job.location?.toLowerCase().includes(filters.domainDetail.toLowerCase())
+        )
+      );
+      newActiveFilters.push({ 
+        id: 'domainDetail', 
+        name: 'Domain Detail', 
+        value: filters.domainDetail 
+      });
+    }
+  
     setFilteredContractors(filtered);
     setActiveFilters(newActiveFilters);
   };
@@ -160,7 +223,6 @@ const ContractorFeed: React.FC = () => {
   const handleRemoveFilter = (filterId: string) => {
     const updatedFilters = { ...currentFilters };
     
-    // Reset the appropriate filter
     switch (filterId) {
       case 'searchTerm':
         updatedFilters.searchTerm = '';
@@ -171,44 +233,46 @@ const ContractorFeed: React.FC = () => {
       case 'securityClearance':
         updatedFilters.securityClearance = '';
         break;
-      case 'skills':
-        updatedFilters.skills = '';
-        break;
-      case 'expertise':
-        updatedFilters.expertise = '';
+      case 'skillsAndExpertise':
+        updatedFilters.skillsAndExpertise = '';
         break;
       case 'certifications':
         updatedFilters.certifications = '';
         break;
-      case 'govtExperience':
+      case 'requireGovtExperience':
         updatedFilters.requireGovtExperience = false;
         break;
-      case 'govtType':
-        updatedFilters.govtType = null;
+      case 'governmentType':
+        updatedFilters.governmentType = '';
+        updatedFilters.department = ''; // Also clear department when government type is removed
         break;
       case 'department':
         updatedFilters.department = '';
+        break;
+      case 'location':
+        updatedFilters.location = '';
+        break;
+      case 'domainFocus':
+        updatedFilters.domainFocus = '';
+        updatedFilters.domainDetail = ''; // Also clear domain detail when focus is removed
+        break;
+      case 'domainDetail':
+        updatedFilters.domainDetail = '';
         break;
       default:
         break;
     }
     
     setCurrentFilters(updatedFilters);
+    applyFilters(updatedFilters); // Explicitly apply filters after update
   };
   
-  const handleSaveSearch = (searchName: string) => {
-    if (!savedSearches.includes(searchName)) {
-      setSavedSearches([...savedSearches, searchName]);
-      // In a real app, you would also save the current filter state associated with this name
-    }
-  };
 
   return (
     <main className="container mx-auto p-6">
       <ContractorFilter 
+        loading={loading}
         onFilterChange={handleFilterChange} 
-        onSaveSearch={handleSaveSearch}
-        savedSearches={savedSearches}
       />
       <ContractorCountFilters 
         contractors={contractors} 

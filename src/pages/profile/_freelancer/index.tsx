@@ -7,6 +7,7 @@ import { fetchProfile } from "@/api/profile-api";
 import Link from "next/link";
 import { toast } from 'react-toastify';
 import Image from 'next/image';
+import { IoLocationOutline } from "react-icons/io5";
 
 // Define proper TypeScript interfaces
 interface WorkHistoryItem {
@@ -32,6 +33,11 @@ interface ProfileData {
   certifications?: string[];
   bio?: string;
   rating?: number;
+  firmAffiliation?: string; // 'independent' or firm name
+  location: {
+    country: string;
+    state: string;
+  };
 }
 
 interface FetchResponse {
@@ -51,33 +57,8 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
-  // Table data for work history
-  const workHistory: WorkHistoryItem[] = [
-    // {
-    //   jobTitle: "Web Developer",
-    //   dates: "12/12/2023 - 02/2024",
-    //   rating: 2,
-    //   amount: "$500"
-    // },
-    // {
-    //   jobTitle: "Frontend Engineer",
-    //   dates: "08/2023 - 11/2023",
-    //   rating: 3,
-    //   amount: "$1,200"
-    // },
-    // {
-    //   jobTitle: "UI Designer",
-    //   dates: "03/2023 - 07/2023",
-    //   rating: 4,
-    //   amount: "$850"
-    // },
-    // {
-    //   jobTitle: "UI Designer",
-    //   dates: "03/2023 - 07/2023",
-    //   rating: 2,
-    //   amount: "$850"
-    // }
-  ];
+  // Mock Table data for work history
+  const workHistory: WorkHistoryItem[] = [];
 
   // Fetch profile data on component mount
   useEffect(() => {
@@ -114,7 +95,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
 
   // Extract profile data with fallbacks
   const profession = profileData?.primaryPosition || 'Web Developer';
-  const location = profileData?.workHistory?.[0]?.location || 'Remote';
+  const location = profileData?.location?.country + ' ' + profileData?.location?.state;
   const rate = profileData?.ratePerHour || 75;
   const skills = profileData?.skills || [];
   const expertise = profileData?.expertise || [];
@@ -187,7 +168,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
                 <div className="text-center sm:text-left mt-2 sm:mt-0">
                   <p className='font-semibold text-xl'>{name || "Anonymous User"}</p>
                   <p className='text-xs font-bold py-2.5'>{profession}</p>
-                  <p className='text-xs font-bold'>{location}</p>
+                  <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} /> {location ?? 'No location'}</p>
                 </div>
               </div>
 

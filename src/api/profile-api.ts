@@ -40,7 +40,9 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       expertise: formData.expertise,
       certifications: formData.certifications,
       workHistory: formData.workHistory,
-      degrees: formData.degrees
+      degrees: formData.degrees,
+      firmAffiliation: formData.firmAffiliation || '', // Add this line
+      location: formData.location || { country: '', state: '' }, // Add this line
     };
     
     let response;

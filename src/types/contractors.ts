@@ -27,6 +27,7 @@ export interface Degree {
 }
 
 export interface ContractorProfile {
+  [x: string]: unknown;
   _id: string;
   user: UserDetails; // Changed from string to UserDetails object
   bio: string;
@@ -38,6 +39,12 @@ export interface ContractorProfile {
   certifications: string[];
   workHistory: WorkHistory[];
   degrees: Degree[];
+  securityClearance?: string;
+  firmAffiliation: string; // 'independent' or firm name
+    location: {
+      country: string;
+      state: string;
+    };
   createdAt: string;
   updatedAt: string;
   __v: number;

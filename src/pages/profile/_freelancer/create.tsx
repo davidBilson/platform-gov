@@ -14,11 +14,19 @@ import useAuthStore from '@/store/authStore';
 import { MdEdit } from "react-icons/md";
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
+import { usaStates, canadaStates, ukStates, australiaStates } from '@/utils/countryAndStates/index'
 
 interface AuthStoreState {
   userId: string;
   name: string;
 }
+
+const statesByCountry = { USA: usaStates, UK: ukStates, Canada: canadaStates, Australia: australiaStates };
+const firmOptions = [
+  "Janus Global Advisors",
+  "Firm companyy namee1", 
+  "Firm companyy namee2"
+];
 
 const CreateFreelancerProfile = () => {
   const router = useRouter();
@@ -31,6 +39,11 @@ const CreateFreelancerProfile = () => {
     skills: [],
     certifications: [],
     expertise: [],
+    firmAffiliation: "",
+    location: {
+      country: "",
+      state: ""
+    },
     workHistory: [
       {
         id: generateId(),
@@ -67,6 +80,8 @@ const CreateFreelancerProfile = () => {
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
+  const [showStatesDropdown, setShowStatesDropdown] = useState<boolean>(false);
+  const [showFirmDropdown, setShowFirmDropdown] = useState<boolean>(false);
   
   const [pendingSubmission, setPendingSubmission] = useState<boolean>(false);
   const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
@@ -148,6 +163,11 @@ const CreateFreelancerProfile = () => {
           skills: profileData.skills || [],
           expertise: profileData.expertise || [],
           certifications: profileData.certifications || [],
+          firmAffiliation: profileData.firmAffiliation || "",
+          location: {
+            country: profileData?.location?.country || "",
+            state: profileData?.location?.state || ""
+          },
           workHistory: profileData.workHistory?.length > 0 ? profileData.workHistory : [{
             id: generateId(),
             title: "",
@@ -306,6 +326,11 @@ const handleSubmit = (e: React.FormEvent): void => {
         skills: [],
         expertise: [],
         certifications: [],
+        firmAffiliation: "",
+        location: {
+          country: "",
+          state: ""
+        },
         workHistory: [
           {
             id: generateId(),
@@ -439,10 +464,157 @@ const handleSubmit = (e: React.FormEvent): void => {
             type="text" 
             name="primaryPosition"
             value={formData.primaryPosition}
-            onChange={handleInputChange}
+            onChange={handleInputChangeWrapper}
             className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
             placeholder="Primary position/Title" 
           />
+
+          {/* Firm Affiliation */}
+<div className="mb-7.5">
+  <div className="flex items-center gap-2.5 text-boldblue text-sm">
+  <div className="flex items-center gap-2.5 mb-2.5 ">
+    <input
+      type="radio" 
+      id="independent" 
+      name="firmAffiliation" 
+      value="independent"
+      checked={formData.firmAffiliation === "independent"}
+      onChange={() => setFormData({...formData, firmAffiliation: "independent"})}
+      />
+    <label htmlFor="independent">Independent</label>
+  </div>
+  
+  <div className="flex items-center gap-2.5 mb-2.5">
+    <input 
+      type="radio" 
+      id="firm" 
+      name="firmAffiliation" 
+      value="firm"
+      checked={formData.firmAffiliation !== "" && formData.firmAffiliation !== "independent"}
+      onChange={() => setFormData({...formData, firmAffiliation: ""})}
+      />
+    <label htmlFor="firm">Firm</label>
+  </div>
+      </div>
+  
+      {formData.firmAffiliation !== "independent" && (
+  <div className="relative w-full max-w-75">
+    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+      <input 
+        type="text"
+        value={formData.firmAffiliation}
+        onChange={(e) => setFormData({...formData, firmAffiliation: e.target.value})}
+        onFocus={() => setShowFirmDropdown(true)}
+        onBlur={() => setTimeout(() => setShowFirmDropdown(false), 200)}
+        className="outline-none placeholder:font-semibold w-[80%]" 
+        placeholder="Select firm name" 
+      />
+      <IoIosSearch />
+    </div>
+    
+    {showFirmDropdown && (
+      <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+          onMouseDown={(e) => e.preventDefault()}
+      >
+        {firmOptions
+          .filter(firm => 
+            formData.firmAffiliation
+              ? firm.toLowerCase().includes(formData.firmAffiliation.toLowerCase())
+              : true
+          )
+          .map((firm, idx) => (
+            <div 
+              key={`firm-option-${idx}`} 
+              className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setFormData({
+                  ...formData,
+                  firmAffiliation: firm
+                });
+                setShowFirmDropdown(false);
+              }}
+            >
+              {firm}
+            </div>
+          ))
+        }
+      </div>
+    )}
+  </div>
+)}
+</div>
+
+{/* Location */}
+<div className="mb-7.5">
+  <div className="flex gap-7.5 mb-2.5">
+    <select
+      value={formData.location.country}
+      onChange={(e) => setFormData({
+        ...formData, 
+        location: {...formData.location, country: e.target.value, state: ""}
+      })}
+      className="outline-none appearance-none border border-boldblue text-boldblue rounded-lg px-5 py-4 text-sm cursor-pointer"
+    >
+      <option className="cursor-pointer" value="">Select Country</option>
+      <option className="cursor-pointer" value="USA">USA</option>
+      <option className="cursor-pointer" value="UK">UK</option>
+      <option className="cursor-pointer" value="Canada">Canada</option>
+      <option className="cursor-pointer" value="Australia">Australia</option>
+    </select>
+    
+    {formData.location.country && (
+    <div className="relative w-full max-w-75">
+      <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+        <input 
+          type="text"
+          value={formData.location.state}
+          onChange={(e) => setFormData({
+            ...formData,
+            location: {...formData.location, state: e.target.value}
+          })}
+          onFocus={() => setShowStatesDropdown(true)}
+          onBlur={() => setTimeout(() => setShowStatesDropdown(false), 200)}
+          className="outline-none placeholder:font-semibold w-[80%]" 
+          placeholder={`Search ${formData.location.country} states`} 
+        />
+        <IoIosSearch />
+      </div>
+    
+      {/* State dropdown */}
+      {showStatesDropdown && (
+          <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+              onMouseDown={(e) => e.preventDefault()}
+          >
+          {statesByCountry[formData.location.country as keyof typeof statesByCountry]
+            .filter(state => 
+              formData.location.state
+                ? state.toLowerCase().includes(formData.location.state.toLowerCase())
+                : true
+            )
+            .map((state, idx) => (
+              <div 
+                key={`state-option-${idx}`} 
+                className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setFormData({
+                    ...formData,
+                    location: {...formData.location, state: state}
+                  });
+                  setShowStatesDropdown(false);
+                }}
+              >
+                {state}
+              </div>
+            ))
+          }
+        </div>
+      )}
+  </div>
+)}
+  </div>
+</div>
           
           {/* Skills */}
           <div className="flex flex-wrap items-center mb-7.5 gap-2.5">
@@ -459,7 +631,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      if (skillInput) addTag('skills', skillInput);
+                      if (skillInput) addTagWrapper('skills', skillInput);
                     }
                   }}
                   className="outline-none placeholder:font-semibold w-[80%]" 
@@ -487,7 +659,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                       className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
                       onMouseDown={(e) => {
                         e.preventDefault(); // Prevent blur event from firing
-                        addTag('skills', skill);
+                        addTagWrapper('skills', skill);
                       }}
                     >
                       {skill}
@@ -530,7 +702,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      if (expertiseInput) addTag('expertise', expertiseInput);
+                      if (expertiseInput) addTagWrapper('expertise', expertiseInput);
                     }
                   }}
                   className="outline-none placeholder:font-semibold w-[80%]" 
@@ -539,7 +711,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                 <button 
                   type="button" 
                   onClick={() => {
-                    if (expertiseInput) addTag('expertise', expertiseInput);
+                    if (expertiseInput) addTagWrapper('expertise', expertiseInput);
                   }}
                   className="focus:outline-none"
                 >
@@ -558,7 +730,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                       className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
                       onMouseDown={(e) => {
                         e.preventDefault(); // Prevent blur event from firing
-                        addTag('expertise', exp);
+                        addTagWrapper('expertise', exp);
                       }}
                     >
                       {exp}
@@ -603,7 +775,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      if (certificationInput) addTag('certifications', certificationInput);
+                      if (certificationInput) addTagWrapper('certifications', certificationInput);
                     }
                   }}
                   className="outline-none placeholder:font-semibold w-[80%]" 
@@ -612,7 +784,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                 <button 
                   type="button" 
                   onClick={() => {
-                    if (certificationInput) addTag('certifications', certificationInput);
+                    if (certificationInput) addTagWrapper('certifications', certificationInput);
                   }}
                   className="focus:outline-none"
                 >
@@ -631,7 +803,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                       className="px-4 py-2 hover:bg-aquagreen hover:text-white cursor-pointer text-sm"
                       onMouseDown={(e) => {
                         e.preventDefault(); // Prevent blur event from firing
-                        addTag('certifications', cert);
+                        addTagWrapper('certifications', cert);
                       }}
                     >
                       {cert}

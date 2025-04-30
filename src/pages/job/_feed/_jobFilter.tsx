@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IoMdArrowDropdown, IoMdSearch } from 'react-icons/io';
 import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { Jobs } from '@/types/jobs';
@@ -8,6 +8,13 @@ import { australiaDepartments } from '@/utils/govDeptAgency/australia'
 import { canadaDepartments } from '@/utils/govDeptAgency/canada'
 import { ukDepartments } from '@/utils/govDeptAgency/uk'
 import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govDeptAgency/us'
+import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates'
+import { MdDeleteForever } from "react-icons/md";
+import { toast } from 'react-toastify';
+
+type Country = string;
+type StateWithCountry = [string, string]; // Tuple type for state/country pairs
+type USState = string;
 
 interface JobFilterProps {
   jobs: Jobs[];
@@ -18,43 +25,13 @@ interface JobFilterProps {
 
 const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFilters, loading }) => {
 
-  const mergedAgencyDeptArray = useMemo(() => [
-    ...australiaDepartments,
-    ...canadaDepartments,
-    ...ukDepartments,
-    ...usCongressional,
-    ...usIntelligenceAndOversight,
-    ...usInnovationAndIP,
-    ...usScienceAgencies,
-    ...usDepartments,
-  ], [
-    australiaDepartments,
-    canadaDepartments,
-    ukDepartments,
-    usCongressional,
-    usIntelligenceAndOversight,
-    usInnovationAndIP,
-    usScienceAgencies,
-    usDepartments,
-  ]);
-  useEffect(() => {
-    console.log(mergedAgencyDeptArray)
-  }, [])
-
-  // Mock data for new filters
-  const mockLocations = ['Remote', 'Hybrid', 'On-site', 'Washington DC', 'New York', 'California', 'Texas', 'Florida', 'Illinois', 'Virginia', 'Maryland'];
-  
-  const mockUSStates = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'];
-  
-  const mockCountries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'France', 'Germany', 'Japan', 'China', 'India', 'Brazil', 'Mexico', 'South Africa', 'Nigeria', 'Russia', 'South Korea', 'Italy', 'Spain', 'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Ireland', 'Poland', 'Ukraine', 'Turkey', 'Israel', 'Saudi Arabia', 'UAE', 'Qatar', 'Singapore', 'Malaysia', 'Indonesia', 'Thailand', 'Vietnam', 'Philippines', 'New Zealand'];
-
-  // Access the feed store
   const { 
     addSavedSearch, 
-    getSavedSearchesByFeedType 
+    getSavedSearchesByFeedType,
+    removeSavedSearch
   } = useFeedStore();
+  const jobSavedSearches = getSavedSearchesByFeedType('Jobs');
   
-  // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [jobType, setJobType] = useState('');
   const [securityClearance, setSecurityClearance] = useState('');
@@ -73,23 +50,59 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
   const [showDomainDetailsDropdown, setShowDomainDetailsDropdown] = useState(false);
   const [domainDetailOptions, setDomainDetailOptions] = useState<string[]>([]);
   const [domainDetail, setDomainDetail] = useState('');
-  
-  // Refs
+
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const locationDropdownRef = useRef<HTMLDivElement>(null);
+
+  const [showSavedSearchesDropdown, setShowSavedSearchesDropdown] = useState(false);
+  const savedSearchesDropdownRef = useRef<HTMLDivElement>(null);
+
+// Refs
   const departmentInputRef = useRef<HTMLInputElement>(null);
   const departmentDropdownRef = useRef<HTMLDivElement>(null);
   const domainDetailInputRef = useRef<HTMLInputElement>(null);
   const domainDetailDropdownRef = useRef<HTMLDivElement>(null);
   
   // Get job-specific saved searches
-  const jobSavedSearches = getSavedSearchesByFeedType('Jobs');
   
   // Unique values for filters
   const [availableJobTypes, setAvailableJobTypes] = useState<string[]>([]);
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [availableCertifications, setAvailableCertifications] = useState<string[]>([]);
   const [availableClearances, setAvailableClearances] = useState<string[]>([]);
+  
+  const [allCountries, setAllCountries] = useState<Country[]>([]);
+  const [statesWithCountries, setStatesWithCountries] = useState<StateWithCountry[]>([]);
+  const [usStates, setUsStates] = useState<USState[]>([]);
+  
+  const [locationClickTime, setLocationClickTime] = useState<number>(0);
+  
 
-  // Extract unique values for filter options from jobs data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+
+        const [countriesData, statesData, usStatesData] = await Promise.all([
+          getAllCountries(),
+          getSpecificCountryStates(),
+          getUSStates()
+        ]);
+        
+        setAllCountries(countriesData);
+        setStatesWithCountries(statesData);
+        setUsStates(usStatesData);
+        
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  
+
   useEffect(() => {
     if (jobs.length > 0) {
       // Extract job types
@@ -100,7 +113,26 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
 
       const combinedSkillsAndExpertise = [
         ...Array.from(new Set(allSkills)),
-        'Beginner', 'Intermediate', 'Expert', 'Advanced'
+        "JavaScript",
+        "Python",
+        "Java",
+        "C#",
+        "Ruby",
+        "PHP",
+        "Swift",
+        "Kotlin",
+        "HTML/CSS",
+        "React",
+        "Angular",
+        "Node.js",
+        "Django",
+        "Flask",
+        "SQL",
+        "NoSQL",
+        "Git",
+        "Docker",
+        "AWS",
+        "Azure",
       ];
       setAvailableSkills(combinedSkillsAndExpertise);
 
@@ -112,25 +144,24 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
     }
   }, [jobs]);
 
-  // Set domain detail options based on domain focus selection
   useEffect(() => {
+
     if (domainFocus === 'US Federal Government') {
       setDomainDetailOptions([]);
     } else if (domainFocus === 'US State Government') {
-      setDomainDetailOptions(mockUSStates);
+      setDomainDetailOptions(usStates);
     } else if (domainFocus === 'International Government') {
-      setDomainDetailOptions(mockCountries);
+      setDomainDetailOptions(allCountries);
     } else {
       setDomainDetailOptions([]);
     }
     
-    // Reset domain detail when domain focus changes
     setDomainDetail('');
-  }, [domainFocus]);
+  }, [domainFocus, usStates, allCountries]);
 
   useEffect(() => {
     if (governmentType && departmentInputRef.current) {
-      // Use the imported arrays directly based on government type
+
       let depts: string[] = [];
       if (governmentType === 'Federal') {
         depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
@@ -141,9 +172,15 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
     }
   }, [governmentType]);
 
-  // Handle clicks outside the department dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // For location dropdown
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node) &&
+          locationInputRef.current && !locationInputRef.current.contains(event.target as Node)) {
+        setShowLocationDropdown(false);
+      }
+      
+      // Keep the rest of your outside click handlers...
       if (departmentDropdownRef.current && !departmentDropdownRef.current.contains(event.target as Node) &&
           departmentInputRef.current && !departmentInputRef.current.contains(event.target as Node)) {
         setShowDepartmentDropdown(false);
@@ -153,6 +190,13 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
           domainDetailInputRef.current && !domainDetailInputRef.current.contains(event.target as Node)) {
         setShowDomainDetailsDropdown(false);
       }
+  
+      if (savedSearchesDropdownRef.current && 
+        !savedSearchesDropdownRef.current.contains(event.target as Node) &&
+        locationInputRef.current && 
+        !locationInputRef.current.contains(event.target as Node)) {
+      setShowSavedSearchesDropdown(false);
+    }
     }
     
     document.addEventListener('mousedown', handleClickOutside);
@@ -161,7 +205,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
     };
   }, []);
 
-   // Handle department input change
    const handleDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setDepartment(value);
@@ -180,7 +223,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
     }
   };
 
-  // Handle domain detail input change
   const handleDomainDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setDomainDetail(value);
@@ -299,8 +341,8 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
   }, [searchTerm, jobType, securityClearance, skillsAndExpertise, certifications, requirePrevGovtExp, governmentType, department, location, domainFocus, domainDetail, jobs, loading]);
 
   // Handle saved search selection
-  const handleSavedSearchSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const searchId = e.target.value;
+  const handleSavedSearchSelect = (id: string) => {
+    const searchId = id;
     setSelectedSavedSearch(searchId);
     
     if (searchId) {
@@ -326,16 +368,16 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
 
   // Save current search
   const saveSearch = () => {
-    if (!searchTerm && !jobType && !securityClearance && !skillsAndExpertise && !certifications && !requirePrevGovtExp && !governmentType && !location && !domainFocus) {
+    if (!searchTerm && !jobType && !securityClearance && !skillsAndExpertise && 
+        !certifications && !requirePrevGovtExp && !governmentType && 
+        !location && !domainFocus) {
       return;
     }
-
+  
     let searchName = searchTerm ? `"${searchTerm}"` : 'All Jobs';
-    
     if (jobType) searchName += ` - ${jobType}`;
     if (skillsAndExpertise) searchName += ` - ${skillsAndExpertise}`;
     
-    // Create filters object
     const filters = {
       searchTerm,
       jobType,
@@ -349,20 +391,18 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
       domainFocus,
       domainDetail
     };
-
-    // Add to store
+  
     const added = addSavedSearch({
       query: searchTerm,
-      feedType: 'jobs',
+      feedType: 'Jobs',
       name: searchName,
       filters: JSON.stringify(filters)
     });
-
+  
     if (added) {
-      // Optionally provide feedback to user that search was saved
-      alert('Search saved successfully!');
+      toast.success('Saved successfully!');
     } else {
-      alert('This search already exists in your saved searches.');
+      toast.info('Search exists!');
     }
   };
 
@@ -400,30 +440,91 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
           </button>
         </div>
 
-        <div className="relative flex-grow">
-          <select 
-            className="h-12.5 border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
-            value={selectedSavedSearch}
-            onChange={handleSavedSearchSelect}
-          >
-            <option value="">Saved Searches</option>
-            {jobSavedSearches.map((search: { id: string; name: string }) => (
-              <option key={search.id} value={search.id}>{search.name}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-            <IoMdArrowDropdown size={20} className="text-boldblue" />
-          </div>
-        </div>
+        <div className="relative w-full sm:w-64">
+  <input 
+    ref={locationInputRef}
+    type="text" 
+    placeholder="Saved Searches" 
+    className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+    value={selectedSavedSearch ? jobSavedSearches.find((search: { id: string; name: string }) => search.id === selectedSavedSearch)?.name || '' : ''}
+    onChange={() => {}}
+    onFocus={() => {
+      if (!showSavedSearchesDropdown) {
+        setShowSavedSearchesDropdown(true);
+      }
+    }}
+    readOnly
+    onClick={(e) => {
+      e.stopPropagation();
+      setShowSavedSearchesDropdown(true);
+    }}
+  />
+  <button 
+    className="absolute right-4 top-1/2 transform -translate-y-1/2"
+    onClick={(e) => {
+      e.stopPropagation();
+      setShowSavedSearchesDropdown(!showSavedSearchesDropdown);
+    }}
+  >
+    <IoMdArrowDropdown size={20} className="text-boldblue" />
+  </button>
 
-        {/* Save Search button */}
+  {showSavedSearchesDropdown && (
+    <div 
+      ref={savedSearchesDropdownRef}
+      className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+      onClick={(e) => e.stopPropagation()} // Prevent clicks inside dropdown from closing it
+    >
+      <div
+        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        onClick={() => {
+          setSelectedSavedSearch('');
+          setShowSavedSearchesDropdown(false);
+          resetFilters();
+        }}
+      >
+        Saved Searches
+      </div>
+      {jobSavedSearches.map((search: { id: string; name: string; filters?: string }) => (
+        <div key={search.id} className="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+          <div
+            className="flex-grow cursor-pointer text-sm"
+            onClick={() => {
+              handleSavedSearchSelect(search.id);
+              setShowSavedSearchesDropdown(false);
+            }}
+          >
+            {search.name}
+          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              removeSavedSearch(search.id);
+              if (selectedSavedSearch === search.id) {
+                resetFilters();
+              }
+            }}
+            className="text-red-500 hover:text-red-700 text-sm cursor-pointer"
+          >
+            <MdDeleteForever color='red' size={20} />
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+    
         <button 
-          className="h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold"
+          className="h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
           onClick={saveSearch}
         >
           Save Search
         </button>
       </div>
+
+
+
+
 
         <h3 className="text-gray-700 mb-3">Filter by</h3>
         
@@ -496,22 +597,68 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
             </div>
           </div>
           
-          {/* New Location filter */}
-          <div className="relative w-full sm:w-64">
-            <select 
-              className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+         {/* New Location filter with fixed functionality */}
+<div className="relative w-full sm:w-64">
+<input 
+    ref={locationInputRef}
+    type="text" 
+    placeholder="Select Location" 
+    className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+    value={location}
+    onChange={(e) => {
+      setLocation(e.target.value);
+      setShowLocationDropdown(true);
+    }}
+    onClick={(e) => {
+      e.stopPropagation();
+      const now = Date.now();
+      // Prevent double-triggering by checking if it's been at least 100ms since last click
+      if (now - locationClickTime > 100) {
+        setShowLocationDropdown(!showLocationDropdown);
+        setLocationClickTime(now);
+      }
+    }}
+  />
+ <button 
+    className="absolute right-4 top-1/2 transform -translate-y-1/2"
+    onClick={(e) => {
+      e.stopPropagation();
+      setShowLocationDropdown(!showLocationDropdown);
+    }}
+  >
+    <IoMdArrowDropdown size={20} className="text-boldblue" />
+  </button>
+
+  {/* Dropdown for locations */}
+  {showLocationDropdown && (
+    <div 
+      ref={locationDropdownRef}
+      className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto"
+    >
+      {statesWithCountries.length > 0 ? (
+        statesWithCountries
+          .filter(([state, country]) => 
+            state.toLowerCase().includes(location.toLowerCase()) || 
+            country.toLowerCase().includes(location.toLowerCase())
+          )
+          .map(([state, country], index) => (
+            <div
+              key={`loc-${index}`}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+              onClick={() => {
+                setLocation(`${state}, ${country}`);
+                setShowLocationDropdown(false);
+              }}
             >
-              <option value="">Location</option>
-              {mockLocations.map((loc, index) => (
-                <option key={`loc-${index}`} value={loc}>{loc}</option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <IoMdArrowDropdown size={20} className="text-boldblue" />
+              {state}, {country}
             </div>
-          </div>
+          ))
+      ) : (
+        <div className="px-4 py-2 text-sm text-gray-500">No locations found</div>
+      )}
+    </div>
+  )}
+</div>
           
           {/* New Domain Focus filter */}
           <div className="relative w-full sm:w-64">
@@ -669,6 +816,8 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
           </div>
         )}
         
+
+          </div>
         {(
             searchTerm ||
             jobType ||
@@ -691,8 +840,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
               Reset Filters <RxReset />
             </button>
           )}
-
-          </div>
           </main>
         );
       };

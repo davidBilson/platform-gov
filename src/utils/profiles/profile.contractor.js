@@ -149,7 +149,6 @@ export const addDegree = (setFormData) => {
   }));
 };
 
-
 export const updateDegree = (id, field, value, setFormData) => {
   setFormData(prev => ({
     ...prev,
@@ -181,17 +180,31 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
       toast.error("Form data is missing");
       return;
     }
+
+    const dataToSend = {
+      ...formData,
+      location: formData.location && typeof formData.location === 'object' 
+        ? formData.location 
+        : {
+            country: formData.location?.country || "",
+            state: formData.location?.state || ""
+          },
+      firmAffiliation: formData.firmAffiliation !== undefined 
+        ? formData.firmAffiliation 
+        : ""
+    };
     
+    // Handle profile image URLs properly
     if (formData.profileImageUrl?.startsWith('blob:') && formData.profileImage) {
-      formData.profileImageUrl = formData.profileImage;
+      dataToSend.profileImageUrl = formData.profileImage;
     }
-    
+
     const response = await saveProfile(
-      formData, 
+      dataToSend, 
       userId, 
       isProfileExists && typeof userId === 'string' ? userId : null
     );
-    
+
     if (response?.data?.success) {
       // If creating a new profile, save the profileId
       if (!isProfileExists && response.data.data?._id) {
@@ -201,19 +214,17 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
       toast.success(isProfileExists ? "Profile updated successfully" : "Profile created successfully");
       
       try {
-        // Refetch user profile to ensure we have the latest data
         await fetchUserProfile();
-        // router.push("/profile");
       } catch (fetchError) {
         console.error("Error fetching updated profile:", fetchError);
-        router.push("/profile/freelancer");
       }
+
     } else {
       const errorMessage = response?.data?.message || "Unknown error in response";
       toast.error(errorMessage);
     }
   } catch (error) {
-    // Error handling
+
     if (error.response) {
       const statusCode = error.response.status;
       const errorMessage = error.response.data?.message || "An error occurred while saving";
@@ -228,13 +239,11 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
       
       console.error(`Axios error (${statusCode}) saving profile:`, error);
     } else if (error instanceof Error) {
-      toast.error(`Error: ${error.message}`);
+      toast?.error(`Error: ${error.message}`);
       console.error("Error saving profile:", error);
     } else {
-      toast.error("An unexpected error occurred");
+      toast?.error("An unexpected error occurred");
       console.error("Unknown error:", error);
     }
-  } finally {
-    setIsLoading(false);
   }
 };

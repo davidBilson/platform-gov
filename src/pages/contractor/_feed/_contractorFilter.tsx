@@ -2,6 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { IoMdArrowDropdown, IoMdSearch } from 'react-icons/io';
 import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxReset } from "react-icons/rx";
+import { australiaDepartments } from '@/utils/govDeptAgency/australia';
+import { canadaDepartments } from '@/utils/govDeptAgency/canada';
+import { ukDepartments } from '@/utils/govDeptAgency/uk';
+import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govDeptAgency/us';
+import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
+import { useFeedStore } from '@/store/feedStore';
+import { MdDeleteForever } from "react-icons/md";
+import { toast } from 'react-toastify';
+
+
+type Country = string;
+type StateWithCountry = [string, string];
+type USState = string;
 
 export interface FilterOptions {
   searchTerm: string;
@@ -19,32 +32,20 @@ export interface FilterOptions {
 
 interface ContractorFilterProps {
   onFilterChange: (filters: FilterOptions) => void;
-  setActiveFilters: (filters: Array<{id: string, name: string}>) => void;
-  savedSearches: Array<{ id: string; name: string; filters: string }>;
-  onSaveSearch: (search: { query: string; feedType: string; name: string; filters: string }) => boolean;
   loading: boolean;
 }
 
 const ContractorFilter: React.FC<ContractorFilterProps> = ({ 
   onFilterChange, 
-  savedSearches = [],
-  onSaveSearch,
   loading
 }) => {
-  // Mock data for filters
+  // Mock data for filters based on ContractorProfile
   const mockProfessions = ['Software Developer', 'Project Manager', 'Data Analyst', 'Cybersecurity Specialist', 'Systems Architect', 'DevOps Engineer'];
-  const mockSkillsAndExpertise = ['React', 'Java', 'Python', 'TypeScript', 'Project Management', 'Frontend', 'Backend', 'Full Stack', 'DevOps', 'Data Science', 'Cloud Architecture', 'Beginner', 'Intermediate', 'Expert', 'Advanced'];
+  const mockSkillsAndExpertise = ['React', 'Java', 'Python', 'TypeScript', 'Project Management', 'Frontend', 'Backend', 'Full Stack', 'DevOps', 'Data Science', 'Cloud Architecture'];
   const mockCertifications = ['AWS', 'PMP', 'CISSP', 'Azure', 'Scrum Master', 'CompTIA Security+', 'ITIL', 'CCNA', 'CEH'];
   const mockClearances = ['Secret', 'Top Secret', 'Confidential', 'Public Trust', 'SCI'];
-  const mockLocations = ['Remote', 'Hybrid', 'On-site', 'Washington DC', 'New York', 'California', 'Texas', 'Florida', 'Illinois', 'Virginia', 'Maryland'];
-  const mockUSStates = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'];
-  const mockCountries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'France', 'Germany', 'Japan', 'China', 'India', 'Brazil', 'Mexico', 'South Africa', 'Nigeria', 'Russia', 'South Korea', 'Italy', 'Spain', 'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Ireland', 'Poland', 'Ukraine', 'Turkey', 'Israel', 'Saudi Arabia', 'UAE', 'Qatar', 'Singapore', 'Malaysia', 'Indonesia', 'Thailand', 'Vietnam', 'Philippines', 'New Zealand'];
   
-  // Mock departments based on government type
-  const usFederalDepartments = ['Department of Defense', 'Department of State', 'Department of Justice', 'Department of Treasury', 'Department of Homeland Security', 'Department of Energy'];
-  const stateAndInternationalDepartments = ['UK Ministry of Defence', 'Australian Department of Foreign Affairs', 'Canada Revenue Agency', 'Department of Education NSW', 'Ontario Ministry of Health'];
-
-  // Filter states
+  // State for filters
   const [searchTerm, setSearchTerm] = useState('');
   const [profession, setProfession] = useState('');
   const [securityClearance, setSecurityClearance] = useState('');
@@ -56,59 +57,109 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
   const [selectedSavedSearch, setSelectedSavedSearch] = useState('');
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
   const [filteredDepartments, setFilteredDepartments] = useState<string[]>([]);
-  
-  // New filter states (matching JobFilter)
   const [location, setLocation] = useState('');
   const [domainFocus, setDomainFocus] = useState('');
   const [showDomainDetailsDropdown, setShowDomainDetailsDropdown] = useState(false);
   const [domainDetailOptions, setDomainDetailOptions] = useState<string[]>([]);
   const [domainDetail, setDomainDetail] = useState('');
-  
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [showSavedSearchesDropdown, setShowSavedSearchesDropdown] = useState(false);
+  const [locationClickTime, setLocationClickTime] = useState<number>(0);
+
+  // Location data
+  const [allCountries, setAllCountries] = useState<Country[]>([]);
+  const [statesWithCountries, setStatesWithCountries] = useState<StateWithCountry[]>([]);
+  const [usStates, setUsStates] = useState<USState[]>([]);
+
   // Refs
+  const locationInputRef = useRef<HTMLInputElement>(null);
+  const locationDropdownRef = useRef<HTMLDivElement>(null);
+  const savedSearchesDropdownRef = useRef<HTMLDivElement>(null);
   const departmentInputRef = useRef<HTMLInputElement>(null);
   const departmentDropdownRef = useRef<HTMLDivElement>(null);
   const domainDetailInputRef = useRef<HTMLInputElement>(null);
   const domainDetailDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Set domain detail options based on domain focus selection
+  const {addSavedSearch, removeSavedSearch, getSavedSearchesByFeedType} = useFeedStore();
+  
+  const savedSearches: { id: string; name: string; filters?: string }[] = getSavedSearchesByFeedType('Contractors');
+
+  // Fetch location data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [countriesData, statesData, usStatesData] = await Promise.all([
+          getAllCountries(),
+          getSpecificCountryStates(),
+          getUSStates()
+        ]);
+        
+        setAllCountries(countriesData);
+        setStatesWithCountries(statesData);
+        setUsStates(usStatesData);
+      } catch (err) {
+        console.error('Error fetching location data:', err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Set domain detail options based on domain focus
   useEffect(() => {
     if (domainFocus === 'US Federal Government') {
       setDomainDetailOptions([]);
     } else if (domainFocus === 'US State Government') {
-      setDomainDetailOptions(mockUSStates);
+      setDomainDetailOptions(usStates);
     } else if (domainFocus === 'International Government') {
-      setDomainDetailOptions(mockCountries);
+      setDomainDetailOptions(allCountries);
     } else {
       setDomainDetailOptions([]);
     }
     
-    // Reset domain detail when domain focus changes
     setDomainDetail('');
-  }, [domainFocus]);
+  }, [domainFocus, usStates, allCountries]);
 
+  // Set departments based on government type
   useEffect(() => {
     if (governmentType && departmentInputRef.current) {
       let depts: string[] = [];
       if (governmentType === 'Federal') {
-        depts = usFederalDepartments;
+        depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
       } else if (governmentType === 'State') {
-        depts = stateAndInternationalDepartments;
+        depts = [...australiaDepartments, ...canadaDepartments, ...ukDepartments];
       }
       setFilteredDepartments(depts);
     }
   }, [governmentType]);
 
-  // Handle clicks outside the dropdowns
+  // Handle clicks outside dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // Location dropdown
+      if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node) &&
+          locationInputRef.current && !locationInputRef.current.contains(event.target as Node)) {
+        setShowLocationDropdown(false);
+      }
+      
+      // Department dropdown
       if (departmentDropdownRef.current && !departmentDropdownRef.current.contains(event.target as Node) &&
           departmentInputRef.current && !departmentInputRef.current.contains(event.target as Node)) {
         setShowDepartmentDropdown(false);
       }
       
+      // Domain detail dropdown
       if (domainDetailDropdownRef.current && !domainDetailDropdownRef.current.contains(event.target as Node) &&
           domainDetailInputRef.current && !domainDetailInputRef.current.contains(event.target as Node)) {
         setShowDomainDetailsDropdown(false);
+      }
+  
+      // Saved searches dropdown
+      if (savedSearchesDropdownRef.current && 
+        !savedSearchesDropdownRef.current.contains(event.target as Node) &&
+        locationInputRef.current && 
+        !locationInputRef.current.contains(event.target as Node)) {
+        setShowSavedSearchesDropdown(false);
       }
     }
     
@@ -126,9 +177,9 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     if (governmentType) {
       let depts: string[] = [];
       if (governmentType === 'Federal') {
-        depts = usFederalDepartments;
+        depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
       } else if (governmentType === 'State') {
-        depts = stateAndInternationalDepartments;
+        depts = [...australiaDepartments, ...canadaDepartments, ...ukDepartments];
       }
       setFilteredDepartments(
         depts.filter(dept => dept.toLowerCase().includes(value.toLowerCase()))
@@ -160,63 +211,11 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     setShowDomainDetailsDropdown(false);
   };
 
-  // Apply filters
+  // Apply filters when they change
   useEffect(() => {
     if (loading) return;
     
-    const activeFiltersList: Array<{id: string, name: string}> = [];
-
-    // Add active filters to list
-    if (searchTerm) {
-      activeFiltersList.push({ id: 'searchTerm', name: `Search: ${searchTerm}` });
-    }
-
-    if (profession) {
-      activeFiltersList.push({ id: 'profession', name: `Profession: ${profession}` });
-    }
-
-    if (securityClearance) {
-      activeFiltersList.push({ id: 'securityClearance', name: `Clearance: ${securityClearance}` });
-    }
-
-    if (skillsAndExpertise) {
-      activeFiltersList.push({ id: 'skills', name: `Skills & Expertise: ${skillsAndExpertise}` });
-    }
-
-    if (certifications) {
-      activeFiltersList.push({ id: 'certifications', name: `Certs & Education: ${certifications}` });
-    }
-
-    if (requireGovtExperience) {
-      activeFiltersList.push({ id: 'govtExp', name: 'Previous Govt. Experience' });
-    }
-
-    if (governmentType) {
-      activeFiltersList.push({ id: 'govtType', name: `${governmentType} Government` });
-      
-      if (department) {
-        activeFiltersList.push({ id: 'department', name: `Department: ${department}` });
-      }
-    }
-    
-    if (location) {
-      activeFiltersList.push({ id: 'location', name: `Location: ${location}` });
-    }
-    
-    if (domainFocus) {
-      let domainFilterName = `Domain: ${domainFocus}`;
-      if (domainDetail) {
-        domainFilterName += ` - ${domainDetail}`;
-      }
-      
-      activeFiltersList.push({ id: 'domainFocus', name: domainFilterName });
-    }
-
-    // Update active filters
-    // setActiveFilters(activeFiltersList);
-    
-    // Pass filters to parent component
-    onFilterChange({
+    const filters = {
       searchTerm,
       profession,
       securityClearance,
@@ -228,16 +227,31 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
       location,
       domainFocus,
       domainDetail
-    });
-  }, [searchTerm, profession, securityClearance, skillsAndExpertise, certifications, requireGovtExperience, governmentType, department, location, domainFocus, domainDetail, loading]);
+    };
+    
+    onFilterChange(filters);
+  }, [
+    searchTerm,
+    profession,
+    securityClearance,
+    skillsAndExpertise,
+    certifications,
+    requireGovtExperience,
+    governmentType,
+    department,
+    location,
+    domainFocus,
+    domainDetail,
+    loading,
+    onFilterChange
+  ]);
 
   // Handle saved search selection
-  const handleSavedSearchSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const searchId = e.target.value;
+  const handleSavedSearchSelect = (searchId: string) => {
     setSelectedSavedSearch(searchId);
     
     if (searchId) {
-      const savedSearch = savedSearches.find(search => search.id.toString() === searchId);
+      const savedSearch = savedSearches.find((search: { id: string; name: string; filters?: string }) => search.id.toString() === searchId);
       
       if (savedSearch && savedSearch.filters) {
         // Restore saved search filters
@@ -259,45 +273,43 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
 
   // Save current search
   const saveSearch = () => {
-    if (!searchTerm && !profession && !securityClearance && !skillsAndExpertise && !certifications && !requireGovtExperience && !governmentType && !location && !domainFocus) {
-      return;
-    }
+  if (!searchTerm && !profession && !securityClearance && !skillsAndExpertise && 
+      !certifications && !requireGovtExperience && !governmentType && 
+      !location && !domainFocus) {
+    return;
+  }
 
-    let searchName = searchTerm ? `"${searchTerm}"` : 'All Contractors';
-    
-    if (profession) searchName += ` - ${profession}`;
-    if (skillsAndExpertise) searchName += ` - ${skillsAndExpertise}`;
-    
-    // Create filters object
-    const filters = {
-      searchTerm,
-      profession,
-      securityClearance,
-      skillsAndExpertise,
-      certifications,
-      requireGovtExperience,
-      governmentType,
-      department,
-      location,
-      domainFocus,
-      domainDetail
-    };
-
-    // Add to store
-    const added = onSaveSearch({
-      query: searchTerm,
-      feedType: 'contractors',
-      name: searchName,
-      filters: JSON.stringify(filters)
-    });
-
-    if (added) {
-      // Optionally provide feedback to user that search was saved
-      alert('Search saved successfully!');
-    } else {
-      alert('This search already exists in your saved searches.');
-    }
+  let searchName = searchTerm ? `"${searchTerm}"` : 'All Contractors';
+  if (profession) searchName += ` - ${profession}`;
+  if (skillsAndExpertise) searchName += ` - ${skillsAndExpertise}`;
+  
+  const filters = {
+    searchTerm,
+    profession,
+    securityClearance,
+    skillsAndExpertise,
+    certifications,
+    requireGovtExperience,
+    governmentType,
+    department,
+    location,
+    domainFocus,
+    domainDetail
   };
+
+  const added = addSavedSearch({
+    query: searchTerm,
+    feedType: 'Contractors',
+    name: searchName,
+    filters: JSON.stringify(filters)
+  });
+
+  if (added) {
+    toast.success('Saved successfully!');
+  } else {
+    toast.info('Search exists!');
+  }
+};
 
   // Reset filters
   const resetFilters = () => {
@@ -313,20 +325,6 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     setDomainFocus('');
     setDomainDetail('');
     setSelectedSavedSearch('');
-    // setActiveFilters([]);
-    onFilterChange({
-      searchTerm: '',
-      profession: '',
-      securityClearance: '',
-      skillsAndExpertise: '',
-      certifications: '',
-      requireGovtExperience: false,
-      governmentType: '',
-      department: '',
-      location: '',
-      domainFocus: '',
-      domainDetail: ''
-    });
   };
 
   return (
@@ -345,35 +343,89 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
           </button>
         </div>
 
-        <div className="relative flex-grow">
-          <select 
-            className="h-12.5 border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
-            value={selectedSavedSearch}
-            onChange={handleSavedSearchSelect}
+        <div className="relative w-full sm:w-64">
+          <input 
+            ref={locationInputRef}
+            type="text" 
+            placeholder="Saved Searches" 
+            className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+            value={selectedSavedSearch ? savedSearches.find((search: { id: string; name: string }) => search.id === selectedSavedSearch)?.name || '' : ''}
+            onChange={() => {}}
+            onFocus={() => setShowSavedSearchesDropdown(true)}
+            readOnly
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowSavedSearchesDropdown(true);
+            }}
+          />
+          <button 
+            className="absolute right-4 top-1/2 transform -translate-y-1/2"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Only the arrow button should toggle
+              setShowSavedSearchesDropdown(!showSavedSearchesDropdown);
+            }}
           >
-            <option value="">Saved Searches</option>
-            {savedSearches.map((search) => (
-              <option key={search.id} value={search.id}>{search.name}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
             <IoMdArrowDropdown size={20} className="text-boldblue" />
-          </div>
+          </button>
+
+          {showSavedSearchesDropdown && (
+            <div 
+              ref={savedSearchesDropdownRef}
+              className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+              onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
+            >
+              <div
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                onClick={() => {
+                  setSelectedSavedSearch('');
+                  setShowSavedSearchesDropdown(false);
+                  resetFilters();
+                }}
+              >
+                Saved Searches
+              </div>
+              {savedSearches.map((search: { id: React.Key | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<unknown>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => (
+                <div key={search.id} className="flex justify-between items-center px-4 py-2 hover:bg-gray-100">
+                  <div
+                    className="flex-grow cursor-pointer text-sm"
+                    onClick={() => {
+                      if (search.id) handleSavedSearchSelect(search.id.toString());
+                      setShowSavedSearchesDropdown(false);
+                    }}
+                  >
+                    {search.name}
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeSavedSearch(search.id);
+                      if (selectedSavedSearch === search.id) {
+                        resetFilters();
+                      }
+                    }}
+                    className="text-red-500 hover:text-red-700 text-sm cursor-pointer"
+                  >
+                    <MdDeleteForever color='red' size={20} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Save Search button */}
         <button 
-          className="h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold"
+          className="h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
           onClick={saveSearch}
         >
-          Save Search
-        </button>
-      </div>
+            Save Search
+          </button>
+        </div>
 
       <h3 className="text-gray-700 mb-3">Filter by</h3>
-        
+      
       <div className="flex flex-wrap gap-3 mb-6">
-        {/* Title/Profession filter */}
+        {/* Profession filter */}
         <div className="relative w-full sm:w-64">
           <select 
             className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
@@ -407,7 +459,7 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
           </div>
         </div>
         
-        {/* Skills & Expertise filter (combined) */}
+        {/* Skills & Expertise filter */}
         <div className="relative w-full sm:w-64">
           <select 
             className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
@@ -424,7 +476,7 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
           </div>
         </div>
         
-        {/* Certifications filter - renamed to "Certs & Education" */}
+        {/* Certifications filter */}
         <div className="relative w-full sm:w-64">
           <select 
             className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
@@ -443,19 +495,63 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
         
         {/* Location filter */}
         <div className="relative w-full sm:w-64">
-          <select 
-            className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
+          <input 
+            ref={locationInputRef}
+            type="text" 
+            placeholder="Select Location" 
+            className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => {
+              setLocation(e.target.value);
+              setShowLocationDropdown(true);
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              const now = Date.now();
+              if (now - locationClickTime > 100) {
+                setShowLocationDropdown(!showLocationDropdown);
+                setLocationClickTime(now);
+              }
+            }}
+          />
+          <button 
+            className="absolute right-4 top-1/2 transform -translate-y-1/2"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLocationDropdown(!showLocationDropdown);
+            }}
           >
-            <option value="">Location</option>
-            {mockLocations.map((loc, index) => (
-              <option key={`loc-${index}`} value={loc}>{loc}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
             <IoMdArrowDropdown size={20} className="text-boldblue" />
-          </div>
+          </button>
+
+          {showLocationDropdown && (
+            <div 
+              ref={locationDropdownRef}
+              className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto"
+            >
+              {statesWithCountries.length > 0 ? (
+                statesWithCountries
+                  .filter(([state, country]) => 
+                    state.toLowerCase().includes(location.toLowerCase()) || 
+                    country.toLowerCase().includes(location.toLowerCase())
+                  )
+                  .map(([state, country], index) => (
+                    <div
+                      key={`loc-${index}`}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      onClick={() => {
+                        setLocation(`${state}, ${country}`);
+                        setShowLocationDropdown(false);
+                      }}
+                    >
+                      {state}, {country}
+                    </div>
+                  ))
+              ) : (
+                <div className="px-4 py-2 text-sm text-gray-500">No locations found</div>
+              )}
+            </div>
+          )}
         </div>
         
         {/* Domain Focus filter */}
@@ -475,7 +571,7 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
           </div>
         </div>
         
-        {/* Domain Detail input (appears when Domain Focus is selected) */}
+        {/* Domain Detail input */}
         {domainFocus && domainFocus !== 'US Federal Government' && (
           <div className="relative w-full sm:w-64">
             <input 
@@ -493,7 +589,6 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
               </svg>
             </button>
             
-            {/* Dropdown for domain details */}
             {showDomainDetailsDropdown && (
               <div 
                 ref={domainDetailDropdownRef}
@@ -590,7 +685,6 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
               </svg>
             </button>
           
-            {/* Dropdown for departments */}
             {showDepartmentDropdown && governmentType && (
               <div 
                 ref={departmentDropdownRef}
@@ -616,20 +710,9 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
       </div>
       
       {/* Reset Filters button */}
-      {(
-        searchTerm ||
-        profession ||
-        securityClearance ||
-        skillsAndExpertise ||
-        certifications ||
-        requireGovtExperience ||
-        governmentType ||
-        department ||
-        location ||
-        domainFocus ||
-        domainDetail ||
-        selectedSavedSearch
-      ) && (
+      {(searchTerm || profession || securityClearance || skillsAndExpertise || 
+        certifications || requireGovtExperience || governmentType || department || 
+        location || domainFocus || domainDetail || selectedSavedSearch) && (
         <button 
           onClick={resetFilters} 
           title="reset" 

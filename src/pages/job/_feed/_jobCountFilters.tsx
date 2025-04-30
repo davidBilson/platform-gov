@@ -25,10 +25,10 @@ const JobCountFilters: React.FC<JobCountFiltersProps> = ({
           
             <div className="flex flex-wrap gap-2">
               {activeFilters.map((filter) => (
-                <div key={filter.id} className="bg-deepskyblue text-white text-xs rounded-full px-3 py-1 flex items-center">
+                <div key={filter.id} className="bg-deepskyblue hover:bg-boldblue text-white text-xs rounded-full px-3 py-1 flex items-center">
                   {filter.name}
                   <button 
-                    className="ml-1 focus:outline-none cursor-pointer"
+                    className="ml-1 focus:outline-none cursor-pointer hover:text-red-500"
                     onClick={() => onRemoveFilter(filter.id)}
                     aria-label={`Remove ${filter.name} filter`}
                   >

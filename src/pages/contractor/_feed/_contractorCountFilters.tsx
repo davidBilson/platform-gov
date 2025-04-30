@@ -13,7 +13,7 @@ const ContractorCountFilters: React.FC<ContractorCountFiltersProps> = ({
   contractors, 
   filteredCount, 
   activeFilters,
-  onRemoveFilter,
+  // onRemoveFilter,
   showTotalCount = false
 }) => {
   const displayCount = filteredCount !== undefined ? filteredCount : contractors.length;
@@ -39,19 +39,20 @@ const ContractorCountFilters: React.FC<ContractorCountFiltersProps> = ({
           
           {/* Filter pills */}
           <div className="flex gap-2 flex-wrap">
-            {activeFilters.map((filter) => (
-              <div key={filter.id} className="bg-deepskyblue text-white text-xs rounded-full px-3 py-1 flex items-center">
-                {filter.value ? `${filter.name}: ${filter.value}` : filter.name}
-                <button 
-                  className="ml-1 focus:outline-none"
-                  onClick={() => onRemoveFilter(filter.id)}
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            ))}
+          {/* {activeFilters.map((filter) => (
+            <button 
+              key={filter.id}
+              className="bg-deepskyblue hover:bg-boldblue text-white text-xs rounded-full px-3 py-1 flex items-center transition-colors focus:outline-none"
+              onClick={() => onRemoveFilter(filter.id)}
+            >
+              {filter.value ? `${filter.name}: ${filter.value}` : filter.name}
+              <span className="ml-1 hover:text-red-500">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </span>
+            </button>
+          ))} */}
           </div>
         </div>
       )}

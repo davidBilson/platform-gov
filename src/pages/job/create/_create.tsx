@@ -1,14 +1,17 @@
 import useAuthStore from '@/store/authStore';
 import { ReactLib, Data, Icons, UI } from '@/utils/jobs/_imports';
+const { jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
 import type { JobFormData, Milestone } from '@/utils/jobs/_imports';
 const { React, useState, useEffect, useRef } = ReactLib;
-const { locationList, jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, FiTrash, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
 const { DatePicker, AddMilestoneModal } = UI;
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FaCheckCircle } from "react-icons/fa";
+import { getSpecificCountryStates  } from '@/utils/getLocations/getAllCountriesAndStates'
+
+type StateWithCountry = [string, string]; // Tuple type for state/country pairs
 
   
 const CreateJob: React.FC = () => {
@@ -72,7 +75,27 @@ const CreateJob: React.FC = () => {
     // Filtered options
     const [filteredLocation, setFilteredLocation] = useState<string[]>([]);
     const [filteredJobCategory, setFilteredJobCategory] = useState<string[]>([]);
-    
+
+    const [statesWithCountries, setStatesWithCountries] = useState<StateWithCountry[]>([]);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [ statesData ] = await Promise.all([
+            getSpecificCountryStates(),
+          ]);
+          setStatesWithCountries(statesData);
+        } catch (err) {
+          console.error('Error fetching data:', err);
+        }
+      };
+      fetchData();
+    }, []);
+
+    useEffect(() => {
+      console.log('statesWithCountries: ',statesWithCountries)
+    }, [statesWithCountries])
+
     // Retainer Handlers
     const handleRetainerAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value) || 0;
@@ -323,9 +346,7 @@ const CreateJob: React.FC = () => {
 
   useEffect(() => {
     if (showLocationDropdown) {
-      const availableLocations = locationList.filter(location => 
-        !formData.location.includes(location)
-      );
+      const availableLocations = statesWithCountries.map(([state, country]) => `${state}, ${country}`);
       
       if (locationInput.trim()) {
         const filtered = availableLocations.filter(location => 
@@ -336,9 +357,9 @@ const CreateJob: React.FC = () => {
         setFilteredLocation(availableLocations);
       }
     } else {
-      setFilteredLocation(locationList.filter(location => !formData.location.includes(location)));
+      setFilteredLocation(statesWithCountries.map(([state, country]) => `${state}, ${country}`));
     }
-  }, [locationInput, formData.location, showLocationDropdown]);
+  }, [locationInput, formData.location, showLocationDropdown, statesWithCountries]);
 
   useEffect(() => {
     if (showJobCategoryDropdown) {
@@ -924,11 +945,11 @@ const CreateJob: React.FC = () => {
                       onChange={(e) => setLocationInput(e.target.value)}
                       onClick={() => {
                         setShowLocationDropdown(true);
-                        setFilteredLocation(locationList);
+                        setFilteredLocation(statesWithCountries.map(([state, country]) => `${state}, ${country}`));
                       }}
                       onFocus={() => {
                         setShowLocationDropdown(true);
-                        setFilteredLocation(locationList);
+                        setFilteredLocation(statesWithCountries.map(([state, country]) => `${state}, ${country}`));
                       }}
                       onBlur={(e) => {
                         // Only close if the related dropdown item wasn't clicked
