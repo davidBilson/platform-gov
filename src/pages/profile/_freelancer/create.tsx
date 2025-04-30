@@ -23,9 +23,7 @@ interface AuthStoreState {
 
 const statesByCountry = { USA: usaStates, UK: ukStates, Canada: canadaStates, Australia: australiaStates };
 const firmOptions = [
-  "Janus Global Advisors",
-  "Firm companyy namee1", 
-  "Firm companyy namee2"
+  "Janus Global Advisors"
 ];
 
 const CreateFreelancerProfile = () => {
