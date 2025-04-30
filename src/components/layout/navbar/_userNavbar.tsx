@@ -173,7 +173,7 @@ const UserNavbar = () => {
                 {/* Jobs dropdown */}
                 <li className="flex items-center gap-1.25 cursor-pointer relative" ref={jobsDropdownRef}>
                     <div onClick={() => setJobsDropdown(!jobsDropdown)} className="flex items-center gap-1.25">
-                      <span>Jobs</span>
+                      <span>{role === 'contractor' ? 'Find Jobs' : 'Jobs'}</span>
                       <span>
                         {jobsDropdown ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}
                       </span>

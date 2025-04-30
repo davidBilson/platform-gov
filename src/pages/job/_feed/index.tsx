@@ -98,7 +98,7 @@ const JobFeed: React.FC = () => {
         </div>
       ) : searchPerformed ? (
         <div className="flex justify-center py-8 text-boldblue">
-          <p>No jobs matched your search.</p>
+          <p>No jobs</p>
         </div>
       ) : (
         <div className="flex justify-center py-8">

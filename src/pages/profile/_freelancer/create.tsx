@@ -310,53 +310,6 @@ const handleSubmit = (e: React.FormEvent): void => {
   // Now wait for the useEffect to trigger when acceptedLegalAgreement becomes true
 };
 
-  // Handle form cancellation
-  const handleCancel = () => {
-    // Reload the original profile data or reset to defaults
-    if (isProfileExists) {
-      fetchUserProfile();
-    } else {
-      // Reset to defaults
-      setFormData({
-        bio: "",
-        ratePerHour: "",
-        primaryPosition: "",
-        skills: [],
-        expertise: [],
-        certifications: [],
-        firmAffiliation: "",
-        location: {
-          country: "",
-          state: ""
-        },
-        workHistory: [
-          {
-            id: generateId(),
-            title: "",
-            department: "",
-            departmentType: "",
-            experienceLevel: "",
-            location: "",
-            fromDate: "",
-            toDate: ""
-          }
-        ],
-        degrees: [
-          {
-            id: generateId(),
-            degree: "",
-            institution: "",
-            yearCompleted: ""
-          }
-        ],
-        profileImage: null,
-        profileImageUrl: "",
-      });
-    }
-    
-    toast.success("Changes discarded");
-  };
-
   // Handle preview - could be expanded in future
   const handlePreview = async () => {
     // First check if we already know the profile exists
@@ -987,7 +940,7 @@ const handleSubmit = (e: React.FormEvent): void => {
         <section className="flex items-center justify-center gap-2.5 py-7.5 px-6 fixed bottom-0 left-0 bg-skyblue w-full border-t border-t-boldblue">
           <button 
             type="button"
-            onClick={handleCancel}
+            onClick={() => router.push('/')}
             className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 border bg-white border-boldblue text-boldblue text-sm font-semibold rounded-lg"
           >
             Cancel
