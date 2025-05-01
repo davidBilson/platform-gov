@@ -20,8 +20,8 @@ const UserNavbar = () => {
   
   const router = useRouter();
   const pathname = router.pathname;
-  const { name, role, resetAll } = authStore();
   const { setFeedType, feedType } = useFeedStore();
+  const { name, role, resetAll } = authStore();
 
   const handleSignOut = () => {
     resetAll();

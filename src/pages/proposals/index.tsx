@@ -5,6 +5,7 @@ import PendingProposals from './_pendingProposals';
 import DraftProposals from './_draftProposals';
 import useAuthStore from '@/store/authStore';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/router';
 
 
 // Define interfaces based on your mongoose schema
@@ -82,7 +83,13 @@ interface Application {
 
 const Proposals = () => {
 
-  const { userId } = useAuthStore()
+  const { userId, resetAll} = useAuthStore()
+  const router = useRouter()
+
+  const handleSignOut = () => {
+    resetAll();
+    router.push('/auth/sign-in');
+  }
 
   const [applications, setApplications] = useState({
     pending: [],
@@ -143,6 +150,14 @@ const Proposals = () => {
           </section>
         </section>
       );
+    }
+    if (!userId)  {
+        return (
+        <main className='p-5 pb-20 md:p-6 flex items-center justify-center flex-col gap-7.5'>
+          <p className='text-boldblue font-semibold'>You are not logged in</p>
+          <button onClick={handleSignOut} className='outline-none bg-aquagreen px-6 py-2 text-white font-semibold rounded-lg transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer'>Sign in</button>
+        </main>
+      )
     }
 
   return (
