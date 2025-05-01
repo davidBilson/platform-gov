@@ -10,7 +10,7 @@ import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/
 import { useFeedStore } from '@/store/feedStore';
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from 'react-toastify';
-
+import { useContractorFilter } from '@/store/useContractorFilter';
 
 type Country = string;
 type StateWithCountry = [string, string];
@@ -30,38 +30,34 @@ export interface FilterOptions {
   domainDetail: string;
 }
 
-interface ContractorFilterProps {
-  onFilterChange: (filters: FilterOptions) => void;
-  loading: boolean;
-}
+const ContractorFilter = () => {
 
-const ContractorFilter: React.FC<ContractorFilterProps> = ({ 
-  onFilterChange, 
-  loading
-}) => {
-  // Mock data for filters based on ContractorProfile
+  const {
+    searchTerm, setSearchTerm,
+    profession, setProfession,
+    securityClearance, setSecurityClearance,
+    skillsAndExpertise, setSkillsAndExpertise,
+    certifications, setCertifications,
+    requireGovtExperience, setRequireGovtExperience,
+    governmentType, setGovernmentType,
+    department, setDepartment,
+    location, setLocation,
+    domainFocus, setDomainFocus,
+    domainDetail, setDomainDetail,
+    resetFilters
+  } = useContractorFilter();
+
   const mockProfessions = ['Software Developer', 'Project Manager', 'Data Analyst', 'Cybersecurity Specialist', 'Systems Architect', 'DevOps Engineer'];
   const mockSkillsAndExpertise = ['React', 'Java', 'Python', 'TypeScript', 'Project Management', 'Frontend', 'Backend', 'Full Stack', 'DevOps', 'Data Science', 'Cloud Architecture'];
   const mockCertifications = ['AWS', 'PMP', 'CISSP', 'Azure', 'Scrum Master', 'CompTIA Security+', 'ITIL', 'CCNA', 'CEH'];
   const mockClearances = ['Secret', 'Top Secret', 'Confidential', 'Public Trust', 'SCI'];
   
   // State for filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [profession, setProfession] = useState('');
-  const [securityClearance, setSecurityClearance] = useState('');
-  const [skillsAndExpertise, setSkillsAndExpertise] = useState('');
-  const [certifications, setCertifications] = useState('');
-  const [requireGovtExperience, setRequireGovtExperience] = useState(false);
-  const [governmentType, setGovernmentType] = useState('');
-  const [department, setDepartment] = useState('');
   const [selectedSavedSearch, setSelectedSavedSearch] = useState('');
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
   const [filteredDepartments, setFilteredDepartments] = useState<string[]>([]);
-  const [location, setLocation] = useState('');
-  const [domainFocus, setDomainFocus] = useState('');
   const [showDomainDetailsDropdown, setShowDomainDetailsDropdown] = useState(false);
   const [domainDetailOptions, setDomainDetailOptions] = useState<string[]>([]);
-  const [domainDetail, setDomainDetail] = useState('');
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showSavedSearchesDropdown, setShowSavedSearchesDropdown] = useState(false);
   const [locationClickTime, setLocationClickTime] = useState<number>(0);
@@ -169,7 +165,6 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     };
   }, []);
 
-  // Handle department input change
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setDepartment(value);
@@ -211,40 +206,6 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     setShowDomainDetailsDropdown(false);
   };
 
-  // Apply filters when they change
-  useEffect(() => {
-    if (loading) return;
-    
-    const filters = {
-      searchTerm,
-      profession,
-      securityClearance,
-      skillsAndExpertise,
-      certifications,
-      requireGovtExperience,
-      governmentType,
-      department,
-      location,
-      domainFocus,
-      domainDetail
-    };
-    
-    onFilterChange(filters);
-  }, [
-    searchTerm,
-    profession,
-    securityClearance,
-    skillsAndExpertise,
-    certifications,
-    requireGovtExperience,
-    governmentType,
-    department,
-    location,
-    domainFocus,
-    domainDetail,
-    loading,
-  ]);
-
   // Handle saved search selection
   const handleSavedSearchSelect = (searchId: string) => {
     setSelectedSavedSearch(searchId);
@@ -270,60 +231,43 @@ const ContractorFilter: React.FC<ContractorFilterProps> = ({
     }
   };
 
-  // Save current search
   const saveSearch = () => {
-  if (!searchTerm && !profession && !securityClearance && !skillsAndExpertise && 
-      !certifications && !requireGovtExperience && !governmentType && 
-      !location && !domainFocus) {
-    return;
-  }
+    if (!searchTerm && !profession && !securityClearance && !skillsAndExpertise && 
+        !certifications && !requireGovtExperience && !governmentType && 
+        !location && !domainFocus) {
+      return;
+    }
 
-  let searchName = searchTerm ? `"${searchTerm}"` : 'All Contractors';
-  if (profession) searchName += ` - ${profession}`;
-  if (skillsAndExpertise) searchName += ` - ${skillsAndExpertise}`;
-  
-  const filters = {
-    searchTerm,
-    profession,
-    securityClearance,
-    skillsAndExpertise,
-    certifications,
-    requireGovtExperience,
-    governmentType,
-    department,
-    location,
-    domainFocus,
-    domainDetail
-  };
+    let searchName = searchTerm ? `"${searchTerm}"` : 'All Contractors';
+    if (profession) searchName += ` - ${profession}`;
+    if (skillsAndExpertise) searchName += ` - ${skillsAndExpertise}`;
+    
+    const filters = {
+      searchTerm,
+      profession,
+      securityClearance,
+      skillsAndExpertise,
+      certifications,
+      requireGovtExperience,
+      governmentType,
+      department,
+      location,
+      domainFocus,
+      domainDetail
+    };
 
-  const added = addSavedSearch({
-    query: searchTerm,
-    feedType: 'Contractors',
-    name: searchName,
-    filters: JSON.stringify(filters)
-  });
+    const added = addSavedSearch({
+      query: searchTerm,
+      feedType: 'Contractors',
+      name: searchName,
+      filters: JSON.stringify(filters)
+    });
 
-  if (added) {
-    toast.success('Saved successfully!');
-  } else {
-    toast.info('Search exists!');
-  }
-};
-
-  // Reset filters
-  const resetFilters = () => {
-    setSearchTerm('');
-    setProfession('');
-    setSecurityClearance('');
-    setSkillsAndExpertise('');
-    setCertifications('');
-    setRequireGovtExperience(false);
-    setGovernmentType('');
-    setDepartment('');
-    setLocation('');
-    setDomainFocus('');
-    setDomainDetail('');
-    setSelectedSavedSearch('');
+    if (added) {
+      toast.success('Saved successfully!');
+    } else {
+      toast.info('Search exists!');
+    }
   };
 
   return (
