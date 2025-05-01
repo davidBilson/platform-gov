@@ -10,7 +10,7 @@ import { ToastContainer } from 'react-toastify';
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { userId, isLoading, initAuth, verificationStep } = useAuthStore();  // Added verificationStep
+  const { userId, isLoading, initAuth, verificationStep } = useAuthStore();
 
   const publicRoutes = [
     '/auth/sign-up',
@@ -26,15 +26,12 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     publicRoutes.includes(router.pathname) ||
     publicRoutes.some(route => router.pathname.startsWith(route + '/'));
 
-    // const isAuthPage = ['/auth/sign-in', '/auth/sign-up'].includes(router.pathname);
     const isVerificationPage = router.pathname === '/auth/verification';
   
-    // Initialize auth on first load
     useEffect(() => {
       initAuth();
     }, [initAuth]);
   
-    // Redirect if not authenticated and trying to access protected route
     useEffect(() => {
       if (!isLoading && !userId && !isPublicRoute) {
         router.replace('/auth/sign-in');
@@ -42,7 +39,6 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     }, [userId, isPublicRoute, isLoading, router]);
   
 
-  // Handle redirection for verification flow
   useEffect(() => {
     if (!isLoading) {
 

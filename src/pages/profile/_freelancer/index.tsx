@@ -183,7 +183,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
                 </div>
                 {/* Skills & Certifications */}
                 <div className='flex items-center justify-center sm:justify-start flex-wrap gap-2'>
-                  {skills.slice(0, 3).map((skill, index) => (
+                  {skills.map((skill, index) => (
                     <button 
                       key={`skill-${index}`} 
                       className='rounded-full px-2 py-1 text-xs text-white font-semibold bg-deepskyblue' 
@@ -192,7 +192,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
                       {skill}
                     </button>
                   ))}
-                  {expertise.slice(0, 1).map((exp, index) => (
+                  {expertise.map((exp, index) => (
                     <button 
                       key={`exp-${index}`} 
                       className='rounded-full px-2 py-1 text-xs text-white font-semibold bg-deepskyblue' 
@@ -201,7 +201,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
                       {exp}
                     </button>
                   ))}
-                  {certifications.slice(0, 2).map((cert, index) => (
+                  {certifications.map((cert, index) => (
                     <button 
                       key={`cert-${index}`} 
                       className='rounded-full px-2 py-1 text-xs text-white font-semibold bg-aquagreen' 
