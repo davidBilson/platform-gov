@@ -268,32 +268,32 @@ const removeDegreeWrapper = (id: string) => {
   }
 
 
+  
+  // The function that handles the actual API call and data processing
+  // Submit profile data
+  const submitProfileDataWrapper = async () => {
+    await submitProfileData(
+      formData, 
+      userId, 
+      isProfileExists, 
+      setIsLoading, 
+      setIsProfileExists, 
+      toast, 
+      router, 
+      fetchUserProfile
+    );
+  };
+  
   // This effect monitors for when legal agreement is accepted while a submission is pending
   useEffect(() => {
     // If we have a pending submission AND the user has accepted the agreement, proceed with submission
     if (pendingSubmission && acceptedLegalAgreement && showLegalAgreement === false) {
       // Reset the pending flag
       setPendingSubmission(false);
-      // Proceed with actual submission
-      submitProfileData();
+
+      submitProfileDataWrapper();
     }
   }, [pendingSubmission, acceptedLegalAgreement, showLegalAgreement]);
-
-// The function that handles the actual API call and data processing
-// Submit profile data
-const submitProfileDataWrapper = async () => {
-  await submitProfileData(
-    formData, 
-    userId, 
-    isProfileExists, 
-    setIsLoading, 
-    setIsProfileExists, 
-    toast, 
-    router, 
-    fetchUserProfile
-  );
-};
-
 
 const handleSubmit = (e: React.FormEvent): void => {
   e.preventDefault();
