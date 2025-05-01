@@ -13,7 +13,6 @@ const ContractorCountFilters: React.FC<ContractorCountFiltersProps> = ({
   contractors, 
   filteredCount, 
   activeFilters,
-  // onRemoveFilter,
   showTotalCount = false
 }) => {
   const displayCount = filteredCount !== undefined ? filteredCount : contractors.length;

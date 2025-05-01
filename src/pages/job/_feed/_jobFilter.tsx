@@ -11,6 +11,8 @@ import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScien
 import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates'
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from 'react-toastify';
+import { useJobFilter } from '@/store/useJobFilter';
+
 
 type Country = string;
 type StateWithCountry = [string, string]; // Tuple type for state/country pairs
@@ -19,37 +21,41 @@ type USState = string;
 interface JobFilterProps {
   jobs: Jobs[];
   onFilterChange: (filteredJobs: Jobs[]) => void;
-  setActiveFilters: (filters: Array<{id: string, name: string}>) => void;
   loading: boolean;
 }
 
-const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFilters, loading }) => {
+const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) => {
 
   const { 
     addSavedSearch, 
     getSavedSearchesByFeedType,
     removeSavedSearch
   } = useFeedStore();
+
   const jobSavedSearches = getSavedSearchesByFeedType('Jobs');
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [jobType, setJobType] = useState('');
-  const [securityClearance, setSecurityClearance] = useState('');
-  const [skillsAndExpertise, setSkillsAndExpertise] = useState('');
-  const [certifications, setCertifications] = useState('');
-  const [requirePrevGovtExp, setRequirePrevGovtExp] = useState(false);
-  const [governmentType, setGovernmentType] = useState('');
-  const [department, setDepartment] = useState('');
+
+  const {
+    searchTerm, setSearchTerm,
+    jobType, setJobType,
+    securityClearance, setSecurityClearance,
+    skillsAndExpertise, setSkillsAndExpertise,
+    certifications, setCertifications,
+    requirePrevGovtExp, setRequirePrevGovtExp,
+    governmentType, setGovernmentType,
+    department, setDepartment,
+    location, setLocation,
+    domainFocus, setDomainFocus,
+    domainDetail, setDomainDetail,
+    setActiveFilters,
+    resetFilters
+  } = useJobFilter();
+
   const [selectedSavedSearch, setSelectedSavedSearch] = useState('');
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
   const [filteredDepartments, setFilteredDepartments] = useState<string[]>([]);
   
-  // New filter states
-  const [location, setLocation] = useState('');
-  const [domainFocus, setDomainFocus] = useState('');
   const [showDomainDetailsDropdown, setShowDomainDetailsDropdown] = useState(false);
   const [domainDetailOptions, setDomainDetailOptions] = useState<string[]>([]);
-  const [domainDetail, setDomainDetail] = useState('');
 
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const locationInputRef = useRef<HTMLInputElement>(null);
@@ -58,15 +64,11 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
   const [showSavedSearchesDropdown, setShowSavedSearchesDropdown] = useState(false);
   const savedSearchesDropdownRef = useRef<HTMLDivElement>(null);
 
-// Refs
   const departmentInputRef = useRef<HTMLInputElement>(null);
   const departmentDropdownRef = useRef<HTMLDivElement>(null);
   const domainDetailInputRef = useRef<HTMLInputElement>(null);
   const domainDetailDropdownRef = useRef<HTMLDivElement>(null);
   
-  // Get job-specific saved searches
-  
-  // Unique values for filters
   const [availableJobTypes, setAvailableJobTypes] = useState<string[]>([]);
   const [availableSkills, setAvailableSkills] = useState<string[]>([]);
   const [availableCertifications, setAvailableCertifications] = useState<string[]>([]);
@@ -78,7 +80,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
   
   const [locationClickTime, setLocationClickTime] = useState<number>(0);
   
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -103,7 +104,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
 
   
 
-  useEffect(() => {
+    useEffect(() => {
     if (jobs.length > 0) {
       // Extract job types
       const jobTypes = Array.from(new Set(jobs.map(job => job.employmentType)));
@@ -404,24 +405,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, setActiveFi
     } else {
       toast.info('Search exists!');
     }
-  };
-
-  // Reset filters
-  const resetFilters = () => {
-    setSearchTerm('');
-    setJobType('');
-    setSecurityClearance('');
-    setSkillsAndExpertise('');
-    setCertifications('');
-    setRequirePrevGovtExp(false);
-    setGovernmentType('');
-    setDepartment('');
-    setLocation('');
-    setDomainFocus('');
-    setDomainDetail('');
-    setSelectedSavedSearch('');
-    setActiveFilters([]);
-    onFilterChange(jobs);
   };
 
   return (

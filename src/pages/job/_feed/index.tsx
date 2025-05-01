@@ -5,6 +5,7 @@ import JobCountFilters from './_jobCountFilters';
 import JobFilter from './_jobFilter';
 import { Jobs, PaginationInfo, JobsResponse } from '@/types/jobs';
 import { IoReload } from "react-icons/io5";
+import { useJobFilter } from '@/store/useJobFilter';
 
 const JobFeed: React.FC = () => {
   const [jobs, setJobs] = useState<Jobs[]>([]);
@@ -12,8 +13,10 @@ const JobFeed: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [, setPagination] = useState<PaginationInfo>({ total: 0, page: 1, limit: 10, pages: 0 });
-  const [activeFilters, setActiveFilters] = useState<Array<{id: string, name: string}>>([]);
+  // const [activeFilters, setActiveFilters] = useState<Array<{id: string, name: string}>>([]);
   const [searchPerformed, setSearchPerformed] = useState<boolean>(false);
+
+  const { activeFilters, removeFilter } = useJobFilter()
   
   const fetchJobs = async () => {
     try {
@@ -50,31 +53,18 @@ const JobFeed: React.FC = () => {
     setSearchPerformed(true);
   };
 
-  // Handle removing a filter
-  const handleRemoveFilter = (filterId: string) => {
-    const updatedFilters = activeFilters.filter(filter => filter.id !== filterId);
-    setActiveFilters(updatedFilters);
-    
-    // If all filters are removed, reset to original jobs
-    if (updatedFilters.length === 0) {
-      setFilteredJobs(jobs);
-      setSearchPerformed(false);
-    }
-  };
-
   return (
     <main className="container mx-auto p-6">
       <JobFilter 
         jobs={jobs} 
-        onFilterChange={handleFilterChange} 
-        setActiveFilters={setActiveFilters} 
+        onFilterChange={handleFilterChange}
         loading={loading}
       />
       
       <JobCountFilters 
         jobCount={filteredJobs.length} 
         activeFilters={activeFilters}
-        onRemoveFilter={handleRemoveFilter}
+        onRemoveFilter={removeFilter}
       />
       
       {filteredJobs.length > 0 ? (
