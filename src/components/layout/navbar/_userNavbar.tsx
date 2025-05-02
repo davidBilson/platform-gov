@@ -9,6 +9,8 @@ import authStore from "@/store/authStore";
 import { useRouter } from "next/router";
 import { useFeedStore } from "@/store/feedStore"
 import { FiLogOut } from "react-icons/fi";
+import { useContractorFilter } from "@/store/useContractorFilter";
+import { useJobFilter } from "@/store/useJobFilter";
 
 const UserNavbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -22,6 +24,14 @@ const UserNavbar = () => {
   const pathname = router.pathname;
   const { setFeedType, feedType } = useFeedStore();
   const { name, role, resetAll } = authStore();
+
+  // Get both search terms with aliases to avoid conflicts
+  const { searchTerm: contractorSearchTerm, setSearchTerm: setContractorSearchTerm } = useContractorFilter();
+  const { searchTerm: jobSearchTerm, setSearchTerm: setJobSearchTerm } = useJobFilter();
+
+  // Determine which search term and setter to use based on feedType
+  const currentSearchTerm = feedType === "Jobs" ? jobSearchTerm : contractorSearchTerm;
+  const currentSetSearchTerm = feedType === "Jobs" ? setJobSearchTerm : setContractorSearchTerm;
 
   const handleSignOut = () => {
     resetAll();
@@ -46,6 +56,10 @@ const UserNavbar = () => {
 
   const toggleDropdown = (dropdownName: string) => {
     setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    currentSetSearchTerm(e.target.value);
   };
 
   const jobAndContractorOptions = ["Jobs", "Contractors"];
@@ -299,7 +313,13 @@ const UserNavbar = () => {
 
         {/* Desktop search */}
         <div className="hidden lg:flex w-full max-w-[250px] h-12.5 items-center py-1.25 pl-5 pr-1.25 border border-skyblue text-boldblue rounded-sm text-[14px]">
-          <input type='text' placeholder="search" className="outline-none w-1/2" />
+          <input 
+            type='text' 
+            placeholder="search" 
+            className="outline-none w-1/2" 
+            value={currentSearchTerm}
+            onChange={handleSearchChange}
+          />
           <div className="relative w-1/2">
             <button 
               className="w-full bg-skyblue border-none flex items-center justify-center p-2 rounded-full font-semibold"
@@ -363,7 +383,14 @@ const UserNavbar = () => {
         <div ref={searchRef} className={`lg:hidden fixed top-28 left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-40 ${mobileSearch ? 'block' : 'hidden'}`}>
           <div className="px-6">
             <div className="w-full h-12.5 flex items-center py-1.25 pl-5 pr-1.25 border border-skyblue text-boldblue rounded-sm text-[14px]">
-              <input type='text' placeholder="search" className="outline-none w-1/2" autoFocus />
+              <input 
+                type='text' 
+                placeholder="search" 
+                className="outline-none w-1/2" 
+                autoFocus 
+                value={currentSearchTerm}
+                onChange={handleSearchChange}
+              />
               <button 
                 className="w-1/2 bg-skyblue border-none flex items-center justify-center p-2 rounded-full font-semibold"
                 onClick={() => toggleDropdown('mobileSearch')}
