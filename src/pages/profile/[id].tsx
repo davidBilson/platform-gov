@@ -1,9 +1,9 @@
 import React from 'react'
 
-const ClientContractorProfile= () => {
+const PublicProfile = () => {
   return (
-    <div>ClientContractorProfile</div>
+    <div>PublicProfile</div>
   )
 }
 
-export default ClientContractorProfile;
+export default PublicProfile

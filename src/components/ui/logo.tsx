@@ -1,7 +1,7 @@
 import React from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import GovlinkLogo from '@/assets/logo.svg'
-import Link from 'next/link';
 
 
 const Logo = () => {

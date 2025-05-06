@@ -1,13 +1,12 @@
-"use client"
+"use client";
 import React, { useState, useRef, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import Logo from '@/components/ui/logo';
-import { FiSearch } from "react-icons/fi";
-import { HiMenuAlt3 } from "react-icons/hi";
 import { IoMdArrowDropdown } from "react-icons/io";
+import { useFeedStore } from "@/store/useFeed";
+import { usePathname } from 'next/navigation';
+import { HiMenuAlt3 } from "react-icons/hi";
+import { FiSearch } from "react-icons/fi";
 import { useRouter } from 'next/router';
-import { useFeedStore } from "@/store/feedStore"
-
+import Logo from '@/components/ui/logo';
 
 // Define types for state and refs
 type ContractorOption = "Jobs" | "Contractors";

@@ -4,7 +4,7 @@ import Head from "next/head";
 import Navbar from "@/components/layout/navbar/navbar";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import useAuthStore from "@/store/authStore";
+import useAuthStore from "@/store/useAuth";
 import { ToastContainer } from 'react-toastify';
 
 

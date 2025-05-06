@@ -8,7 +8,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Jobs } from '@/types/jobs';
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import { ApplicationDraft } from '@/types/jobs';
 
 interface ApplicationProps {
@@ -345,7 +345,7 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   }
 
   return (
-    <section className='h-screen w-full fixed top-0 left-0 z-50 bg-red-500 flex items-center justify-end'>
+    <section className='h-screen w-full fixed top-0 left-0 z-50 flex items-center justify-end'>
       <section className='w-full h-screen bg-skyblue p-4 md:p-7.5 overflow-y-auto'>
         <div className='w-full max-w-275 m-auto pb-32 md:pb-64'>
 

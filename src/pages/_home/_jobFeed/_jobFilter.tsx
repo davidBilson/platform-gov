@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { IoMdArrowDropdown, IoMdSearch } from 'react-icons/io';
 import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { Jobs } from '@/types/jobs';
-import { useFeedStore } from '@/store/feedStore';
+import { useFeedStore } from '@/store/useFeed';
 import { RxReset } from "react-icons/rx";
 import { australiaDepartments } from '@/utils/govDeptAgency/australia'
 import { canadaDepartments } from '@/utils/govDeptAgency/canada'

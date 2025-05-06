@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { FaSearch } from "react-icons/fa";
 import { IoMdImages } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
 import { IoCloseOutline } from "react-icons/io5";
+import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
 
 
 const CreateBusinessProfile = () => {
@@ -63,10 +64,33 @@ const CreateBusinessProfile = () => {
   };
 
   useEffect(() => {
+    
     if (userId) {
       fetchBusinessProfile();
     }
+
   }, [userId]);
+
+  useEffect(() => {
+    const fetchLocationData = async () => {
+      try {
+        const [countriesData, statesData, usStatesData] = await Promise.all([
+          getAllCountries(),
+          getSpecificCountryStates(),
+          getUSStates()
+        ]);
+        
+        setAllCountries(countriesData);
+        setStatesWithCountries(statesData);
+        setUsStates(usStatesData);
+      } catch (err) {
+        console.error('Error fetching location data:', err);
+      }
+    };
+
+    fetchLocationData();
+
+  }, []);
 
   // Handle input changes
   const handleChange = (e) => {

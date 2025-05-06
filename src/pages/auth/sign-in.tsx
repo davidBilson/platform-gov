@@ -3,7 +3,7 @@ import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import { SignInFormData, SignInApiResponse } from '@/types/auth';
 
 interface ErrorResponse {

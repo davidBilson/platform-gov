@@ -1,73 +1,16 @@
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRegHourglass } from "react-icons/fa6";
+import {
+  Job,
+  ApiResponse
+} from '@/types/jobs'; 
+import Link from 'next/link';
 
-// Define TypeScript interfaces based on the example response
-interface ClientLocation {
-  country: string;
-  address1: string;
-  address2: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  _id: string;
-}
+const OpenJobs = () => {
 
-interface Milestone {
-  id: number;
-  description: string;
-  price: number;
-  dueDate: string | null;
-  _id?: string; // MongoDB might add this
-}
-
-interface Job {
-  _id: string;
-  userId: string;
-  clientName: string;
-  clientLogo: string;
-  clientIndustry: string;
-  clientCompanySize: string;
-  clientSpecializations: string[];
-  clientLocation: ClientLocation[];
-  clientAccountAge: string;
-  userRole: string;
-  location: string;
-  jobCategory: string;
-  jobTitle: string;
-  description: string;
-  requiredSkills: string[];
-  requiredCertifications: string[];
-  requiresRegisteredLobbyist: boolean;
-  employmentType: string;
-  paymentType: string;
-  price: number;
-  milestones: Milestone[];
-  startDate: string;
-  retainerAmount: number;
-  retainerFrequency: string;
-  retainerDuration: number;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-  proposalsCount: number;
-}
-
-interface ApiResponse {
-  success: boolean;
-  data: Job[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    pages: number;
-  };
-}
-
-const OpenJobs: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,9 +67,12 @@ const OpenJobs: React.FC = () => {
                   </p>
 
                   {/* number of proposals */}
-                  <button disabled className='bg-[#009DDE] text-[15px] text-white font-bold w-[114px] h-[30px] rounded-full'>
+                  <Link 
+                    href={`/job/${job._id}/proposals`} 
+                    className='bg-[#009DDE] text-[15px] text-center flex justify-center items-center text-white font-bold w-[114px] h-[30px] rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer'
+                  >
                     {job.proposalsCount} Proposals
-                  </button>
+                  </Link>
                 </div>
 
                 <p className='text-sm mb-[15px] font-semibold'>{job.jobCategory}</p>
@@ -173,9 +119,12 @@ const OpenJobs: React.FC = () => {
                   </p>
 
                   {/* number of proposals */}
-                  <button disabled className='bg-[#009DDE] text-[15px] text-white font-bold w-[114px] h-[30px] rounded-full'>
+                  <Link 
+                    href={`/job/${job._id}/proposals`} 
+                    className='bg-[#009DDE] text-[15px] text-center flex justify-center items-center text-white font-bold w-[114px] h-[30px] rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer'
+                  >
                     {job.proposalsCount} Proposals
-                  </button>
+                  </Link>
                 </div>
 
                 <p className='text-sm mb-[15px] font-semibold'>{job.jobCategory}</p>

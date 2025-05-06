@@ -7,7 +7,7 @@ import { canadaDepartments } from '@/utils/govDeptAgency/canada';
 import { ukDepartments } from '@/utils/govDeptAgency/uk';
 import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govDeptAgency/us';
 import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
-import { useFeedStore } from '@/store/feedStore';
+import { useFeedStore } from '@/store/useFeed';
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from 'react-toastify';
 import { useContractorFilter } from '@/store/useContractorFilter';

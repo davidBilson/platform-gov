@@ -1,55 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { IoMdImages } from "react-icons/io";
 import { FaEdit } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import { fetchProfile } from "@/api/profile-api";
 import Link from "next/link";
 import { toast } from 'react-toastify';
-import Image from 'next/image';
 import { IoLocationOutline } from "react-icons/io5";
+import ProfilePicture from '@/components/ui/profilePicture';
+import { WorkHistoryItem, ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
 
-// Define proper TypeScript interfaces
-interface WorkHistoryItem {
-  jobTitle: string;
-  dates: string;
-  rating: number;
-  amount: string;
-}
-
-interface ProfileData {
-  profileImage?: string;
-  primaryPosition?: string;
-  workHistory?: Array<{
-    location?: string;
-    position?: string;
-    company?: string;
-    startDate?: string;
-    endDate?: string;
-  }>;
-  ratePerHour?: number;
-  skills?: string[];
-  expertise?: string[];
-  certifications?: string[];
-  bio?: string;
-  rating?: number;
-  firmAffiliation?: string; // 'independent' or firm name
-  location: {
-    country: string;
-    state: string;
-  };
-}
-
-interface FetchResponse {
-  success: boolean;
-  data?: ProfileData;
-  error?: string;
-}
-
-// Define props if needed (for future extensibility)
-interface ProfileProps {
-  initialProfileId?: string;
-}
 
 const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   // Get user data from auth store - add proper typing
@@ -133,9 +92,6 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
     return profileData.profileImage;
   };
 
-  // Check if profile image exists
-  const hasProfileImage = profileData?.profileImage ? true : false;
-  
   return (
     <main className="p-5 pb-20 md:p-6">
       <section className="w-full max-w-275 mx-auto pb-32">
@@ -151,19 +107,7 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
               {/* Image and Name+Loc+Profession */}
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
                 {/* Image */}
-                <div className="w-22 h-22 overflow-hidden bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
-                {hasProfileImage ? (
-                  <Image 
-                    src={getProfileImageUrl()}
-                    alt={`${name || 'User'}'s profile`}
-                    className="h-22 w-22 overflow-hidden rounded-full object-cover flex items-center justify-center"
-                    width={88}
-                    height={88}
-                  />
-                ) : (
-                  <IoMdImages size={32} className="text-white/70" />
-                )}
-                </div>
+                <ProfilePicture source={getProfileImageUrl()} alt={`${name || 'User'}'s profile`} width={88} height={88} />
                 {/* Name (now using the name from auth store) */}
                 <div className="text-center sm:text-left mt-2 sm:mt-0">
                   <p className='font-semibold text-xl'>{name || "Anonymous User"}</p>

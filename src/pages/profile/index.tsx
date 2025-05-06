@@ -1,4 +1,4 @@
-import useAuthStore from '@/store/authStore'
+import useAuthStore from '@/store/useAuth'
 import React from 'react'
 import BusinessProfile from './_business'
 import FreelancerProfile from './_freelancer'

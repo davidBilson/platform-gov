@@ -1,21 +1,25 @@
 "use client"
-import Logo from "@/components/ui/logo"
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
-import { FaBell } from "react-icons/fa6";
 import { useState, useRef } from 'react';
-import { HiMenuAlt3 } from "react-icons/hi";
-import { FiSearch } from "react-icons/fi";
-import authStore from "@/store/authStore";
-import { useRouter } from "next/router";
-import { useFeedStore } from "@/store/feedStore"
-import { FiLogOut } from "react-icons/fi";
-import { useContractorFilter } from "@/store/useContractorFilter";
-import { useJobFilter } from "@/store/useJobFilter";
+import { useRouter } from 'next/router';
+
+import authStore from '@/store/useAuth';
+import { useFeedStore } from '@/store/useFeed';
+import { useContractorFilter } from '@/store/useContractorFilter';
+import { useJobFilter } from '@/store/useJobFilter';
+
+import Logo from '@/components/ui/logo';
+import NotificationsDropdown from '@/components/ui/notificationDropdown';
+
+import { FaBell } from 'react-icons/fa6';
+import { FiLogOut, FiSearch } from 'react-icons/fi';
+import { HiMenuAlt3 } from 'react-icons/hi';
+import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
 
 const UserNavbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
   
   const profileDropdownRef = useRef(null);
   const searchRef = useRef(null);
@@ -56,6 +60,7 @@ const UserNavbar = () => {
 
   const toggleDropdown = (dropdownName: string) => {
     setActiveDropdown(activeDropdown === dropdownName ? null : dropdownName);
+    setNotificationsOpen(false)
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,8 +81,8 @@ const UserNavbar = () => {
       { 
         label: 'Jobs', 
         dropdown: [
-          { label: 'Create Job', action: () => handleNavigation('/job/create', 'Jobs') },
-          { label: 'Manage Jobs', action: () => {} },
+          { label: 'Create Job', action: () => handleNavigation('/job/create') },
+          { label: 'Manage Jobs', action: () => handleNavigation('/job/manage') },
           { label: 'Find Jobs', action: () => handleNavigation('/', 'Jobs') }
         ]
       },
@@ -88,11 +93,7 @@ const UserNavbar = () => {
       { 
         label: 'Manage Contracts',
         dropdown: [
-          { label: 'Proposals', action: () => handleNavigation('/proposals') },
-          { label: 'Active Contracts', action: () => handleNavigation('/contracts/active') },
-          { label: 'Open Contracts', action: () => handleNavigation('/contracts/open') },
-          { label: 'Pending Contracts', action: () => handleNavigation('/contracts/pending') },
-          { label: 'Closed Contracts', action: () => handleNavigation('/contracts/closed') }
+          { label: 'Contracts', action: () => handleNavigation('/contract') },
         ]
       },
       { 
@@ -117,10 +118,7 @@ const UserNavbar = () => {
         label: 'Manage Contracts',
         dropdown: [
           { label: 'Proposals', action: () => handleNavigation('/proposals') },
-          { label: 'Active Contracts', action: () => handleNavigation('/contracts/active') },
-          { label: 'Open Contracts', action: () => handleNavigation('/contracts/open') },
-          { label: 'Pending Contracts', action: () => handleNavigation('/contracts/pending') },
-          { label: 'Closed Contracts', action: () => handleNavigation('/contracts/closed') }
+          { label: 'Contracts', action: () => handleNavigation('/contract') }
         ]
       },
       { 
@@ -240,8 +238,24 @@ const UserNavbar = () => {
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="text-boldblue">
-              <FaBell color="#0B5F94" size={24} />
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  setNotificationsOpen(!notificationsOpen);
+                  // Close other dropdowns when opening notifications
+                  if (!notificationsOpen) {
+                    setActiveDropdown(null);
+                  }
+                }}
+                className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
+              >
+                  <FaBell size={24} />
+                  {/* Optional notification badge */}
+                  <span className="absolute -top-1 -right-2 text-red-500 font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
+                    3
+                  </span>
+              </button>
+              <NotificationsDropdown notificationsOpen={notificationsOpen} />
             </div>
             <div ref={profileDropdownRef} className="relative">
               <p 
@@ -293,9 +307,25 @@ const UserNavbar = () => {
             <FiSearch size={24} />
           </button>
           
-          <div className="text-boldblue">
-            <FaBell color="#0B5F94" size={24} />
-          </div>
+          <div className="relative">
+              <button 
+                onClick={() => {
+                  setNotificationsOpen(!notificationsOpen);
+                  // Close other dropdowns when opening notifications
+                  if (!notificationsOpen) {
+                    setActiveDropdown(null);
+                  }
+                }}
+                className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
+              >
+                  <FaBell size={24} />
+                  {/* Optional notification badge */}
+                  <span className="absolute -top-1 -right-2 text-red-500 font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
+                    3
+                  </span>
+              </button>
+              <NotificationsDropdown notificationsOpen={notificationsOpen} />
+            </div>
           
           <button onClick={() => {
             setMobileMenu(!mobileMenu);
@@ -347,11 +377,26 @@ const UserNavbar = () => {
             </div>
           </div>
         </div>
-
-        {/* Desktop bell icon */}
-        <div className="hidden lg:block">
-          <FaBell color="#0B5F94" size={32} />
-        </div>
+            
+        <div className="relative hidden lg:block">
+              <button 
+                onClick={() => {
+                  setNotificationsOpen(!notificationsOpen);
+                  // Close other dropdowns when opening notifications
+                  if (!notificationsOpen) {
+                    setActiveDropdown(null);
+                  }
+                }}
+                className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
+              >
+                  <FaBell size={24} />
+                  {/* Optional notification badge */}
+                  <span className="absolute -top-1 -right-2 text-red-500  font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
+                    3
+                  </span>
+              </button>
+              <NotificationsDropdown notificationsOpen={notificationsOpen} />
+            </div>
 
         {/* Desktop profile icon with dropdown */}
         <div className="hidden lg:block relative" ref={profileDropdownRef}>

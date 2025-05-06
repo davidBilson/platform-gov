@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { IoMdImages } from "react-icons/io";
 import OpenJobs from './_open-jobs';
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 
 const BusinessProfile = () => {
+  
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -45,18 +46,18 @@ const BusinessProfile = () => {
     }
   }, [client, loading]);
 
-    // Handle the loading state
-    if (loading) {
-      return (
-        <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
-          <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
-            <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
-            </div>
-          </section>
+  // Handle the loading state
+  if (loading) {
+    return (
+      <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
+        <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
+          <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+          </div>
         </section>
-      );
-    }
+      </section>
+    );
+  }
 
   return (
     <section className='p-5 pb-20 md:p-6'>

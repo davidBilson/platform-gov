@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 

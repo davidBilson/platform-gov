@@ -1,4 +1,4 @@
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import { ReactLib, Data, Icons, UI } from '@/utils/jobs/_imports';
 const { jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
 import type { JobFormData, Milestone } from '@/utils/jobs/_imports';

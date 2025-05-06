@@ -1,28 +1,85 @@
-// /job/create
+// jobs.ts
+
+export interface ClientLocation {
+  country: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  _id: string;
+}
+
 export interface Milestone {
-    id: number;
-    description: string;
-    price: number;
-    dueDate: Date | null;
-  }
-  
-  export interface JobFormData {
-    userId: string;
-    location: string;
-    jobCategory: string;
-    jobTitle: string;
-    description: string;
-    requiredSkills: string[];
-    requiredCertifications: string[];
-    requiresRegisteredLobbyist: boolean;
-    employmentType: 'Full Time' | 'part-time';
-    paymentType: 'hourly' | 'fixed-price' | 'retainer';
-    price: number;
-    milestones: Milestone[];
-    startDate: Date | null;
-    retainerAmount: number;
-    retainerFrequency: string;
-    retainerDuration: number | null;
+  id: number;
+  description: string;
+  price: number;
+  dueDate: string | null;
+  _id?: string;
+}
+
+export interface Job {
+  _id: string;
+  userId: string;
+  clientName: string;
+  clientLogo: string;
+  clientIndustry: string;
+  clientCompanySize: string;
+  clientSpecializations: string[];
+  clientLocation: ClientLocation[];
+  clientAccountAge: string;
+  userRole: string;
+  location: string;
+  jobCategory: string;
+  jobTitle: string;
+  description: string;
+  requiredSkills: string[];
+  requiredCertifications: string[];
+  requiresRegisteredLobbyist: boolean;
+  employmentType: string;
+  paymentType: string;
+  price: number;
+  milestones: Milestone[];
+  startDate: string;
+  retainerAmount: number;
+  retainerFrequency: string;
+  retainerDuration: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  proposalsCount: number;
+}
+
+export interface ApiResponse {
+  success: boolean;
+  data: Job[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+// Existing types from jobs.ts
+export interface JobFormData {
+  userId: string;
+  location: string;
+  jobCategory: string;
+  jobTitle: string;
+  description: string;
+  requiredSkills: string[];
+  requiredCertifications: string[];
+  requiresRegisteredLobbyist: boolean;
+  employmentType: 'Full Time' | 'part-time';
+  paymentType: 'hourly' | 'fixed-price' | 'retainer';
+  price: number;
+  milestones: Milestone[];
+  startDate: Date | null;
+  retainerAmount: number;
+  retainerFrequency: string;
+  retainerDuration: number | null;
 }
 
 export interface JobList {
@@ -39,15 +96,13 @@ export interface JobList {
   createdAt: string;
   retainerAmount?: number;
   retainerFrequency?: string;
-
-  // New client-related fields
   clientName: string;
   clientLogo: string;
   clientIndustry: string;
   clientCompanySize: string;
-  clientSpecializations: string[]; // Assuming it's always an array of strings
-  clientLocation: string[];        // Also assuming it's an array of strings
-  clientAccountAge: string;        // ISO string format
+  clientSpecializations: string[];
+  clientLocation: string[];
+  clientAccountAge: string;
 }
 
 export interface JobListProps {
@@ -55,17 +110,16 @@ export interface JobListProps {
 }
 
 export interface Jobs {
-    // New client-related fields
-    clientName: string;
-    clientLogo: string;
-    clientIndustry: string;
-    clientCompanySize: string;
-    clientSpecializations: string[]; // Assuming it's always an array of strings
-    clientLocation: string[];        // Also assuming it's an array of strings
-    clientAccountAge: string; 
-    
+  clientName: string;
+  clientLogo: string;
+  clientIndustry: string;
+  clientCompanySize: string;
+  clientSpecializations: string[];
+  clientLocation: string[];
+  clientAccountAge: string;
   _id: string;
   jobTitle: string;
+  jobCategory?: string;
   description: string;
   location: string;
   paymentType: 'hourly' | 'fixed-price' | 'retainer';
@@ -108,7 +162,7 @@ export interface JobsResponse {
 
 export interface ApplicationDraft {
   _id: string;
-  jobId: string | { _id: string; [key: string]: string }; // Allow jobId to be either a string or an object
+  jobId: string | { _id: string; [key: string]: string };
   freelancerId: string;
   coverLetter?: string;
   proposedRate?: string | number;

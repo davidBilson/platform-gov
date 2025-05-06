@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import ContractorList from './_contractorList';
-import ContractorFilter from './_contractorFilter';
-import ContractorCountFilters from './_contractorCountFilters';
+import ContractorList from '../../_home/_contractorFeed/_contractorList';
+import ContractorFilter from '../../_home/_contractorFeed/_contractorFilter';
+import ContractorCountFilters from '../../_home/_contractorFeed/_contractorCountFilters';
 import { ContractorProfile, ContractorApiResponse } from '@/types/contractors';
 import { IoReload } from 'react-icons/io5';
 import { useContractorFilter } from '@/store/useContractorFilter';

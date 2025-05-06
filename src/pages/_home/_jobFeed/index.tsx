@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import JobList from './_jobList';
-import JobCountFilters from './_jobCountFilters';
-import JobFilter from './_jobFilter';
+import JobList from '../../_home/_jobFeed/_jobList';
+import JobCountFilters from '../../_home/_jobFeed/_jobCountFilters';
+import JobFilter from '../../_home/_jobFeed/_jobFilter';
 import { Jobs, PaginationInfo, JobsResponse } from '@/types/jobs';
 import { IoReload } from "react-icons/io5";
 import { useJobFilter } from '@/store/useJobFilter';

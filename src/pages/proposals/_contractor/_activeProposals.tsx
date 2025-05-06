@@ -82,17 +82,12 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
 
             <div className="flex items-center gap-5">
               <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
-                <img 
+                <img width={35} height={35} className="rounded-full" 
                   src={typeof application.jobId === 'object' ? application.jobId.clientLogo : ""} 
                   alt={typeof application.jobId === 'object' ? application.jobId.clientName : "Client"} 
-                  width={35} 
-                  height={35} 
-                  className="rounded-full" 
                 />
               </div>
-              <Link 
-                href={''}
-                className="font-semibold text-sm hover:underline">
+              <Link  href={''} className="font-semibold text-sm hover:underline">
                 {typeof application.jobId === 'object' ? application.jobId.clientName : "Client"}
               </Link>
             </div>
@@ -100,12 +95,8 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
         ))
       )}
       
-      {selectedProposal && (
-        <ProposalModal 
-          proposal={selectedProposal} 
-          onClose={closeProposalModal} 
-        />
-      )}
+      {selectedProposal && ( <ProposalModal proposal={selectedProposal} onClose={closeProposalModal} /> )}
+
     </section>
   );
 };

@@ -1,6 +1,6 @@
-import JobFeed from "./job/_feed";
-import ContractorFeed from "./contractor/_feed";
-import { useFeedStore } from "@/store/feedStore";
+import JobFeed from "./_home/_jobFeed";
+import ContractorFeed from "./_home/_contractorFeed";
+import { useFeedStore } from "@/store/useFeed";
 import { useEffect } from "react";
 
 export default function Home() {

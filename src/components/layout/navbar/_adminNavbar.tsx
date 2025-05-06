@@ -3,7 +3,7 @@ import React from 'react';
 import Logo from "@/components/ui/logo"
 import { FaBell } from "react-icons/fa6";
 import { usePathname } from 'next/navigation';
-import authStore from "@/store/authStore";
+import authStore from "@/store/useAuth";
 
 const AdminNavbar: React.FC = () => {
   const pathname = usePathname();

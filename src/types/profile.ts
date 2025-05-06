@@ -1,5 +1,3 @@
-// Types for all profile data
-
 export interface WorkHistory {
     id: string;
     title: string;
@@ -29,7 +27,7 @@ export interface WorkHistory {
     degrees: Degree[];
     profileImage?: File | null;
     profileImageUrl?: string;
-    firmAffiliation: string; // 'independent' or firm name
+    firmAffiliation: string;
     location: {
       country: string;
       state: string;
@@ -43,3 +41,45 @@ export interface WorkHistory {
     onCancel?: () => void;
     onPreview?: (data: ProfileFormData) => void;
   }
+
+// /profile/_freelancer/index
+export interface WorkHistoryItem {
+  jobTitle: string;
+  dates: string;
+  rating: number;
+  amount: string;
+}
+
+export interface ProfileData {
+  profileImage?: string;
+  primaryPosition?: string;
+  workHistory?: Array<{
+    location?: string;
+    position?: string;
+    company?: string;
+    startDate?: string;
+    endDate?: string;
+  }>;
+  ratePerHour?: number;
+  skills?: string[];
+  expertise?: string[];
+  certifications?: string[];
+  bio?: string;
+  rating?: number;
+  firmAffiliation?: string; // 'independent' or firm name
+  location: {
+    country: string;
+    state: string;
+  };
+}
+
+export interface FetchResponse {
+  success: boolean;
+  data?: ProfileData;
+  error?: string;
+}
+
+// Define props if needed (for future extensibility)
+export interface ProfileProps {
+  initialProfileId?: string;
+}

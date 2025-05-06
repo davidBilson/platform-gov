@@ -40,9 +40,8 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
             key={contractor._id} 
           >
 
-            {/* *********** 1 *********** */}
             <div className='flex flex-col md:flex-row items-start gap-4 md:gap-18.25 mb-6 md:mb-10.25'>
-                {/* *********** 1a *********** */}
+
                 <div className='flex items-center  gap-4.25 w-full md:max-w-[20%] h-26  '>
                   
                   <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center overflow-hidden'>

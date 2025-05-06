@@ -1,4 +1,4 @@
-import useAuthStore from '@/store/authStore'
+import useAuthStore from '@/store/useAuth'
 import React from 'react'
 import CreateJob from './_create'
 

@@ -4,7 +4,7 @@ import { JobListProps } from '@/types/jobs';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import Link from 'next/link';
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 
 const JobList: React.FC<JobListProps> = ({ job }) => {
 

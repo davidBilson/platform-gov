@@ -10,7 +10,7 @@ import Legalagreement from "@/components/ui/legal-agreement";
 import { generateId } from "@/utils/profiles/profile.contractor";
 import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
-import useAuthStore from '@/store/authStore';
+import useAuthStore from '@/store/useAuth';
 import { MdEdit } from "react-icons/md";
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
