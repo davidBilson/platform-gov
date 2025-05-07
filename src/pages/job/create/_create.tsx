@@ -204,7 +204,7 @@ const CreateJob: React.FC = () => {
       id: newMilestoneId,
       description: milestoneData.description,
       price: milestoneData.price,
-      dueDate: milestoneData.dueDate
+      dueDate: milestoneData.dueDate ? milestoneData.dueDate.toISOString() : null
     };
     
     // If fixed-price, recalculate price per milestone
@@ -266,7 +266,7 @@ const CreateJob: React.FC = () => {
         setFormData(prev => ({
         ...prev,
         milestones: prev.milestones.map(milestone => 
-            milestone.id === id ? { ...milestone, dueDate } : milestone
+            milestone.id === id ? { ...milestone, dueDate: dueDate ? dueDate.toISOString() : null } : milestone
         )
         }));
     };
@@ -893,7 +893,7 @@ const CreateJob: React.FC = () => {
           <div className="flex items-center mb-5 gap-2">
             <p aria-label="due_date" className='font-semibold text-sm'>Due</p>
             <DatePicker
-              selected={milestone.dueDate}
+              selected={milestone.dueDate ? new Date(milestone.dueDate) : null}
               onChange={(date) => updateMilestoneDueDate(milestone.id, date)}
               dateFormat="MM/dd/yyyy"
               className="outline-none rounded-md p-1 text-sm"

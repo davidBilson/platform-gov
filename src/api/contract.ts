@@ -41,18 +41,26 @@ export const submitHireContract = async ({
     formDataToSend.append('clientId', userId || '');
     formDataToSend.append('contractorId', contractorId || '');
     formDataToSend.append('applicationId', applicationId || '');
+    formDataToSend.append('clientNotes', '');
     formDataToSend.append('rate', rate);
     formDataToSend.append('employmentType', employmentType);
     formDataToSend.append('startDate', startDate.toISOString());
 
-    // Optional fields
+
     if (selectedFiles.length > 0) {
       selectedFiles.forEach(file => {
         formDataToSend.append('documents', file);
       });
     }
 
-    await axios.post('/api/hire-contractor', formDataToSend, {
+    for (const pair of formDataToSend.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
+    }
+
+    const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+    const endPoint = process.env.NEXT_PUBLIC_SEND_HIRING_CONTRACT;
+
+    await axios.post(`${baseURL}${endPoint}`, formDataToSend, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

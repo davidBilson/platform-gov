@@ -3,12 +3,12 @@ import { useRouter } from 'next/router';
 import { NextPage } from 'next';
 import ProfilePicture from '@/components/ui/profilePicture';
 import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { IoMdCalendar, IoMdArrowDropdown } from 'react-icons/io';
 import useAuthStore from '@/store/useAuth';
 import { useHire } from '@/store/useHire';
 import { fetchJob } from "@/api/job-api";
 import { Jobs } from '@/types/jobs';
-
 import { submitHireContract } from '@/api/contract';
 
 interface FormData {
@@ -124,7 +124,7 @@ const HireContractor: NextPage = () => {
       
         if (success) {
           clearHireData();
-          router.push('/contracts');
+          router.push('/job/manage');
         }
         
         setIsLoading(false);
