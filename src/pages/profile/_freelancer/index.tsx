@@ -10,7 +10,7 @@ import ProfilePicture from '@/components/ui/profilePicture';
 import { WorkHistoryItem, ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
 
 
-const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
+const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   // Get user data from auth store - add proper typing
   const { userId, name } = useAuthStore() as { userId: string | null; name: string | null };
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
@@ -19,7 +19,6 @@ const FreelancerProfile: React.FC<ProfileProps> = ({ initialProfileId }) => {
   // Mock Table data for work history
   const workHistory: WorkHistoryItem[] = [];
 
-  // Fetch profile data on component mount
   useEffect(() => {
     const getProfileData = async (): Promise<void> => {
       try {

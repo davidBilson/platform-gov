@@ -32,19 +32,16 @@ const JobDetails = ({jobId}: JobDetailsProps) => {
 
   return (
     <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
-      <>
-          <div className='flex items-center justify-between mb-7.5'>
-            <p className='font-bold text-sm text-boldblue'>Posted {postedDate}</p>
-            <button className='p-2.5 w-fit h-fit bg-boldblue rounded-lg text-white'><IoIosArrowDown size={20} /></button>
-          </div>
+        <div className='flex items-center justify-between mb-7.5'>
+          <p className='font-bold text-sm text-boldblue'>Posted {postedDate}</p>
+          <button className='p-2.5 w-fit h-fit bg-boldblue rounded-lg text-white'><IoIosArrowDown size={20} /></button>
+        </div>
 
-          <article className='flex flex-col gap-5 '>
-            <p className='text-sm font-semibold'>{job?.jobCategory ?? ""}</p>
-            <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
-            <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
-          </article>
-        </>
-      
+        <article className='flex flex-col gap-5 '>
+          <p className='text-sm font-semibold'>{job?.jobCategory ?? ""}</p>
+          <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
+          <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
+        </article>
     </section>
   )
 }
