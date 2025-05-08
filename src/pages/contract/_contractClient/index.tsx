@@ -3,9 +3,38 @@ import Details from './_details';
 import Timesheet from './_timesheet';
 import Messages from './_messages'
 
-const ContractClient = () => {
+// so you can either make request with contractId and userId alone or make request with jobId and proposalId
+// you make request with contractId and userId when you go from /contract to /contract/:id
+// you make request with jobId and proposalId when you go from /proposals to /contract/:id
 
-    const [activeTab, setActiveTab] = useState('messages');
+interface ContractClientProps {
+    contractId?: string;
+    jobId: string;
+    proposalId: string;
+}
+
+const ContractClient = ({ contractId, jobId, proposalId }: ContractClientProps) => {
+
+    const [activeTab, setActiveTab] = useState('details');
+
+    console.log('contractId', contractId);
+    console.log('jobId', jobId);
+    console.log('proposalId', proposalId);
+
+    // make request using contractId and userId if jobId and proposalId are not provided
+
+
+    // need to fetch job details and client information
+
+    // FOR PENDING CONTRACT (contractor is yet to accept)
+
+    // 1. show job details and contractor details
+    // show sign document fixed bar at the bottom
+    // it shows the documents you need to sign, this shows the hiring offer details as a ui
+    // then contractor has to sign
+    // after signin you can now accept the job
+    // FOR ACTIVE CONTRACT (contractor has accepted)
+
     return (
         <main className='w-full'>
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>

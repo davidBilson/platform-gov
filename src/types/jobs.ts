@@ -110,25 +110,25 @@ export interface JobListProps {
 }
 
 export interface Jobs {
-  clientName: string;
-  clientLogo: string;
-  clientIndustry: string;
-  clientCompanySize: string;
-  clientSpecializations: string[];
-  clientLocation: string[];
-  clientAccountAge: string;
-  _id: string;
-  jobTitle: string;
+  clientName?: string;
+  clientLogo?: string;
+  clientIndustry?: string;
+  clientCompanySize?: string;
+  clientSpecializations?: string[];
+  clientLocation?: string[];
+  clientAccountAge?: string;
+  _id?: string;
+  jobTitle?: string;
   jobCategory?: string;
-  description: string;
-  location: string;
-  paymentType: 'hourly' | 'fixed-price' | 'retainer';
-  price: number;
-  employmentType: string;
-  requiredSkills: string[];
-  requiredCertifications: string[];
-  userRole: string;
-  createdAt: string;
+  description?: string;
+  location?: string;
+  paymentType?: 'hourly' | 'fixed-price' | 'retainer';
+  price?: number;
+  employmentType?: string;
+  requiredSkills?: string[];
+  requiredCertifications?: string[];
+  userRole?: string;
+  createdAt?: string;
   retainerAmount?: number;
   retainerFrequency?: string;
   milestones?: Array<{

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 // import { format } from 'date-fns';
-import ProposalModal from './_proposalModal';
+import ProposalModal from './_signContractModal';
 import { Application } from '@/types/proposals';
 import MockImage from "@/assets/GovLink_Global_Logo.png"
 import Image from 'next/image';

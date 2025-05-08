@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { FaTimes } from 'react-icons/fa';
 import { Application } from '@/types/proposals';
+import { useRouter } from 'next/router';
 
 interface ProposalModalProps {
   proposal: Application;
@@ -9,6 +10,9 @@ interface ProposalModalProps {
 }
 
 const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
+  
+  const router = useRouter();
+  
   const formatDate = (dateString: string): string => {
     try {
       return format(new Date(dateString), 'MMMM dd, yyyy');
@@ -31,8 +35,14 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
     }
   };
 
-  // Check if jobId is an object
   const jobDetails = typeof proposal.jobId === 'object' ? proposal.jobId : null;
+
+  const viewContract = (id: string) => {
+    router.push({
+      pathname: `/contract/${id}`,
+      query: { jobId: typeof proposal.jobId === 'object' ? proposal.jobId._id : undefined }
+    });
+  }
 
   return (
     <section 
@@ -74,6 +84,12 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
               <div>
                 <p className="text-gray-600">Status</p>
                 <p className="font-semibold capitalize">{proposal.status}</p>
+              </div>
+              <div>
+                {
+                  proposal.status === 'active' && 
+                  <button onClick={() => viewContract(proposal._id)} className='bg-deepskyblue rounded-lg text-white text-sm  px-3 py-2 font-semibold cursor-pointer hover:opacity-70 transition duration-300 ease-in-out' >View Contract</button>
+                }
               </div>
             </div>
           </div>

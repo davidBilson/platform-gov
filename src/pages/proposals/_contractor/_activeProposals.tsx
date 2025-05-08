@@ -64,7 +64,6 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
                 }`}
               > 
                 {application.status === 'active' && "Offer"}
-                {/* {application.status.charAt(0).toUpperCase() + application.status.slice(1)} */}
               </small>
             </div>
             

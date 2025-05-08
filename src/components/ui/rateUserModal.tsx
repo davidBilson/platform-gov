@@ -6,7 +6,7 @@ interface ModalProps {
     userToRate: string;
   }
 
-const RateUserModal: React.FC<ModalProps> = ({ onClose, userToRate }) => {
+const RateUserModal = ({ onClose, userToRate }: ModalProps) => {
 
     const handleRating = () => {
         onClose()
@@ -26,4 +26,4 @@ const RateUserModal: React.FC<ModalProps> = ({ onClose, userToRate }) => {
   )
 }
 
-export default RateUserModal
+export default RateUserModal;
