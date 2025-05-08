@@ -392,15 +392,14 @@ const CreateJob: React.FC = () => {
       
       const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
       const createJobEndpoint =process.env.NEXT_PUBLIC_CREATE_JOBS;
+
     try {
-        console.log(baseURL);
-        console.log(createJobEndpoint);
-      // Prepare data for API submission
-      const response = await axios.post(`${baseURL}${createJobEndpoint}`, formData);
-      console.log('Job created successfully:', response.data);
+
+        await axios.post(`${baseURL}${createJobEndpoint}`, formData);
+
       toast.success('Job created successfully');
       router.push('/')
-      // Handle success (redirect, show message, etc.)
+      
     } catch (error) {
       console.error('Error creating job:', error);
       toast.error('Error creating job');
@@ -409,7 +408,6 @@ const CreateJob: React.FC = () => {
     }
   };
 
-  // Helper function to format price display
   const formatMilestonePrice = (milestone: Milestone) => {
     if (formData.paymentType === 'hourly') {
       return `$${milestone.price} / hr`;
@@ -429,9 +427,9 @@ const CreateJob: React.FC = () => {
         />
       <section className='w-full max-w-275 m-auto pb-64'>
         <h1 className='pb-7.5 font-semibold text-xl'>Create Job</h1>
-        {/* Create Job Form */}
+        
         <form id="createJobForm" onSubmit={handleSubmit}>
-          {/* Job Category */}
+          
           <div className="relative w-full max-w-75 mb-7.5">
             <div className="w-full max-w-75 flex justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
                 <input 

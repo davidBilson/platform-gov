@@ -3,17 +3,12 @@ import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { FaLocationDot } from "react-icons/fa6";
 import { FaRegHourglass } from "react-icons/fa6";
-import {
-  Job,
-  ApiResponse
-} from '@/types/jobs'; 
+import { Job, ApiResponse} from '@/types/jobs'; 
 import Link from 'next/link';
 
 const OpenJobs = () => {
 
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
 
   const { userId } = useAuthStore();
 
@@ -27,14 +22,10 @@ const OpenJobs = () => {
         
         if (response.data.success) {
           setJobs(response.data.data);
-        } else {
-          setError('Failed to fetch jobs');
         }
+
       } catch (err) {
-        setError('Error connecting to the server');
         console.error('Error fetching jobs:', err);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -44,9 +35,6 @@ const OpenJobs = () => {
   // Filter jobs by status
   const openJobs = jobs.filter(job => job.status === 'open');
   const activeJobs = jobs.filter(job => job.status === 'active');
-
-  if (loading) return <div>Loading jobs...</div>;
-  if (error) return <div>Error: {error}</div>;
 
   return (
     <main className='p-6'>

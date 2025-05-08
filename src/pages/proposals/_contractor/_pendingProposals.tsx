@@ -39,6 +39,7 @@ const PendingProposals: React.FC<PendingProposalsProps> = ({ applications = [] }
     <section className='w-full max-w-275 m-auto border-b border-b-skyblue pb-10 mb-7.5'>
       <h2 className='pb-5 mb-7.5 text-darkgray border-b border-b-deepskyblue'>Pending Proposals</h2>
       
+      <section className='flex flex-col gap-7.5'>
       {applications.length === 0 ? (
         <p className="text-gray-500 text-center py-5">No pending proposals</p>
       ) : (
@@ -97,6 +98,7 @@ const PendingProposals: React.FC<PendingProposalsProps> = ({ applications = [] }
           </article>
         ))
       )}
+      </section>
       
       {selectedProposal && (
         <ProposalModal 
