@@ -10,6 +10,7 @@ import { useHire } from '@/store/useHire';
 import { fetchJob } from "@/api/job-api";
 import { Jobs } from '@/types/jobs';
 import { submitHireContract } from '@/api/contract';
+import { updateJobApplicationStatus } from '@/api/status-api';
 
 interface FormData {
     startDate: Date | null;
@@ -123,8 +124,9 @@ const HireContractor: NextPage = () => {
         });
       
         if (success) {
-          clearHireData();
-          router.push('/job/manage');
+            updateJobApplicationStatus({applicationId: applicationId, status: "active"})
+            clearHireData();
+            router.push('/job/manage');
         }
         
         setIsLoading(false);
@@ -162,7 +164,7 @@ const HireContractor: NextPage = () => {
     }
 
     return (
-        <main className='w-full max-w-300 mx-auto p-6 pb-20'>
+        <main className='w-full max-w-300 mx-auto p-6 pb-80'>
             <section>
                 <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>
 

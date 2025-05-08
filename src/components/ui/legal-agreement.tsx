@@ -19,8 +19,6 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
     setShowLegalAgreement(false);
   }
 
-
-
   return (
     <section className='fixed top-0 left-0 w-full min-h-screen z-50 bg-black/50 flex items-center justify-center p-6'>
       <div className='w-full max-w-158 p-7.5 bg-white rounded-sm'>
@@ -69,7 +67,6 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
             onClick={closeModal}
           >
             Continue
-            {/* Send Contract  */}
           </button>
 
         </div>

@@ -48,9 +48,25 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
               Applied {formatDate(application.createdAt)}
             </p>
             
-            <h3 className="text-xl font-semibold mb-3.75">
-              {typeof application.jobId === 'object' ? application.jobId.jobTitle : "Job Title"}
-            </h3>
+            <div className='mb-3.75 flex items-start justify-between gap-1'>
+              <h3 className="text-xl font-semibold">
+                {typeof application.jobId === 'object' ? application.jobId.jobTitle : "Job Title"}
+              </h3>
+              <small
+                className={`text-[10px] text-white font-bold px-2 py-1 rounded-full ${
+                  application.status === 'pending'
+                    ? 'bg-gray-400'
+                    : application.status === 'viewed'
+                    ? 'bg-deepskyblue'
+                    : application.status === 'active'
+                    ? 'bg-aquagreen'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              > 
+                {application.status === 'active' && "Offer"}
+                {/* {application.status.charAt(0).toUpperCase() + application.status.slice(1)} */}
+              </small>
+            </div>
             
             <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
               <div className="flex items-center gap-1.25">

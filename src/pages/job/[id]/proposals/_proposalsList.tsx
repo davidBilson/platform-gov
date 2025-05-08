@@ -9,6 +9,7 @@ import { JobApplicationsResponse } from '@/types/proposals';
 import { truncateDescription } from '@/utils/truncateDescription';
 import { JobDetailsProps, JobApplication, ProposalData } from '@/types/proposalsList';
 import Link from 'next/link';
+import { updateJobApplicationStatus } from '@/api/status-api';
 
 const ProposalsList = ({ jobId }: JobDetailsProps) => {
   
@@ -18,12 +19,16 @@ const ProposalsList = ({ jobId }: JobDetailsProps) => {
   const { userId, role } = useAuthStore();
 
   const handleViewProposal = (proposal: JobApplication) => {
+
     if (userId && role === "contractor") {
       toast.error('You cannot view this!');
       return;
     }
     
     if (userId && proposal.freelancerProfileId) {
+
+      updateJobApplicationStatus({applicationId: proposal._id, status: "viewed"})
+
       setSelectedProposal({
         applicationId: proposal._id,
         jobId: proposal.jobId,

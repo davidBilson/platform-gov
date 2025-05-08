@@ -39,9 +39,10 @@ const ContractorProposals = () => {
         );
 
         if (response.data.success) {
+
           // Filter applications by status
-          const pendingApplications = response.data.data.filter((app: Application) => app.status === 'pending');
           const activeApplications = response.data.data.filter((app: Application) => app.status === 'active');
+          const pendingApplications = response.data.data.filter((app: Application) => app.status === 'pending' || app.status === 'viewed');
           const draftApplications = response.data.data.filter((app: Application) => app.status === 'draft');
           
           setApplications({
