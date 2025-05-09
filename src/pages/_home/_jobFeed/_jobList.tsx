@@ -6,7 +6,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import Link from 'next/link';
 import useAuthStore from '@/store/useAuth';
 
-const JobList: React.FC<JobListProps> = ({ job }) => {
+const JobList = ({ job }: JobListProps) => {
 
   const { userId } = useAuthStore()
 

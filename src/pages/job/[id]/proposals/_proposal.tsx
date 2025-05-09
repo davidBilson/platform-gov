@@ -30,7 +30,7 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
   }, [proposalData])
 
   return (
-        <section className='p-6 md:p-12.5 pb-[240px]'>
+        <section className='p-6 md:p-12.5 pb-[240px] w-full h-full relative'>
           <div className='flex flex-col gap-5 mb-7.5'>
               
               <div className='flex gap-4 h-26'>
@@ -132,7 +132,9 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
 
             </div>
 
-            <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-12.5 px-6 absolute bottom-0 right-0 bg-skyblue w-full md:max-w-3/6 border-t border-t-boldblue">
+            <div
+              className="flex items-center justify-center gap-2.5 md:gap-7.5 py-12.5 px-6 absolute bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue"
+            >
               <button
                 onClick={handleClose}
                 type="button"

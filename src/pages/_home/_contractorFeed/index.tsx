@@ -6,6 +6,7 @@ import ContractorCountFilters from '../../_home/_contractorFeed/_contractorCount
 import { ContractorProfile, ContractorApiResponse } from '@/types/contractors';
 import { IoReload } from 'react-icons/io5';
 import { useContractorFilter } from '@/store/useContractorFilter';
+import LoadingAnimation from '@/components/ui/loading';
 
 const ContractorFeed: React.FC = () => {
   const [contractors, setContractors] = useState<ContractorProfile[]>([]);
@@ -83,7 +84,9 @@ const ContractorFeed: React.FC = () => {
         filteredCount={filteredContractors.length}
       />
       {loading ? (
-        <div>Loading contractors...</div>
+        <div className='flex items-center justify-center h-[60vh]'>
+          <LoadingAnimation />
+        </div>
       ) : error ? (
         <div className="text-boldblue text-center py-8">
           <p>

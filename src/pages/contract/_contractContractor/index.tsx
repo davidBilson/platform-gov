@@ -17,14 +17,11 @@ interface ContractContractorProps {
     proposalId: string;
 }
 
-const ContractContractor = ({ contractId, jobId, proposalId }: ContractContractorProps) => {
+const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
 
-    console.log('contractId:', contractId);
-    console.log('jobId:', jobId);
-    console.log('proposalId:', proposalId);
-
+    
     const [activeTab, setActiveTab] = useState('details');
-
+    
     const [job, setJob] = useState<Jobs | null>(null);
 
     useEffect(() => {
@@ -94,7 +91,7 @@ const ContractContractor = ({ contractId, jobId, proposalId }: ContractContracto
             </section>
 
             <section className={activeTab === 'details' ? 'block' : 'hidden'}>
-               {job !== null && <Details job={job} />}
+               {job !== null && <Details job={job} jobId={jobId} applicationId={proposalId} />}
             </section>
             <section className={activeTab === 'timesheet' ? 'block' : 'hidden'}>
                 <Timesheet />

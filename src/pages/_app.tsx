@@ -1,3 +1,4 @@
+import 'aos/dist/aos.css';
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -6,7 +7,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import useAuthStore from "@/store/useAuth";
 import { ToastContainer } from 'react-toastify';
-
+import AOS from 'aos';
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -66,6 +67,16 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export default function App({ Component, pageProps }: AppProps) {
+
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true,
+      mirror: false
+    });
+  }, []);
+
   return (
     <>
       <Head>

@@ -6,6 +6,7 @@ import JobFilter from '../../_home/_jobFeed/_jobFilter';
 import { Jobs, PaginationInfo, JobsResponse } from '@/types/jobs';
 import { IoReload } from "react-icons/io5";
 import { useJobFilter } from '@/store/useJobFilter';
+import LoadingAnimation from '@/components/ui/loading';
 
 const JobFeed: React.FC = () => {
   const [jobs, setJobs] = useState<Jobs[]>([]);
@@ -74,8 +75,8 @@ const JobFeed: React.FC = () => {
           ))}
         </div>
       ) : loading ? (
-        <div className="flex justify-center py-8">
-          <p>Loading jobs...</p>
+        <div className='flex items-center justify-center h-[60vh]'>
+          <LoadingAnimation />
         </div>
       ) : error ? (
         <div className="text-boldblue text-center py-8">

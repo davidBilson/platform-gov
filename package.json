@@ -11,6 +11,7 @@
   "dependencies": {
     "@next/env": "^15.3.1",
     "@react-icons/all-files": "^4.1.0",
+    "aos": "^3.0.0-beta.6",
     "axios": "^1.8.4",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
@@ -29,6 +30,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.4",
+    "@types/aos": "^3.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

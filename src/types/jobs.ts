@@ -110,40 +110,40 @@ export interface JobListProps {
 }
 
 export interface Jobs {
-  clientName?: string;
-  clientLogo?: string;
-  clientIndustry?: string;
-  clientCompanySize?: string;
-  clientSpecializations?: string[];
-  clientLocation?: string[];
-  clientAccountAge?: string;
-  _id?: string;
-  jobTitle?: string;
-  jobCategory?: string;
-  description?: string;
-  location?: string;
-  paymentType?: 'hourly' | 'fixed-price' | 'retainer';
-  price?: number;
-  employmentType?: string;
-  requiredSkills?: string[];
-  requiredCertifications?: string[];
-  userRole?: string;
-  createdAt?: string;
-  retainerAmount?: number;
-  retainerFrequency?: string;
-  milestones?: Array<{
+  clientName: string;
+  clientLogo: string;
+  clientIndustry: string;
+  clientCompanySize: string;
+  clientSpecializations: string[];
+  clientLocation: string[];
+  clientAccountAge: string;
+  _id: string;
+  jobTitle: string;
+  jobCategory: string;
+  description: string;
+  location: string;
+  paymentType: 'hourly' | 'fixed-price' | 'retainer';
+  price: number;
+  employmentType: string;
+  requiredSkills: string[];
+  requiredCertifications: string[];
+  userRole: string;
+  createdAt: string;
+  retainerAmount: number;
+  retainerFrequency: string;
+  milestones: Array<{
     id: number;
     description: string;
     price: number;
     dueDate: string | null;
     _id: string;
   }>;
-  startDate?: string | null;
-  status?: string;
-  updatedAt?: string;
-  userId?: string | null;
-  requiresRegisteredLobbyist?: boolean;
-  retainerDuration?: number;
+  startDate: string | null;
+  status: string;
+  updatedAt: string;
+  userId: string | null;
+  requiresRegisteredLobbyist: boolean;
+  retainerDuration: number;
   [key: string]: string | number | boolean | null | undefined | Array<unknown> | Record<string, unknown>;
 }
 

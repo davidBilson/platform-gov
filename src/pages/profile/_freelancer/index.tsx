@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import { IoLocationOutline } from "react-icons/io5";
 import ProfilePicture from '@/components/ui/profilePicture';
 import { WorkHistoryItem, ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
+import LoadingAnimation from '@/components/ui/loading';
 
 
 const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
@@ -95,8 +96,8 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     <main className="p-5 pb-20 md:p-6">
       <section className="w-full max-w-275 mx-auto pb-32">
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p>Loading profile data...</p>
+          <div className='flex items-center justify-center h-[60vh]'>
+            <LoadingAnimation />
           </div>
         ) : (
           <>

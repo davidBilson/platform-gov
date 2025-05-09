@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import React, { useState } from 'react';
-import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 // import { format } from 'date-fns';
-import ProposalModal from './_signContractModal';
-import { Application } from '@/types/proposals';
+// import React, { useState } from 'react';
+// import SignContractModal from './_signContractModal';
+// import { Application } from '@/types/proposals';
+import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import MockImage from "@/assets/GovLink_Global_Logo.png"
 import Image from 'next/image';
 
@@ -16,7 +16,7 @@ const InactiveContracts
 = (
   // { applications = [] }
 ) => {
-  const [selectedProposal, setSelectedProposal] = useState<Application | null>(null);
+  // const [selectedProposal, setSelectedProposal] = useState<Application | null>(null);
 
   // const truncateDescription = (text: string | undefined, maxLength = 200): string => {
   //   if (!text) return '';
@@ -37,9 +37,9 @@ const InactiveContracts
   //   setSelectedProposal(proposal);
   // };
 
-  const closeProposalModal = (): void => {
-    setSelectedProposal(null);
-  };
+  // const closeProposalModal = (): void => {
+  //   setSelectedProposal(null);
+  // };
 
   return (
     <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>
@@ -104,7 +104,7 @@ const InactiveContracts
         {/* ))
       )} */}
       
-      {selectedProposal && ( <ProposalModal proposal={selectedProposal} onClose={closeProposalModal} /> )}
+      {/* {selectedProposal && ( <SignContractModal onClose={closeProposalModal} /> )} */}
 
     </section>
   );

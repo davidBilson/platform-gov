@@ -1,11 +1,15 @@
 import Link from 'next/link';
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import RateUserModal from '@/components/ui/rateUserModal';
 // import RatingStars from '@/components/ui/rating';
 import ProfilePicture from '@/components/ui/profilePicture';
 import { format } from 'date-fns';
-import SignContractModal from '../_contractorContracts/_signContractModal';
+import SignContractModal from '../_signContractModal';
+import LoadingAnimation from '@/components/ui/loading';
+import useAuthStore from '@/store/useAuth';
+import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/contract';
+import { toast } from 'react-toastify';
 
 interface Job {
   createdAt?: string;
@@ -23,15 +27,44 @@ interface Job {
   clientSpecializations?: string[];
 }
 
-const Details = ({ job }: { job: Job }) => {
+interface HiringDocument {
+  jobId: { description: string };
+  offerDetails: {
+    rate: number;
+    paymentType: string;
+    employmentType: string;
+    startDate: string;
+  };
+  clientNotes: string;
+  applicationId: { coverLetter: string };
+  status: string; // Added status property
+}
 
+interface DetailsProps {
+  job: Job;
+  jobId: string;
+  applicationId: string;
+}
+const Details = ({ job, jobId, applicationId }: DetailsProps) => {
+
+  const [contractSigned, setContractSigned] = useState(false);
   const [showRateUserModal, setShowRateUserModal] = useState(false);
   const [showSignContractModal, setShowSignContractModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const [hiringOffer, setHiringOffer] = useState<HiringDocument>();
+  const [hiringId, setHiringId] = useState<string>('');
+  
+  const { userId, role } = useAuthStore();
 
   const handleClose = () => {
     setShowRateUserModal(false);
     setShowSignContractModal(false);
   };
+
+  const updateContractSigned = (value: boolean) => {
+    setContractSigned(value);
+  }
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -40,6 +73,69 @@ const Details = ({ job }: { job: Job }) => {
   };
 
   const postedDate = job?.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
+
+  useEffect(() => {
+
+    if (!userId || role !== 'contractor'){
+      return;
+    }
+
+    const fetchHiringOffer = async () => {
+      try {
+        setLoading(true);
+        const offer = await getHiringOffer(jobId, applicationId);
+        setHiringOffer(offer);
+        setHiringId(offer._id);
+      } catch (error) {
+        toast.error('Failed to load hiring offer');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHiringOffer();
+  }, [jobId, applicationId]);
+
+
+  const acceptJob = async () => {
+    try {
+      await acceptHiringOffer({ hiringId, contractorId: userId });
+      toast.success('Job accepted successfully');
+    } catch (error) {
+      toast.error('Failed to accept job');
+      console.error(error);
+    }
+  };
+
+  const checkSignatureStatus = async () => {
+;
+    const contractorId = userId;
+    
+    const isSigned = await getContractorSignature(hiringId, contractorId);
+    
+    if (isSigned) {
+      setContractSigned(true);
+    } else {
+      console.log('Contractor has not signed yet');
+    }
+  };
+
+  useEffect(() => {
+    if (hiringId) {
+      checkSignatureStatus();
+    }
+  }, [hiringId]);
+
+  
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-[60vh]'>
+        <LoadingAnimation />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -207,7 +303,14 @@ const Details = ({ job }: { job: Job }) => {
         className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
         onClick={handleOverlayClick}
       >
-        <SignContractModal jobId='id' onClose={handleClose} />
+        {hiringOffer && (
+          <SignContractModal
+            updateContractSigned={updateContractSigned}
+            contractSigned={contractSigned}
+            hiringOffer={hiringOffer}
+            onClose={handleClose} 
+          />
+        )}
       </div>
     )}
 
@@ -215,19 +318,37 @@ const Details = ({ job }: { job: Job }) => {
 
       {/* action buttons */}
       <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
+        
         <button 
-          onClick={() => setShowSignContractModal(true)}
-          className='flex items-center justify-center gap-2 p-2 rounded-lg border border-boldblue bg-white transition transform active:scale-95 hover:shadow-lg duration-300 ease-in-out cursor-pointer text-xs md:text-sm font-semibold'
+          onClick={() => !contractSigned && setShowSignContractModal(true)}
+          className={`flex items-center justify-center gap-2 rounded-lg border transition transform duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold
+            ${contractSigned 
+              ? 'border-gray-400 bg-gray-100 opacity-70 cursor-not-allowed text-gray-500' 
+              : 'border-boldblue bg-white active:scale-95 hover:shadow-lg cursor-pointer'
+            }`
+          }
+          disabled={contractSigned}
         > 
-            <img src="/assets/documents_logo.svg" alt="document_logo" />
-            <span className="h-fit w-fit">Sign Documents</span>
+          <img 
+            src="/assets/documents_logo.svg" 
+            alt="document_logo" 
+            className={contractSigned ? 'opacity-60' : ''}
+          />
+          <span className="h-fit w-fit">
+            {contractSigned ? "Documents Signed" : "Sign Documents"}
+          </span>
         </button>
         
         <button
-          // onClick={handleSubmit}
-          className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
+          onClick={acceptJob}
+          disabled={!contractSigned && hiringOffer?.status !== "offered"}
+          className={`transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold rounded-lg border ${
+            contractSigned && hiringOffer?.status == "offered"
+            ? 'cursor-pointer bg-boldblue border-boldblue text-white'
+              : 'bg-white border-lightblue text-lightblue cursor-not-allowed'
+          }`}
         >
-          Accept Job
+          {hiringOffer?.status == "accepted" ? "Job Accepted" : hiringOffer?.status == "offered" ? "Accept Job": hiringOffer?.status}
         </button>
       </div>
     </>

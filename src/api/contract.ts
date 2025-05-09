@@ -13,6 +13,15 @@ interface HireContractorParams {
   selectedFiles: File[];
 }
 
+interface AcceptHiringOfferParams {
+  contractorId: string;
+  hiringId: string;
+  contractorNotes?: string;
+  selectedFiles?: File[];
+}
+
+const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+
 export const submitHireContract = async ({
   jobId,
   userId,
@@ -57,7 +66,6 @@ export const submitHireContract = async ({
       console.log(`${pair[0]}: ${pair[1]}`);
     }
 
-    const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
     const endPoint = process.env.NEXT_PUBLIC_SEND_HIRING_CONTRACT;
 
     await axios.post(`${baseURL}${endPoint}`, formDataToSend, {
@@ -77,6 +85,86 @@ export const submitHireContract = async ({
     } else {
       toast.error('An unknown error occurred');
     }
+    return false;
+  }
+};
+
+
+
+export const getHiringOffer = async (jobId: string, applicationId: string) => {
+  try {
+
+    const endPoint = process.env.NEXT_PUBLIC_GET_HIRING_OFFER;
+
+    const response = await axios.post(`${baseURL}${endPoint}`,
+      {
+        jobId,
+        applicationId
+      }
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching hiring offer:', error);
+  }
+};
+
+// Accept hiring offer (updated)
+export const acceptHiringOffer = async ({
+  hiringId,
+  contractorId,
+  contractorNotes = '',
+  selectedFiles = []
+}: AcceptHiringOfferParams): Promise<boolean> => {
+  try {
+    const formData = new FormData();
+    formData.append('contractorId', contractorId);
+    formData.append('contractorNotes', contractorNotes);
+    
+    selectedFiles.forEach(file => formData.append('documents', file));
+
+    const endPoint = process.env.NEXT_PUBLIC_ACCEPT_HIRING_CONTRACT?.replace(':id', hiringId);
+    await axios.put(`${baseURL}${endPoint}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+
+    toast.success('Hiring offer accepted successfully!');
+    return true;
+  } catch (err) {
+    console.error(err);
+    if (axios.isAxiosError(err)) {
+      toast.error(err.response?.data?.error || 'Failed to accept offer');
+    } else {
+      toast.error('An unknown error occurred');
+    }
+    return false;
+  }
+};
+
+export const contractorSignHiringOffer = async (hiringId: string, contractorId: string): Promise<boolean> => {
+  try {
+    const endPoint = process.env.NEXT_PUBLIC_CONTRACTOR_SIGN_HIRING_OFFER?.replace(':id', hiringId);
+    await axios.put(`${baseURL}${endPoint}`, { contractorId });
+    return true;
+  } catch (err) {
+    console.error(err);
+    if (axios.isAxiosError(err)) {
+      toast.error(err.response?.data?.error || 'Failed to sign contract');
+    } else {
+      toast.error('An unknown error occurred');
+    }
+    return false;
+  }
+};
+
+export const getContractorSignature = async (hiringId: string, contractorId: string): Promise<boolean> => {
+  try {
+    const endPoint = process.env.NEXT_PUBLIC_GET_CONTRACTOR_OFFER_SIGNATURE?.replace(':id', hiringId);
+    const response = await axios.get(`${baseURL}${endPoint}`, {
+      params: { contractorId }
+    });
+    return response.data.data.contractorSigned || false;
+  } catch (err) {
+    console.error('Error checking contractor signature:', err);
     return false;
   }
 };

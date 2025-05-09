@@ -164,14 +164,12 @@ const ProposalsList = ({ jobId }: JobDetailsProps) => {
 
       {showProposal && selectedProposal && (
         <div 
-          className='fixed inset-0 bg-black/50 z-50 flex items-center justify-end transition-opacity duration-300 ease-in-out'
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-end"
           onClick={handleOverlayClick}
         >
           <div 
             className="w-full md:max-w-3/6 h-screen bg-white overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            style={{
-              animation: 'slideIn 0.3s forwards'
-            }}
+            data-aos="fade-left"
           >
             <Proposal 
               handleClose={handleClose} 
