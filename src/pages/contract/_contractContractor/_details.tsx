@@ -11,6 +11,7 @@ import useAuthStore from '@/store/useAuth';
 import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
 import { toast } from 'react-toastify';
 import { createContract } from '@/api/contract-api';
+import { useRouter } from 'next/router';
 
 interface Job {
   createdAt?: string;
@@ -57,6 +58,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   
   const [hiringOffer, setHiringOffer] = useState<HiringDocument>();
   const [hiringId, setHiringId] = useState<string>('');
+  const router = useRouter();
   
   const { userId, role } = useAuthStore();
 
@@ -109,6 +111,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         clientId: job?.userId?._id, 
         contractorId: userId
       });
+      router.reload();
       toast.success('Job accepted');
     } catch (error) {
       toast.error('Failed to accept job');
