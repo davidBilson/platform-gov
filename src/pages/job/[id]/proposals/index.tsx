@@ -1,14 +1,25 @@
 "use client"
-import React from 'react';
+import React, { useEffect } from 'react';
 import JobDetails from './_jobDetails';
 import ProposalsList from './_proposalsList';
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useRouter } from 'next/router';
+import useAuthStore from '@/store/useAuth';
 
 const SingleJobProposals = () => {
 
   const router = useRouter();
   const { id } = router.query;
+
+  const { role } = useAuthStore();
+
+  useEffect(() => {
+    if (role === "contractor") {
+      router.back();
+    }
+  }, [role, router]);
+  
+  // Then have a proper return statement for the component
 
   return (
 

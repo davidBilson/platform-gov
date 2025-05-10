@@ -168,3 +168,22 @@ export const getContractorSignature = async (hiringId: string, contractorId: str
     return false;
   }
 };
+
+
+export const getClientHiringOffers = async (clientId: string) => {
+  try {
+    const endpoint = process.env.NEXT_PUBLIC_GET_CLIENT_HIRING_OFFERS?.replace(':id', clientId);
+    const response = await axios.get(`${baseURL}${endpoint}`);
+
+    if (!response.data.success || !response.data.data) {
+      toast.error(response.data.message || 'Failed to fetch hiring offers');
+      return null;
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching client hiring offers:', error);
+    
+    return null;
+  }
+};

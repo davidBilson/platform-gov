@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next';
-import ProfilePicture from '@/components/ui/profilePicture';
+import ProfilePicture from '@/components/profile/profilePicture';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IoMdCalendar, IoMdArrowDropdown } from 'react-icons/io';

@@ -39,3 +39,18 @@ export const fetchJobApplications = async (jobId: string): Promise<JobApplicatio
     return null;
   }
 };
+
+// fetch proposal/application
+export const fetchApplication = async (applicationId: string): Promise<JobApplicationsResponse | null> => {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+    const endpoint = process.env.NEXT_PUBLIC_GET_JOB_APPLICATION_BY_ID?.replace(':id', applicationId) || '';
+    
+    const response = await axios.get<JobApplicationsResponse>(`${baseUrl}${endpoint}`);
+    
+    return response.data.success ? response.data : null;
+  } catch (err) {
+    console.error('Error fetching job applications:', err);
+    return null;
+  }
+};

@@ -6,14 +6,14 @@ import { fetchProfile } from "@/api/profile-api";
 import Link from "next/link";
 import { toast } from 'react-toastify';
 import { IoLocationOutline } from "react-icons/io5";
-import ProfilePicture from '@/components/ui/profilePicture';
+import ProfilePicture from '@/components/profile/profilePicture';
 import { WorkHistoryItem, ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
 import LoadingAnimation from '@/components/ui/loading';
 
 
 const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   // Get user data from auth store - add proper typing
-  const { userId, name } = useAuthStore() as { userId: string | null; name: string | null };
+  const { userId } = useAuthStore() as { userId: string | null; name: string | null };
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
@@ -23,8 +23,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   useEffect(() => {
     const getProfileData = async (): Promise<void> => {
       try {
-        // Use the initialProfileId prop if available, otherwise fall back to userId from store
-        const profileId = initialProfileId || userId;
+        const profileId = initialProfileId ?? userId;
         
         if (!profileId) {
           setLoading(false);
@@ -35,18 +34,19 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
         
         if (response?.success && response?.data) {
           setProfileData(response.data);
+
         }
 
-      } catch (err) {
+      } catch (error){
+        console.log(error)
         toast.error('Error fetching profile')
-        console.error('Error fetching profile:', err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
     };
 
     getProfileData();
-  }, [userId, initialProfileId]);
+  }, [initialProfileId, userId ]);
 
   useEffect(() => {
     getProfileImageUrl();
@@ -60,6 +60,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   const expertise = profileData?.expertise || [];
   const certifications = profileData?.certifications || [];
   const bio = profileData?.bio || 'No bio available';
+  const name = profileData?.name || "";
   
   // Helper function to render star ratings
   const renderRating = (rating: number, maxRating: number = 5) => {
@@ -107,10 +108,10 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
               {/* Image and Name+Loc+Profession */}
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
                 {/* Image */}
-                <ProfilePicture source={getProfileImageUrl()} alt={`${name || 'User'}'s profile`} width={88} height={88} />
+                <ProfilePicture source={getProfileImageUrl()} alt={name ?? ""} width={88} height={88} />
                 {/* Name (now using the name from auth store) */}
                 <div className="text-center sm:text-left mt-2 sm:mt-0">
-                  <p className='font-semibold text-xl'>{name || "Anonymous User"}</p>
+                  <p className='font-semibold text-xl'>{name ??""}</p>
                   <p className='text-xs font-bold py-2.5'>{profession}</p>
                   <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} /> {location ?? 'No location'}</p>
                 </div>

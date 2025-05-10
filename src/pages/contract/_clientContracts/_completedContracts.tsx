@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 // import { format } from 'date-fns';
 // import RatingStars from '@/components/ui/rating';
-import RateUserModal from '../../../components/ui/rateUserModal';
+import RateUserModal from '../../../components/rating/rateUserModal';
 import StatusTag from '@/components/ui/statusTag';
 
 // interface ActiveProposalsProps {

@@ -9,10 +9,8 @@ const AllContracts = () => {
   const { role } = useAuthStore();
 
   const contractId = router.query.id;
-  const proposalId = router.query.id;
+  const proposalId = router.query.proposalId ||router.query.id ;
   const jobId = router.query.jobId;
-
-  console.log('Extracted values:', { contractId, jobId })
 
   return (
     <main className='w-full max-w-275 mx-auto p-5 pb-20 md:p-6'>

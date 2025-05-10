@@ -1,4 +1,4 @@
-import ProfilePicture from '@/components/ui/profilePicture'
+import ProfilePicture from '@/components/profile/profilePicture'
 import React, { useEffect } from 'react'
 import { IoLocationOutline } from 'react-icons/io5';
 // import { WorkHistoryItem } from '@/types/profile';

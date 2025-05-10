@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
-import RateUserModal from '@/components/ui/rateUserModal';
+import RateUserModal from '@/components/rating/rateUserModal';
 // import RatingStars from '@/components/ui/rating';
-import ProfilePicture from '@/components/ui/profilePicture';
+import ProfilePicture from '@/components/profile/profilePicture';
 import { format } from 'date-fns';
 import SignContractModal from '../_signContractModal';
 import LoadingAnimation from '@/components/ui/loading';
@@ -47,9 +47,10 @@ interface DetailsProps {
 }
 const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
+  const [showSignContractModal, setShowSignContractModal] = useState(false);
   const [contractSigned, setContractSigned] = useState(false);
   const [showRateUserModal, setShowRateUserModal] = useState(false);
-  const [showSignContractModal, setShowSignContractModal] = useState(false);
+  
   const [loading, setLoading] = useState(true);
   
   const [hiringOffer, setHiringOffer] = useState<HiringDocument>();
@@ -149,9 +150,9 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
           <p className='text-xs font-semibold text-boldblue'><strong>Contract End:</strong> 12/12/2025 {" | "}</p>
         </div> */}
         
-        <p className='font-bold text-sm text-boldblue'>Posted {postedDate}</p>
+        <p className='font-semibold text-xs text-boldblue'>Posted {postedDate}</p>
         
-        <h1 className="text-xl font-bold mb-3.75">{job?.jobTitle ?? ""}</h1>
+        <h1 className="text-xl font-bold my-3.75">{job?.jobTitle ?? ""}</h1>
         
         <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
           <div className="flex items-center gap-1.25">
@@ -208,7 +209,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
                   {job.requiredSkills.map((skill: string, index: number) => (
                     <span className="bg-deepskyblue text-white text-xs rounded-full px-3 py-1" key={index}>
                       {skill}
-                      {job?.requiredSkills?.length && index !== job.requiredSkills.length - 1 && ', '}
+                      {job?.requiredSkills?.length && index !== job.requiredSkills.length - 1 && ' '}
                     </span>
                   ))}
                 </>

@@ -1,4 +1,4 @@
-import RatingStars from '@/components/ui/rating';
+import RatingStars from '@/components/rating/rating';
 import React from 'react'
 
 interface ModalProps {

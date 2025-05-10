@@ -51,6 +51,7 @@ export interface WorkHistoryItem {
 }
 
 export interface ProfileData {
+  name?: string;
   profileImage?: string;
   primaryPosition?: string;
   workHistory?: Array<{
