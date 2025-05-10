@@ -99,7 +99,7 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
       </div>
       
       {/* Description section */}
-      <div className="pb-7.5 border-b border-b-deepskyblue pb-">
+      <div className="pb-7.5 border-b border-b-deepskyblue mb-7.5">
         <p className="text-black whitespace-pre-line">{job?.description ?? ""}</p>
         <div className='flex items-center gap-2.5 mt-3.25'>
           <span className='px-2.5 py-1.25 text-xs text-boldblue font-semibold border border-boldblue rounded-full'>{job?.jobCategory ?? ""}</span>
@@ -107,9 +107,9 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
       </div>
       
       {/* Skills and Certifications section */}
-      <div className="py-7.5 border-b border-b-deepskyblue">
+      {/* <div className="py-7.5 border-b border-b-deepskyblue">
       </div>
-        
+         */}
 
         <div className="mb-3.75">
           <h3 className="font-semibold mb-3.75">Required Certifications</h3>
@@ -148,29 +148,23 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
                 <p className="text-gray-400">No specializations specified</p>
               )
             }
-            {applicationDetail && <ProfileCard data={applicationDetail as ApplicationDetail} />}
         </div>
-        
-        {/* <div>
-          <h3 className="font-semibold mb-3.75">Security Clearance</h3>
-          <div className="flex flex-wrap gap-3">
-            <span className="text-boldblue border border-boldblue font-semibold text-xs rounded-full px-3 py-1">
-              Top Secret
-            </span>
-          </div>
-        </div> */}
+
+        {/* 
+          <div>
+            <h3 className="font-semibold mb-3.75">Security Clearance</h3>
+            <TopSecret />
+          </div> 
+        */}
 
       </div>
       
-      {/* Consultant/Contractor Information */}
-      <div className="py-7.5 border-b border-b-deepskyblue">
+      <div className="py-7.5 mt-7.5 border-y border-y-deepskyblue">
         <h2 className="font-semibold mb-3.75">Contractor/Consultant Information</h2>
-        
         <article className='flex flex-wrap justify-between items-start gap-5'>
           <section>
             {applicationDetail && <ProfileCard data={applicationDetail} />}
           </section>
-        
         </article>
       </div>
 

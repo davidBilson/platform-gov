@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify';
 import Logo from '@/components/ui/logo';
-import { contractorSignHiringOffer } from '@/api/contract';
+import { contractorSignHiringOffer } from '@/api/hiring';
 import useAuthStore from '@/store/useAuth';
 
 interface HiringDocument {

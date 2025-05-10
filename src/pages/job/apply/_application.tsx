@@ -60,7 +60,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           
           if (submittedApps.length > 0) {
             setHasSubmittedApplication(true);
-            toast.info("You have already submitted an application for this job.");
           }
           
           // Look for drafts only if there's no submitted application
@@ -219,7 +218,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   
   const handleSaveDraft = async () => {
     if (hasSubmittedApplication) {
-      toast.info("You have already submitted an application for this job.");
       return;
     }
     
@@ -330,7 +328,7 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex flex-col items-center justify-center h-full'>
             <FaCheckCircle size={50} color="#0B5F94" className="mb-4" />
             <h2 className="text-xl font-bold text-boldblue mb-2">Application Submitted</h2>
-            <p className="text-center text-boldblue mb-6">You have already submitted an application for this job.</p>
+            <p className="text-center text-boldblue mb-6">You have submitted an application for this job.</p>
             <button 
               onClick={onClose}
               type="button"

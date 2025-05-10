@@ -14,7 +14,6 @@ const ContractorFeed: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Get the applyFilters function and all filter states we want to watch
   const { 
     applyFilters,
     searchTerm,
@@ -44,7 +43,7 @@ const ContractorFeed: React.FC = () => {
       }
     } catch (err) {
       console.log(err)
-      setError('Error fetching contractors');
+      setError('Failed to fetch contractors');
     } finally {
       setLoading(false);
     }

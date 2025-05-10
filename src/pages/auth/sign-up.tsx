@@ -1,14 +1,12 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
-// import { useRouter } from 'next/router';
 import Link from 'next/link';
-import useAuthStore from '@/store/useAuth';
 import axios, { AxiosError } from 'axios';
-
+import useAuthStore from '@/store/useAuth';
 import { SignupFormData, SignupApiResponse, ErrorResponse,  AuthStore } from '@/types/auth';
 
 
-const Signup: React.FC = () => {
-  // const router = useRouter();
+const Signup = () => {
+
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore() as AuthStore;
   
   const [formData, setLocalFormData] = useState<SignupFormData>({
@@ -35,11 +33,9 @@ const Signup: React.FC = () => {
     if (errorMessage) setErrorMessage('');
   };
 
-  // Submit form
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
-    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage('Passwords do not match');
       return;
@@ -49,10 +45,10 @@ const Signup: React.FC = () => {
     setErrorMessage('');
     
     try {
-      // Store data in Zustand - using role and name as expected by the store
+
       const formDataForStore = {
-        role: formData.userType,  // Use role instead of userType for the store
-        name: `${formData.firstName} ${formData.lastName}`,  // Concatenate name for the store
+        role: formData.userType,
+        name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         password: formData.password,
@@ -60,20 +56,18 @@ const Signup: React.FC = () => {
       
       setStoreFormData(formDataForStore);
       
-      // Ensure environment variables are properly typed or use defaults
       const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
       const signupEndpoint = process.env.NEXT_PUBLIC_SIGNUP;
       
       const res = await axios.post<SignupApiResponse>(
         `${apiHost}${signupEndpoint}`, 
         {
-          // Send firstName and lastName separately to the backend
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           password: formData.password,
-          role: formData.userType,  // Use userType for API submission
+          role: formData.userType,
         }
       );
       
@@ -81,21 +75,18 @@ const Signup: React.FC = () => {
       
       
       if (responseData.data?.userId) {
-        // Store user ID for verification
+  
         setUserId(responseData.data.userId);
         
-        // Update Zustand store with user data
         setStoreFormData({
           ...formDataForStore,
           userId: responseData.data.userId,
         });
         
-        // Set verification step to email verification
         setVerificationStep('email');
         
-        // Redirect to verification page - Replace the router.push with immediate navigation
-        window.location.href = '/auth/verification';  // This forces a complete page load, bypassing Next.js client-side routing
-        return; // Prevent further execution
+        window.location.href = '/auth/verification';
+        return;
       }
       
       if (!responseData.data?.userId) {
@@ -104,7 +95,7 @@ const Signup: React.FC = () => {
       }
 
     } catch (error) {
-      // If there's an error, check for specific messages like "Email already in use"
+
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ErrorResponse>;
         
@@ -125,7 +116,6 @@ const Signup: React.FC = () => {
     }
   };
 
-  // Inline styles with proper TypeScript typing
   const radioStyle: React.CSSProperties = {
     appearance: 'none',
     WebkitAppearance: 'none',

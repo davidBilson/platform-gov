@@ -15,7 +15,7 @@ import { useJobFilter } from '@/store/useJobFilter';
 
 
 type Country = string;
-type StateWithCountry = [string, string]; // Tuple type for state/country pairs
+type StateWithCountry = [string, string];
 type USState = string;
 
 interface JobFilterProps {

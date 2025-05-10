@@ -141,11 +141,16 @@ export interface Jobs {
   startDate: string | null;
   status: string;
   updatedAt: string;
-  userId: string | null;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
   requiresRegisteredLobbyist: boolean;
   retainerDuration: number;
   [key: string]: string | number | boolean | null | undefined | Array<unknown> | Record<string, unknown>;
 }
+
 
 export interface PaginationInfo {
   total: number;

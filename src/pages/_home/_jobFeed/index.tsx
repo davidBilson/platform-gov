@@ -8,13 +8,12 @@ import { IoReload } from "react-icons/io5";
 import { useJobFilter } from '@/store/useJobFilter';
 import LoadingAnimation from '@/components/ui/loading';
 
-const JobFeed: React.FC = () => {
+const JobFeed = () => {
   const [jobs, setJobs] = useState<Jobs[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Jobs[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [, setPagination] = useState<PaginationInfo>({ total: 0, page: 1, limit: 10, pages: 0 });
-  // const [activeFilters, setActiveFilters] = useState<Array<{id: string, name: string}>>([]);
   const [searchPerformed, setSearchPerformed] = useState<boolean>(false);
 
   const { activeFilters, removeFilter } = useJobFilter()
@@ -30,7 +29,7 @@ const JobFeed: React.FC = () => {
       
       if (response.data.success) {
         setJobs(response.data.data);
-        setFilteredJobs(response.data.data); // Initialize filtered jobs with all jobs
+        setFilteredJobs(response.data.data);
         setPagination(response.data.pagination);
       } else {
         throw new Error('Failed to fetch jobs');
@@ -38,7 +37,6 @@ const JobFeed: React.FC = () => {
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      console.error('Error fetching jobs:', err);
     } finally {
       setLoading(false);
     }
@@ -48,7 +46,6 @@ const JobFeed: React.FC = () => {
     fetchJobs();
   }, []);
 
-  // Handle filter changes
   const handleFilterChange = (newFilteredJobs: Jobs[]) => {
     setFilteredJobs(newFilteredJobs);
     setSearchPerformed(true);

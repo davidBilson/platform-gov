@@ -24,10 +24,10 @@ const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const submitHireContract = async ({
   jobId,
+  rate,
   userId,
   contractorId,
   applicationId,
-  rate,
   employmentType,
   startDate,
   selectedFiles
@@ -88,8 +88,6 @@ export const submitHireContract = async ({
     return false;
   }
 };
-
-
 
 export const getHiringOffer = async (jobId: string, applicationId: string) => {
   try {
@@ -169,14 +167,13 @@ export const getContractorSignature = async (hiringId: string, contractorId: str
   }
 };
 
-
 export const getClientHiringOffers = async (clientId: string) => {
   try {
     const endpoint = process.env.NEXT_PUBLIC_GET_CLIENT_HIRING_OFFERS?.replace(':id', clientId);
     const response = await axios.get(`${baseURL}${endpoint}`);
 
     if (!response.data.success || !response.data.data) {
-      toast.error(response.data.message || 'Failed to fetch hiring offers');
+      console.error(response.data.message || 'Failed to fetch hiring offers');
       return null;
     }
 

@@ -3,7 +3,7 @@ import React, { useState, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import RateUserModal from '../../../components/rating/rateUserModal';
-import StatusTag from '@/components/ui/statusTag';
+import StatusTag from '@/components/tags/statusTag';
 
 interface Job {
   _id: string;

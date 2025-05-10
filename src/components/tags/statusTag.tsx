@@ -4,7 +4,8 @@ interface StatusProps {
   status: string;
 }
 
-const StatusTag: React.FC<StatusProps> = ({ status }) => {
+const StatusTag = ({ status }: StatusProps) => {
+  
   const getStatusColor = () => {
     switch (status.toLowerCase()) {
       case 'active':
@@ -14,7 +15,7 @@ const StatusTag: React.FC<StatusProps> = ({ status }) => {
       case 'inactive':
         return 'bg-mediumgray';
       default:
-        return 'bg-boldblue'; // fallback
+        return 'bg-boldblue';
     }
   };
 

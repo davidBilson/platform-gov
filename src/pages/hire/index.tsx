@@ -9,7 +9,7 @@ import useAuthStore from '@/store/useAuth';
 import { useHire } from '@/store/useHire';
 import { fetchJob } from "@/api/job-api";
 import { Jobs } from '@/types/jobs';
-import { submitHireContract } from '@/api/contract';
+import { submitHireContract } from '@/api/hiring';
 import { updateJobApplicationStatus } from '@/api/status-api';
 
 interface FormData {

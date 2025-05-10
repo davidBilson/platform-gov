@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ActiveContracts from './_activeContracts';
 import CompletedContracts from './_completedContracts';
 import InactiveContracts from './_inactiveContracts';
-import { getClientHiringOffers } from '@/api/contract';
+import { getClientHiringOffers } from '@/api/hiring';
 import useAuthStore from '@/store/useAuth';
 import LoadingAnimation from '@/components/ui/loading';
 

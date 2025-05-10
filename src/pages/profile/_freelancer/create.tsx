@@ -284,11 +284,8 @@ const removeDegreeWrapper = (id: string) => {
     );
   };
   
-  // This effect monitors for when legal agreement is accepted while a submission is pending
   useEffect(() => {
-    // If we have a pending submission AND the user has accepted the agreement, proceed with submission
     if (pendingSubmission && acceptedLegalAgreement && showLegalAgreement === false) {
-      // Reset the pending flag
       setPendingSubmission(false);
 
       submitProfileDataWrapper();
@@ -298,27 +295,21 @@ const removeDegreeWrapper = (id: string) => {
 const handleSubmit = (e: React.FormEvent): void => {
   e.preventDefault();
   
-  // If legal agreement is already accepted, proceed immediately
   if (acceptedLegalAgreement) {
     submitProfileDataWrapper();
     return;
   }
   
-  // Legal agreement not yet accepted - show the modal and mark as pending
   setPendingSubmission(true);
   legalSetterOnce();
-  // Now wait for the useEffect to trigger when acceptedLegalAgreement becomes true
 };
 
-  // Handle preview - could be expanded in future
   const handlePreview = async () => {
-    // First check if we already know the profile exists
     if (isProfileExists) {
       router.push('/profile');
       return;
     }
     
-    // If we're not sure, fetch the latest profile data
     const profileResult = await fetchUserProfile();
     
     if (profileResult.success) {
@@ -328,7 +319,6 @@ const handleSubmit = (e: React.FormEvent): void => {
     }
   };
 
-  // Initialize textarea height on mount
   useEffect(() => {
     if (formData.bio && textareaRef.current) {
       handleTextAreaInput();
@@ -599,17 +589,16 @@ const handleSubmit = (e: React.FormEvent): void => {
                 </button>
               </div>
               
-              {/* Skills dropdown */}
               {showSkillsDropdown && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
+                    onMouseDown={(e) => e.preventDefault()}
                 >
                   {filteredSkills.map((skill, idx) => (
                     <div 
                       key={`skill-option-${idx}`} 
                       className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
                       onMouseDown={(e) => {
-                        e.preventDefault(); // Prevent blur event from firing
+                        e.preventDefault();
                         addTagWrapper('skills', skill);
                       }}
                     >
@@ -637,7 +626,6 @@ const handleSubmit = (e: React.FormEvent): void => {
             ))}
           </div>
           
-          {/* Expertise */}
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative w-full max-w-75">
               <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
@@ -670,17 +658,16 @@ const handleSubmit = (e: React.FormEvent): void => {
                 </button>
               </div>
               
-              {/* Expertise dropdown */}
               {showExpertiseDropdown && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
+                    onMouseDown={(e) => e.preventDefault()}
                 >
                   {filteredExpertise.map((exp, idx) => (
                     <div 
                       key={`expertise-option-${idx}`} 
                       className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
                       onMouseDown={(e) => {
-                        e.preventDefault(); // Prevent blur event from firing
+                        e.preventDefault();
                         addTagWrapper('expertise', exp);
                       }}
                     >
@@ -690,7 +677,7 @@ const handleSubmit = (e: React.FormEvent): void => {
                 </div>
               )}
             </div>
-            {/* tags */}
+
             {formData.expertise.map((item, index) => (
               <div 
                 key={`expertise-${index}`} 
@@ -709,7 +696,6 @@ const handleSubmit = (e: React.FormEvent): void => {
           </div>
         </div>
   
-        {/* Certification */}
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="relative w-full max-w-75">
@@ -743,7 +729,6 @@ const handleSubmit = (e: React.FormEvent): void => {
                 </button>
               </div>
               
-              {/* Certifications dropdown */}
               {showCertificationsDropdown && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
                     onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
@@ -782,7 +767,6 @@ const handleSubmit = (e: React.FormEvent): void => {
           </div>
         </div>
   
-        {/* Work History */}
         <div className="mb-7.5">
           <h3 className="mb-7.5 font-semibold text-black">Work History</h3>
           

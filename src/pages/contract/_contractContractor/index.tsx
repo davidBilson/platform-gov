@@ -7,7 +7,8 @@ import Retainer from './_retainer';
 import { fetchJob } from '@/api/job-api';
 import { Jobs } from '@/types/jobs';
 import useAuthStore from '@/store/useAuth';
-import { getHiringOffer } from '@/api/contract';
+import { getHiringOffer } from '@/api/hiring';
+import { getSingleContract } from '@/api/contract-api';
 
 
 interface HiringDocument {
@@ -29,6 +30,10 @@ interface ContractContractorProps {
     proposalId: string;
 }
 
+interface MutualContract {
+    _id: string;
+}
+
 const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
     
     const [activeTab, setActiveTab] = useState('details');
@@ -36,18 +41,20 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
 
     const [, setHiringOffer] = useState<HiringDocument>();
     const [hiringId, setHiringId] = useState<string>('');
-
+    
+    
+    const [mutualContract, setMutualContract] = useState<MutualContract | null>(null);
     const { userId, role, name} = useAuthStore();
 
     useEffect(() => {
         const loadJob = async () => {
         if (jobId) {
             try {
-            const jobData = await fetchJob(jobId as string);
-            setJob(jobData);
+                const jobData = await fetchJob(jobId as string);
+                setJob(jobData);
             } catch (error) {
-            console.error('Error loading job:', error);
-            setJob(null);
+                console.error('Error loading job:', error);
+                setJob(null);
             }
         }
         };
@@ -65,7 +72,7 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
           try {
             const offer = await getHiringOffer(jobId, proposalId);
             setHiringOffer(offer);
-            setHiringId(offer._id);
+            setHiringId(offer?._id);
           } catch (error) {
             console.error(error);
           }
@@ -73,6 +80,27 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
     
         fetchHiringOffer();
       }, [jobId, proposalId]);
+
+      useEffect(() => {
+        const fetchSingleMutualContract =  async () => {
+            if (hiringId && job?.userId?._id && userId ) {
+                try {
+                    const mutualContract = await getSingleContract({
+                        hiringId: hiringId,
+                        clientId: job?.userId?._id,
+                        contractorId: userId
+                    })
+                    if (mutualContract) {
+                        console.log(mutualContract)
+                        setMutualContract(mutualContract.data);
+                    }
+                } catch (error) {
+                    console.error('Error loading contract:', error);
+                }
+            }
+        }
+        fetchSingleMutualContract();
+    }, [hiringId, job?.userId?._id, userId])
 
     return (
         <main>
@@ -90,7 +118,7 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
                         Details
                     </button>
                     <button 
-                        onClick={() => setActiveTab('retainer')}
+                        onClick={() => setActiveTab('milestones')}
                         className={`border-b-3  pb-5 px-5 text-sm text-darkgray cursor-pointer ${
                             activeTab === 'milestones' 
                                 ? 'border-b-boldblue' 
@@ -114,13 +142,25 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
             </section>
 
             <section className={activeTab === 'details' ? 'block' : 'hidden'}>
-               {job !== null && <Details job={job} jobId={jobId} applicationId={proposalId} />}
+               {job !== null && (
+                   <Details 
+                       job={{
+                           ...job,
+                           userId: job.userId ? { _id: job.userId._id } : undefined
+                       }} 
+                       jobId={jobId} 
+                       applicationId={proposalId} 
+                   />
+               )}
             </section>
             <section className={activeTab === 'timesheet' ? 'block' : 'hidden'}>
                 <Timesheet />
             </section>
             <section className={activeTab === 'milestones' ? 'block' : 'hidden'}>
-                <Milestones />
+                {
+                    mutualContract && <Milestones mutualContractId={mutualContract?._id} />
+                }
+                
             </section>
             <section className={activeTab === 'retainer' ? 'block' : 'hidden'}>
                 <Retainer />

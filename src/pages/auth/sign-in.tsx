@@ -10,7 +10,7 @@ interface ErrorResponse {
   message?: string;
 }
 
-// Interface for AuthStore to match the zustand structure
+
 interface AuthStore {
   setFormData: (data: {
     role?: string;

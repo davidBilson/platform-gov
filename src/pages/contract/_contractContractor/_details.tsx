@@ -8,8 +8,9 @@ import { format } from 'date-fns';
 import SignContractModal from '../_signContractModal';
 import LoadingAnimation from '@/components/ui/loading';
 import useAuthStore from '@/store/useAuth';
-import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/contract';
+import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
 import { toast } from 'react-toastify';
+import { createContract } from '@/api/contract-api';
 
 interface Job {
   createdAt?: string;
@@ -25,6 +26,7 @@ interface Job {
   clientName?: string;
   clientIndustry?: string;
   clientSpecializations?: string[];
+  userId?: { _id: string }; // Added userId property
 }
 
 interface HiringDocument {
@@ -102,7 +104,12 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const acceptJob = async () => {
     try {
       await acceptHiringOffer({ hiringId, contractorId: userId });
-      toast.success('Job accepted successfully');
+      await createContract({
+        hiringId: hiringId, 
+        clientId: job?.userId?._id, 
+        contractorId: userId
+      });
+      toast.success('Job accepted');
     } catch (error) {
       toast.error('Failed to accept job');
       console.error(error);

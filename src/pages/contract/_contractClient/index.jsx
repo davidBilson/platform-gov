@@ -5,6 +5,7 @@ import Messages from '../../../components/chat/_messages';
 import { fetchApplication, fetchJob } from '@/api/job-api';
 import useAuthStore from '@/store/useAuth';
 import Milestones from './_milestones';
+import { getSingleContract } from '@/api/contract-api';
 
 // varTab could later be replaced with a dynamic value
 const varTab = "milestones";
@@ -15,6 +16,7 @@ const ContractClient = ({ contractId, jobId, proposalId, tab }) => {
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState(null);
     const { userId, name } = useAuthStore();
+    const [mutualContract, setMutualContract] = useState(null);
 
     const fetchJobData = useCallback(async () => {
         if (!jobId) return;
@@ -39,6 +41,27 @@ const ContractClient = ({ contractId, jobId, proposalId, tab }) => {
     }, [proposalId]);
 
     useEffect(() => {
+        const fetchSingleMutualContract =  async () => {
+            if (contractId && userId && applicationDetail?.freelancerId) {
+                try {
+                    const mutualContract = await getSingleContract({
+                        hiringId: contractId,
+                        clientId: userId,
+                        contractorId: applicationDetail?.freelancerId
+                    })
+                    if (mutualContract) {
+                        console.log(mutualContract)
+                        setMutualContract(mutualContract.data);
+                    }
+                } catch (error) {
+                    console.error('Error loading contract:', error);
+                }
+            }
+        }
+        fetchSingleMutualContract();
+    }, [contractId, userId, applicationDetail?.freelancerId])
+
+    useEffect(() => {
         fetchJobData();
         fetchApplicationData();
     }, [fetchJobData, fetchApplicationData]);
@@ -50,7 +73,8 @@ const ContractClient = ({ contractId, jobId, proposalId, tab }) => {
             case 'timesheet':
                 return <Timesheet />;
             case 'milestones':
-                return <Milestones />;
+                // 
+                return mutualContract && <Milestones mutualContractId={mutualContract._id} />;
             case 'messages':
                 return (
                     <Messages

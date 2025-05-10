@@ -6,7 +6,7 @@ import useAuthStore from '@/store/useAuth';
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
 import { IoCloseOutline } from "react-icons/io5";
-import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
+// import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
 
 
 const CreateBusinessProfile = () => {
@@ -51,7 +51,6 @@ const CreateBusinessProfile = () => {
         setBusiness(data.data);
         return data.data;
       } else {
-        // No profile found, keep the default empty state
         console.log("No business profile found. Ready to create one.");
         return null;
       }
@@ -71,26 +70,27 @@ const CreateBusinessProfile = () => {
 
   }, [userId]);
 
-  useEffect(() => {
-    const fetchLocationData = async () => {
-      try {
-        const [countriesData, statesData, usStatesData] = await Promise.all([
-          getAllCountries(),
-          getSpecificCountryStates(),
-          getUSStates()
-        ]);
-        
-        setAllCountries(countriesData);
-        setStatesWithCountries(statesData);
-        setUsStates(usStatesData);
-      } catch (err) {
-        console.error('Error fetching location data:', err);
-      }
-    };
+  // TODO: use this location logic to populate the profile setup, user should be able to select country and state based on the data returned
+  // useEffect(() => {
+  //   const fetchLocationData = async () => {
+  //     try {
+  //       // const [countriesData, statesData, usStatesData] = await Promise.all([
+  //       //   getAllCountries(),
+  //       //   getSpecificCountryStates(),
+  //       //   getUSStates()
+  //       // ]);
 
-    fetchLocationData();
+  //       // setAllCountries(countriesData);
+  //       // setStatesWithCountries(statesData);
+  //       // setUsStates(usStatesData);
+  //     } catch (err) {
+  //       console.error('Error fetching location data:', err);
+  //     }
+  //   };
 
-  }, []);
+  //   fetchLocationData();
+
+  // }, []);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -135,7 +135,6 @@ const CreateBusinessProfile = () => {
     setNewSpecialization("");
   };
 
-  // Remove a specialization
   const handleRemoveSpecialization = (specialization) => {
     setBusiness(prev => ({
       ...prev,
@@ -143,7 +142,6 @@ const CreateBusinessProfile = () => {
     }));
   };
 
-  // Add a new location
   const handleAddLocation = () => {
     setBusiness(prev => ({
       ...prev,
@@ -232,11 +230,11 @@ const CreateBusinessProfile = () => {
           toast.success('Profile created successfully!');
         }
       } else {
-        toast.error(data.message || 'Failed to save business profile');
+        toast.error(data.message || 'Failed to save profile');
       }
     } catch (err) {
-      console.error('Error saving business profile:', err);
-      return toast.error('Error saving business profile');
+      console.error('Error saving profile:', err);
+      return toast.error('Error saving profile');
     } finally {
       setIsLoading(false);
     }

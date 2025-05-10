@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // import { format } from 'date-fns';
 // import RatingStars from '@/components/ui/rating';
 import RateUserModal from '../../../components/rating/rateUserModal';
-import StatusTag from '@/components/ui/statusTag';
+import StatusTag from '@/components/tags/statusTag';
 
 // interface ActiveProposalsProps {
 //   applications: Application[];

@@ -20,7 +20,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
   const renderRating = () => {
 
     const rating = 4  // mock rating
-    const maxRating = 5
+    const maxRating = 5;
 
     return (
       <div className="flex items-center">
