@@ -90,7 +90,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         setHiringOffer(offer);
         setHiringId(offer._id);
       } catch (error) {
-        toast.error('Failed to load hiring offer');
         console.error(error);
       } finally {
         setLoading(false);
@@ -112,7 +111,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
       window.location.reload();
       toast.success('Job accepted');
     } catch (error) {
-      toast.error('Failed to accept job');
       console.error(error);
     }
   };

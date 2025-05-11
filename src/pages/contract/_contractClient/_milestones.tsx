@@ -5,7 +5,6 @@ import AddNewMilestoneModal from './_addMilestoneModal';
 import { getMilestones, approveMilestone, markMilestonePaid, 
   // disputeMilestone 
 } from '@/api/milestone-api';
-import { toast } from 'react-toastify';
 // import DisputeModal from './_disputeModal';
 import useAuthStore from '@/store/useAuth';
 
@@ -32,7 +31,6 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId: string }) =>
       setMilestones(response.data || []);
     } catch (error) {
       console.error('Error fetching milestones:', error);
-      toast.error('Failed to load milestones');
     }
   };
 

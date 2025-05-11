@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { getMilestones, completeMilestone, 
   // disputeMilestone 
 } from '@/api/milestone-api';
-import { toast } from 'react-toastify';
 // import DisputeModal from './_disputeModal';
 
 interface Milestone {
@@ -26,7 +25,6 @@ const ContractorMilestones = ({ mutualContractId }: { mutualContractId?: string 
       setMilestones(response.data || []);
     } catch (error) {
       console.error('Error fetching milestones:', error);
-      toast.error('Failed to load milestones');
     }
   };
 
