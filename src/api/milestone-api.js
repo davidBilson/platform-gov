@@ -24,9 +24,9 @@ export const addMilestone = async (contractId, milestoneData, userId) => {
   } catch (error) {
     console.error('Error adding milestone:', error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.message || 'Failed to add milestone');
+      console.error(error.response?.data?.message || 'Failed to add milestone');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     throw error;
   }
@@ -93,9 +93,9 @@ export const completeMilestone = async (contractId, milestoneId) => {
   } catch (error) {
     console.error('Error completing milestone:', error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.message || 'Failed to complete milestone');
+      console.error(error.response?.data?.message || 'Failed to complete milestone');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     throw error;
   }
@@ -118,9 +118,9 @@ export const approveMilestone = async (contractId, milestoneId) => {
   } catch (error) {
     console.error('Error approving milestone:', error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.message || 'Failed to approve milestone');
+      console.error(error.response?.data?.message || 'Failed to approve milestone');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     throw error;
   }
@@ -143,9 +143,9 @@ export const markMilestonePaid = async (contractId, milestoneId) => {
   } catch (error) {
     console.error('Error marking milestone as paid:', error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.message || 'Failed to mark milestone as paid');
+      console.error(error.response?.data?.message || 'Failed to mark milestone as paid');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     throw error;
   }
@@ -169,9 +169,9 @@ export const disputeMilestone = async (contractId, milestoneId, reason) => {
   } catch (error) {
     console.error('Error disputing milestone:', error);
     if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.message || 'Failed to dispute milestone');
+      console.error(error.response?.data?.message || 'Failed to dispute milestone');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     throw error;
   }

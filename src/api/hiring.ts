@@ -34,12 +34,12 @@ export const submitHireContract = async ({
 }: HireContractorParams): Promise<boolean> => {
   try {
     if (!startDate) {
-      toast.error('Please select a start date');
+      console.error('Please select a start date');
       return false;
     }
 
     if (!rate) {
-      toast.error('Please enter a rate');
+      console.error('Please enter a rate');
       return false;
     }
 
@@ -79,11 +79,11 @@ export const submitHireContract = async ({
   } catch (err: unknown) {
     console.error(err);
     if (err instanceof Error) {
-      toast.error(err.message);
+      console.error(err.message);
     } else if (axios.isAxiosError(err)) {
-      toast.error(err.response?.data?.message || 'Failed to send contract');
+      console.error(err.response?.data?.message || 'Failed to send contract');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     return false;
   }
@@ -130,9 +130,9 @@ export const acceptHiringOffer = async ({
   } catch (err) {
     console.error(err);
     if (axios.isAxiosError(err)) {
-      toast.error(err.response?.data?.error || 'Failed to accept offer');
+      console.error(err.response?.data?.error || 'Failed to accept offer');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     return false;
   }
@@ -146,9 +146,9 @@ export const contractorSignHiringOffer = async (hiringId: string, contractorId: 
   } catch (err) {
     console.error(err);
     if (axios.isAxiosError(err)) {
-      toast.error(err.response?.data?.error || 'Failed to sign contract');
+      console.error(err.response?.data?.error || 'Failed to sign contract');
     } else {
-      toast.error('An unknown error occurred');
+      console.error('An unknown error occurred');
     }
     return false;
   }
