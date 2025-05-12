@@ -75,7 +75,7 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
         fetchHiringOffer();
       }, [jobId, proposalId]);
 
-      const { data: mutualContract } = useQuery({
+      const { data: mutualContract} = useQuery({
         queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
         queryFn: async () => {
             if (!job?.userId?._id || !userId) return null;
@@ -95,6 +95,8 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
         refetchIntervalInBackground: true,
         staleTime: Infinity
     });
+
+    console.log(mutualContract)
 
     return (
         <main>
