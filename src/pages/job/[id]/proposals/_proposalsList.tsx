@@ -6,7 +6,7 @@ import { fetchJobApplications } from '@/api/job-api';
 import { JobApplicationsResponse } from '@/types/proposals';
 import { truncateDescription } from '@/utils/truncateDescription';
 import { JobDetailsProps, JobApplication, ProposalData } from '@/types/proposalsList';
-import { updateJobApplicationStatus } from '@/api/status-api';
+// import { trackHiringStatus, updateJobApplicationStatus } from '@/api/status-api';
 import ProfileCard from '@/components/profile/ProfileCard';
 
 const ProposalsList = ({ jobId }: JobDetailsProps) => {
@@ -16,16 +16,14 @@ const ProposalsList = ({ jobId }: JobDetailsProps) => {
   const [selectedProposal, setSelectedProposal] = useState<ProposalData | null>(null);
   const { userId, role } = useAuthStore();
 
-  const handleViewProposal = (proposal: JobApplication) => {
+  const handleViewProposal = async (proposal: JobApplication) => {
 
     if (userId && role === "contractor") {
       toast.error('You cannot view this!');
       return;
     }
-    
-    if (userId && proposal.freelancerProfileId) {
 
-      updateJobApplicationStatus({applicationId: proposal._id, status: "viewed"})
+    if (userId && proposal.freelancerProfileId) {
 
       setSelectedProposal({
         applicationId: proposal._id,
@@ -102,21 +100,19 @@ const ProposalsList = ({ jobId }: JobDetailsProps) => {
       })}
 
       {showProposal && selectedProposal && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-end"
-          onClick={handleOverlayClick}
-        >
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-end">
           <div 
-            className="w-full md:max-w-3/6 h-screen bg-white overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-            data-aos="fade-left"
-          >
-            <Proposal 
-              handleClose={handleClose} 
-              proposalData={selectedProposal}
-            />
+            className="absolute inset-0" 
+            onClick={handleOverlayClick}
+          />
+          <div className="relative w-full md:max-w-1/2 h-full bg-white flex flex-col">
+            <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <Proposal handleClose={handleClose} proposalData={selectedProposal} />
+            </div>
           </div>
         </div>
       )}
+
     </section>
   );
 };

@@ -1,6 +1,7 @@
 import 'aos/dist/aos.css';
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
+import { ReactQueryProvider } from "@/providers/ReactQueryProvider"
 import Head from "next/head";
 import Navbar from "@/components/layout/navbar/navbar";
 import { useRouter } from "next/router";
@@ -85,23 +86,25 @@ export default function App({ Component, pageProps }: AppProps) {
             content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
           />
       </Head>
-      <Navbar />
-      <AuthWrapper>
-        <ToastContainer 
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-          className={'text-xs font-bold'}
-        />
-        <Component {...pageProps} />
-      </AuthWrapper>
+      <ReactQueryProvider>
+        <Navbar />
+        <AuthWrapper>
+          <ToastContainer 
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            className={'text-xs font-bold'}
+          />
+          <Component {...pageProps} />
+        </AuthWrapper>
+      </ReactQueryProvider>
     </>
   );
 }

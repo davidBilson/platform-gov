@@ -6,17 +6,18 @@ import { fetchApplication, fetchJob } from '@/api/job-api';
 import useAuthStore from '@/store/useAuth';
 import Milestones from './_milestones';
 import { getSingleContract } from '@/api/contract-api';
+import { useQuery } from '@tanstack/react-query';
 
 // varTab could later be replaced with a dynamic value
-const varTab = "milestones";
-const TAB_OPTIONS = ['details', varTab, 'messages'];
+const TAB_OPTIONS = ['details', "milestones", 'messages'];
 
-const ContractClient = ({ contractId, jobId, proposalId, tab }) => {
+const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
+
     const [applicationDetail, setApplicationDetail] = useState(null);
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState(null);
     const { userId, name } = useAuthStore();
-    const [mutualContract, setMutualContract] = useState(null);
+    const [mutualContractId, setMutualContractId] = useState('')
 
     const fetchJobData = useCallback(async () => {
         if (!jobId) return;
@@ -40,26 +41,26 @@ const ContractClient = ({ contractId, jobId, proposalId, tab }) => {
         }
     }, [proposalId]);
 
-    useEffect(() => {
-        const fetchSingleMutualContract =  async () => {
-            if (contractId && userId && applicationDetail?.freelancerId) {
-                try {
-                    const mutualContract = await getSingleContract({
-                        hiringId: contractId,
-                        clientId: userId,
-                        contractorId: applicationDetail?.freelancerId
-                    })
-                    if (mutualContract) {
-                        console.log(mutualContract)
-                        setMutualContract(mutualContract.data);
-                    }
-                } catch (error) {
-                    console.error('Error loading contract:', error);
-                }
-            }
-        }
-        fetchSingleMutualContract();
-    }, [contractId, userId, applicationDetail?.freelancerId])
+    const { data: mutualContract } = useQuery({
+        queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
+        queryFn: async () => {
+            if (!job?.userId?._id || !userId) return null;
+            const response = await getSingleContract({
+                jobId: jobId,
+                clientId: userId,
+                contractorId: applicationDetail.freelancerId
+            });
+            setMutualContractId(response?.data._id)
+            console.log(response?.data._id)
+            return response?.data || null;
+        },
+        enabled: !!job?.userId?._id && !!userId,
+        refetchInterval: (query) => {
+            return !query.state.data ? 5000 : false;
+        },
+        refetchIntervalInBackground: true,
+        staleTime: Infinity
+    });
 
     useEffect(() => {
         fetchJobData();
@@ -73,21 +74,20 @@ const ContractClient = ({ contractId, jobId, proposalId, tab }) => {
             case 'timesheet':
                 return <Timesheet />;
             case 'milestones':
-                // 
-                return mutualContract && <Milestones mutualContractId={mutualContract._id} />;
+                return <Milestones mutualContractId={mutualContractId} />;
             case 'messages':
                 return (
                     <Messages
-                        hiringId={contractId}
+                        // add proposalId and jobId here
+                        jobId={jobId}
+                        proposalId={proposalId}
                         currentUser={{
                             _id: userId,
                             name: name,
-                            profilePicture: ""
                         }}
                         otherUser={{
                             _id: applicationDetail?.freelancerId,
                             name: applicationDetail?.freelancerName,
-                            profilePicture: applicationDetail?.freelancerProfileId?.profileImage
                         }}
                     />
                 );

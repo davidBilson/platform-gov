@@ -2,9 +2,7 @@
 import React, { useState, useEffect } from 'react';
 // import { LuTrash } from "react-icons/lu";
 import AddNewMilestoneModal from './_addMilestoneModal';
-import { getMilestones, approveMilestone, markMilestonePaid, 
-  // disputeMilestone 
-} from '@/api/milestone-api';
+import { getMilestones, approveMilestone, markMilestonePaid } from '@/api/milestone-api';
 // import DisputeModal from './_disputeModal';
 import useAuthStore from '@/store/useAuth';
 
@@ -18,17 +16,18 @@ interface Milestone {
   completionDate?: string;
 }
 
-const ClientMilestones = ({ mutualContractId }: { mutualContractId: string }) => {
+const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) => {
   const [showNewMilestoneModal, setShowNewMilestoneModal] = useState(false);
-  // const [showDisputeModal, setShowDisputeModal] = useState(false);
-  // const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null);
+  
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const { role } = useAuthStore()
 
   const fetchMilestones = async () => {
     try {
-      const response = await getMilestones(mutualContractId);
-      setMilestones(response.data || []);
+      if (mutualContractId) {
+        const response = await getMilestones(mutualContractId);
+        setMilestones(response.data || []);
+      }
     } catch (error) {
       console.error('Error fetching milestones:', error);
     }
@@ -42,8 +41,10 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId: string }) =>
 
   const handleApprove = async (milestoneId: string) => {
     try {
-      await approveMilestone(mutualContractId, milestoneId);
-      await fetchMilestones();
+      if (mutualContractId) {
+        await approveMilestone(mutualContractId, milestoneId);
+        await fetchMilestones();
+      }
     } catch (error) {
       console.error('Error approving milestone:', error);
     }
@@ -51,28 +52,14 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId: string }) =>
 
   const handleMarkPaid = async (milestoneId: string) => {
     try {
-      await markMilestonePaid(mutualContractId, milestoneId);
-      await fetchMilestones();
+      if (mutualContractId) {
+        await markMilestonePaid(mutualContractId, milestoneId);
+        await fetchMilestones();
+      }
     } catch (error) {
       console.error('Error marking milestone as paid:', error);
     }
   };
-
-  // const handleOpenDispute = (milestone: Milestone) => {
-  //   setSelectedMilestone(milestone);
-  //   setShowDisputeModal(true);
-  // };
-
-  // const handleDisputeSubmit = async (reason: string) => {
-  //   if (!selectedMilestone) return;
-  //   try {
-  //     await disputeMilestone(mutualContractId, selectedMilestone._id, reason);
-  //     await fetchMilestones();
-  //     setShowDisputeModal(false);
-  //   } catch (error) {
-  //     console.error('Error disputing milestone:', error);
-  //   }
-  // };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -120,6 +107,16 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId: string }) =>
         return null;
     }
   };
+
+  // Fixed condition: Show "No mutual contract established" when mutualContractId is NOT available
+  if (!mutualContractId) {
+    return (
+      <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">
+        <p className="text-center text-gray-600">No mutual contract established yet</p>
+        <p className="text-center text-sm text-gray-500 mt-2">Milestone tracking will be available once the contractor accepts the contract</p>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -179,19 +176,6 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId: string }) =>
           />
         </div>
       )}
-
-      {/* {showDisputeModal && selectedMilestone && (
-        <div 
-          className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
-          onClick={(e) => e.target === e.currentTarget && setShowDisputeModal(false)}
-        >
-          <DisputeModal
-            milestone={selectedMilestone}
-            onClose={() => setShowDisputeModal(false)}
-            onSubmit={handleDisputeSubmit}
-          />
-        </div>
-      )} */}
     </>
   );
 };

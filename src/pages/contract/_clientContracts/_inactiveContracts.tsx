@@ -85,14 +85,14 @@ const InactiveContracts: React.FC<InactiveContractsProps> = ({ offers = [] }) =>
     }
   };
 
-  const viewContract = (contractId: string, jobId?: string, applicationId?: string) => {
+  const viewContract = (hiringId: string, jobId?: string, applicationId?: string) => {
     const query: { jobId?: string; proposalId?: string } = {};
     
     if (jobId) query.jobId = jobId;
     if (applicationId) query.proposalId = applicationId;
 
     router.push({
-      pathname: `/contract/${contractId}`,
+      pathname: `/contract/${hiringId}`,
       query: Object.keys(query).length > 0 ? query : undefined
     });
   };

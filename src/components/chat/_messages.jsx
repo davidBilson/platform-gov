@@ -4,13 +4,41 @@ import { IoSendSharp } from 'react-icons/io5';
 import ProfilePicture from '@/components/profile/profilePicture';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { fetchProfilePicture } from '@/api/profile-api';
 
-const Messages = ({ hiringId, currentUser, otherUser }) => {
+const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
+  const [currentUserPfp, setCurrentUserPfp] = useState(null);
+  const [otherUserPfp, setOtherUserPfp] = useState(null);
 
+  useEffect(() => {
+    if (!currentUser?._id || !otherUser?._id) return;
+    const abortController = new AbortController();
+    const fetchProfilePictures = async () => {
+      try {
+        const [currentUserPfp, otherUserPfp] = await Promise.all([
+          fetchProfilePicture(currentUser._id),
+          fetchProfilePicture(otherUser._id)
+        ]);
+        if (!abortController.signal.aborted) {
+          setCurrentUserPfp(currentUserPfp);
+          setOtherUserPfp(otherUserPfp);
+        }
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          console.error('Error fetching profile pictures:', error);
+        }
+      }
+    };
+    fetchProfilePictures();
+  
+    return () => {
+      abortController.abort();
+    };
+  }, [currentUser?._id, otherUser?._id]);
 
   useEffect(() => {
     const newSocket = io(process.env.NEXT_PUBLIC_BASE_URL, {
@@ -21,15 +49,6 @@ const Messages = ({ hiringId, currentUser, otherUser }) => {
       }
     });
   
-    // Debug listeners
-    newSocket.on('connect', () => {
-      console.log('Socket connected:', newSocket.id);
-    });
-
-    newSocket.on('connect_error', (err) => {
-      console.error('Connection error:', err);
-    });
-
     setSocket(newSocket);
 
     return () => {
@@ -37,26 +56,24 @@ const Messages = ({ hiringId, currentUser, otherUser }) => {
     };
   }, []);
 
-  // Join chat room and fetch messages
   useEffect(() => {
-    if (!socket || !hiringId) return;
+    if (!socket || !jobId || !proposalId) return;
 
     const loadMessages = async () => {
       try {
         const { data } = await axios.get(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/hiring/${hiringId}/messages`
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/job/${jobId}/proposal/${proposalId}/messages`
         );
         setMessages(data);
       } catch (error) {
         console.error('Error loading messages:', error);
-        console.log('Attempted URL:', `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/hiring/${hiringId}/messages`);
       }
     };
 
-    socket.emit('join-hiring-chat', hiringId);
+    const roomId = `${jobId}-${proposalId}`;
+    socket.emit('join-chat-room', roomId);
     loadMessages();
 
-    // Listen for new messages from WebSocket
     socket.on('receive-message', (message) => {
       setMessages(prev => [...prev, message]);
     });
@@ -64,9 +81,8 @@ const Messages = ({ hiringId, currentUser, otherUser }) => {
     return () => {
       socket.off('receive-message');
     };
-  }, [socket, hiringId]);
+  }, [socket, jobId, proposalId]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -81,21 +97,16 @@ const Messages = ({ hiringId, currentUser, otherUser }) => {
       content: newMessage
     };
 
-    console.log('Sending message:', messageData);
-
     try {
-      // Send via HTTP POST
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/hiring/${hiringId}/messages`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}/api/chat/job/${jobId}/proposal/${proposalId}/messages`,
         messageData,
         { withCredentials: true }
       );
       
-      console.log('Message sent successfully:', response.data);
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
-      // Handle error (show user feedback)
     }
   };
 
@@ -114,10 +125,9 @@ const Messages = ({ hiringId, currentUser, otherUser }) => {
           >
             <div className={message.sender._id === currentUser._id ? 'self-end' : 'self-start'}>
               <ProfilePicture 
-                source={message.sender.profilePicture ?? ""} 
+                source={message.sender._id === currentUser._id ? currentUserPfp : message.sender._id === otherUser._id ? otherUserPfp : ""} 
                 alt={message.sender.name} 
-                dimension={60} 
-                iconType='user' 
+                dimension={60}
               />
             </div>
             <div className={`w-fit ${message.sender._id === currentUser._id ? 'pr-10 pt-1.5' : 'pl-10 pt-1.5'}`}>

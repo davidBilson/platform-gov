@@ -9,7 +9,7 @@ import { Jobs } from '@/types/jobs';
 import useAuthStore from '@/store/useAuth';
 import { getHiringOffer } from '@/api/hiring';
 import { getSingleContract } from '@/api/contract-api';
-
+import { useQuery } from '@tanstack/react-query';
 
 interface HiringDocument {
     jobId: { description: string };
@@ -21,17 +21,13 @@ interface HiringDocument {
     };
     clientNotes: string;
     applicationId: { coverLetter: string };
-    status: string; // Added status property
-  }
-
-interface ContractContractorProps {
-    contractId?: string;
-    jobId: string;
-    proposalId: string;
+    status: string;
 }
 
-interface MutualContract {
-    _id: string;
+interface ContractContractorProps {
+    hiringId?: string;
+    jobId: string;
+    proposalId: string;
 }
 
 const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
@@ -40,10 +36,9 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
     const [job, setJob] = useState<Jobs | null>(null);
 
     const [, setHiringOffer] = useState<HiringDocument>();
-    const [hiringId, setHiringId] = useState<string>('');
+    const [, setHiringId] = useState<string>('');
+    const [mutualContractId, setMutualContractId] = useState('')
     
-    
-    const [mutualContract, setMutualContract] = useState<MutualContract | null>(null);
     const { userId, role, name} = useAuthStore();
 
     useEffect(() => {
@@ -58,7 +53,6 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
             }
         }
         };
-        
         loadJob();
     }, [jobId]);
 
@@ -81,26 +75,26 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
         fetchHiringOffer();
       }, [jobId, proposalId]);
 
-      useEffect(() => {
-        const fetchSingleMutualContract =  async () => {
-            if (hiringId && job?.userId?._id && userId ) {
-                try {
-                    const mutualContract = await getSingleContract({
-                        hiringId: hiringId,
-                        clientId: job?.userId?._id,
-                        contractorId: userId
-                    })
-                    if (mutualContract) {
-                        console.log(mutualContract)
-                        setMutualContract(mutualContract.data);
-                    }
-                } catch (error) {
-                    console.error('Error loading contract:', error);
-                }
-            }
-        }
-        fetchSingleMutualContract();
-    }, [hiringId, job?.userId?._id, userId])
+      const { data: mutualContract } = useQuery({
+        queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
+        queryFn: async () => {
+            if (!job?.userId?._id || !userId) return null;
+            const response = await getSingleContract({
+                jobId: jobId,
+                clientId: job.userId._id,
+                contractorId: userId
+            });
+            setMutualContractId(response?.data._id)
+            console.log(response?.data._id)
+            return response?.data || null;
+        },
+        enabled: !!job?.userId?._id && !!userId,
+        refetchInterval: (query) => {
+            return !query.state.data ? 5000 : false;
+        },
+        refetchIntervalInBackground: true,
+        staleTime: Infinity
+    });
 
     return (
         <main>
@@ -117,6 +111,7 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
                     >
                         Details
                     </button>
+                    
                     <button 
                         onClick={() => setActiveTab('milestones')}
                         className={`border-b-3  pb-5 px-5 text-sm text-darkgray cursor-pointer ${
@@ -157,17 +152,17 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
                 <Timesheet />
             </section>
             <section className={activeTab === 'milestones' ? 'block' : 'hidden'}>
-                {
-                    mutualContract && <Milestones mutualContractId={mutualContract?._id} />
-                }
-                
+                <Milestones 
+                    mutualContractId={mutualContractId}
+                />
             </section>
             <section className={activeTab === 'retainer' ? 'block' : 'hidden'}>
                 <Retainer />
             </section>
             <section className={activeTab === 'messages' ? 'block' : 'hidden'}>
                 <Messages
-                    hiringId={hiringId}
+                    jobId={jobId}
+                    proposalId={proposalId}
                     
                     currentUser={{
                         _id: userId,
@@ -176,8 +171,8 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
                     }}
 
                     otherUser={{
-                        _id: job?.userId,
-                        name: "",
+                        _id: job?.userId?._id,
+                        name:job?.userId?.name,
                         profilePicture: ""
                     }}
                     

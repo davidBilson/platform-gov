@@ -30,8 +30,8 @@ export const createContract = async (contractData: {
 
 
 export const getSingleContract = async (contractData: {
-  hiringId: string;
-  clientId?: string;
+  jobId: string;
+  clientId: string;
   contractorId: string;
 }) => {
   try {

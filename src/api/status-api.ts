@@ -14,19 +14,21 @@ export const trackJobStatus = async (jobId: string) => {
 };
 
 export const trackHiringStatus = async (params: {
-    jobId: string;
-    contractorId: string;
-    clientId: string;
-  }) => {
-    try {
-      const response = await axios.get(
-        `${BASE_URL}${process.env.NEXT_PUBLIC_TRACK_HIRING_STATUS}`,
-        { params }
-      );
+  jobId: string;
+  contractorId: string;
+  clientId: string;
+}) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}${process.env.NEXT_PUBLIC_TRACK_HIRING_STATUS}`,
+      params
+    );
+    if (response) {
       return response.data;
-    } catch (error) {
-      console.error('Error tracking hiring status:', error);
     }
+  } catch (error) {
+    console.error('Error tracking hiring status:', error);
+  }
 };
 
 export const trackJobApplicationStatus = async (params: {

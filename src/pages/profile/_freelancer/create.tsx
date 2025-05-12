@@ -1,34 +1,32 @@
-
 "use client"
-import { fetchProfile, skillsList, expertiseList, certificationsList } from "@/api/profile-api";
-import { 
-  handleTextAreaInput, handleInputChange, handleProfileImageChange, addTag, removeTag, addWorkHistory, updateWorkHistory, removeWorkHistory, addDegree, updateDegree, removeDegree, submitProfileData } 
-from "@/utils/profiles/profile.contractor";
 import React, { useState, useRef, useEffect, ChangeEvent } from "react";
+import { useRouter } from 'next/router';
+import useAuthStore from '@/store/useAuth';
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
-import Legalagreement from "@/components/ui/legal-agreement";
+// API
+import { fetchProfile } from "@/api/profile-api";
+// Utils
 import { generateId } from "@/utils/profiles/profile.contractor";
+import { handleTextAreaInput, handleInputChange, handleProfileImageChange, addTag, removeTag, addWorkHistory, updateWorkHistory, removeWorkHistory, addDegree, updateDegree, removeDegree, submitProfileData } from "@/utils/profiles/profile.contractor";
+import { skillsList } from '@/utils/skillsExpertiseCertificationList/skillsList';
+import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
+import { certificationsList } from '@/utils/skillsExpertiseCertificationList/certificationList';
+import { usaStates, canadaStates, ukStates, australiaStates } from '@/utils/countryAndStates/index';
+// UI Components
+import Legalagreement from "@/components/ui/legal-agreement";
+import { toast } from "react-toastify";
+// Icons
 import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
-import useAuthStore from '@/store/useAuth';
 import { MdEdit } from "react-icons/md";
-import { useRouter } from 'next/router';
-import { toast } from "react-toastify";
-import { usaStates, canadaStates, ukStates, australiaStates } from '@/utils/countryAndStates/index'
-
-interface AuthStoreState {
-  userId: string;
-  name: string;
-}
 
 const statesByCountry = { USA: usaStates, UK: ukStates, Canada: canadaStates, Australia: australiaStates };
-const firmOptions = [
-  "Janus Global Advisors"
-];
+const firmOptions = [ "Janus Global Advisors" ];
 
 const CreateFreelancerProfile = () => {
+
   const router = useRouter();
-  const { userId, name } = useAuthStore() as AuthStoreState;
+  const { userId, name } = useAuthStore();
 
   const [formData, setFormData] = useState<ProfileFormData>({
     bio: "",
@@ -72,7 +70,6 @@ const CreateFreelancerProfile = () => {
   const [filteredCertifications, setFilteredCertifications] = useState<string[]>([]);
   const [expertiseInput, setExpertiseInput] = useState<string>("");
   const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
-  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
@@ -80,25 +77,19 @@ const CreateFreelancerProfile = () => {
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   const [showStatesDropdown, setShowStatesDropdown] = useState<boolean>(false);
   const [showFirmDropdown, setShowFirmDropdown] = useState<boolean>(false);
-  
   const [pendingSubmission, setPendingSubmission] = useState<boolean>(false);
   const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
   const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
-
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (showSkillsDropdown) {
-      const availableSkills = skillsList.filter(skill => 
-        !formData.skills.includes(skill)
-      );
+      const availableSkills = skillsList.filter(skill => !formData.skills.includes(skill));
       
       if (skillInput.trim()) {
-        const filtered = availableSkills.filter(skill => 
-          skill.toLowerCase().includes(skillInput.toLowerCase())
-        );
-        setFilteredSkills(filtered);
+          const filtered = availableSkills.filter(skill => skill.toLowerCase().includes(skillInput.toLowerCase()));
+          setFilteredSkills(filtered);
       } else {
         setFilteredSkills(availableSkills);
       }
@@ -109,45 +100,36 @@ const CreateFreelancerProfile = () => {
 
   useEffect(() => {
     if (showExpertiseDropdown) {
-      const availableExpertise = expertiseList.filter(exp => 
-        !formData.expertise.includes(exp)
-      );
+        const availableExpertise = expertiseList.filter(exp => !formData.expertise.includes(exp));
       
-      if (expertiseInput.trim()) {
-        const filtered = availableExpertise.filter(exp => 
-          exp.toLowerCase().includes(expertiseInput.toLowerCase())
-        );
-        setFilteredExpertise(filtered);
-      } else {
-        setFilteredExpertise(availableExpertise);
-      }
+        if (expertiseInput.trim()) {
+          const filtered = availableExpertise.filter(exp => exp.toLowerCase().includes(expertiseInput.toLowerCase()));
+          setFilteredExpertise(filtered);
+        } else {
+          setFilteredExpertise(availableExpertise);
+        }
     } else {
       setFilteredExpertise(expertiseList.filter(exp => !formData.expertise.includes(exp)));
     }
   }, [expertiseInput, formData.expertise, showExpertiseDropdown]);
 
-    useEffect(() => {
-      if (showCertificationsDropdown) {
-        const availableCertifications = certificationsList.filter(cert => 
-          !formData.certifications.includes(cert)
-        );
-        
-        if (certificationInput.trim()) {
-          const filtered = availableCertifications.filter(cert => 
-            cert.toLowerCase().includes(certificationInput.toLowerCase())
-          );
-          setFilteredCertifications(filtered);
-        } else {
-          setFilteredCertifications(availableCertifications);
-        }
+  useEffect(() => {
+    if (showCertificationsDropdown) {
+      const availableCertifications = certificationsList.filter(cert => !formData.certifications.includes(cert));
+      
+      if (certificationInput.trim()) {
+        const filtered = availableCertifications.filter(cert => cert.toLowerCase().includes(certificationInput.toLowerCase()));
+        setFilteredCertifications(filtered);
       } else {
-        setFilteredCertifications(certificationsList.filter(cert => !formData.certifications.includes(cert)));
+        setFilteredCertifications(availableCertifications);
       }
-    }, [certificationInput, formData.certifications, showCertificationsDropdown]);
+    } else {
+      setFilteredCertifications(certificationsList.filter(cert => !formData.certifications.includes(cert)));
+    }
+  }, [certificationInput, formData.certifications, showCertificationsDropdown]);
 
   const fetchUserProfile = async () => {
     try {
-      // setIsLoading(true);
       const response = await fetchProfile(userId);
       
       if (response.success && response.data) {
@@ -224,53 +206,27 @@ const CreateFreelancerProfile = () => {
     fileInputRef.current?.click();
   };
 
-const addTagWrapper = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
-  const setInputFunc = type === 'skills' ? setSkillInput : 
-                      type === 'expertise' ? setExpertiseInput : 
-                      type === 'certifications' ? setCertificationInput : null;
-  addTag(type, value, formData, setFormData, setInputFunc);
-};
-
-const removeTagWrapper = (type: 'skills' | 'expertise' | 'certifications', index: number) => {
-  removeTag(type, index, setFormData);
-};
-
-const addWorkHistoryWrapper = () => {
-  addWorkHistory(setFormData);
-};
-
-const updateWorkHistoryWrapper = (id: string, field: keyof WorkHistory, value: string) => {
-  updateWorkHistory(id, field, value, setFormData);
-};
-
-const removeWorkHistoryWrapper = (id: string) => {
-  removeWorkHistory(id, formData, setFormData);
-};
-
-const addDegreeWrapper = () => {
-  addDegree(setFormData);
-};
-
-const updateDegreeWrapper = (id: string, field: keyof Degree, value: string) => {
-  updateDegree(id, field, value, setFormData);
-};
-
-const removeDegreeWrapper = (id: string) => {
-  removeDegree(id, formData, setFormData);
-};
+  const addTagWrapper = (type: 'skills' | 'expertise' | 'certifications', value: string) => {
+    const setInputFunc = type === 'skills' ? setSkillInput : 
+                        type === 'expertise' ? setExpertiseInput : 
+                        type === 'certifications' ? setCertificationInput : null;
+    addTag(type, value, formData, setFormData, setInputFunc);
+  };
+  const removeTagWrapper = (type: 'skills' | 'expertise' | 'certifications', index: number) => { removeTag(type, index, setFormData)};
+  const addWorkHistoryWrapper = () => { addWorkHistory(setFormData)};
+  const updateWorkHistoryWrapper = (id: string, field: keyof WorkHistory, value: string) => { updateWorkHistory(id, field, value, setFormData); };
+  const removeWorkHistoryWrapper = (id: string) => { removeWorkHistory(id, formData, setFormData) };
+  const addDegreeWrapper = () => { addDegree(setFormData)};
+  const updateDegreeWrapper = (id: string, field: keyof Degree, value: string) => {updateDegree(id, field, value, setFormData); };
+  const removeDegreeWrapper = (id: string) => { removeDegree(id, formData, setFormData) };
 
   let called = false;
-
   function legalSetterOnce() {
     if (called) return;
     called = true;
     setShowLegalAgreement(true);
   }
 
-
-  
-  // The function that handles the actual API call and data processing
-  // Submit profile data
   const submitProfileDataWrapper = async () => {
     await submitProfileData(
       formData, 
@@ -287,19 +243,16 @@ const removeDegreeWrapper = (id: string) => {
   useEffect(() => {
     if (pendingSubmission && acceptedLegalAgreement && showLegalAgreement === false) {
       setPendingSubmission(false);
-
       submitProfileDataWrapper();
     }
   }, [pendingSubmission, acceptedLegalAgreement, showLegalAgreement]);
 
 const handleSubmit = (e: React.FormEvent): void => {
   e.preventDefault();
-  
   if (acceptedLegalAgreement) {
     submitProfileDataWrapper();
     return;
   }
-  
   setPendingSubmission(true);
   legalSetterOnce();
 };
@@ -327,15 +280,9 @@ const handleSubmit = (e: React.FormEvent): void => {
 
   return (
     <>
-    { 
-      showLegalAgreement && 
-      <Legalagreement
-        setShowLegalAgreement={setShowLegalAgreement} 
-        acceptedLegalAgreement={acceptedLegalAgreement}
-        setAcceptedLegalAgreement={setAcceptedLegalAgreement}
-      />
-      }
+    { showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} /> }
     <main className="p-6">
+      
       <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
         {/* Bio */}
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-col sm:flex-row sm:items-center gap-5">

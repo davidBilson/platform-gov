@@ -6,10 +6,10 @@ interface NotificationDropdownProps {
     notificationsOpen: boolean;
 }
 
-const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ notificationsOpen }) => {
+const NotificationDropdown  = ({ notificationsOpen }: NotificationDropdownProps) => {
 
   return (
-    <div className={`absolute top-15 -right-[500%] w-68.75 p-7.5 bg-white border  border-skyblue rounded shadow-lg z-10 ${notificationsOpen ? 'block' : 'hidden'}`}>
+    <div className={`absolute top-15 right-0 w-68.75 p-7.5 bg-white border  border-skyblue rounded shadow-lg z-10 ${notificationsOpen ? 'block' : 'hidden'}`}>
         <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex items-start flex-col  gap-7.5">
             
             {[1, 2, 3, 4].map((item) => (

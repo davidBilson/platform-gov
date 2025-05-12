@@ -1,7 +1,7 @@
 "use client"
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
-
+import { useQuery } from '@tanstack/react-query';
 import authStore from '@/store/useAuth';
 import { useFeedStore } from '@/store/useFeed';
 import { useContractorFilter } from '@/store/useContractorFilter';
@@ -14,6 +14,8 @@ import { FaBell } from 'react-icons/fa6';
 import { FiLogOut, FiSearch } from 'react-icons/fi';
 import { HiMenuAlt3 } from 'react-icons/hi';
 import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
+import ProfilePicture from '@/components/profile/profilePicture';
+import { fetchProfilePicture } from '@/api/profile-api';
 
 const UserNavbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -27,7 +29,16 @@ const UserNavbar = () => {
   const router = useRouter();
   const pathname = router.pathname;
   const { setFeedType, feedType } = useFeedStore();
-  const { name, role, resetAll } = authStore();
+  const { name, role, resetAll, userId } = authStore();
+
+  // const [ profilePicture, setProfilePicture] = useState<string | null>(null);
+  
+  const { data: profilePicture } = useQuery({
+    queryKey: ['profilePicture', userId],
+    queryFn: () => fetchProfilePicture(userId),
+    enabled: !!userId, // Only fetch if userId exists
+    staleTime: Infinity // Cache indefinitely
+  });
 
   // Get both search terms with aliases to avoid conflicts
   const { searchTerm: contractorSearchTerm, setSearchTerm: setContractorSearchTerm } = useContractorFilter();
@@ -242,7 +253,6 @@ const UserNavbar = () => {
               <button 
                 onClick={() => {
                   setNotificationsOpen(!notificationsOpen);
-                  // Close other dropdowns when opening notifications
                   if (!notificationsOpen) {
                     setActiveDropdown(null);
                   }
@@ -250,7 +260,6 @@ const UserNavbar = () => {
                 className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
               >
                   <FaBell size={24} />
-                  {/* Optional notification badge */}
                   <span className="absolute -top-1 -right-2 text-red-500 font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
                     3
                   </span>
@@ -258,12 +267,19 @@ const UserNavbar = () => {
               <NotificationsDropdown notificationsOpen={notificationsOpen} />
             </div>
             <div ref={profileDropdownRef} className="relative">
-              <p 
-                onClick={() => toggleDropdown('profile')} 
-                className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
-              >
-                {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
-              </p>
+              <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('profile')}>
+                {
+                  profilePicture ? (
+                    <ProfilePicture source={profilePicture} alt='user' dimension={48} />
+                  ): (
+                    <p 
+                      className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+                    >
+                      {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                    </p>
+                  )
+                }
+              </div>
               
               <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'profile' ? 'block' : 'hidden'}`}>
                 <button 
@@ -400,12 +416,19 @@ const UserNavbar = () => {
 
         {/* Desktop profile icon with dropdown */}
         <div className="hidden lg:block relative" ref={profileDropdownRef}>
-          <p 
-            onClick={() => toggleDropdown('profile')} 
-            className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
-          >
-            {name ? (name.split(' ') as string[]).map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
-          </p>
+            <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('profile')}>
+                {
+                  profilePicture ? (
+                    <ProfilePicture source={profilePicture} alt='user' dimension={48} />
+                  ) : (
+                    <p 
+                      className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+                    >
+                      {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                    </p>
+                  )
+                }
+              </div>
           
           <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'profile' ? 'block' : 'hidden'}`}>
             <button onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
@@ -470,12 +493,19 @@ const UserNavbar = () => {
           </ul>
           
           <div className="mt-6 flex justify-center relative" ref={profileDropdownRef}>
-            <div 
-              onClick={() => toggleDropdown('mobileProfile')} 
-              className="w-14 h-14 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
-            >
-              {name ? (name.split(' ') as string[]).map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
-            </div>
+          <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('mobileProfile')}>
+                {
+                  profilePicture ? (
+                    <ProfilePicture source={profilePicture} alt='user' dimension={48} />
+                  ): (
+                    <p 
+                      className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+                    >
+                      {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                    </p>
+                  )
+                }
+              </div>
             
             <div className={`absolute top-full mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'mobileProfile' ? 'block' : 'hidden'}`}>
               <a onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">

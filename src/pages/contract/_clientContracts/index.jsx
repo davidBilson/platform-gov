@@ -1,3 +1,4 @@
+// ClientContracts.tsx
 import { useEffect, useState } from 'react';
 import ActiveContracts from './_activeContracts';
 import CompletedContracts from './_completedContracts';
@@ -29,9 +30,12 @@ const ClientContracts = () => {
     fetchOffers();
   }, [userId]);
 
-  // Filter offers for InactiveContracts (offered, accepted, declined, withdrawn)
+  const activeOffers = offers.filter(offer => 
+    ['offered', 'accepted'].includes(offer.status)
+  );
+
   const inactiveOffers = offers.filter(offer => 
-    ['offered', 'accepted', 'declined', 'withdrawn'].includes(offer.status)
+    ['declined', 'withdrawn'].includes(offer.status)
   );
 
   if (loading) {
@@ -40,7 +44,7 @@ const ClientContracts = () => {
 
   return (
     <>
-      <ActiveContracts />
+      <ActiveContracts offers={activeOffers} />
       <InactiveContracts offers={inactiveOffers} />
       <CompletedContracts />
     </>
