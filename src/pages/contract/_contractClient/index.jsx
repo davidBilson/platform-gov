@@ -78,7 +78,6 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
             case 'messages':
                 return (
                     <Messages
-                        // add proposalId and jobId here
                         jobId={jobId}
                         proposalId={proposalId}
                         currentUser={{

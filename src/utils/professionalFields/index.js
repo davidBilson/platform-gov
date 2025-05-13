@@ -3,5 +3,14 @@ export { canadaProfessionalFields } from './canada';
 export { ukProfessionalFields } from './unitedKingdom';
 export { australiaProfessionalFields } from './australia';
 
-// import anywhere
-// import { professionalFieldsAndAreasOfExpertise, canadaProfessionalFields, ukProfessionalFields, australiaProfessionalFields } from '@/utils/professionalFields';
+import { professionalFieldsAndAreasOfExpertise } from './general';
+import { canadaProfessionalFields } from './canada';
+import { ukProfessionalFields } from './unitedKingdom';
+import { australiaProfessionalFields } from './australia';
+
+export const professionalFields = [
+    ...professionalFieldsAndAreasOfExpertise,
+    ...canadaProfessionalFields,
+    ...ukProfessionalFields,
+    ...australiaProfessionalFields,
+];

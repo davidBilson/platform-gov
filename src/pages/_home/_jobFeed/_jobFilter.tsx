@@ -4,10 +4,10 @@ import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "reac
 import { Jobs } from '@/types/jobs';
 import { useFeedStore } from '@/store/useFeed';
 import { RxReset } from "react-icons/rx";
-import { australiaDepartments } from '@/utils/govDeptAgency/australia'
-import { canadaDepartments } from '@/utils/govDeptAgency/canada'
-import { ukDepartments } from '@/utils/govDeptAgency/uk'
-import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govDeptAgency/us'
+import { australiaDepartments } from '@/utils/govtAgencyAndClearanceIndex/australia'
+import { canadaDepartments } from '@/utils/govtAgencyAndClearanceIndex/canada'
+import { ukDepartments } from '@/utils/govtAgencyAndClearanceIndex/uk'
+import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govtAgencyAndClearanceIndex/us'
 import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates'
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from 'react-toastify';
@@ -161,19 +161,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
   }, [domainFocus, usStates, allCountries]);
 
   useEffect(() => {
-    if (governmentType && departmentInputRef.current) {
-
-      let depts: string[] = [];
-      if (governmentType === 'Federal') {
-        depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
-      } else if (governmentType === 'State') {
-        depts = [...australiaDepartments, ...canadaDepartments, ...ukDepartments];
-      }
-      setFilteredDepartments(depts);
-    }
-  }, [governmentType]);
-
-  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       // For location dropdown
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node) &&
@@ -206,24 +193,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
     };
   }, []);
 
-   const handleDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setDepartment(value);
-    
-    if (governmentType) {
-      // Use the imported arrays directly based on government type
-      let depts: string[] = [];
-      if (governmentType === 'Federal') {
-        depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
-      } else if (governmentType === 'State') {
-        depts = [...australiaDepartments, ...canadaDepartments, ...ukDepartments];
-      }
-      setFilteredDepartments(
-        depts.filter(dept => dept.toLowerCase().includes(value.toLowerCase()))
-      );
-    }
-  };
-
   const handleDomainDetailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setDomainDetail(value);
@@ -235,11 +204,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
     }
   };
 
-  // Select department from dropdown
-  const selectDepartment = (dept: string) => {
-    setDepartment(dept);
-    setShowDepartmentDropdown(false);
-  };
+
 
   // Select domain detail from dropdown
   const selectDomainDetail = (detail: string) => {
@@ -253,7 +218,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
     
     let filtered = [...jobs];
     const activeFiltersList: Array<{id: string, name: string}> = [];
-
+  
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(job => 
@@ -262,13 +227,13 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
         job.clientName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
+  
     // Filter by job type
     if (jobType) {
       filtered = filtered.filter(job => job.employmentType === jobType);
       activeFiltersList.push({ id: 'jobType', name: `Job Type: ${jobType}` });
     }
-
+  
     // Filter by security clearance
     if (securityClearance) {
       filtered = filtered.filter(job => 
@@ -276,7 +241,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       );
       activeFiltersList.push({ id: 'securityClearance', name: `Clearance: ${securityClearance}` });
     }
-
+  
     // Filter by skills
     if (skillsAndExpertise) {
       filtered = filtered.filter(job => 
@@ -285,28 +250,29 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       );
       activeFiltersList.push({ id: 'skills', name: `Skills & Expertise: ${skillsAndExpertise}` });
     }
-
+  
     // Filter by certifications
     if (certifications) {
       filtered = filtered.filter(job => job.requiredCertifications.includes(certifications));
-      activeFiltersList.push({ id: 'certifications', name: `Certs & Education: ${certifications}` });
+      activeFiltersList.push({ id: 'certifications', name: `Certifications: ${certifications}` });
     }
-
+  
     // Filter by government experience
     if (requirePrevGovtExp) {
       filtered = filtered.filter(job => job.userRole?.includes('government'));
       activeFiltersList.push({ id: 'govtExp', name: 'Previous Govt. Experience' });
     }
-
-    // Filter by government type and department
+  
+    // Filter by government type (independent of department)
     if (governmentType) {
       filtered = filtered.filter(job => job.clientIndustry?.includes(governmentType.toLowerCase()));
       activeFiltersList.push({ id: 'govtType', name: `${governmentType} Government` });
-      
-      if (department) {
-        filtered = filtered.filter(job => job.clientName.includes(department));
-        activeFiltersList.push({ id: 'department', name: `Department: ${department}` });
-      }
+    }
+    
+    // Independent department filter
+    if (department) {
+      filtered = filtered.filter(job => job.clientName.includes(department));
+      activeFiltersList.push({ id: 'department', name: `Department: ${department}` });
     }
     
     // Filter by location
@@ -335,12 +301,13 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       
       activeFiltersList.push({ id: 'domainFocus', name: domainFilterName });
     }
-
+  
     // Update active filters and filtered jobs
     setActiveFilters(activeFiltersList);
     onFilterChange(filtered);
   }, [searchTerm, jobType, securityClearance, skillsAndExpertise, certifications, requirePrevGovtExp, governmentType, department, location, domainFocus, domainDetail, jobs, loading]);
-
+  
+  
   // Handle saved search selection
   const handleSavedSearchSelect = (id: string) => {
     const searchId = id;
@@ -570,7 +537,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
               value={certifications}
               onChange={(e) => setCertifications(e.target.value)}
             >
-              <option value="">Certs & Education</option>
+               <option value="">Certifications</option>
               {availableCertifications.map((cert, index) => (
                 <option key={`cert-${index}`} value={cert}>{cert}</option>
               ))}
@@ -733,10 +700,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
               name="govt" 
               id="state" 
               checked={governmentType === 'State'}
-              onChange={() => {
-                setGovernmentType('State'); 
-                setDepartment('');
-              }}
+              onChange={() => setGovernmentType('State')}
               className="h-4 w-4 text-deepskyblue border-gray-300 focus:ring-deepskyblue" 
             />
             <label htmlFor="state" className="ml-2 text-gray-700 text-sm">State</label>
@@ -748,57 +712,85 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
               name="govt" 
               id="federal" 
               checked={governmentType === 'Federal'}
-              onChange={() => {
-                setGovernmentType('Federal');
-                setDepartment('');
-              }}
+              onChange={() => setGovernmentType('Federal')}
               className="h-4 w-4 text-deepskyblue border-gray-300 focus:ring-deepskyblue" 
             />
             <label htmlFor="federal" className="ml-2 text-gray-700 text-sm">Federal</label>
           </div>
           
           {/* Department/Agency selector moved from skyblue container */}
-          {governmentType && (
-            <div className="relative flex-grow w-full max-w-125">
-              <input 
-                ref={departmentInputRef}
-                type="text" 
-                placeholder="Select departments or agencies" 
-                className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
-                value={department}
-                onChange={handleDepartmentChange}
-                onFocus={() => setShowDepartmentDropdown(true)}
-              />
-              <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                <svg className="w-5 h-5 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {/* Dropdown for departments */}
-            {showDepartmentDropdown && governmentType && (
-              <div 
-                ref={departmentDropdownRef}
-                className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-              >
-                {filteredDepartments.length > 0 ? (
-                  filteredDepartments.map((dept, index) => (
-                    <div
-                      key={`dept-${index}`}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                      onClick={() => selectDepartment(dept)}
-                    >
-                      {dept}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-sm text-gray-500">No departments found</div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-        
+          {/* Department/Agency selector - independent version */}
+<div className="relative flex-grow w-full max-w-125">
+  <input 
+    ref={departmentInputRef}
+    type="text" 
+    placeholder="Select departments or agencies" 
+    className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+    value={department}
+    onChange={(e) => {
+      const value = e.target.value;
+      setDepartment(value);
+      // Combine all departments from all sources
+      const allDepts = [
+        ...usCongressional, 
+        ...usIntelligenceAndOversight, 
+        ...usInnovationAndIP, 
+        ...usScienceAgencies, 
+        ...usDepartments,
+        ...australiaDepartments, 
+        ...canadaDepartments, 
+        ...ukDepartments
+      ];
+      setFilteredDepartments(
+        allDepts.filter(dept => 
+          dept.toLowerCase().includes(value.toLowerCase())
+        )
+      );
+    }}
+    onFocus={() => {
+      setShowDepartmentDropdown(true);
+      // Initialize with all departments when focused
+      const allDepts = [
+        ...usCongressional, 
+        ...usIntelligenceAndOversight, 
+        ...usInnovationAndIP, 
+        ...usScienceAgencies, 
+        ...usDepartments,
+        ...australiaDepartments, 
+        ...canadaDepartments, 
+        ...ukDepartments
+      ];
+      setFilteredDepartments(allDepts);
+    }}
+  />
+  <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+    <svg className="w-5 h-5 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  {showDepartmentDropdown && (
+    <div 
+      ref={departmentDropdownRef}
+      className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+    >
+      {/* Show all departments in a single list without government type categorization */}
+      {filteredDepartments.map((dept, index) => (
+        <div
+          key={`dept-${index}`}
+          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+          onClick={() => {
+            setDepartment(dept);
+            setShowDepartmentDropdown(false);
+            // No automatic government type setting here
+          }}
+        >
+          {dept}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
           </div>
         {(

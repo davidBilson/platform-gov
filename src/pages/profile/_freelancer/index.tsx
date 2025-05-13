@@ -53,9 +53,10 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   },[profileData]);
 
   // Extract profile data with fallbacks
-  const profession = profileData?.primaryPosition || 'Web Developer';
+  const profession = profileData?.primaryPosition || '';
   const location = profileData?.location?.country + ' ' + profileData?.location?.state;
   const rate = profileData?.ratePerHour || 75;
+  const clearance = profileData?.clearance || "";
   const skills = profileData?.skills || [];
   const expertise = profileData?.expertise || [];
   const certifications = profileData?.certifications || [];
@@ -169,7 +170,10 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
             </div>
 
             {/* Rate */}
-            <p className='font-semibold mb-6'>Proposed Rate: ${rate}</p>
+            <p className='font-semibold mb-6'>Clearance: {clearance}</p>
+
+            {/* Rate */}
+            <p className='font-semibold mb-6'>Rate: ${rate}</p>
 
             {/* Work History */}
             <div>

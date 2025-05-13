@@ -110,6 +110,13 @@ const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
+
   const formatTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -148,6 +155,7 @@ const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
           name="message"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
           className='w-full pt-3.75 text-boldblue text-sm placeholder:text-boldblue resize-none outline-none overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'
         />

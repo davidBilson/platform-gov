@@ -2,15 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { IoMdArrowDropdown, IoMdSearch } from 'react-icons/io';
 import { MdOutlineRadioButtonChecked, MdOutlineRadioButtonUnchecked } from "react-icons/md";
 import { RxReset } from "react-icons/rx";
-import { australiaDepartments } from '@/utils/govDeptAgency/australia';
-import { canadaDepartments } from '@/utils/govDeptAgency/canada';
-import { ukDepartments } from '@/utils/govDeptAgency/uk';
-import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govDeptAgency/us';
+import { australiaDepartments } from '@/utils/govtAgencyAndClearanceIndex/australia';
+import { canadaDepartments } from '@/utils/govtAgencyAndClearanceIndex/canada';
+import { ukDepartments } from '@/utils/govtAgencyAndClearanceIndex/uk';
+import { usCongressional, usIntelligenceAndOversight, usInnovationAndIP, usScienceAgencies, usDepartments } from '@/utils/govtAgencyAndClearanceIndex/us';
 import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
 import { useFeedStore } from '@/store/useFeed';
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from 'react-toastify';
 import { useContractorFilter } from '@/store/useContractorFilter';
+import { professionalFields } from "@/utils/professionalFields/index"
 
 type Country = string;
 type StateWithCountry = [string, string];
@@ -19,7 +20,7 @@ type USState = string;
 export interface FilterOptions {
   searchTerm: string;
   profession: string;
-  securityClearance: string;
+  clearance: string;
   skillsAndExpertise: string;
   certifications: string;
   requireGovtExperience: boolean;
@@ -35,7 +36,7 @@ const ContractorFilter = () => {
   const {
     searchTerm, setSearchTerm,
     profession, setProfession,
-    securityClearance, setSecurityClearance,
+    clearance, setClearance,
     skillsAndExpertise, setSkillsAndExpertise,
     certifications, setCertifications,
     requireGovtExperience, setRequireGovtExperience,
@@ -47,7 +48,7 @@ const ContractorFilter = () => {
     resetFilters
   } = useContractorFilter();
 
-  const mockProfessions = ['Software Developer', 'Project Manager', 'Data Analyst', 'Cybersecurity Specialist', 'Systems Architect', 'DevOps Engineer'];
+  const professions = professionalFields;
   const mockSkillsAndExpertise = ['React', 'Java', 'Python', 'TypeScript', 'Project Management', 'Frontend', 'Backend', 'Full Stack', 'DevOps', 'Data Science', 'Cloud Architecture'];
   const mockCertifications = ['AWS', 'PMP', 'CISSP', 'Azure', 'Scrum Master', 'CompTIA Security+', 'ITIL', 'CCNA', 'CEH'];
   const mockClearances = ['Secret', 'Top Secret', 'Confidential', 'Public Trust', 'SCI'];
@@ -61,6 +62,9 @@ const ContractorFilter = () => {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [showSavedSearchesDropdown, setShowSavedSearchesDropdown] = useState(false);
   const [locationClickTime, setLocationClickTime] = useState<number>(0);
+  const [showProfessionDropdown, setShowProfessionDropdown] = useState(false);
+  const [filteredProfessions, setFilteredProfessions] = useState<string[]>(professions);
+
 
   // Location data
   const [allCountries, setAllCountries] = useState<Country[]>([]);
@@ -75,6 +79,8 @@ const ContractorFilter = () => {
   const departmentDropdownRef = useRef<HTMLDivElement>(null);
   const domainDetailInputRef = useRef<HTMLInputElement>(null);
   const domainDetailDropdownRef = useRef<HTMLDivElement>(null);
+  const professionInputRef = useRef<HTMLInputElement>(null);
+  const professionDropdownRef = useRef<HTMLDivElement>(null);
 
   const {addSavedSearch, removeSavedSearch, getSavedSearchesByFeedType} = useFeedStore();
   
@@ -116,19 +122,6 @@ const ContractorFilter = () => {
     setDomainDetail('');
   }, [domainFocus, usStates, allCountries]);
 
-  // Set departments based on government type
-  useEffect(() => {
-    if (governmentType && departmentInputRef.current) {
-      let depts: string[] = [];
-      if (governmentType === 'Federal') {
-        depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
-      } else if (governmentType === 'State') {
-        depts = [...australiaDepartments, ...canadaDepartments, ...ukDepartments];
-      }
-      setFilteredDepartments(depts);
-    }
-  }, [governmentType]);
-
   // Handle clicks outside dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -136,6 +129,11 @@ const ContractorFilter = () => {
       if (locationDropdownRef.current && !locationDropdownRef.current.contains(event.target as Node) &&
           locationInputRef.current && !locationInputRef.current.contains(event.target as Node)) {
         setShowLocationDropdown(false);
+      }
+
+      if (professionDropdownRef.current && !professionDropdownRef.current.contains(event.target as Node) &&
+          professionInputRef.current && !professionInputRef.current.contains(event.target as Node)) {
+        setShowProfessionDropdown(false);
       }
       
       // Department dropdown
@@ -165,21 +163,17 @@ const ContractorFilter = () => {
     };
   }, []);
 
-  const handleDepartmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfessionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setDepartment(value);
-    
-    if (governmentType) {
-      let depts: string[] = [];
-      if (governmentType === 'Federal') {
-        depts = [...usCongressional, ...usIntelligenceAndOversight, ...usInnovationAndIP, ...usScienceAgencies, ...usDepartments];
-      } else if (governmentType === 'State') {
-        depts = [...australiaDepartments, ...canadaDepartments, ...ukDepartments];
-      }
-      setFilteredDepartments(
-        depts.filter(dept => dept.toLowerCase().includes(value.toLowerCase()))
-      );
-    }
+    setProfession(value);
+    setFilteredProfessions(
+      professions.filter(prof => prof.toLowerCase().includes(value.toLowerCase()))
+    );
+  };
+  
+  const selectProfession = (prof: string) => {
+    setProfession(prof);
+    setShowProfessionDropdown(false);
   };
 
   // Handle domain detail input change
@@ -218,7 +212,7 @@ const ContractorFilter = () => {
         const filters = JSON.parse(savedSearch.filters);
         setSearchTerm(filters.searchTerm || '');
         setProfession(filters.profession || '');
-        setSecurityClearance(filters.securityClearance || '');
+        setClearance(filters.clearance || '');
         setSkillsAndExpertise(filters.skillsAndExpertise || '');
         setCertifications(filters.certifications || '');
         setRequireGovtExperience(filters.requireGovtExperience || false);
@@ -232,7 +226,7 @@ const ContractorFilter = () => {
   };
 
   const saveSearch = () => {
-    if (!searchTerm && !profession && !securityClearance && !skillsAndExpertise && 
+    if (!searchTerm && !profession && !clearance && !skillsAndExpertise && 
         !certifications && !requireGovtExperience && !governmentType && 
         !location && !domainFocus) {
       return;
@@ -245,7 +239,7 @@ const ContractorFilter = () => {
     const filters = {
       searchTerm,
       profession,
-      securityClearance,
+      clearance,
       skillsAndExpertise,
       certifications,
       requireGovtExperience,
@@ -368,29 +362,60 @@ const ContractorFilter = () => {
       <h3 className="text-gray-700 mb-3">Filter by</h3>
       
       <div className="flex flex-wrap gap-3 mb-6">
+
         {/* Profession filter */}
-        <div className="relative w-full sm:w-64">
-          <select 
-            className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
-            value={profession}
-            onChange={(e) => setProfession(e.target.value)}
+       {/* Profession filter */}
+<div className="relative w-full sm:w-64">
+  <input 
+    ref={professionInputRef}
+    type="text" 
+    placeholder="Title/Profession" 
+    className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+    value={profession}
+    onChange={handleProfessionChange}
+    onFocus={() => {
+      setShowProfessionDropdown(true);
+      setFilteredProfessions(professions);
+    }}
+  />
+  <button 
+    className="absolute right-4 top-1/2 transform -translate-y-1/2"
+    onClick={(e) => {
+      e.stopPropagation();
+      setShowProfessionDropdown(!showProfessionDropdown);
+    }}
+  >
+    <IoMdArrowDropdown size={20} className="text-boldblue" />
+  </button>
+
+  {showProfessionDropdown && (
+    <div 
+      ref={professionDropdownRef}
+      className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+    >
+      {filteredProfessions.length > 0 ? (
+        filteredProfessions.map((prof, index) => (
+          <div
+            key={`prof-${index}`}
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+            onClick={() => selectProfession(prof)}
           >
-            <option value="">Title/Profession</option>
-            {mockProfessions.map((type, index) => (
-              <option key={`profession-${index}`} value={type}>{type}</option>
-            ))}
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-            <IoMdArrowDropdown size={20} className="text-boldblue" />
+            {prof}
           </div>
-        </div>
+        ))
+      ) : (
+        <div className="px-4 py-2 text-sm text-gray-500">No professions found</div>
+      )}
+    </div>
+  )}
+</div>
         
         {/* Security Clearance filter */}
         <div className="relative w-full sm:w-64">
           <select 
             className="border border-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue appearance-none text-boldblue"
-            value={securityClearance}
-            onChange={(e) => setSecurityClearance(e.target.value)}
+            value={clearance}
+            onChange={(e) => setClearance(e.target.value)}
           >
             <option value="">Security Clearance</option>
             {mockClearances.map((clearance, index) => (
@@ -426,7 +451,7 @@ const ContractorFilter = () => {
             value={certifications}
             onChange={(e) => setCertifications(e.target.value)}
           >
-            <option value="">Certs & Education</option>
+            <option value="">Certifications</option>
             {mockCertifications.map((cert, index) => (
               <option key={`cert-${index}`} value={cert}>{cert}</option>
             ))}
@@ -611,49 +636,115 @@ const ContractorFilter = () => {
         </div>
         
         {/* Department/Agency selector */}
-        {governmentType && (
-          <div className="relative flex-grow w-full max-w-125">
-            <input 
-              ref={departmentInputRef}
-              type="text" 
-              placeholder="Select departments or agencies" 
-              className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
-              value={department}
-              onChange={handleDepartmentChange}
-              onFocus={() => setShowDepartmentDropdown(true)}
-            />
-            <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
-              <svg className="w-5 h-5 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          
-            {showDepartmentDropdown && governmentType && (
-              <div 
-                ref={departmentDropdownRef}
-                className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-              >
-                {filteredDepartments.length > 0 ? (
-                  filteredDepartments.map((dept, index) => (
-                    <div
-                      key={`dept-${index}`}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                      onClick={() => selectDepartment(dept)}
-                    >
-                      {dept}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-2 text-sm text-gray-500">No departments found</div>
-                )}
-              </div>
-            )}
+        <div className="relative flex-grow w-full max-w-125">
+  <input 
+    ref={departmentInputRef}
+    type="text" 
+    placeholder="Select departments or agencies" 
+    className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+    value={department}
+    onChange={(e) => {
+      const value = e.target.value;
+      setDepartment(value);
+      // Combine all departments from all sources
+      const allDepts = [
+        ...usCongressional, 
+        ...usIntelligenceAndOversight, 
+        ...usInnovationAndIP, 
+        ...usScienceAgencies, 
+        ...usDepartments,
+        ...australiaDepartments, 
+        ...canadaDepartments, 
+        ...ukDepartments
+      ];
+      setFilteredDepartments(
+        allDepts.filter(dept => 
+          dept.toLowerCase().includes(value.toLowerCase())
+        )
+      );
+    }}
+    onFocus={() => {
+      setShowDepartmentDropdown(true);
+      // Initialize with all departments when focused
+      const allDepts = [
+        ...usCongressional, 
+        ...usIntelligenceAndOversight, 
+        ...usInnovationAndIP, 
+        ...usScienceAgencies, 
+        ...usDepartments,
+        ...australiaDepartments, 
+        ...canadaDepartments, 
+        ...ukDepartments
+      ];
+      setFilteredDepartments(allDepts);
+    }}
+  />
+  <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+    <svg className="w-5 h-5 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </button>
+
+  {showDepartmentDropdown && (
+    <div 
+      ref={departmentDropdownRef}
+      className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+    >
+      {/* Optional: Add category headers if you want */}
+      <div className="px-4 py-2 font-semibold bg-gray-100 text-sm">US Federal Agencies</div>
+      {filteredDepartments
+        .filter(dept => 
+          usCongressional.includes(dept) || 
+          usIntelligenceAndOversight.includes(dept) || 
+          usInnovationAndIP.includes(dept) || 
+          usScienceAgencies.includes(dept) || 
+          usDepartments.includes(dept)
+        )
+        .map((dept, index) => (
+          <div
+            key={`dept-fed-${index}`}
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+            onClick={() => {
+              selectDepartment(dept);
+              // Auto-set government type to Federal if a federal agency is selected
+              if (governmentType !== 'Federal') {
+                setGovernmentType('Federal');
+              }
+            }}
+          >
+            {dept}
           </div>
-        )}
+        ))}
+      
+      <div className="px-4 py-2 font-semibold bg-gray-100 text-sm">International Agencies</div>
+      {filteredDepartments
+        .filter(dept => 
+          australiaDepartments.includes(dept) || 
+          canadaDepartments.includes(dept) || 
+          ukDepartments.includes(dept)
+        )
+        .map((dept, index) => (
+          <div
+            key={`dept-intl-${index}`}
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+            onClick={() => {
+              selectDepartment(dept);
+              // Auto-set government type to State if an international agency is selected
+              if (governmentType !== 'State') {
+                setGovernmentType('State');
+              }
+            }}
+          >
+            {dept}
+          </div>
+        ))}
+    </div>
+  )}
+</div>
       </div>
       
       {/* Reset Filters button */}
-      {(searchTerm || profession || securityClearance || skillsAndExpertise || 
+      {(searchTerm || profession || clearance || skillsAndExpertise || 
         certifications || requireGovtExperience || governmentType || department || 
         location || domainFocus || domainDetail || selectedSavedSearch) && (
         <button 

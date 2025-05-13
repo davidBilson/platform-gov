@@ -11,6 +11,8 @@ hover:opacity-70 transition duration-300 ease-in-out cursor-pointer
 ## Focus Effect For Input Fields
 focus:outline focus:outline-boldblue
 
+# overflow style
+overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
 
 
 # API RESPONSE FOR GET JOB APPLICATIONS BY JOB ID

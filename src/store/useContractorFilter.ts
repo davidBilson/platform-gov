@@ -5,7 +5,7 @@ interface ContractorFilterState {
   // Filter states
   searchTerm: string;
   profession: string;
-  securityClearance: string;
+  clearance: string;
   skillsAndExpertise: string;
   certifications: string;
   requireGovtExperience: boolean;
@@ -19,7 +19,7 @@ interface ContractorFilterState {
   // Setters
   setSearchTerm: (term: string) => void;
   setProfession: (profession: string) => void;
-  setSecurityClearance: (clearance: string) => void;
+  setClearance: (clearance: string) => void;
   setSkillsAndExpertise: (skills: string) => void;
   setCertifications: (certs: string) => void;
   setRequireGovtExperience: (value: boolean) => void;
@@ -40,7 +40,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
   // Initial state
   searchTerm: '',
   profession: '',
-  securityClearance: '',
+  clearance: '',
   skillsAndExpertise: '',
   certifications: '',
   requireGovtExperience: false,
@@ -60,8 +60,8 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     set({ profession });
     get().updateActiveFilters();
   },
-  setSecurityClearance: (clearance) => {
-    set({ securityClearance: clearance });
+  setClearance: (clearance) => {
+    set({ clearance: clearance });
     get().updateActiveFilters();
   },
   setSkillsAndExpertise: (skills) => {
@@ -77,7 +77,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     get().updateActiveFilters();
   },
   setGovernmentType: (type) => {
-    set({ governmentType: type, department: '' }); // Reset department when gov type changes
+    set({ governmentType: type }); // Reset department when gov type changes
     get().updateActiveFilters();
   },
   setDepartment: (dept) => {
@@ -102,7 +102,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     set({
       searchTerm: '',
       profession: '',
-      securityClearance: '',
+      clearance: '',
       skillsAndExpertise: '',
       certifications: '',
       requireGovtExperience: false,
@@ -125,7 +125,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
       switch(filterId) {
         case 'searchTerm': resetState.searchTerm = ''; break;
         case 'profession': resetState.profession = ''; break;
-        case 'securityClearance': resetState.securityClearance = ''; break;
+        case 'clearance': resetState.clearance = ''; break;
         case 'skillsAndExpertise': resetState.skillsAndExpertise = ''; break;
         case 'certifications': resetState.certifications = ''; break;
         case 'requireGovtExperience': resetState.requireGovtExperience = false; break;
@@ -167,11 +167,11 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
       });
     }
 
-    if (state.securityClearance) {
+    if (state.clearance) {
       newActiveFilters.push({ 
-        id: 'securityClearance', 
+        id: 'clearance', 
         name: 'Clearance', 
-        value: state.securityClearance 
+        value: state.clearance 
       });
     }
 
@@ -268,9 +268,9 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     }
   
     // Security Clearance
-    if (state.securityClearance) {
+    if (state.clearance) {
       filtered = filtered.filter(contractor => 
-        contractor.securityClearance?.toLowerCase() === state.securityClearance.toLowerCase()
+        typeof contractor.clearance === 'string' && contractor.clearance.toLowerCase() === state.clearance.toLowerCase()
       );
     }
   

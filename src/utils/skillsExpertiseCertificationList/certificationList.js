@@ -1,4 +1,7 @@
 export const certificationsList = [
+    // custom list
+    "GCCI certification",
+
     // Cloud & DevOps
     "AWS Certified Solutions Architect – Associate",
     "AWS Certified Solutions Architect – Professional",

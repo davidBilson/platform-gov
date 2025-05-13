@@ -23,6 +23,7 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       userId: userId,
       bio: formData.bio,
       profileImage: formData.profileImageUrl,
+      clearance: formData.clearance || '',
       ratePerHour: formData.ratePerHour,
       primaryPosition: formData.primaryPosition,
       skills: formData.skills,

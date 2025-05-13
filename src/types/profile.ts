@@ -20,6 +20,7 @@ export interface WorkHistory {
     bio: string;
     ratePerHour: string;
     primaryPosition: string;
+    clearance?: string;
     skills: string[];
     expertise: string[];
     certifications: string[];
@@ -54,6 +55,7 @@ export interface ProfileData {
   name?: string;
   profileImage?: string;
   primaryPosition?: string;
+  clearance?: string;
   workHistory?: Array<{
     location?: string;
     position?: string;

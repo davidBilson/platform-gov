@@ -12,6 +12,7 @@ import { skillsList } from '@/utils/skillsExpertiseCertificationList/skillsList'
 import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
 import { certificationsList } from '@/utils/skillsExpertiseCertificationList/certificationList';
 import { usaStates, canadaStates, ukStates, australiaStates } from '@/utils/countryAndStates/index';
+import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances"
 // UI Components
 import Legalagreement from "@/components/ui/legal-agreement";
 import { toast } from "react-toastify";
@@ -36,6 +37,7 @@ const CreateFreelancerProfile = () => {
     certifications: [],
     expertise: [],
     firmAffiliation: "",
+    clearance: "",
     location: {
       country: "",
       state: ""
@@ -77,6 +79,9 @@ const CreateFreelancerProfile = () => {
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   const [showStatesDropdown, setShowStatesDropdown] = useState<boolean>(false);
   const [showFirmDropdown, setShowFirmDropdown] = useState<boolean>(false);
+  const [showClearancesDropdown, setShowClearancesDropdown] = useState<boolean>(false);
+  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState<boolean>(false);
+  const [showExperienceDropdown, setShowExperienceDropdown] = useState<boolean>(false);
   const [pendingSubmission, setPendingSubmission] = useState<boolean>(false);
   const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
   const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
@@ -195,6 +200,18 @@ const CreateFreelancerProfile = () => {
   };
 
   const handleInputChangeWrapper = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.target.name === 'bio') {
+      const words = e.target.value.split(/\s+/).filter(Boolean);
+      if (words.length > 300) {
+        // Truncate to 300 words if exceeded
+        const truncatedText = words.slice(0, 300).join(' ');
+        setFormData({
+          ...formData,
+          bio: truncatedText
+        });
+        return;
+      }
+    }
     handleInputChange(e, setFormData);
   };
 
@@ -325,10 +342,14 @@ const handleSubmit = (e: React.FormEvent): void => {
             value={formData.bio}
             onChange={handleInputChangeWrapper}
             onInput={handleTextAreaInputWrapper}
+            maxLength={300}
             rows={1}
-            className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden"
+            className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden h-[200px] scrollbar-hide"
             placeholder="About Me/Bio"
           ></textarea>
+          <div className="text-right text-xs text-gray-500 mt-1">
+            {formData.bio.split(/\s+/).filter(Boolean).length}/300
+          </div>
         </div>
   
         {/* Rate per hour */}
@@ -381,7 +402,7 @@ const handleSubmit = (e: React.FormEvent): void => {
       checked={formData.firmAffiliation !== "" && formData.firmAffiliation !== "independent"}
       onChange={() => setFormData({...formData, firmAffiliation: ""})}
       />
-    <label htmlFor="firm">Firm</label>
+    <label htmlFor="firm">Firm Affiliation</label>
   </div>
       </div>
   
@@ -432,6 +453,61 @@ const handleSubmit = (e: React.FormEvent): void => {
   </div>
 )}
 </div>
+
+
+
+
+
+{/* Previously held clearances */}
+<div className="relative w-full max-w-75 mb-7.5">
+  <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+    <input 
+      type="text"
+      value={formData.clearance || ""}
+      onChange={(e) => setFormData({...formData, clearance: e.target.value})}
+      onFocus={() => setShowClearancesDropdown(true)}
+      onBlur={() => setTimeout(() => setShowClearancesDropdown(false), 200)}
+      className="outline-none placeholder:font-semibold w-[80%]" 
+      placeholder="Previously held clearances" 
+    />
+    <IoIosSearch />
+  </div>
+  
+  {showClearancesDropdown && (
+    <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+        onMouseDown={(e) => e.preventDefault()}
+    >
+      {clearanceLevels
+        .filter(clearance => 
+          formData.clearance
+            ? clearance.toLowerCase().includes(formData.clearance.toLowerCase())
+            : true
+        )
+        .map((clearance, idx) => (
+          <div 
+            key={`clearance-option-${idx}`} 
+            className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setFormData({
+                ...formData,
+                clearance: clearance
+              });
+              setShowClearancesDropdown(false);
+            }}
+          >
+            {clearance}
+          </div>
+        ))
+      }
+    </div>
+  )}
+</div>
+
+
+
+
+
 
 {/* Location */}
 <div className="mb-7.5">
@@ -503,6 +579,81 @@ const handleSubmit = (e: React.FormEvent): void => {
 )}
   </div>
 </div>
+
+
+
+<div className="my-7.5 pt-7.5  border-t border-t-deepskyblue">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="relative w-full max-w-75">
+              <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+                <input 
+                  type="text"
+                  value={certificationInput}
+                  onFocus={() => {
+                    setShowCertificationsDropdown(true);
+                    setFilteredCertifications(certificationsList);
+                  }}
+                  onBlur={() => setTimeout(() => setShowCertificationsDropdown(false), 200)}
+                  onChange={(e) => setCertificationInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (certificationInput) addTagWrapper('certifications', certificationInput);
+                    }
+                  }}
+                  className="outline-none placeholder:font-semibold w-[80%]" 
+                  placeholder="Certifications" 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    if (certificationInput) addTagWrapper('certifications', certificationInput);
+                  }}
+                  className="focus:outline-none"
+                >
+                  <IoIosSearch />
+                </button>
+              </div>
+              
+              {showCertificationsDropdown && (
+                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
+                >
+                  {filteredCertifications.map((cert, idx) => (
+                    <div 
+                      key={`cert-option-${idx}`} 
+                      className="px-4 py-2 hover:bg-aquagreen hover:text-white cursor-pointer text-sm"
+                      onMouseDown={(e) => {
+                        e.preventDefault(); // Prevent blur event from firing
+                        addTagWrapper('certifications', cert);
+                      }}
+                    >
+                      {cert}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {formData.certifications.map((cert, index) => (
+              <div 
+                key={`cert-${index}`} 
+                className="flex flex-row justify-between items-center px-2.5 py-1.25 gap-2.5 bg-aquagreen rounded-[37px] text-xs text-white"
+              >
+                {cert}
+                <button 
+                  type="button"
+                  onClick={() => removeTag('certifications', index)}
+                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform active:scale-95  hover:text-red-500"
+                >
+                  <IoCloseOutline size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+
           
           {/* Skills */}
           <div className="flex flex-wrap items-center mb-7.5 gap-2.5">
@@ -643,76 +794,11 @@ const handleSubmit = (e: React.FormEvent): void => {
           </div>
         </div>
   
-        <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="relative w-full max-w-75">
-              <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
-                <input 
-                  type="text"
-                  value={certificationInput}
-                  onFocus={() => {
-                    setShowCertificationsDropdown(true);
-                    setFilteredCertifications(certificationsList);
-                  }}
-                  onBlur={() => setTimeout(() => setShowCertificationsDropdown(false), 200)}
-                  onChange={(e) => setCertificationInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (certificationInput) addTagWrapper('certifications', certificationInput);
-                    }
-                  }}
-                  className="outline-none placeholder:font-semibold w-[80%]" 
-                  placeholder="Certifications" 
-                />
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    if (certificationInput) addTagWrapper('certifications', certificationInput);
-                  }}
-                  className="focus:outline-none"
-                >
-                  <IoIosSearch />
-                </button>
-              </div>
-              
-              {showCertificationsDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-                    onMouseDown={(e) => e.preventDefault()} // Prevent blur event from firing
-                >
-                  {filteredCertifications.map((cert, idx) => (
-                    <div 
-                      key={`cert-option-${idx}`} 
-                      className="px-4 py-2 hover:bg-aquagreen hover:text-white cursor-pointer text-sm"
-                      onMouseDown={(e) => {
-                        e.preventDefault(); // Prevent blur event from firing
-                        addTagWrapper('certifications', cert);
-                      }}
-                    >
-                      {cert}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            {formData.certifications.map((cert, index) => (
-              <div 
-                key={`cert-${index}`} 
-                className="flex flex-row justify-between items-center px-2.5 py-1.25 gap-2.5 bg-aquagreen rounded-[37px] text-xs text-white"
-              >
-                {cert}
-                <button 
-                  type="button"
-                  onClick={() => removeTag('certifications', index)}
-                  className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform active:scale-95  hover:text-red-500"
-                >
-                  <IoCloseOutline size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        
+
+
+
+
   
         <div className="mb-7.5">
           <h3 className="mb-7.5 font-semibold text-black">Work History</h3>
@@ -740,45 +826,115 @@ const handleSubmit = (e: React.FormEvent): void => {
                 placeholder="Title" 
               />
   
-              <div className="flex items-start gap-7.5 mb-7.5">
-                <input 
-                  type="text"
-                  value={work.department}
-                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'department', e.target.value)}
-                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 focus:outline focus:outline-boldblue" 
-                  placeholder="Department/Agency" 
-                />
-                
-                <div className="flex items-center gap-2.5">
-                  <input 
-                    type="radio" 
-                    id={`state-${work.id}`} 
-                    name={`department-type-${work.id}`} 
-                    value="state" 
-                    checked={work.departmentType === "state"}
-                    onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', 'state')}
-                  />
-                  <label htmlFor={`state-${work.id}`}>State</label>
-                  
-                  <input 
-                    type="radio" 
-                    id={`federal-${work.id}`} 
-                    name={`department-type-${work.id}`} 
-                    value="federal" 
-                    checked={work.departmentType === "federal"}
-                    onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', 'federal')}
-                  />
-                  <label htmlFor={`federal-${work.id}`}>Federal</label>
-                </div>
-                
-                <input 
-                  type="text"
-                  value={work.experienceLevel}
-                  onChange={(e) => updateWorkHistoryWrapper(work.id, 'experienceLevel', e.target.value)}
-                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-[242px] px-5 py-4 focus:outline focus:outline-boldblue" 
-                  placeholder="Level of Dept Experience" 
-                />
-              </div>
+             <div className="flex items-start gap-7.5 mb-7.5">
+  <div className="relative w-full max-w-[242px]">
+    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+      <input 
+        type="text"
+        value={work.department}
+        onChange={(e) => updateWorkHistoryWrapper(work.id, 'department', e.target.value)}
+        onFocus={() => setShowDepartmentDropdown(true)}
+        onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
+        className="outline-none placeholder:font-semibold w-[80%]" 
+        placeholder="Department/Agency" 
+      />
+      <IoIosSearch />
+    </div>
+    
+    {showDepartmentDropdown && (
+      <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+          onMouseDown={(e) => e.preventDefault()}
+      >
+        {departmentAgencies
+          .filter(dept => 
+            work.department
+              ? dept.toLowerCase().includes(work.department.toLowerCase())
+              : true
+          )
+          .map((dept, idx) => (
+            <div 
+              key={`dept-option-${idx}`} 
+              className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                updateWorkHistoryWrapper(work.id, 'department', dept);
+                setShowDepartmentDropdown(false);
+              }}
+            >
+              {dept}
+            </div>
+          ))
+        }
+      </div>
+    )}
+  </div>
+  
+  <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-1">
+      <input 
+        type="checkbox"
+        id={`state-${work.id}`}
+        checked={work.departmentType === "state"}
+        onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', work.departmentType === "state" ? "" : "state")}
+        className="form-checkbox h-4 w-4 text-boldblue transition duration-150 ease-in-out"
+      />
+      <label htmlFor={`state-${work.id}`}>State</label>
+    </div>
+    
+    <div className="flex items-center gap-1">
+      <input 
+        type="checkbox"
+        id={`federal-${work.id}`}
+        checked={work.departmentType === "federal"}
+        onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', work.departmentType === "federal" ? "" : "federal")}
+        className="form-checkbox h-4 w-4 text-boldblue transition duration-150 ease-in-out"
+      />
+      <label htmlFor={`federal-${work.id}`}>Federal</label>
+    </div>
+  </div>
+  
+  <div className="relative w-full max-w-[242px]">
+    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+      <input 
+        type="text"
+        value={work.experienceLevel}
+        onChange={(e) => updateWorkHistoryWrapper(work.id, 'experienceLevel', e.target.value)}
+        onFocus={() => setShowExperienceDropdown(true)}
+        onBlur={() => setTimeout(() => setShowExperienceDropdown(false), 200)}
+        className="outline-none placeholder:font-semibold w-[80%]" 
+        placeholder="Level of Experience" 
+      />
+      <IoIosSearch />
+    </div>
+    
+    {showExperienceDropdown && (
+      <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+          onMouseDown={(e) => e.preventDefault()}
+      >
+        {["Entry level (0-2 years)", "Intermediate/Mid-Level (2-5 years)", "Senior Level (5+ Years)"]
+          .filter(level => 
+            work.experienceLevel
+              ? level.toLowerCase().includes(work.experienceLevel.toLowerCase())
+              : true
+          )
+          .map((level, idx) => (
+            <div 
+              key={`level-option-${idx}`} 
+              className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                updateWorkHistoryWrapper(work.id, 'experienceLevel', level);
+                setShowExperienceDropdown(false);
+              }}
+            >
+              {level}
+            </div>
+          ))
+        }
+      </div>
+    )}
+  </div>
+</div>
               
               <div className="mb-7.5">
                 <input 
