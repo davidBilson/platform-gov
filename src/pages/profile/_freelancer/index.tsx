@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaEdit } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import useAuthStore from '@/store/useAuth';
-import { fetchProfile } from "@/api/profile-api";
+import { fetchProfile } from "../../../api/profile-api";
 import Link from "next/link";
 import { toast } from 'react-toastify';
 import { IoLocationOutline } from "react-icons/io5";
@@ -12,7 +12,6 @@ import LoadingAnimation from '@/components/ui/loading';
 
 
 const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
-  // Get user data from auth store - add proper typing
   const { userId } = useAuthStore() as { userId: string | null; name: string | null };
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -53,7 +52,8 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   },[profileData]);
 
   // Extract profile data with fallbacks
-  const profession = profileData?.primaryPosition || '';
+  const profession = profileData?.profession || "Profession"
+  const primaryPosition = profileData?.primaryPosition || '';
   const location = profileData?.location?.country + ' ' + profileData?.location?.state;
   const rate = profileData?.ratePerHour || 75;
   const clearance = profileData?.clearance || "";
@@ -122,11 +122,12 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
               <div className='w-full sm:max-w-85 mt-4 sm:mt-0'>
                 {/* Title & Rating */}
                 <div className='flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6'>
-                  <h3 className="text-sm text-boldblue font-bold mb-2 sm:mb-0">{profession}</h3>
+                  <h3 className="text-sm text-boldblue font-bold mb-2 sm:mb-0">{primaryPosition}</h3>
                   <div className='flex items-center gap-1'> 
                     {renderRating(profileData?.rating || 2)}
                   </div>
                 </div>
+
                 {/* Skills & Certifications */}
                 <div className='flex items-center justify-center sm:justify-start flex-wrap gap-2'>
                   {skills.map((skill, index) => (

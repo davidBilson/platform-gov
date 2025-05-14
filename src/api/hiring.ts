@@ -13,13 +13,6 @@ interface HireContractorParams {
   selectedFiles: File[];
 }
 
-interface AcceptHiringOfferParams {
-  contractorId: string;
-  hiringId: string;
-  contractorNotes?: string;
-  selectedFiles?: File[];
-}
-
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const submitHireContract = async ({
@@ -34,56 +27,53 @@ export const submitHireContract = async ({
 }: HireContractorParams): Promise<boolean> => {
   try {
     if (!startDate) {
-      console.error('Please select a start date');
+      toast.error('Please select a start date');
       return false;
     }
 
     if (!rate) {
-      console.error('Please enter a rate');
+      toast.error('Please enter a rate');
       return false;
     }
 
     const formDataToSend = new FormData();
     
-    // Required fields
+    // Append all required fields
     formDataToSend.append('jobId', jobId || '');
     formDataToSend.append('clientId', userId || '');
     formDataToSend.append('contractorId', contractorId || '');
     formDataToSend.append('applicationId', applicationId || '');
-    formDataToSend.append('clientNotes', '');
     formDataToSend.append('rate', rate);
     formDataToSend.append('employmentType', employmentType);
     formDataToSend.append('startDate', startDate.toISOString());
+    formDataToSend.append('clientNotes', ''); // Add empty notes if none provided
 
-
+    // Append file if exists
     if (selectedFiles.length > 0) {
-      selectedFiles.forEach(file => {
-        formDataToSend.append('documents', file);
-      });
-    }
-
-    for (const pair of formDataToSend.entries()) {
-      console.log(`${pair[0]}: ${pair[1]}`);
+      formDataToSend.append('documents', selectedFiles[0]);
     }
 
     const endPoint = process.env.NEXT_PUBLIC_SEND_HIRING_CONTRACT;
 
-    await axios.post(`${baseURL}${endPoint}`, formDataToSend, {
+    const response = await axios.post(`${baseURL}${endPoint}`, formDataToSend, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
 
-    toast.success('Contract sent successfully!');
-    return true;
+    if (response.data.success) {
+      toast.success('Contract sent successfully!');
+      return true;
+    } else {
+      toast.error(response.data.message || 'Failed to send contract');
+      return false;
+    }
   } catch (err: unknown) {
     console.error(err);
-    if (err instanceof Error) {
-      console.error(err.message);
-    } else if (axios.isAxiosError(err)) {
-      console.error(err.response?.data?.message || 'Failed to send contract');
+    if (axios.isAxiosError(err)) {
+      toast.error(err.response?.data?.message || 'Failed to send contract');
     } else {
-      console.error('An unknown error occurred');
+      toast.error('An unknown error occurred');
     }
     return false;
   }
@@ -91,48 +81,54 @@ export const submitHireContract = async ({
 
 export const getHiringOffer = async (jobId: string, applicationId: string) => {
   try {
-
     const endPoint = process.env.NEXT_PUBLIC_GET_HIRING_OFFER;
-
+    
     const response = await axios.post(`${baseURL}${endPoint}`,
       {
         jobId,
         applicationId
       }
     );
-    return response.data.data;
+    
+    return {
+      success: true,
+      data: response.data.data,
+      error: null
+    };
   } catch (error) {
     console.error('Error fetching hiring offer:', error);
+    
+    // Return a structured error response instead of undefined
+    return {
+      success: false,
+      data: null,
+      error: {
+        message: error instanceof Error ? error.message : 'Unknown error occurred',
+        status: axios.isAxiosError(error) && error.response ? error.response.status : 500
+      }
+    };
   }
 };
 
-// Accept hiring offer (updated)
-export const acceptHiringOffer = async ({
-  hiringId,
-  contractorId,
-  contractorNotes = '',
-  selectedFiles = []
-}: AcceptHiringOfferParams): Promise<boolean> => {
+export const acceptHiringOffer = async (
+  { hiringId, contractorId }: { hiringId: string, contractorId: string }
+): Promise<boolean> => {
   try {
-    const formData = new FormData();
-    formData.append('contractorId', contractorId);
-    formData.append('contractorNotes', contractorNotes);
-    
-    selectedFiles.forEach(file => formData.append('documents', file));
-
     const endPoint = process.env.NEXT_PUBLIC_ACCEPT_HIRING_CONTRACT?.replace(':id', hiringId);
-    await axios.put(`${baseURL}${endPoint}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const response = await axios.put(`${baseURL}${endPoint}`, { contractorId });
 
-    toast.success('Hiring offer accepted successfully!');
-    return true;
+    if (response.data.success) {
+      toast.success('Hiring offer accepted successfully!');
+      return true;
+    }
+    toast.error(response.data.message || 'Failed to accept offer');
+    return false;
   } catch (err) {
     console.error(err);
     if (axios.isAxiosError(err)) {
-      console.error(err.response?.data?.error || 'Failed to accept offer');
+      toast.error(err.response?.data?.error || 'Failed to accept offer');
     } else {
-      console.error('An unknown error occurred');
+      toast.error('An unknown error occurred');
     }
     return false;
   }

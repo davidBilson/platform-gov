@@ -152,6 +152,19 @@ const BusinessProfile = () => {
                 {client?.industry || "Not specified"}
               </p>
             </div>
+
+            <div className='mb-4'>
+              <h3 className='font-medium mb-1'>Security Clearance</h3>
+              <p className='text-boldblue'>
+                {client?.clearance || "Not specified"}
+              </p>
+            </div>
+            <div className='mb-4'>
+              <h3 className='font-medium mb-1'>Department / Agency</h3>
+              <p className='text-boldblue'>
+                {client?.department || "Not specified"}
+              </p>
+            </div>
             
             {/* Company Size */}
             <div className='mb-4'>

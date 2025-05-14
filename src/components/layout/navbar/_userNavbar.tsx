@@ -15,7 +15,7 @@ import { FiLogOut, FiSearch } from 'react-icons/fi';
 import { HiMenuAlt3 } from 'react-icons/hi';
 import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
 import ProfilePicture from '@/components/profile/profilePicture';
-import { fetchProfilePicture } from '@/api/profile-api';
+import { fetchProfilePicture } from '../../../api/profile-api';
 
 const UserNavbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -40,11 +40,9 @@ const UserNavbar = () => {
     staleTime: Infinity // Cache indefinitely
   });
 
-  // Get both search terms with aliases to avoid conflicts
   const { searchTerm: contractorSearchTerm, setSearchTerm: setContractorSearchTerm } = useContractorFilter();
   const { searchTerm: jobSearchTerm, setSearchTerm: setJobSearchTerm } = useJobFilter();
 
-  // Determine which search term and setter to use based on feedType
   const currentSearchTerm = feedType === "Jobs" ? jobSearchTerm : contractorSearchTerm;
   const currentSetSearchTerm = feedType === "Jobs" ? setJobSearchTerm : setContractorSearchTerm;
 
@@ -80,13 +78,10 @@ const UserNavbar = () => {
 
   const jobAndContractorOptions = ["Jobs", "Contractors"];
 
-  // Check if current path is an auth route
   const isAuthRoute = pathname?.startsWith('/auth');
   
-  // Check if current path is the profile creation route
   const isProfileCreateRoute = pathname === '/profile/edit';
 
-  // Client Navigation Items
   const clientNavItems = {
     main: [
       { 
@@ -283,11 +278,10 @@ const UserNavbar = () => {
               
               <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'profile' ? 'block' : 'hidden'}`}>
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault()
+                  onClick={() => {
                     handleNavigation('/profile')
                   }} 
-                  className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+                  className="block w-full text-left px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                   Profile
                 </button>
                 <a onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
@@ -313,7 +307,6 @@ const UserNavbar = () => {
       <nav className='w-full max-w-maxWidth m-auto flex items-center justify-between px-6 lg:px-[45px] relative'>
         <Logo />
         
-        {/* Mobile icons */}
         <div className="lg:hidden flex items-center gap-4">
           <button onClick={() => {
             setMobileSearch(!mobileSearch);
@@ -327,7 +320,6 @@ const UserNavbar = () => {
               <button 
                 onClick={() => {
                   setNotificationsOpen(!notificationsOpen);
-                  // Close other dropdowns when opening notifications
                   if (!notificationsOpen) {
                     setActiveDropdown(null);
                   }
@@ -335,7 +327,6 @@ const UserNavbar = () => {
                 className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
               >
                   <FaBell size={24} />
-                  {/* Optional notification badge */}
                   <span className="absolute -top-1 -right-2 text-red-500 font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
                     3
                   </span>
@@ -352,12 +343,10 @@ const UserNavbar = () => {
           </button>
         </div>
 
-        {/* Desktop navigation */}
         <ul className="hidden lg:flex items-center gap-[13px] w-fit text-boldblue font-bold">
           {navItems.main.map((item, index) => renderDesktopNavItem(item, index))}
         </ul>
 
-        {/* Desktop search */}
         <div className="hidden lg:flex w-full max-w-[250px] h-12.5 items-center py-1.25 pl-5 pr-1.25 border border-skyblue text-boldblue rounded-sm text-[14px]">
           <input 
             type='text' 
@@ -398,7 +387,6 @@ const UserNavbar = () => {
               <button 
                 onClick={() => {
                   setNotificationsOpen(!notificationsOpen);
-                  // Close other dropdowns when opening notifications
                   if (!notificationsOpen) {
                     setActiveDropdown(null);
                   }
@@ -406,7 +394,6 @@ const UserNavbar = () => {
                 className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
               >
                   <FaBell size={24} />
-                  {/* Optional notification badge */}
                   <span className="absolute -top-1 -right-2 text-red-500  font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
                     3
                   </span>
@@ -414,40 +401,35 @@ const UserNavbar = () => {
               <NotificationsDropdown notificationsOpen={notificationsOpen} />
             </div>
 
-        {/* Desktop profile icon with dropdown */}
         <div className="hidden lg:block relative" ref={profileDropdownRef}>
-            <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('profile')}>
-                {
-                  profilePicture ? (
-                    <ProfilePicture source={profilePicture} alt='user' dimension={48} />
-                  ) : (
-                    <p 
-                      className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
-                    >
-                      {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
-                    </p>
-                  )
-                }
-              </div>
+          <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('profile')}>
+            {
+              profilePicture ? (
+                <ProfilePicture source={profilePicture} alt='user' dimension={48} />
+              ) : (
+                <p 
+                  className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
+                >
+                  {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                </p>
+              )
+            }
+          </div>
           
           <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'profile' ? 'block' : 'hidden'}`}>
-            <button onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+            <button onClick={() => handleNavigation('/profile')} className="block w-full text-left px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
               Profile
             </button>
             <span onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
               Edit Profile
             </span>
-            <button 
-              onClick={handleSignOut}
-              className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"
-            >
+            <button onClick={handleSignOut} className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer">
               Sign Out
               <FiLogOut size={20} />
             </button>
           </div>
         </div>
         
-        {/* Mobile search dropdown */}
         <div ref={searchRef} className={`lg:hidden fixed top-28 left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-40 ${mobileSearch ? 'block' : 'hidden'}`}>
           <div className="px-6">
             <div className="w-full h-12.5 flex items-center py-1.25 pl-5 pr-1.25 border border-skyblue text-boldblue rounded-sm text-[14px]">
@@ -486,7 +468,6 @@ const UserNavbar = () => {
           </div>
         </div>
         
-        {/* Mobile menu */}
         <div className={`lg:hidden fixed top-28 left-0 w-full bg-white border-b-2 border-b-boldblue shadow-md py-4 z-40 ${mobileMenu ? 'block' : 'hidden'}`}>
           <ul className="flex flex-col items-center gap-5 text-boldblue font-bold text-[16px]">
             {navItems.main.map((item, index) => renderMobileNavItem(item, index))}
@@ -508,7 +489,7 @@ const UserNavbar = () => {
               </div>
             
             <div className={`absolute top-full mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'mobileProfile' ? 'block' : 'hidden'}`}>
-              <a onClick={() => handleNavigation('/profile')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+              <a onClick={() => handleNavigation('/profile')} className="block w-full text-left px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                 Profile
               </a>
               <a onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">

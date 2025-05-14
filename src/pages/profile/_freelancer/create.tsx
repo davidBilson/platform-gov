@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
 // API
-import { fetchProfile } from "@/api/profile-api";
+import { fetchProfile } from "../../../api/profile-api";
 // Utils
 import { generateId } from "@/utils/profiles/profile.contractor";
 import { handleTextAreaInput, handleInputChange, handleProfileImageChange, addTag, removeTag, addWorkHistory, updateWorkHistory, removeWorkHistory, addDegree, updateDegree, removeDegree, submitProfileData } from "@/utils/profiles/profile.contractor";
@@ -12,7 +12,8 @@ import { skillsList } from '@/utils/skillsExpertiseCertificationList/skillsList'
 import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
 import { certificationsList } from '@/utils/skillsExpertiseCertificationList/certificationList';
 import { usaStates, canadaStates, ukStates, australiaStates } from '@/utils/countryAndStates/index';
-import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances"
+import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
+import { professionalFields } from "@/utils/professionalFields";
 // UI Components
 import Legalagreement from "@/components/ui/legal-agreement";
 import { toast } from "react-toastify";
@@ -32,6 +33,7 @@ const CreateFreelancerProfile = () => {
   const [formData, setFormData] = useState<ProfileFormData>({
     bio: "",
     ratePerHour: "",
+    profession: "",
     primaryPosition: "",
     skills: [],
     certifications: [],
@@ -74,6 +76,7 @@ const CreateFreelancerProfile = () => {
   const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
+  const [showProfessionalFieldsDropdown, setShowProfessionalFieldsDropdown] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
@@ -377,6 +380,52 @@ const handleSubmit = (e: React.FormEvent): void => {
             className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue" 
             placeholder="Primary position/Title" 
           />
+
+<div className="relative w-full max-w-75 mb-7.5">
+  <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+    <input 
+      type="text"
+      value={formData.profession}
+      onChange={(e) => setFormData({...formData, profession: e.target.value})}
+      onFocus={() => setShowProfessionalFieldsDropdown(true)}
+      onBlur={() => setTimeout(() => setShowProfessionalFieldsDropdown(false), 200)}
+      className="outline-none placeholder:font-semibold w-[80%]" 
+      placeholder="Professional Field" 
+    />
+    <IoIosSearch />
+  </div>
+  
+  {showProfessionalFieldsDropdown && (
+    <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+        onMouseDown={(e) => e.preventDefault()}
+    >
+      {professionalFields
+        .filter(field => 
+          formData.profession
+            ? field.toLowerCase().includes(formData.profession.toLowerCase())
+            : true
+        )
+        .map((field, idx) => (
+          <div 
+            key={`professional-field-${idx}`} 
+            className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setFormData({
+                ...formData,
+                profession: field
+              });
+              setShowProfessionalFieldsDropdown(false);
+            }}
+          >
+            {field}
+          </div>
+        ))
+      }
+    </div>
+  )}
+</div>
+          
 
           {/* Firm Affiliation */}
 <div className="mb-7.5">

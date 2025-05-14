@@ -104,8 +104,8 @@ const HireContractor: NextPage = () => {
     }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setSelectedFiles(Array.from(e.target.files));
+        if (e.target.files && e.target.files.length > 0) {
+            setSelectedFiles([e.target.files[0]]);
         }
     };
 
@@ -264,7 +264,7 @@ const HireContractor: NextPage = () => {
                         type="file"
                         ref={fileInputRef}
                         onChange={handleFileChange}
-                        multiple
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
                         className="hidden"
                     />
                     <button 

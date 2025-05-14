@@ -66,7 +66,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
                     <p className="text-lg md:text-xl font-semibold">
                       {contractor.user.name.split(' ')[0]} {contractor.user.name.split(' ')[1]?.charAt(0)}.
                     </p>
-                    <p className='text-xs font-bold'>{contractor.primaryPosition ?? "Profession"}</p>
+                    <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
                     <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
                   </div>
 

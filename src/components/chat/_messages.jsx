@@ -4,7 +4,7 @@ import { IoSendSharp } from 'react-icons/io5';
 import ProfilePicture from '@/components/profile/profilePicture';
 import axios from 'axios';
 import { io } from 'socket.io-client';
-import { fetchProfilePicture } from '@/api/profile-api';
+import { fetchProfilePicture } from '../../api/profile-api';
 
 const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
   const [messages, setMessages] = useState([]);

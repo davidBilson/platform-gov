@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Details from './_details';
 import Timesheet from './_timesheet';
 import Messages from '../../../components/chat/_messages'
@@ -7,75 +7,52 @@ import Retainer from './_retainer';
 import { fetchJob } from '@/api/job-api';
 import { Jobs } from '@/types/jobs';
 import useAuthStore from '@/store/useAuth';
-import { getHiringOffer } from '@/api/hiring';
 import { getSingleContract } from '@/api/contract-api';
 import { useQuery } from '@tanstack/react-query';
-
-interface HiringDocument {
-    jobId: { description: string };
-    offerDetails: {
-      rate: number;
-      paymentType: string;
-      employmentType: string;
-      startDate: string;
-    };
-    clientNotes: string;
-    applicationId: { coverLetter: string };
-    status: string;
-}
 
 interface ContractContractorProps {
     hiringId?: string;
     jobId: string;
     proposalId: string;
+    tab?: string;
 }
 
-const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
+const TAB_OPTIONS = ['details', 'milestones', 'messages'];
+
+const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps) => {
     
-    const [activeTab, setActiveTab] = useState('details');
+    const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState<Jobs | null>(null);
 
-    const [, setHiringOffer] = useState<HiringDocument>();
-    const [, setHiringId] = useState<string>('');
     const [mutualContractId, setMutualContractId] = useState('')
     
-    const { userId, role, name} = useAuthStore();
+    const { userId, name} = useAuthStore();
 
-    useEffect(() => {
-        const loadJob = async () => {
-        if (jobId) {
-            try {
-                const jobData = await fetchJob(jobId as string);
-                setJob(jobData);
-            } catch (error) {
-                console.error('Error loading job:', error);
-                setJob(null);
-            }
+    const fetchJobData = useCallback(async () => {
+        if (!jobId) return;
+        try {
+            const jobData = await fetchJob(jobId as string);
+            setJob(jobData);
+        } catch (error) {
+            console.error('Error loading job:', error);
+            setJob(null);
         }
-        };
-        loadJob();
     }, [jobId]);
 
     useEffect(() => {
+        fetchJobData();
+    }, [fetchJobData]);
 
-        if (!userId || role !== 'contractor'){
-          return;
+
+
+    // Set active tab when tab prop changes
+    useEffect(() => {
+        if (tab && TAB_OPTIONS.includes(tab)) {
+            setActiveTab(tab);
         }
-    
-        const fetchHiringOffer = async () => {
-          try {
-            const offer = await getHiringOffer(jobId, proposalId);
-            setHiringOffer(offer);
-            setHiringId(offer?._id);
-          } catch (error) {
-            console.error(error);
-          }
-        };
-    
-        fetchHiringOffer();
-      }, [jobId, proposalId]);
+    }, [tab]);
 
-      const { data: mutualContract} = useQuery({
+   useQuery({
         queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
         queryFn: async () => {
             if (!job?.userId?._id || !userId) return null;
@@ -90,99 +67,80 @@ const ContractContractor = ({ jobId, proposalId }: ContractContractorProps) => {
         },
         enabled: !!job?.userId?._id && !!userId,
         refetchInterval: (query) => {
-            return !query.state.data ? 5000 : false;
+            return !query.state.data ? 20000 : false;
         },
         refetchIntervalInBackground: true,
         staleTime: Infinity
+
     });
 
-    console.log(mutualContract)
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 'details':
+                return job !== null && (
+                    <Details 
+                        job={{
+                            ...job,
+                            userId: job.userId ? { _id: job.userId._id } : undefined
+                        }} 
+                        jobId={jobId} 
+                        applicationId={proposalId} 
+                    />
+                );
+            case 'timesheet':
+                return <Timesheet />;
+            case 'milestones':
+                return <Milestones mutualContractId={mutualContractId} />;
+            case 'retainer':
+                return <Retainer />;
+            case 'messages':
+                return (
+                    <Messages
+                        jobId={jobId}
+                        proposalId={proposalId}
+                        currentUser={{
+                            _id: userId,
+                            name: name,
+                            profilePicture: ""
+                        }}
+                        otherUser={{
+                            _id: job?.userId?._id,
+                            name: job?.userId?.name,
+                            profilePicture: ""
+                        }}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
 
     return (
         <main>
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
                 <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
                 <div className='flex items-center md:gap-10 pt-5.5'>
-                    <button 
-                        onClick={() => setActiveTab('details')}
-                        className={`border-b-3 hover:border-b-skyblue pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                            activeTab === 'details' 
-                                ? 'border-b-boldblue' 
-                                : 'border-b-transparent'
-                        }`}
-                    >
-                        Details
-                    </button>
-                    
-                    <button 
-                        onClick={() => setActiveTab('milestones')}
-                        className={`border-b-3  pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                            activeTab === 'milestones' 
-                                ? 'border-b-boldblue' 
-                                : 'border-b-transparent'
-                        }`}
-                    >
-                        Milestones
-                    </button>
-
-                    <button 
-                        onClick={() => setActiveTab('messages')}
-                        className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                            activeTab === 'messages' 
-                                ? 'border-b-boldblue' 
-                                : 'border-b-transparent'
-                        }`}
-                    >
-                        Messages
-                    </button>
+                    {TAB_OPTIONS.map((tabOption) => (
+                        <button 
+                            key={tabOption}
+                            onClick={() => setActiveTab(tabOption)}
+                            className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
+                                activeTab === tabOption 
+                                    ? 'border-b-boldblue' 
+                                    : 'border-b-transparent hover:border-b-skyblue'
+                            }`}
+                        >
+                            {tabOption.charAt(0).toUpperCase() + tabOption.slice(1)}
+                        </button>
+                    ))}
                 </div>
             </section>
 
-            <section className={activeTab === 'details' ? 'block' : 'hidden'}>
-               {job !== null && (
-                   <Details 
-                       job={{
-                           ...job,
-                           userId: job.userId ? { _id: job.userId._id } : undefined
-                       }} 
-                       jobId={jobId} 
-                       applicationId={proposalId} 
-                   />
-               )}
+            <section className='w-full'>
+                {renderTabContent()}
             </section>
-            <section className={activeTab === 'timesheet' ? 'block' : 'hidden'}>
-                <Timesheet />
-            </section>
-            <section className={activeTab === 'milestones' ? 'block' : 'hidden'}>
-                <Milestones 
-                    mutualContractId={mutualContractId}
-                />
-            </section>
-            <section className={activeTab === 'retainer' ? 'block' : 'hidden'}>
-                <Retainer />
-            </section>
-            <section className={activeTab === 'messages' ? 'block' : 'hidden'}>
-                <Messages
-                    jobId={jobId}
-                    proposalId={proposalId}
-                    
-                    currentUser={{
-                        _id: userId,
-                        name: name,
-                        profilePicture: ""
-                    }}
-
-                    otherUser={{
-                        _id: job?.userId?._id,
-                        name:job?.userId?.name,
-                        profilePicture: ""
-                    }}
-                    
-                />
-            </section>
-            
         </main>
     )
 }
 
-export default ContractContractor
+export default ContractContractor;

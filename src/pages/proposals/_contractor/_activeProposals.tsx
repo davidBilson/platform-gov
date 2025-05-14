@@ -4,6 +4,7 @@ import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import { format } from 'date-fns';
 import ProposalModal from './_proposalModal';
 import { Application } from '@/types/proposals';
+import { useRouter } from 'next/router';
 
 interface ActiveProposalsProps {
   applications: Application[];
@@ -11,6 +12,8 @@ interface ActiveProposalsProps {
 
 const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) => {
   const [selectedProposal, setSelectedProposal] = useState<Application | null>(null);
+  const router = useRouter();
+
 
   const truncateDescription = (text: string | undefined, maxLength = 200): string => {
     if (!text) return '';
@@ -34,6 +37,16 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
   const closeProposalModal = (): void => {
     setSelectedProposal(null);
   };
+
+  const messageClient = (id: string, application: Application) => {
+    router.push({
+      pathname: `/contract/${id}`,
+      query: { 
+        jobId: typeof application.jobId === 'object' ? application.jobId._id : undefined,
+        tab: 'messages'
+      }
+    });
+  }
 
   return (
     <section className='w-full max-w-275 m-auto border-b border-b-skyblue pb-10 mb-7.5'>
@@ -90,9 +103,9 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
               >
                 View proposal
               </button>
-              <Link href={`/message-client/${typeof application.jobId === 'object' ? application.jobId.clientId : ''}`} className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out'>
+              <button onClick={() => messageClient(application._id, application)} className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out cursor-pointer'>
                 Message Client
-              </Link>
+              </button>
             </div>
 
             <div className="flex items-center gap-5">

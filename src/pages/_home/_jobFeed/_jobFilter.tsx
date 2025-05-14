@@ -141,7 +141,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       const allCerts = jobs.flatMap(job => job.requiredCertifications);
       setAvailableCertifications(Array.from(new Set(allCerts)));
       
-      setAvailableClearances(['Secret', 'Top Secret', 'Confidential', 'Public Trust']);
+      setAvailableClearances(['Secret', 'Top Secret', 'Confidential', 'Public Trust', 'SCI']);
     }
   }, [jobs]);
 
@@ -234,10 +234,10 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       activeFiltersList.push({ id: 'jobType', name: `Job Type: ${jobType}` });
     }
   
-    // Filter by security clearance
     if (securityClearance) {
       filtered = filtered.filter(job => 
-        typeof job.securityClearance === 'string' && job.securityClearance.toLowerCase().includes(securityClearance.toLowerCase())
+        job.clientClearance && 
+        typeof job.clientClearance === 'string' && job.clientClearance.toLowerCase().includes(securityClearance.toLowerCase())
       );
       activeFiltersList.push({ id: 'securityClearance', name: `Clearance: ${securityClearance}` });
     }
@@ -269,9 +269,11 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       activeFiltersList.push({ id: 'govtType', name: `${governmentType} Government` });
     }
     
-    // Independent department filter
     if (department) {
-      filtered = filtered.filter(job => job.clientName.includes(department));
+      filtered = filtered.filter(job => 
+        job.clientDepartment && 
+        typeof job.clientDepartment === 'string' && job.clientDepartment.toLowerCase().includes(department.toLowerCase())
+      );
       activeFiltersList.push({ id: 'department', name: `Department: ${department}` });
     }
     

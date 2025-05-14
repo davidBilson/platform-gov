@@ -30,6 +30,7 @@ interface Job {
 }
 
 interface HiringDocument {
+  _id: string;
   jobId: { description: string };
   offerDetails: {
     rate: number;
@@ -78,7 +79,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const postedDate = job?.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
 
   useEffect(() => {
-
     if (!userId || role !== 'contractor'){
       return;
     }
@@ -86,9 +86,14 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     const fetchHiringOffer = async () => {
       try {
         setLoading(true);
-        const offer = await getHiringOffer(jobId, applicationId);
-        setHiringOffer(offer);
-        setHiringId(offer._id);
+        const response = await getHiringOffer(jobId, applicationId);
+        
+        if (response.success && response.data) {
+          setHiringOffer(response.data);
+          setHiringId(response.data._id);
+        } else {
+          console.error('Failed to fetch hiring offer:', response.error);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -97,26 +102,33 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     };
 
     fetchHiringOffer();
-  }, [jobId, applicationId]);
-
+  }, [jobId, applicationId, userId, role]);
 
   const acceptJob = async () => {
     try {
+      if (hiringOffer?.status === "accepted") {
+        toast.info('Job has already been accepted');
+        return;
+      }
+      
       await acceptHiringOffer({ hiringId, contractorId: userId });
       await createContract({
         hiringId: hiringId, 
         clientId: job?.userId?._id, 
         contractorId: userId
       });
-      window.location.reload();
+      
+      // Update local state to reflect the accepted status
+      setHiringOffer(prev => prev ? {...prev, status: "accepted"} : prev);
+      
       toast.success('Job accepted');
     } catch (error) {
       console.error(error);
+      toast.error('Failed to accept job');
     }
   };
 
   const checkSignatureStatus = async () => {
-;
     const contractorId = userId;
     
     const isSigned = await getContractorSignature(hiringId, contractorId);
@@ -134,8 +146,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     }
   }, [hiringId]);
 
-  
-
   if (loading) {
     return (
       <div className='flex items-center justify-center h-[60vh]'>
@@ -144,17 +154,15 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     );
   }
 
+  // Calculate button disabled state correctly
+  const isJobAlreadyAccepted = hiringOffer?.status === "accepted";
+  const canAcceptJob = contractSigned && hiringOffer?.status === "offered";
+
   return (
     <>
     <section className='w-full max-w-275 m-auto pb-64'>
       
       <div className="pt-7.5">
-
-        {/* <div className="flex flex-wrap gap-2 items-center text-xs text-gray-500 mb-3.75">
-          <p className='text-xs font-semibold text-boldblue'><strong>Contract Start:</strong> 12/12/2025 {" | "}</p>
-          <p className='text-xs font-semibold text-boldblue'><strong>Contract Renewed:</strong> 12/12/2025 {" | "}</p>
-          <p className='text-xs font-semibold text-boldblue'><strong>Contract End:</strong> 12/12/2025 {" | "}</p>
-        </div> */}
         
         <p className='font-semibold text-xs text-boldblue'>Posted {postedDate}</p>
         
@@ -184,7 +192,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
       
       {/* Skills and Certifications section */}
       <div className="py-7.5 border-b border-b-deepskyblue">
-        
         
         <div className="mb-3.75">
           <h3 className="font-semibold mb-3.75">Required Certifications</h3>
@@ -225,15 +232,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
             }
           </div>
         </div>
-        
-        {/* <div>
-          <h3 className="font-semibold mb-3.75">Security Clearance</h3>
-          <div className="flex flex-wrap gap-3">
-            <span className="text-boldblue border border-boldblue font-semibold text-xs rounded-full px-3 py-1">
-              Top Secret
-            </span>
-          </div>
-        </div> */}
 
       </div>
       
@@ -277,20 +275,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
           </section>
 
-          {/* <button 
-            onClick={() => setShowRateUserModal(true)} 
-            className="bg-deepskyblue  text-sm text-white font-semibold py-2.5 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">
-            Rate this client
-          </button> */}
-
-          {/* if rating exists - show this otherwise show the button above */}
-
-          {/* <div className='flex flex-col gap-2.5 bg-skyblue rounded-lg w-full max-w-86.25 p-5'>
-            <h3 className='font-bold text-[15px]'>Your Feedback To Client</h3>
-            <RatingStars rating={4} />
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque repellat sequi dolor nesciunt omnis ad.</p>
-          </div> */}
-
         </article>
       </div>
 
@@ -321,8 +305,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
       </div>
     )}
 
-
-
       {/* action buttons */}
       <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
         
@@ -348,14 +330,16 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         
         <button
           onClick={acceptJob}
-          disabled={!contractSigned && hiringOffer?.status !== "offered"}
+          disabled={isJobAlreadyAccepted || !canAcceptJob}
           className={`transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold rounded-lg border ${
-            contractSigned && hiringOffer?.status == "offered"
-            ? 'cursor-pointer bg-boldblue border-boldblue text-white'
-              : 'bg-white border-lightblue text-lightblue cursor-not-allowed'
+            canAcceptJob
+              ? 'cursor-pointer bg-boldblue border-boldblue text-white'
+              : isJobAlreadyAccepted
+                ? 'bg-gray-100 border-gray-400 text-gray-500 cursor-not-allowed'
+                : 'bg-white border-lightblue text-lightblue cursor-not-allowed'
           }`}
         >
-          {hiringOffer?.status == "accepted" ? "Job Accepted" : hiringOffer?.status == "offered" ? "Accept Job": hiringOffer?.status}
+          {isJobAlreadyAccepted ? "Job Accepted" : "Accept Job"}
         </button>
       </div>
     </>

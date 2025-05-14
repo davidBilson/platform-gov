@@ -42,15 +42,56 @@ export const fetchJobApplications = async (jobId: string): Promise<JobApplicatio
 
 // fetch proposal/application
 export const fetchApplication = async (applicationId: string): Promise<JobApplicationsResponse | null> => {
+  // First validate the applicationId
+  if (!applicationId || typeof applicationId !== 'string') {
+    console.error('Invalid application ID');
+    return null;
+  }
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
-    const endpoint = process.env.NEXT_PUBLIC_GET_JOB_APPLICATION_BY_ID?.replace(':id', applicationId) || '';
-    
-    const response = await axios.get<JobApplicationsResponse>(`${baseUrl}${endpoint}`);
-    
-    return response.data.success ? response.data : null;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!baseUrl) {
+      console.error('Base URL not configured');
+      return null;
+    }
+
+    const endpointTemplate = process.env.NEXT_PUBLIC_GET_JOB_APPLICATION_BY_ID;
+    if (!endpointTemplate) {
+      console.error('Endpoint template not configured');
+      return null;
+    }
+
+    const endpoint = endpointTemplate.replace(':id', applicationId);
+    const url = `${baseUrl}${endpoint}`;
+
+    // Add timeout and validate URL
+    if (!url.startsWith('http')) {
+      console.error('Invalid API URL');
+      return null;
+    }
+
+    const response = await axios.get<JobApplicationsResponse>(url, {
+      timeout: 10000, // 10 second timeout
+      validateStatus: (status) => status >= 200 && status < 500 // Accept 400-499 as valid responses
+    });
+
+    if (!response.data?.success) {
+      console.error('API request failed:', response.data?.message || 'Unknown error');
+      return null;
+    }
+
+    return response.data;
   } catch (err) {
-    console.error('Error fetching job applications:', err);
+    // More detailed error logging
+    if (axios.isAxiosError(err)) {
+      console.error(
+        'API Error:',
+        err.response?.status,
+        err.response?.data?.message || err.message
+      );
+    } else {
+      console.error('Unexpected error:', err);
+    }
     return null;
   }
 };

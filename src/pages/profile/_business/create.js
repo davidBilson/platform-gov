@@ -6,7 +6,8 @@ import useAuthStore from '@/store/useAuth';
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
 import { IoCloseOutline } from "react-icons/io5";
-// import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
+import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
+import { IoIosSearch } from "react-icons/io";
 
 
 const CreateBusinessProfile = () => {
@@ -16,6 +17,8 @@ const CreateBusinessProfile = () => {
     logo: "",
     industry: "",
     size: "",
+    department: "",
+    clearance: "",
     specializations: [],
     locations: [
       {
@@ -31,6 +34,9 @@ const CreateBusinessProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [newSpecialization, setNewSpecialization] = useState("");
+
+  const [showClearancesDropdown, setShowClearancesDropdown] = useState(false);
+  const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
 
   const { userId } = useAuthStore();
   const router = useRouter();
@@ -70,29 +76,6 @@ const CreateBusinessProfile = () => {
 
   }, [userId]);
 
-  // TODO: use this location logic to populate the profile setup, user should be able to select country and state based on the data returned
-  // useEffect(() => {
-  //   const fetchLocationData = async () => {
-  //     try {
-  //       // const [countriesData, statesData, usStatesData] = await Promise.all([
-  //       //   getAllCountries(),
-  //       //   getSpecificCountryStates(),
-  //       //   getUSStates()
-  //       // ]);
-
-  //       // setAllCountries(countriesData);
-  //       // setStatesWithCountries(statesData);
-  //       // setUsStates(usStatesData);
-  //     } catch (err) {
-  //       console.error('Error fetching location data:', err);
-  //     }
-  //   };
-
-  //   fetchLocationData();
-
-  // }, []);
-
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setBusiness(prev => ({
@@ -101,7 +84,6 @@ const CreateBusinessProfile = () => {
     }));
   };
 
-  // Handle location changes
   const handleLocationChange = (e, index = 0) => {
     const { name, value } = e.target;
     const updatedLocations = [...business.locations];
@@ -326,6 +308,102 @@ const CreateBusinessProfile = () => {
               className='w-full py-3.5 px-5 text-boldblue resize-none border border-boldblue  focus:outline focus:outline-boldblue rounded-md min-h-[80px]'
             />
           </div>
+          {/* Clearance */}
+          <div className='mb-4 w-full max-w-105'>
+  <div className='relative'>
+    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-3 text-sm text-boldblue">
+      <input 
+        type="text"
+        value={business.clearance || ""}
+        onChange={(e) => setBusiness({...business, clearance: e.target.value})}
+        onFocus={() => setShowClearancesDropdown(true)}
+        onBlur={() => setTimeout(() => setShowClearancesDropdown(false), 200)}
+        className="outline-none placeholder:font-semibold w-[80%]" 
+        placeholder="Previously held clearances" 
+      />
+      <IoIosSearch />
+    </div>
+    
+    {showClearancesDropdown && (
+      <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+          onMouseDown={(e) => e.preventDefault()}
+      >
+        {clearanceLevels
+          .filter(clearance => 
+            business.clearance
+              ? clearance.toLowerCase().includes(business.clearance.toLowerCase())
+              : true
+          )
+          .map((clearance, idx) => (
+            <div 
+              key={`clearance-option-${idx}`} 
+              className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setBusiness({
+                  ...business,
+                  clearance: clearance
+                });
+                setShowClearancesDropdown(false);
+              }}
+            >
+              {clearance}
+            </div>
+          ))
+        }
+      </div>
+    )}
+  </div>
+</div>
+
+<div className='mb-8 w-full max-w-105'>
+  <div className='relative'>
+    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-3 text-sm text-boldblue">
+      <input 
+        type="text"
+        value={business.department || ""}
+        onChange={(e) => setBusiness({...business, department: e.target.value})}
+        onFocus={() => setShowDepartmentDropdown(true)}
+        onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
+        className="outline-none placeholder:font-semibold w-[80%]" 
+        placeholder="Department/Agency" 
+      />
+      <IoIosSearch />
+    </div>
+    
+    {showDepartmentDropdown && (
+      <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+          onMouseDown={(e) => e.preventDefault()}
+      >
+        {departmentAgencies
+          .filter(dept => 
+            business.department
+              ? dept.toLowerCase().includes(business.department.toLowerCase())
+              : true
+          )
+          .map((dept, idx) => (
+            <div 
+              key={`dept-option-${idx}`} 
+              className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setBusiness({
+                  ...business,
+                  department: dept
+                });
+                setShowDepartmentDropdown(false);
+              }}
+            >
+              {dept}
+            </div>
+          ))
+        }
+      </div>
+    )}
+  </div>
+</div>
+
+
         </div>
         
         <div className='border-t border-t-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>

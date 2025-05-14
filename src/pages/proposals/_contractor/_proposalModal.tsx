@@ -37,6 +37,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
 
   const jobDetails = typeof proposal.jobId === 'object' ? proposal.jobId : null;
 
+  // duplicate this for message client button
   const viewContract = (id: string) => {
     router.push({
       pathname: `/contract/${id}`,

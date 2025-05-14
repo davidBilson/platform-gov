@@ -44,13 +44,13 @@ export default function MessageList({ conversations, loading, onSelect, selected
     return (
       <div className="w-full bg-white h-full rounded-xl shadow-sm flex flex-col">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="p-4 border-b border-gray-100 animate-pulse">
+          <div key={i} className="p-4 border-b border-deepskyblue animate-pulse">
             <div className="flex items-start space-x-3">
               <div className="w-10 h-10 rounded-full bg-gray-200"></div>
               <div className="flex-1">
                 <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-100 rounded w-1/2 mb-1"></div>
-                <div className="h-3 bg-gray-100 rounded w-5/6"></div>
+                <div className="h-3 bg-deepskyblue rounded w-1/2 mb-1"></div>
+                <div className="h-3 bg-deepskyblue rounded w-5/6"></div>
               </div>
             </div>
           </div>
@@ -61,9 +61,9 @@ export default function MessageList({ conversations, loading, onSelect, selected
 
   if (conversations.length === 0) {
     return (
-      <div className="w-full bg-white h-full rounded-xl shadow-sm flex items-center justify-center p-4">
+      <div className="w-full h-full rounded-xl shadow-sm flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-gray-500">No conversations found</p>
+          <p className="text-gray-500 ">No conversations found</p>
         </div>
       </div>
     );
@@ -77,7 +77,7 @@ export default function MessageList({ conversations, loading, onSelect, selected
         return (
           <div 
             key={conversation.threadId} 
-            className={`px-4 py-3 border-b border-gray-100 cursor-pointer transition-colors duration-150 ${
+            className={`px-4 py-3 border-b border-deepskyblue cursor-pointer transition-colors duration-150 ${
               isSelected 
                 ? 'bg-blue-50 hover:bg-blue-100' 
                 : 'hover:bg-gray-50'
@@ -91,7 +91,7 @@ export default function MessageList({ conversations, loading, onSelect, selected
                     ? 'bg-deepskyblue text-white' 
                     : isSelected
                       ? 'bg-blue-100 text-deepskyblue'
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-deepskyblue text-gray-600'
                 }`}>
                   <span className="font-medium text-sm">
                     {conversation.threadId === 'govlink' ? 'GL' : conversation.otherUser.name.charAt(0).toUpperCase()}

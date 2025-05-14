@@ -33,6 +33,7 @@ export interface ContractorProfile {
   bio: string;
   profileImage: string;
   ratePerHour: number;
+  profession: string;
   primaryPosition: string;
   skills: string[];
   expertise: string[];

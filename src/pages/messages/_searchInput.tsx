@@ -29,10 +29,10 @@ const SearchInput = ({ onSearch, placeholder = 'Search' }: SearchInputProps) => 
           onChange={handleChange}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className={`w-full border bg-white rounded-full py-2.5 pl-10 pr-4 focus:outline-none text-sm transition-all duration-200 ${
+          className={`text-deepskyblue placeholder:text-deepskyblue w-full border bg-white rounded-full py-2.5 pl-10 pr-4 focus:outline-none text-sm transition-all duration-200 ${
             focused 
-              ? 'border-deepskyblue ring-2 ring-blue-100' 
-              : 'border-gray-200 hover:border-blue-300'
+              ? 'border-2 border-deepskyblue ring-2 ring-deepskyblue' 
+              : 'border-deepskyblue hover:border-blue-300'
           }`}
           aria-label="Search conversations"
         />

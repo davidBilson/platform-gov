@@ -256,14 +256,16 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
       filtered = filtered.filter((contractor) =>
         contractor.user.name.toLowerCase().includes(searchLower) ||
         contractor.primaryPosition?.toLowerCase().includes(searchLower) ||
+        contractor.profession?.toLowerCase().includes(searchLower) || // Added profession to search
         contractor.bio.toLowerCase().includes(searchLower)
       );
     }
   
-    // PROFESSION
     if (state.profession) {
+      const professionLower = state.profession.toLowerCase();
       filtered = filtered.filter((contractor) =>
-        contractor.primaryPosition?.toLowerCase().includes(state.profession.toLowerCase())
+        contractor.primaryPosition?.toLowerCase().includes(professionLower) ||
+        contractor.profession?.toLowerCase().includes(professionLower)
       );
     }
   

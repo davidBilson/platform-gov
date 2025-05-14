@@ -8,7 +8,6 @@ import Milestones from './_milestones';
 import { getSingleContract } from '@/api/contract-api';
 import { useQuery } from '@tanstack/react-query';
 
-// varTab could later be replaced with a dynamic value
 const TAB_OPTIONS = ['details', "milestones", 'messages'];
 
 const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
@@ -31,15 +30,23 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
     }, [jobId]);
 
     const fetchApplicationData = useCallback(async () => {
-        try {
-            const application = await fetchApplication(proposalId);
-            if (application?.data) {
-                setApplicationDetail(application.data);
-            }
-        } catch (error) {
-            console.error('Error loading application:', error);
+        if (!proposalId) {
+          console.error('No proposal ID provided');
+          return;
         }
-    }, [proposalId]);
+      
+        try {
+          const application = await fetchApplication(proposalId);
+          if (application?.data) {
+            setApplicationDetail(application.data);
+          } else {
+            console.error('No application data received');
+          }
+        } catch (error) {
+          console.error('Error loading application:', error);
+          // You might want to set some error state here
+        }
+      }, [proposalId]);
 
     const { data: mutualContract } = useQuery({
         queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
