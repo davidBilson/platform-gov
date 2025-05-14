@@ -148,6 +148,7 @@ const CreateFreelancerProfile = () => {
           bio: profileData.bio || "",
           ratePerHour: profileData.ratePerHour?.toString() || "",
           primaryPosition: profileData.primaryPosition || "",
+          profession: profileData.profession || "",
           skills: profileData.skills || [],
           expertise: profileData.expertise || [],
           certifications: profileData.certifications || [],
