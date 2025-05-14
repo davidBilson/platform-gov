@@ -9,9 +9,10 @@ interface JobApiResponse {
   message?: string;
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
+
 export const fetchJob = async (jobId: string): Promise<Jobs | null> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const endpoint = process.env.NEXT_PUBLIC_GET_SINGLE_JOB?.replace(':id', jobId) || '';
     
     const response = await axios.get<JobApiResponse>(`${baseUrl}${endpoint}`);
@@ -28,7 +29,6 @@ export const fetchJob = async (jobId: string): Promise<Jobs | null> => {
 
 export const fetchJobApplications = async (jobId: string): Promise<JobApplicationsResponse | null> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const endpoint = process.env.NEXT_PUBLIC_GET_JOB_APPLICATIONS_BY_JOB_ID?.replace(':id', jobId) || '';
     
     const response = await axios.get<JobApplicationsResponse>(`${baseUrl}${endpoint}`);
@@ -49,7 +49,6 @@ export const fetchApplication = async (applicationId: string): Promise<JobApplic
   }
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     if (!baseUrl) {
       console.error('Base URL not configured');
       return null;
@@ -93,5 +92,31 @@ export const fetchApplication = async (applicationId: string): Promise<JobApplic
       console.error('Unexpected error:', err);
     }
     return null;
+  }
+};
+
+export const updateJobStatus = async (userId:string, jobId:string | null, status:string) => {
+  try {
+    if (!userId || !jobId || !status) {
+      console.error('Missing required parameters');
+      return;
+    }
+
+    const endPointTemplate = process.env.NEXT_PUBLIC_UPDATE_JOB_STATUS ?? '';
+    const endPoint = endPointTemplate.replace(':id', userId);
+
+    const response = await axios.put(
+      `${baseUrl}${endPoint}`,
+      { jobId, status },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error updating job status:', error);
   }
 };

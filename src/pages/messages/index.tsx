@@ -35,7 +35,6 @@ export default function ChatIndex() {
   useEffect(() => {
     const fetchConversations = async () => {
       try {
-        
         const baseURL = process.env.NEXT_PUBLIC_BASE_URL
         const endpoint = process.env.NEXT_PUBLIC_FETCH_CONVERSATIONS?.replace(':id', userId)
         const { data } = await axios.get(`${baseURL}${endpoint}`);
@@ -72,10 +71,41 @@ export default function ChatIndex() {
     setDisplayedConversations(filteredConversations);
   };
 
-  const handleSelectConversation = (conversation: Conversation) => {
+  const handleSelectConversation = async (conversation: Conversation) => {
     setSelectedConversation(conversation);
     if (isMobileView) {
       setShowSidebar(false);
+    }
+    
+    // Mark messages as read when conversation is selected
+    if (conversation.threadId !== 'govlink' && conversation.unreadCount > 0) {
+      try {
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+        const endpoint = process.env.NEXT_PUBLIC_MARK_MESSAGES_READ
+          ?.replace(':threadId', conversation.threadId)
+          .replace(':userId', userId);
+          
+        await axios.put(`${baseURL}${endpoint}`);
+        
+        // Update conversations to reflect read status
+        setAllConversations(prevConversations => 
+          prevConversations.map(conv => 
+            conv.threadId === conversation.threadId 
+              ? { ...conv, unreadCount: 0 }
+              : conv
+          )
+        );
+        
+        setDisplayedConversations(prevConversations => 
+          prevConversations.map(conv => 
+            conv.threadId === conversation.threadId 
+              ? { ...conv, unreadCount: 0 }
+              : conv
+          )
+        );
+      } catch (error) {
+        console.error('Error marking messages as read:', error);
+      }
     }
   };
   

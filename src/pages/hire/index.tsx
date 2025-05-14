@@ -7,7 +7,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { IoMdCalendar, IoMdArrowDropdown } from 'react-icons/io';
 import useAuthStore from '@/store/useAuth';
 import { useHire } from '@/store/useHire';
-import { fetchJob } from "@/api/job-api";
+import { fetchJob, updateJobStatus } from "@/api/job-api";
 import { Jobs } from '@/types/jobs';
 import { submitHireContract } from '@/api/hiring';
 import { updateJobApplicationStatus } from '@/api/status-api';
@@ -122,6 +122,9 @@ const HireContractor: NextPage = () => {
           startDate: formData.startDate,
           selectedFiles
         });
+
+        const newJobStatus = "active";
+        await updateJobStatus(userId, jobId, newJobStatus)
       
         if (success) {
             updateJobApplicationStatus({applicationId: applicationId, status: "active"})

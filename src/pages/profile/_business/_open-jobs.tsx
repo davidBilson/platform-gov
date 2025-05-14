@@ -34,8 +34,8 @@ const OpenJobs = () => {
 
   }, [userId]);
 
-  const openJobs = jobs.filter(job => job.status === 'active');
-  const activeJobs = jobs.filter(job => job.status === '');
+  const openJobs = jobs.filter(job => job.status === 'open');
+  const activeJobs = jobs.filter(job => job.status === 'active');
 
   return (
     <main className='p-6'>
