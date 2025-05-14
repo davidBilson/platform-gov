@@ -604,7 +604,6 @@ const ContractorFilter = () => {
           </label>
         </div>
         
-        {/* Government type radio buttons */}
         <div className="flex items-center mr-4">
           <input 
             type="radio" 
@@ -612,8 +611,7 @@ const ContractorFilter = () => {
             id="state" 
             checked={governmentType === 'State'}
             onChange={() => {
-              setGovernmentType('State'); 
-              setDepartment('');
+              setGovernmentType('State');
             }}
             className="h-4 w-4 text-deepskyblue border-gray-300 focus:ring-deepskyblue" 
           />
@@ -628,14 +626,12 @@ const ContractorFilter = () => {
             checked={governmentType === 'Federal'}
             onChange={() => {
               setGovernmentType('Federal');
-              setDepartment('');
             }}
             className="h-4 w-4 text-deepskyblue border-gray-300 focus:ring-deepskyblue" 
           />
           <label htmlFor="federal" className="ml-2 text-gray-700 text-sm">Federal</label>
         </div>
         
-        {/* Department/Agency selector */}
         <div className="relative flex-grow w-full max-w-125">
   <input 
     ref={departmentInputRef}
@@ -646,7 +642,6 @@ const ContractorFilter = () => {
     onChange={(e) => {
       const value = e.target.value;
       setDepartment(value);
-      // Combine all departments from all sources
       const allDepts = [
         ...usCongressional, 
         ...usIntelligenceAndOversight, 
@@ -665,7 +660,6 @@ const ContractorFilter = () => {
     }}
     onFocus={() => {
       setShowDepartmentDropdown(true);
-      // Initialize with all departments when focused
       const allDepts = [
         ...usCongressional, 
         ...usIntelligenceAndOversight, 
@@ -690,7 +684,6 @@ const ContractorFilter = () => {
       ref={departmentDropdownRef}
       className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
     >
-      {/* Optional: Add category headers if you want */}
       <div className="px-4 py-2 font-semibold bg-gray-100 text-sm">US Federal Agencies</div>
       {filteredDepartments
         .filter(dept => 
@@ -706,10 +699,6 @@ const ContractorFilter = () => {
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
             onClick={() => {
               selectDepartment(dept);
-              // Auto-set government type to Federal if a federal agency is selected
-              if (governmentType !== 'Federal') {
-                setGovernmentType('Federal');
-              }
             }}
           >
             {dept}
@@ -729,10 +718,6 @@ const ContractorFilter = () => {
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
             onClick={() => {
               selectDepartment(dept);
-              // Auto-set government type to State if an international agency is selected
-              if (governmentType !== 'State') {
-                setGovernmentType('State');
-              }
             }}
           >
             {dept}

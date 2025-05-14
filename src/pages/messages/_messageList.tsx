@@ -1,3 +1,7 @@
+import { useState, useEffect, useRef } from "react";
+import { fetchProfilePicture } from "@/api/profile-api";
+import ProfilePicture from "@/components/profile/profilePicture";
+
 interface Conversation {
   threadId: string;
   jobId?: string;
@@ -22,6 +26,52 @@ interface MessageListProps {
 }
 
 export default function MessageList({ conversations, loading, onSelect, selectedId }: MessageListProps) {
+  // Use a state object to store profile pictures keyed by user ID
+  const [profilePictures, setProfilePictures] = useState<Record<string, string>>({});
+  // Use a ref to track which user IDs we've already attempted to load
+  const processedUserIds = useRef<Set<string>>(new Set());
+
+  // Fetch profile pictures when conversations change
+  useEffect(() => {
+    // Skip if no conversations
+    if (conversations.length === 0) return;
+    
+    const loadProfilePictures = async () => {
+      const newProfilePictures: Record<string, string> = {};
+      
+      // Get list of user IDs that need pictures loaded (ones we haven't tried yet)
+      const userIdsToLoad = conversations
+        .map(conv => conv.otherUser.id)
+        .filter(userId => !processedUserIds.current.has(userId));
+      
+      // If nothing to load, exit early
+      if (userIdsToLoad.length === 0) return;
+      
+      // Process each user individually
+      for (const userId of userIdsToLoad) {
+        // Mark this user ID as processed so we don't try again
+        processedUserIds.current.add(userId);
+        
+        try {
+          // Safe fetching that always returns a value (empty string on failure)
+          const pfp = await fetchProfilePicture(userId);
+          if (pfp) {
+            newProfilePictures[userId] = pfp;
+          }
+        } catch (error) {
+          console.error(`Failed to fetch profile picture for ${userId}:`, error);
+        }
+      }
+      
+      // Only update state if we have new pictures
+      if (Object.keys(newProfilePictures).length > 0) {
+        setProfilePictures(prev => ({...prev, ...newProfilePictures}));
+      }
+    };
+    
+    loadProfilePictures();
+  }, [conversations]); // Only depend on conversations
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -63,7 +113,7 @@ export default function MessageList({ conversations, loading, onSelect, selected
     return (
       <div className="w-full h-full rounded-xl shadow-sm flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-gray-500 ">No conversations found</p>
+          <p className="text-gray-500">No conversations found</p>
         </div>
       </div>
     );
@@ -73,6 +123,8 @@ export default function MessageList({ conversations, loading, onSelect, selected
     <div className="w-full bg-white h-full rounded-xl overflow-hidden shadow-sm flex flex-col">
       {conversations.map((conversation) => {
         const isSelected = conversation.threadId === selectedId;
+        const userId = conversation.otherUser.id;
+        const profilePicture = profilePictures[userId];
         
         return (
           <div 
@@ -93,9 +145,15 @@ export default function MessageList({ conversations, loading, onSelect, selected
                       ? 'bg-blue-100 text-deepskyblue'
                       : 'bg-deepskyblue text-gray-600'
                 }`}>
-                  <span className="font-medium text-sm">
-                    {conversation.threadId === 'govlink' ? 'GL' : conversation.otherUser.name.charAt(0).toUpperCase()}
-                  </span>
+                  {conversation.threadId === 'govlink' ? (
+                    <span className="font-medium text-sm">GL</span>
+                  ) : (
+                    <ProfilePicture 
+                      source={profilePicture || ''} 
+                      alt={conversation.otherUser.name} 
+                      dimension={40} 
+                    />
+                  )}
                 </div>
               </div>
               

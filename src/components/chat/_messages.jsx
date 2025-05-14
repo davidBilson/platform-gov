@@ -134,7 +134,7 @@ const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
               <ProfilePicture 
                 source={message.sender._id === currentUser._id ? currentUserPfp : message.sender._id === otherUser._id ? otherUserPfp : ""} 
                 alt={message.sender.name} 
-                dimension={60}
+                dimension={40}
               />
             </div>
             <div className={`w-fit ${message.sender._id === currentUser._id ? 'pr-10 pt-1.5' : 'pl-10 pt-1.5'}`}>

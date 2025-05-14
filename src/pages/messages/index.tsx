@@ -63,7 +63,6 @@ export default function ChatIndex() {
   }, [userId]);
 
   useEffect(() => {
-    // Update sidebar visibility when selectedConversation changes in mobile view
     if (isMobileView) {
       setShowSidebar(!selectedConversation);
     }
@@ -111,7 +110,6 @@ export default function ChatIndex() {
       </section>
 
       <section className="flex flex-1 gap-4 overflow-hidden h-full">
-        {/* Conversation List - Hidden on mobile when a conversation is selected */}
         {(showSidebar || !isMobileView) && (
           <div className="w-full md:w-80 flex-shrink-0 h-full">
             <MessageList 
@@ -123,7 +121,6 @@ export default function ChatIndex() {
           </div>
         )}
         
-        {/* Messages Section - Shown conditionally */}
         {(!isMobileView || !showSidebar) && (
           <div className="flex-1 h-full">
             {selectedConversation && selectedConversation.threadId == "govlink" ? (

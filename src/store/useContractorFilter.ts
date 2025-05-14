@@ -37,7 +37,6 @@ interface ContractorFilterState {
 }
 
 export const useContractorFilter = create<ContractorFilterState>((set, get) => ({
-  // Initial state
   searchTerm: '',
   profession: '',
   clearance: '',
@@ -77,7 +76,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     get().updateActiveFilters();
   },
   setGovernmentType: (type) => {
-    set({ governmentType: type }); // Reset department when gov type changes
+    set({ governmentType: type });
     get().updateActiveFilters();
   },
   setDepartment: (dept) => {
@@ -129,10 +128,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
         case 'skillsAndExpertise': resetState.skillsAndExpertise = ''; break;
         case 'certifications': resetState.certifications = ''; break;
         case 'requireGovtExperience': resetState.requireGovtExperience = false; break;
-        case 'governmentType': 
-          resetState.governmentType = ''; 
-          resetState.department = ''; 
-          break;
+        case 'governmentType': resetState.governmentType = ''; break;
         case 'department': resetState.department = ''; break;
         case 'location': resetState.location = ''; break;
         case 'domainFocus': 
@@ -245,10 +241,6 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
   applyFilters: (contractors) => {
     const state = get();
     let filtered = [...contractors];
-    
-    // Call updateActiveFilters to ensure active filters are up to date
-    // This is no longer necessary since we're calling updateActiveFilters in each setter
-    // get().updateActiveFilters();
 
     // SEARCH TERM
     if (state.searchTerm) {

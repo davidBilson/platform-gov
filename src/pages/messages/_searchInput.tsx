@@ -31,7 +31,7 @@ const SearchInput = ({ onSearch, placeholder = 'Search' }: SearchInputProps) => 
           onBlur={() => setFocused(false)}
           className={`text-deepskyblue placeholder:text-deepskyblue w-full border bg-white rounded-full py-2.5 pl-10 pr-4 focus:outline-none text-sm transition-all duration-200 ${
             focused 
-              ? 'border-2 border-deepskyblue ring-2 ring-deepskyblue' 
+              ? 'border border-deepskyblue ring-2 ring-deepskyblue' 
               : 'border-deepskyblue hover:border-blue-300'
           }`}
           aria-label="Search conversations"

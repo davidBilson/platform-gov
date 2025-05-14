@@ -56,7 +56,7 @@ export const useJobFilter = create<JobFilterState>((set) => ({
   setSkillsAndExpertise: (skills) => set({ skillsAndExpertise: skills }),
   setCertifications: (certs) => set({ certifications: certs }),
   setRequirePrevGovtExp: (value) => set({ requirePrevGovtExp: value }),
-  setGovernmentType: (type) => set({ governmentType: type, department: '' }), // Reset department when gov type changes
+  setGovernmentType: (type) => set({ governmentType: type }),
   setDepartment: (dept) => set({ department: dept }),
   setLocation: (loc) => set({ location: loc }),
   setDomainFocus: (focus) => set({ domainFocus: focus, domainDetail: '' }), // Reset detail when focus changes
@@ -93,7 +93,6 @@ export const useJobFilter = create<JobFilterState>((set) => ({
       case 'govtExp': resetState.requirePrevGovtExp = false; break;
       case 'govtType': 
         resetState.governmentType = ''; 
-        resetState.department = ''; 
         break;
       case 'department': resetState.department = ''; break;
       case 'location': resetState.location = ''; break;

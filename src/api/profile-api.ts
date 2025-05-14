@@ -57,19 +57,45 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
 };
 
 
+// Modified version of fetchProfilePicture with even more robust error handling
 export const fetchProfilePicture = async (id: string): Promise<string> => {
   try {
+    // Check if id is valid
+    if (!id) {
+      console.warn('Invalid user ID provided to fetchProfilePicture');
+      return '';
+    }
+
     const endpoint = process.env.NEXT_PUBLIC_GET_PROFILE_PIC?.replace(':id', id);
-    if (!endpoint) throw new Error('Endpoint not configured');
     
-    const response = await axios.get(`${API_BASE_URL}${endpoint}`);
+    // Validate endpoint before making request
+    if (!endpoint) {
+      console.warn('Missing NEXT_PUBLIC_GET_PROFILE_PIC environment variable');
+      return '';
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
+      // Adding timeout to prevent hanging requests
+      timeout: 5000,
+      // Don't throw an error on 404, we'll handle it
+      validateStatus: function (status) {
+        return status < 500; // Only throw for server errors
+      }
+    });
+
+    // Check response status explicitly
+    if (response.status === 404) {
+      console.warn(`Profile picture not found for user ${id}`);
+      return '';
+    }
 
     if (response?.data?.success) {
-      return response?.data?.data;
+      return response?.data?.data || '';
     }
    
     return '';
   } catch (error) {
+    // Log error but don't rethrow
     console.error('Error fetching client profile picture:', error);
     return '';
   }
