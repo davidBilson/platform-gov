@@ -203,7 +203,6 @@ const BusinessProfile = () => {
         </div>
       </section>
       
-      {/* Open Jobs Section */}
       <OpenJobs />
     </section>
   );
