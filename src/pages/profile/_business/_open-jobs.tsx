@@ -1,18 +1,18 @@
-import useAuthStore from '@/store/useAuth';
-import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import { FaLocationDot } from "react-icons/fa6";
 import { FaRegHourglass } from "react-icons/fa6";
-import { Job, ApiResponse} from '@/types/jobs'; 
+import { FaLocationDot } from "react-icons/fa6";
+import { Job, ApiResponse} from '@/types/jobs';
+import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
+import axios from 'axios';
 
 const OpenJobs = () => {
 
   const [jobs, setJobs] = useState<Job[]>([]);
-
   const { userId } = useAuthStore();
 
   useEffect(() => {
+    
     const fetchJobs = async (): Promise<void> => {
       try {
 
@@ -31,9 +31,9 @@ const OpenJobs = () => {
     };
 
     fetchJobs();
+
   }, [userId]);
 
-  // Filter jobs by status
   const openJobs = jobs.filter(job => job.status === 'active');
   const activeJobs = jobs.filter(job => job.status === '');
 
@@ -99,12 +99,11 @@ const OpenJobs = () => {
             activeJobs.map(job => (
               <div key={job._id} className='border-b border-b-[#ccc] pb-10 mb-8'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2'>
-                  {/* date and time job was posted */}
+                  
                   <p className="text-[12px] text-[#808080]">
                     Posted {new Date(job.createdAt).toLocaleDateString()} {new Date(job.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>
 
-                  {/* number of proposals */}
                   <Link 
                     href={`/job/${job._id}/proposals`} 
                     className='bg-[#009DDE] text-[15px] text-center flex justify-center items-center text-white font-bold w-[114px] h-[30px] rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer'

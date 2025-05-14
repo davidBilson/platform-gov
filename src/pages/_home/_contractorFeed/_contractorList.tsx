@@ -18,7 +18,6 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
   };
   
   const renderRating = () => {
-
     const rating = 4  // mock rating
     const maxRating = 5;
 
@@ -33,12 +32,32 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
     );
   };
 
+  // Sort contractors to prioritize 'Janus Global Advisors'
+  const sortedContractors = [...contractors].sort((a, b) => {
+    // Check if contractor a is affiliated with Janus Global Advisors
+    if (a.firmAffiliation === 'Janus Global Advisors' && b.firmAffiliation !== 'Janus Global Advisors') {
+      return -1; // a comes before b
+    }
+    // Check if contractor b is affiliated with Janus Global Advisors
+    if (a.firmAffiliation !== 'Janus Global Advisors' && b.firmAffiliation === 'Janus Global Advisors') {
+      return 1; // b comes before a
+    }
+    // If both have same affiliation status, maintain original order
+    return 0;
+  });
+
   return (
     <section className="pt-7.5 pb-10 flex flex-col gap-7.5">
-        {contractors.map((contractor) => (
+        {sortedContractors.map((contractor) => (
           <div 
             key={contractor._id} 
           >
+            {/* Add a visual indicator for Janus Global Advisors contractors */}
+            {contractor.firmAffiliation === 'Janus Global Advisors' && (
+              <div className="mb-2 text-[8px] font-bold text-boldblue px-2 py-1 bg-blue-50 rounded-md inline-block">
+                Janus Global Advisors
+              </div>
+            )}
 
             <div className='flex flex-col md:flex-row items-start gap-4 md:gap-18.25 mb-6 md:mb-10.25'>
 
