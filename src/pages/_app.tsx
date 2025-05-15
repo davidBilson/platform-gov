@@ -81,10 +81,26 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-          />
+        <title>GovLink Global</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        
+        {/* Favicon/Logo Meta Tags */}
+        <link rel="icon" href="/favicon.ico" sizes="100" />
+        <link rel="icon" type="image/png" href="/images/govlinklogo-nobg.png" />
+        <link rel="apple-touch-icon" href="/images/govlinklogo-nobg.png" />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content="GovLink Global" />
+        <meta property="og:description" content="Welcome to GovLink Global" />
+        <meta property="og:image" content="/images/govlinklogo-nobg.png" />
+        <meta property="og:url" content="https://platform-gov.onrender.com" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="GovLink Global" />
+        <meta name="twitter:description" content="Welcome to GovLink Global" />
+        <meta name="twitter:image" content="/images/govlinklogo-nobg.png" />
       </Head>
       <ReactQueryProvider>
         <Navbar />
