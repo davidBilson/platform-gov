@@ -1,10 +1,11 @@
-import React from 'react';
-import { format } from 'date-fns';
-import { JobListProps } from '@/types/jobs';
+import ProfilePicture from '@/components/profile/profilePicture';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
-import Link from 'next/link';
+import { JobListProps } from '@/types/jobs';
 import useAuthStore from '@/store/useAuth';
+import { format } from 'date-fns';
+import Link from 'next/link';
+import React from 'react';
 
 const JobList = ({ job }: JobListProps) => {
 
@@ -81,7 +82,7 @@ const JobList = ({ job }: JobListProps) => {
         <div className="w-8.75 h-8.75 overflow-hidden rounded-full flex items-center justify-center text-white font-bold">
           {
             job.clientLogo &&
-            <img src={job.clientLogo} alt={job.clientName} className="w-full h-full object-cover" />
+            <ProfilePicture source={job.clientLogo ?? ""} alt={job.clientName} dimension={35} />
           }
         </div>
         <Link href="" className="font-semibold text-sm hover:underline">{job.clientName}</Link>

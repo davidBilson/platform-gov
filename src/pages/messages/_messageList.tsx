@@ -162,8 +162,9 @@ export default function MessageList({ conversations, loading, onSelect, selected
                   <h4 className={`text-sm font-medium truncate ${isSelected ? 'text-blue-700' : 'text-gray-900'}`}>
                     {conversation.otherUser.name}
                   </h4>
+
                   <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                    {formatTime(conversation.lastMessage.createdAt)}
+                    {conversation.threadId !== 'govlink' && formatTime(conversation.lastMessage.createdAt)}
                   </span>
                 </div>
                 

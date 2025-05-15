@@ -1,4 +1,4 @@
-// pages/chat/index.tsx
+// pages/messages/index.tsx
 import { useState, useEffect } from 'react';
 import SearchMessages from './_search';
 import MessageList from './_messageList';
@@ -6,6 +6,8 @@ import NoMessages from './_NoMessages';
 import Messages from '@/components/chat/_messages';
 import useAuthStore from '@/store/useAuth';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 
 interface Conversation {
   threadId: string;
@@ -31,6 +33,129 @@ export default function ChatIndex() {
   const [loading, setLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+
+  
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    // Initialize socket connection
+    const newSocket = io(process.env.NEXT_PUBLIC_BASE_URL, {
+      withCredentials: true,
+      transports: ["websocket"],
+      auth: {
+        userId
+      }
+    });
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [userId]);
+
+
+  useEffect(() => {
+    if (!socket) return;
+  
+    const handleConversationUpdate = (data: {
+      threadId: string;
+      message: {
+        content: string;
+        createdAt: string;
+      };
+      isCurrentUser: boolean;
+      unreadCount?: number;
+    }) => {
+      setAllConversations(prevConversations => {
+        // Find if this conversation exists
+        const existingConvIndex = prevConversations.findIndex(
+          conv => conv.threadId === data.threadId
+        );
+  
+        // If conversation exists
+        if (existingConvIndex >= 0) {
+          const updatedConversations = [...prevConversations];
+          const existingConv = updatedConversations[existingConvIndex];
+          
+          // Only update unread count if this is not the current user
+          // AND if the conversation is not currently selected
+          const shouldIncrementUnread = 
+            !data.isCurrentUser && 
+            selectedConversation?.threadId !== data.threadId;
+  
+          updatedConversations[existingConvIndex] = {
+            ...existingConv,
+            lastMessage: {
+              content: data.message.content,
+              isCurrentUser: data.isCurrentUser,
+              createdAt: data.message.createdAt
+            },
+            unreadCount: shouldIncrementUnread
+              ? (existingConv.unreadCount || 0) + (data.unreadCount || 1)
+              : existingConv.unreadCount
+          };
+  
+          // Move to top
+          updatedConversations.sort((a, b) => 
+            new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+          );
+  
+          return updatedConversations;
+        }
+  
+        return prevConversations;
+      });
+  
+      // Update displayed conversations with the same logic
+      setDisplayedConversations(prev => {
+        const existingConvIndex = prev.findIndex(
+          conv => conv.threadId === data.threadId
+        );
+  
+        if (existingConvIndex >= 0) {
+          const updated = [...prev];
+          const existingConv = updated[existingConvIndex];
+          
+          const shouldIncrementUnread = 
+            !data.isCurrentUser && 
+            selectedConversation?.threadId !== data.threadId;
+  
+          updated[existingConvIndex] = {
+            ...existingConv,
+            lastMessage: {
+              content: data.message.content,
+              isCurrentUser: data.isCurrentUser,
+              createdAt: data.message.createdAt
+            },
+            unreadCount: shouldIncrementUnread
+              ? (existingConv.unreadCount || 0) + (data.unreadCount || 1)
+              : existingConv.unreadCount
+          };
+  
+          updated.sort((a, b) => 
+            new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+          );
+  
+          return updated;
+        }
+  
+        return prev;
+      });
+    };
+  
+    // Listen for both events
+    socket.on('receive-message', handleConversationUpdate);
+    socket.on('conversation-update', handleConversationUpdate);
+  
+    return () => {
+      socket.off('receive-message', handleConversationUpdate);
+      socket.off('conversation-update', handleConversationUpdate);
+    };
+  }, [socket, userId, selectedConversation]);
+
+
   
   useEffect(() => {
     const fetchConversations = async () => {
