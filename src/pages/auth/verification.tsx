@@ -37,7 +37,6 @@ const Verification: React.FC = () => {
   const { 
     userId, 
     email,
-    role,
     phoneNumber, 
     verificationStep, 
     setEmailVerified, 
@@ -85,7 +84,8 @@ const Verification: React.FC = () => {
     
     try {
       if (!userId) {
-        throw new Error('User ID is missing');
+        toast.error('User ID is missing');
+        return;
       }
         
       await axios.post<ApiResponse>(`${apiHost}${verifyEmailEndpoint}`, {
@@ -171,7 +171,8 @@ const Verification: React.FC = () => {
     
     try {
       if (!userId) {
-        throw new Error('User ID is missing');
+        toast.error('User ID is missing');
+        return;
       }
 
       await axios.post<ApiResponse>(`${apiHost}${verifyPhoneEndpoint}`, {
@@ -179,11 +180,11 @@ const Verification: React.FC = () => {
         code: verificationCode
       });
       
-      setPhoneVerified(true);
-      setSuccess('Phone verified successfully!');
       toast.success('Phone verified successfully!');
-      setVerificationCode('');
+      setSuccess('Phone verified successfully!');
       setVerificationStep('completed');
+      setVerificationCode('');
+      setPhoneVerified(true);
       
     } catch (err) {
       console.error('Phone verification error:', err);
@@ -203,13 +204,7 @@ const Verification: React.FC = () => {
   
   const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
-    if (role === 'contractor') {
       router.push('/profile/edit');
-    } else if (role === 'client') {
-      router.push('/profile/edit');
-    } else {
-      toast.error('Unable to determine your account type. Please contact support.');
-    }
   };
   
   const resendVerificationCode = async (): Promise<void> => {
@@ -217,7 +212,8 @@ const Verification: React.FC = () => {
     
     try {
       if (!userId) {
-        throw new Error('User ID is missing');
+        toast.error('User ID is missing');
+        return;
       }
       
       // Determine which endpoint to use based on the current verification step

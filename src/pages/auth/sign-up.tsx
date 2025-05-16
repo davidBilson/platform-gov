@@ -73,7 +73,6 @@ const Signup = () => {
       
       const responseData = res.data;
       
-      
       if (responseData.data?.userId) {
   
         setUserId(responseData.data.userId);
@@ -91,7 +90,6 @@ const Signup = () => {
       
       if (!responseData.data?.userId) {
         console.warn('Response received but userId is missing:', responseData);
-        throw new Error('User ID not received from server');
       }
 
     } catch (error) {

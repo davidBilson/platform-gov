@@ -47,7 +47,6 @@ const SignIn = () => {
     if (errorMessage) setErrorMessage('');
   };
 
-  // Submit form
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
@@ -55,7 +54,7 @@ const SignIn = () => {
     setErrorMessage('');
     
     try {
-      // Ensure environment variables are properly typed or use defaults
+
       const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
       const signinEndpoint = process.env.NEXT_PUBLIC_SIGNIN;
       
@@ -72,7 +71,7 @@ const SignIn = () => {
       // Check if we have user data in the response
       if (!responseData.data?.user?._id) {
         console.warn('Response received but user data is missing:', responseData);
-        throw new Error('User data not received from server');
+        return;
       }
       
       const userData = responseData.data.user;
@@ -80,11 +79,11 @@ const SignIn = () => {
       // Update auth store with user data - now including name and role properly
       setUserId(userData._id);
       setFormData({
-        name: userData.name,         // Store the user's name
-        role: userData.role,         // Store as role (not userType)
+        name: userData.name,
+        role: userData.role,
         email: userData.email,
         phoneNumber: userData.phoneNumber,
-        userId: userData._id         // Also include userId in form data
+        userId: userData._id
       });
       
       // Set verification statuses
@@ -92,11 +91,12 @@ const SignIn = () => {
       setPhoneVerified(userData.isPhoneVerified);
       
       // Redirect based on verification status
+      if (userData.isEmailVerified) {
+        router.push('/');
+      }
+
       if (!userData.isEmailVerified) {
         router.push('/auth/verification');
-      } else {
-        // Redirect to home page if verification is complete
-        router.push('/');
       }
       
     } catch (error) {
