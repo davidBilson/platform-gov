@@ -33,14 +33,14 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
     clientLogo: string;
     clientId?: string;
   } => {
-    if (typeof application.jobId === 'object' && application.jobId !== null) {
+    if (typeof application?.jobId === 'object' && application?.jobId !== null) {
       return {
-        jobTitle: application.jobId.jobTitle || 'Job Title',
-        description: application.jobId.description || 'No description provided',
-        location: application.jobId.location || 'Remote',
-        clientName: application.jobId.clientName || 'Client',
-        clientLogo: application.jobId.clientLogo || 'https://res.cloudinary.com/dhktac9xz/image/upload/v1745753771/profiles/1745753767314-858168824_uft9ll.png',
-        clientId: application.jobId.clientId || application.jobId.userId
+        jobTitle: application?.jobId?.jobTitle || 'Job Title',
+        description: application?.jobId?.description || 'No description provided',
+        location: application?.jobId?.location || 'Remote',
+        clientName: application?.jobId?.clientName || 'Client',
+        clientLogo: application?.jobId?.clientLogo || 'https://res.cloudinary.com/dhktac9xz/image/upload/v1745753771/profiles/1745753767314-858168824_uft9ll.png',
+        clientId: application?.jobId?.clientId || application?.jobId?.userId
       };
     }
     
@@ -78,19 +78,19 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
           const jobDetails = getJobDetails(application);
           
           return (
-            <article key={application._id} className="">
+            <article key={application?._id} className="">
               <p className='text-xs text-boldblue font-semibold mb-5'>
-                Draft saved {formatDate(application.createdAt)}
+                Draft saved {formatDate(application?.createdAt)}
               </p>
               
               <h3 className="text-xl font-semibold mb-3.75">
-                {jobDetails.jobTitle}
+                {jobDetails?.jobTitle}
               </h3>
               
               <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
                 <div className="flex items-center gap-1.25">
                   <FaRegHourglass size={15} />
-                  {`Hourly | $${application.proposedRate || 'N/A'}`} | {getAvailabilityDisplay(application.availability)}
+                  {`Hourly | $${application?.proposedRate || 'N/A'}`} | {getAvailabilityDisplay(application?.availability)}
                 </div>
                 
                 <div className="flex items-center gap-1.25">
@@ -100,12 +100,12 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
               </div>
 
               <p className="text-gray-600 mb-3.75">
-                {truncateDescription(jobDetails.description)}
+                {truncateDescription(jobDetails?.description)}
               </p>
 
               <div className='flex items-center flex-wrap gap-2.5 mb-3.75'>
                 <Link
-                  href={`/job/apply?id=${typeof application.jobId === 'object' && application.jobId !== null ? application.jobId._id : application.jobId}`}
+                  href={`/job/apply?id=${typeof application?.jobId === 'object' && application?.jobId !== null ? application?.jobId?._id : application?.jobId}`}
                   className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out'
                 >
                   Edit Proposal
@@ -115,18 +115,18 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
               <div className="flex items-center gap-5">
                 <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
                   <img 
-                    src={jobDetails.clientLogo} 
-                    alt={jobDetails.clientName} 
+                    src={jobDetails?.clientLogo} 
+                    alt={jobDetails?.clientName} 
                     width={35} 
                     height={35} 
                     className="rounded-full" 
                   />
                 </div>
                 <Link 
-                  href={jobDetails.clientId ? `/client-profile/${jobDetails.clientId}` : '#'}
+                  href={jobDetails?.clientId ? `/client-profile/${jobDetails?.clientId}` : '#'}
                   className="font-semibold text-sm hover:underline"
                 >
-                  {jobDetails.clientName}
+                  {jobDetails?.clientName}
                 </Link>
               </div>
             </article>

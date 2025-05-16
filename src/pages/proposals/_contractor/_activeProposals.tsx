@@ -42,7 +42,7 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
     router.push({
       pathname: `/contract/${id}`,
       query: { 
-        jobId: typeof application.jobId === 'object' ? application.jobId._id : undefined,
+        jobId: typeof application?.jobId === 'object' ? application?.jobId?._id : undefined,
         tab: 'messages'
       }
     });
@@ -56,44 +56,44 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
         <p className="text-gray-500 text-center py-5">No active proposals</p>
       ) : (
         applications.map((application) => (
-          <article key={application._id} className="">
+          <article key={application?._id} className="">
             <p className='text-xs text-boldblue font-semibold mb-5'>
-              Applied {formatDate(application.createdAt)}
+              Applied {formatDate(application?.createdAt)}
             </p>
             
             <div className='mb-3.75 flex items-start justify-between gap-1'>
               <h3 className="text-xl font-semibold">
-                {typeof application.jobId === 'object' ? application.jobId.jobTitle : "Job Title"}
+                {typeof application.jobId === 'object' ? application?.jobId?.jobTitle : "Job Title"}
               </h3>
               <small
                 className={`text-[10px] text-white font-bold px-2 py-1 rounded-full ${
-                  application.status === 'pending'
+                  application?.status === 'pending'
                     ? 'bg-gray-400'
-                    : application.status === 'viewed'
+                    : application?.status === 'viewed'
                     ? 'bg-deepskyblue'
-                    : application.status === 'active'
+                    : application?.status === 'active'
                     ? 'bg-aquagreen'
                     : 'bg-gray-100 text-gray-600'
                 }`}
               > 
-                {application.status === 'active' && "Offer"}
+                {application?.status === 'active' && "Offer"}
               </small>
             </div>
             
             <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
               <div className="flex items-center gap-1.25">
                 <FaRegHourglass size={15} />
-                {`Hourly | $${application.proposedRate}`} | {application.availability || "Full Time"}
+                {`Hourly | $${application?.proposedRate}`} | {application?.availability || "Full Time"}
               </div>
               
               <div className="flex items-center gap-1.25">
                 <FaLocationDot size={15} />
-                {typeof application.jobId === 'object' ? application.jobId.location : "Remote"}
+                {typeof application?.jobId === 'object' ? application?.jobId?.location : "Remote"}
               </div>
             </div>
 
             <p className="text-gray-600 mb-3.75">
-              {truncateDescription(typeof application.jobId === 'object' ? application.jobId.description : "No description provided")}
+              {truncateDescription(typeof application?.jobId === 'object' ? application?.jobId?.description : "No description provided")}
             </p>
 
             <div className='flex items-center flex-wrap gap-2.5 mb-3.75'>
@@ -103,7 +103,7 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
               >
                 View proposal
               </button>
-              <button onClick={() => messageClient(application._id, application)} className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out cursor-pointer'>
+              <button onClick={() => messageClient(application?._id, application)} className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out cursor-pointer'>
                 Message Client
               </button>
             </div>
@@ -111,12 +111,12 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
             <div className="flex items-center gap-5">
               <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
                 <img width={35} height={35} className="rounded-full" 
-                  src={typeof application.jobId === 'object' ? application.jobId.clientLogo : ""} 
-                  alt={typeof application.jobId === 'object' ? application.jobId.clientName : "Client"} 
+                  src={typeof application?.jobId === 'object' ? application?.jobId?.clientLogo : ""} 
+                  alt={typeof application?.jobId === 'object' ? application?.jobId?.clientName : "Client"} 
                 />
               </div>
               <Link  href={''} className="font-semibold text-sm hover:underline">
-                {typeof application.jobId === 'object' ? application.jobId.clientName : "Client"}
+                {typeof application?.jobId === 'object' ? application?.jobId?.clientName : "Client"}
               </Link>
             </div>
           </article>
