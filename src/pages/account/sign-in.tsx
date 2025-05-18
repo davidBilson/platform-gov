@@ -1,4 +1,4 @@
-// src/pages/auth/signin.tsx or src/app/auth/signin/page.tsx
+// src/pages/account/signin.tsx or src/app/account/signin/page.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -96,7 +96,7 @@ const SignIn = () => {
       }
 
       if (!userData.isEmailVerified) {
-        router.push('/auth/verification');
+        router.push('/account/verification');
       }
       
     } catch (error) {
@@ -164,13 +164,13 @@ const SignIn = () => {
             </button>
             
             <div className="text-center mt-2">
-              <Link href="/auth/forgot-password" className='text-xs md:text-sm font-medium text-boldblue underline cursor-pointer'>
+              <Link href="/account/forgot-password" className='text-xs md:text-sm font-medium text-boldblue underline cursor-pointer'>
                 Forgot Password?
               </Link>
             </div>
             
             <p className='text-center text-xs md:text-sm font-medium mt-2'>
-              {"Don't"} have an account? <Link href="/auth/sign-up" className='text-boldblue underline cursor-pointer'>Create Account</Link>
+              {"Don't"} have an account? <Link href="/account/sign-up" className='text-boldblue underline cursor-pointer'>Create Account</Link>
             </p>
           </div>
         </form>

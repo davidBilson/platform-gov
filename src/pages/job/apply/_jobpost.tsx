@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { format } from 'date-fns';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
@@ -36,12 +36,17 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
   const getClientLocation = (): string => {
     if (Array.isArray(job.clientLocation) && job.clientLocation.length > 0) {
       const locationObj = job.clientLocation[0] as unknown as LocationObject;
-      if (locationObj && typeof locationObj === 'object' && 'city' in locationObj && 'state' in locationObj) {
-        return `${locationObj.city}, ${locationObj.state}`;
+      if (locationObj && typeof locationObj === 'object' && 'country' in locationObj && 'state' in locationObj) {
+        
+        return `${locationObj.state}${locationObj.state && ','} ${locationObj.country}`;
       }
     }
     return job.location;
   };
+
+  useEffect(() => {
+    console.log(job)
+  }, [job])
 
   return (
     <section className='w-full max-w-275 m-auto pb-64'>

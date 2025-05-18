@@ -27,7 +27,7 @@ const ResetPassword: React.FC = () => {
     
     // Redirect to forgot password page if no email or token is provided
     if (!email || !token) {
-      router.push('/auth/forgot-password');
+      router.push('/account/forgot-password');
       return;
     }
     
@@ -52,7 +52,7 @@ const ResetPassword: React.FC = () => {
         setError(axiosError.response?.data?.message || 'Invalid or expired reset link. Please request a new password reset.');
         // Redirect after a delay
         setTimeout(() => {
-          router.push('/auth/forgot-password');
+          router.push('/account/forgot-password');
         }, 3000);
       }
     };
@@ -135,7 +135,7 @@ const ResetPassword: React.FC = () => {
         setSuccessMessage('Password reset successfully! Redirecting to login...');
         // Redirect to login page after a delay
         setTimeout(() => {
-          router.push('/auth/sign-in');
+          router.push('/account/sign-in');
         }, 2000);
       }
     } catch (err) {

@@ -15,7 +15,7 @@ const ContractorProposals = () => {
 
   const handleSignOut = () => {
     resetAll();
-    router.push('/auth/sign-in');
+    router.push('/account/sign-in');
   }
 
   const [applications, setApplications] = useState({

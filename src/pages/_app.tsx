@@ -15,11 +15,11 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   const { userId, isLoading, initAuth, verificationStep } = useAuthStore();
 
   const publicRoutes = [
-    '/auth/sign-up',
-    '/auth/sign-in',
-    '/auth/forgot-password',
-    '/auth/reset-password',
-    '/auth/verification',
+    '/account/sign-up',
+    '/account/sign-in',
+    '/account/forgot-password',
+    '/account/reset-password',
+    '/account/verification',
     '/privacy-policy',
     '/'
   ];
@@ -28,7 +28,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     publicRoutes.includes(router.pathname) ||
     publicRoutes.some(route => router.pathname.startsWith(route + '/'));
 
-    const isVerificationPage = router.pathname === '/auth/verification';
+    const isVerificationPage = router.pathname === '/account/verification';
   
     useEffect(() => {
       initAuth();
@@ -36,7 +36,7 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   
     useEffect(() => {
       if (!isLoading && !userId && !isPublicRoute) {
-        router.replace('/auth/sign-in');
+        router.replace('/account/sign-in');
       }
     }, [userId, isPublicRoute, isLoading, router]);
   
@@ -44,10 +44,10 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading) {
 
-      if (userId && router.pathname === '/auth/sign-up') {
+      if (userId && router.pathname === '/account/sign-up') {
 
         if (verificationStep !== 'completed') {
-          router.replace('/auth/verification');
+          router.replace('/account/verification');
         } else {
           router.replace('/');
         }
@@ -55,10 +55,10 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
       } 
 
       else if (isVerificationPage && !userId) {
-        router.replace('/auth/sign-up');
+        router.replace('/account/sign-up');
       }
 
-      else if (userId && router.pathname === '/auth/sign-in') {
+      else if (userId && router.pathname === '/account/sign-in') {
         router.replace('/');
       }
     }

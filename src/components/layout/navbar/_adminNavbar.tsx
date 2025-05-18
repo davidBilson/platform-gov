@@ -10,7 +10,7 @@ const AdminNavbar: React.FC = () => {
   const { name } = authStore();
   
   // Check if current path is an auth route
-  const isAuthRoute = pathname?.startsWith('/auth') || false;
+  const isAuthRoute = pathname?.startsWith('/account') || false;
 
   // Function to generate user initials
   const getUserInitials = (): string => {

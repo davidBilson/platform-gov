@@ -12,14 +12,15 @@ interface MilestoneModalProps {
 }
 
 const AddMilestoneModal = ({ isOpen, onClose, onSubmit, defaultPrice }: MilestoneModalProps) => {
-    const [task, setTask] = useState('');
-    const [price, setPrice] = useState<number | string>(defaultPrice);
-    const [description, setDescription] = useState('');
-    const [dueDate, setDueDate] = useState<Date | null>(null);
-    const datePickerRef = useRef(null);
-    const [datePickerOpen, setDatePickerOpen] = useState(false);
     
-    // Only render if modal is open
+    const [price, setPrice] = useState<number | string>(defaultPrice);
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const [dueDate, setDueDate] = useState<Date | null>(null);
+    const [description, setDescription] = useState('');
+    const [task, setTask] = useState('');
+
+    const datePickerRef = useRef(null);
+    
     if (!isOpen) return null;
     
     const handleSubmit = () => {

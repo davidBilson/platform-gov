@@ -11,6 +11,7 @@ import { fetchJob, updateJobStatus } from "@/api/job-api";
 import { Jobs } from '@/types/jobs';
 import { submitHireContract } from '@/api/hiring';
 import { updateJobApplicationStatus } from '@/api/status-api';
+import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 
 interface FormData {
     startDate: Date | null;
@@ -74,12 +75,24 @@ const HireContractor: NextPage = () => {
         paymentType: 'hourly',
     });
 
+    const getPaymentInfo = () => {
+        if (job?.paymentType === 'hourly') {
+          return `Hourly | $${job?.price}`;
+        } else if (job?.paymentType === 'fixed-price') {
+          return `Fixed Price | $${job?.price}`;
+        } else if (job?.paymentType === 'retainer' && job?.retainerAmount && job?.retainerFrequency) {
+          return `Retainer | $${job?.retainerAmount}/${job?.retainerFrequency.toLowerCase()}`;
+        }
+        return '';
+      };
+
     useEffect(() => {
         const loadJob = async () => {
             if (jobId) {
                 try {
                     const jobData = await fetchJob(jobId as string);
                     setJob(jobData);
+                    console.log(jobData);
                 } catch (error) {
                     console.error('Error loading job:', error);
                     setJob(null);
@@ -174,6 +187,17 @@ const HireContractor: NextPage = () => {
                 <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
                     <article className='flex flex-col gap-5 '>
                         <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
+                        <div className="flex flex-wrap items-center gap-10 text-sm font-semibold">
+                            <div className="flex items-center gap-1.25">
+                                <FaRegHourglass size={15} />
+                                {getPaymentInfo()} | {job?.employmentType}
+                            </div>
+                            
+                            <div className="flex items-center gap-1.25">
+                                <FaLocationDot size={15} />
+                                {job?.location}
+                            </div>
+                            </div>
                         <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
                     </article>
                 </section>

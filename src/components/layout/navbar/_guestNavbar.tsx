@@ -25,7 +25,7 @@ const GuestNavbar: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<ContractorOption>("Jobs");
 
   const pathname = usePathname();
-  const isAuthRoute = pathname?.startsWith('/auth') || false;
+  const isAuthRoute = pathname?.startsWith('/account') || false;
   const { setFeedType } = useFeedStore();
 
   useEffect(() => {
@@ -157,14 +157,14 @@ const GuestNavbar: React.FC = () => {
             {/* Sign up and sign in button (desktop) */}
             <div className='hidden lg:flex items-center gap-7'>
               <button 
-                onClick={() => router.push('/auth/sign-in')}
+                onClick={() => router.push('/account/sign-in')}
                 className='border-none outline-none w-fit p-0 text-boldblue font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer'
                 type="button"
               >
                 Login
               </button>
               <button 
-                onClick={() => router.push('/auth/sign-up')}
+                onClick={() => router.push('/account/sign-up')}
                 className='bg-boldblue w-30 py-2.5 px-5 rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer'
                 type="button"
               >
@@ -210,7 +210,7 @@ const GuestNavbar: React.FC = () => {
               <ul className="flex flex-col items-center gap-5 mb-6">
                 <li>
                   <button 
-                    onClick={() => router.push('/auth/sign-in')}
+                    onClick={() => router.push('/account/sign-in')}
                     className='border-none outline-none w-fit p-0 text-boldblue font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer'
                     type="button"
                   >
@@ -219,7 +219,7 @@ const GuestNavbar: React.FC = () => {
                 </li>
                 <li>
                   <button 
-                    onClick={() => router.push('/auth/sign-up')}
+                    onClick={() => router.push('/account/sign-up')}
                     className='bg-boldblue py-2 px-5 rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer'
                     type="button"
                   >

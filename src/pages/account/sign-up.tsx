@@ -84,7 +84,7 @@ const Signup = () => {
         
         setVerificationStep('email');
         
-        window.location.href = '/auth/verification';
+        window.location.href = '/account/verification';
         return;
       }
       
@@ -261,7 +261,7 @@ const Signup = () => {
             </div>
           </div>
 
-          <p className='text-center text-xs md:text-sm font-medium'>Already have an account? <Link href="/auth/sign-in" className='text-boldblue underline cursor-pointer'>Sign in</Link></p>
+          <p className='text-center text-xs md:text-sm font-medium'>Already have an account? <Link href="/account/sign-in" className='text-boldblue underline cursor-pointer'>Sign in</Link></p>
         </form>
       </section>
     </main>

@@ -60,7 +60,7 @@ const ForgotPassword: React.FC = () => {
       });
       
       if (response.data.success) {
-        router.push(`/auth/reset-password?email=${email}&token=${resetToken}`);
+        router.push(`/account/reset-password?email=${email}&token=${resetToken}`);
       }
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse>;

@@ -100,13 +100,13 @@ const ProposalsList = ({ jobId }: JobDetailsProps) => {
       })}
 
       {showProposal && selectedProposal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-end">
+        <div className="fixed inset-0 bg-black/50 z-50 h-screen flex items-center justify-end">
           <div 
-            className="absolute inset-0" 
+            className="absolute inset-0 h-full" 
             onClick={handleOverlayClick}
           />
           <div className="relative w-full md:max-w-1/2 h-full bg-white flex flex-col">
-            <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="h-full flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Proposal handleClose={handleClose} proposalData={selectedProposal} />
             </div>
           </div>

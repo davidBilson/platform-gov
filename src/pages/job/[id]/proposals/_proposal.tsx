@@ -70,7 +70,7 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
   };
 
   return (
-      <section className='w-full'>
+    <section className='w-full h-full'>
         <div className='px-7.5 pt-7.5 flex flex-col gap-5 mb-7.5'>
           <div className='flex gap-4 h-26'>
             <div>
@@ -157,7 +157,7 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
           </table>
         </div>
 
-        <div className="sticky bottom-0 bg-skyblue border-t border-t-boldblue py-12.5 px-6 mt-8">
+        <div className="h-2/12 sticky bottom-0 bg-skyblue border-t border-t-boldblue py-12.5 px-6 mt-30">
           <div className="flex items-center justify-center gap-2.5 md:gap-7.5">
             <button onClick={handleClose} type="button" className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 border bg-white border-boldblue text-boldblue text-xs md:text-sm font-semibold rounded-lg">
               Back
@@ -180,7 +180,7 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
           </div>
         </div>
             
-    </section>
+  </section>
   )
 }
 

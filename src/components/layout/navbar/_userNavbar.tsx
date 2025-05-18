@@ -48,7 +48,7 @@ const UserNavbar = () => {
 
   const handleSignOut = () => {
     resetAll();
-    router.push('/auth/sign-in');
+    router.push('/account/sign-in');
   }
 
   const handleNavigation = (path: string, feedTypeValue?: string) => {
@@ -78,7 +78,7 @@ const UserNavbar = () => {
 
   const jobAndContractorOptions = ["Jobs", "Contractors"];
 
-  const isAuthRoute = pathname?.startsWith('/auth');
+  const isAuthRoute = pathname?.startsWith('/account');
   
   const isProfileCreateRoute = pathname === '/profile/edit';
 

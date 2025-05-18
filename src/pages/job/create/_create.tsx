@@ -1,27 +1,25 @@
-import useAuthStore from '@/store/useAuth';
-import { ReactLib, Data, Icons, UI } from '@/utils/jobs/_imports';
-const { jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
-import type { JobFormData, Milestone } from '@/utils/jobs/_imports';
-const { React, useState, useEffect, useRef } = ReactLib;
-const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, FiTrash, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
-const { DatePicker, AddMilestoneModal } = UI;
+// External packages
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
-import { FaCheckCircle } from "react-icons/fa";
-import { getSpecificCountryStates  } from '@/utils/getLocations/getAllCountriesAndStates'
+import { FaCheckCircle } from 'react-icons/fa';
 
-type StateWithCountry = [string, string]; // Tuple type for state/country pairs
+import useAuthStore from '@/store/useAuth';
+import { ReactLib, Data, Icons, UI } from '@/utils/jobs/_imports';
+import type { JobFormData } from '@/utils/jobs/_imports';
+import { getSpecificCountryStates } from '@/utils/getLocations/getAllCountriesAndStates';
 
+const { useState, useEffect, useRef } = ReactLib;
+const { jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
+const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
+const { DatePicker } = UI;
+
+type StateWithCountry = [string, string];
   
-const CreateJob: React.FC = () => {
+const CreateJob  = () => {
 
-    const { userId 
-        // role 
-    } = useAuthStore();
-    // const router = useRouter();
-
-    // data to be submitted to BE
+    const { userId } = useAuthStore();
+    
     const [formData, setFormData] = useState<JobFormData>({
         userId: userId,
         location: "",
@@ -34,7 +32,6 @@ const CreateJob: React.FC = () => {
         employmentType: 'Full Time',
         paymentType: 'hourly',
         price: 0,
-        milestones: [],
         startDate: null,
         retainerAmount: 0,
         retainerFrequency: 'Week',
@@ -43,47 +40,36 @@ const CreateJob: React.FC = () => {
 
     const router = useRouter()
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // modal state
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    // date
-    const datePickerRef = useRef(null);
-    const [datePickerOpen, setDatePickerOpen] = useState(false);
-
-    // Form state management
-    const [requiredSkillInput, setRequiredSkillInput] = useState<string>("");
-    const [requiredCertificationInput, setRequiredCertificationInput] = useState<string>("");
-    const [filteredRequiredSkills, setFilteredRequiredSkills] = useState<string[]>([]);
-    const [filteredRequiredCertifications, setFilteredRequiredCertifications] = useState<string[]>([]);
-  
-    //   retainer
-    const [showRetainerFrequencyDropdown, setShowRetainerFrequencyDropdown] = useState<boolean>(false);
-    const [retainerFrequencyInput, setRetainerFrequencyInput] = useState<string>('Week');
-    const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
-
-    // Dropdowns state
     const [showRequiredCertificationsDropdown, setShowRequiredCertificationsDropdown] = useState<boolean>(false);
+    const [showRetainerFrequencyDropdown, setShowRetainerFrequencyDropdown] = useState<boolean>(false);
     const [showRequiredSkillsDropdown, setShowRequiredSkillsDropdown] = useState<boolean>(false);
     const [showJobCategoryDropdown, setShowJobCategoryDropdown] = useState<boolean>(false);
     const [showLocationDropdown, setShowLocationDropdown] = useState<boolean>(false);
     
-    // Input values
+    const [statesWithCountries, setStatesWithCountries] = useState<StateWithCountry[]>([]);
     const [locationInput, setLocationInput] = useState<string>("");
+    
+    const [requiredCertificationInput, setRequiredCertificationInput] = useState<string>("");
+    const [retainerFrequencyInput, setRetainerFrequencyInput] = useState<string>('Week');
+    const [requiredSkillInput, setRequiredSkillInput] = useState<string>("");
     const [jobCategoryInput, setJobCategoryInput] = useState<string>("");
     
-    // Filtered options
-    const [filteredLocation, setFilteredLocation] = useState<string[]>([]);
+    const [filteredRequiredCertifications, setFilteredRequiredCertifications] = useState<string[]>([]);
+    const [filteredRequiredSkills, setFilteredRequiredSkills] = useState<string[]>([]);
     const [filteredJobCategory, setFilteredJobCategory] = useState<string[]>([]);
-
-    const [statesWithCountries, setStatesWithCountries] = useState<StateWithCountry[]>([]);
+    const [filteredLocation, setFilteredLocation] = useState<string[]>([]);
+    
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    const datePickerRef = useRef(null);
+    
+    const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
 
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const [ statesData ] = await Promise.all([
-            getSpecificCountryStates(),
-          ]);
+          const [ statesData ] = await Promise.all([ getSpecificCountryStates() ]);
           setStatesWithCountries(statesData);
         } catch (err) {
           console.error('Error fetching data:', err);
@@ -92,11 +78,6 @@ const CreateJob: React.FC = () => {
       fetchData();
     }, []);
 
-    useEffect(() => {
-      console.log('statesWithCountries: ',statesWithCountries)
-    }, [statesWithCountries])
-
-    // Retainer Handlers
     const handleRetainerAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = parseFloat(e.target.value) || 0;
         setFormData(prev => ({
@@ -122,11 +103,8 @@ const CreateJob: React.FC = () => {
         setShowRetainerFrequencyDropdown(false);
     };
 
-    // Event Handlers
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-
         const { name, value } = e.target;
-
         setFormData(prev => ({
         ...prev,
         [name]: value,
@@ -161,113 +139,6 @@ const CreateJob: React.FC = () => {
         setFormData(prev => ({
         ...prev,
         price: value
-        }));
-        updateMilestonePrices(value);
-    };
-
-    const updateMilestonePrices = (price: number) => {
-        if (formData.paymentType === 'fixed-price' && formData.milestones.length > 0) {
-        const pricePerMilestone = price / formData.milestones.length;
-        setFormData(prev => ({
-            ...prev,
-            milestones: prev.milestones.map(milestone => ({
-            ...milestone,
-            price: pricePerMilestone
-            }))
-        }));
-        } else if (formData.paymentType === 'retainer' || formData.paymentType === 'hourly') {
-        setFormData(prev => ({
-            ...prev,
-            milestones: prev.milestones.map(milestone => ({
-            ...milestone,
-            price: price
-            }))
-        }));
-        }
-    };
-
-    //   milestone
-    const addMilestone = () => {
-        setIsModalOpen(true);
-    };
-
-  const handleMilestoneSubmit =  (milestoneData: {
-    description: string;
-    price: number;
-    dueDate: Date | null;
-  }) => {
-    const newMilestoneId = formData.milestones.length > 0 
-      ? Math.max(...formData.milestones.map(m => m.id)) + 1 
-      : 1;
-    
-    const newMilestone: Milestone = {
-      id: newMilestoneId,
-      description: milestoneData.description,
-      price: milestoneData.price,
-      dueDate: milestoneData.dueDate ? milestoneData.dueDate.toISOString() : null
-    };
-    
-    // If fixed-price, recalculate price per milestone
-    if (formData.paymentType === 'fixed-price') {
-      const updatedMilestones = [...formData.milestones, newMilestone];
-      const pricePerMilestone = formData.price / updatedMilestones.length;
-      const recalculatedMilestones = updatedMilestones.map(milestone => ({
-        ...milestone,
-        price: pricePerMilestone
-      }));
-      
-      setFormData(prev => ({
-        ...prev,
-        milestones: recalculatedMilestones
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        milestones: [...prev.milestones, newMilestone]
-      }));
-    }
-    
-    setIsModalOpen(false);
-  };
-
-    const removeMilestone = (id: number) => {
-        const updatedMilestones = formData.milestones.filter(milestone => milestone.id !== id);
-        
-        // If fixed-price and there are still milestones, recalculate price per milestone
-        if (formData.paymentType === 'fixed-price' && updatedMilestones.length > 0) {
-        const pricePerMilestone = formData.price / updatedMilestones.length;
-        const recalculatedMilestones = updatedMilestones.map(milestone => ({
-            ...milestone,
-            price: pricePerMilestone
-        }));
-        
-        setFormData(prev => ({
-            ...prev,
-            milestones: recalculatedMilestones
-        }));
-        } else {
-        setFormData(prev => ({
-            ...prev,
-            milestones: updatedMilestones
-        }));
-        }
-    };
-
-    const updateMilestoneDescription = (id: number, description: string) => {
-        setFormData(prev => ({
-        ...prev,
-        milestones: prev.milestones.map(milestone => 
-            milestone.id === id ? { ...milestone, description } : milestone
-        )
-        }));
-    };
-
-    const updateMilestoneDueDate = (id: number, dueDate: Date | null) => {
-        setFormData(prev => ({
-        ...prev,
-        milestones: prev.milestones.map(milestone => 
-            milestone.id === id ? { ...milestone, dueDate: dueDate ? dueDate.toISOString() : null } : milestone
-        )
         }));
     };
 
@@ -380,11 +251,6 @@ const CreateJob: React.FC = () => {
     }
   }, [jobCategoryInput, formData.jobCategory, showJobCategoryDropdown]);
 
-  // Effect to update milestone prices when payment type changes
-  useEffect(() => {
-    updateMilestonePrices(formData.price);
-  }, [formData.paymentType]);
-
   // Form submission
   const handleSubmit = async (e: React.FormEvent ) => {
       e.preventDefault();
@@ -408,23 +274,8 @@ const CreateJob: React.FC = () => {
     }
   };
 
-  const formatMilestonePrice = (milestone: Milestone) => {
-    if (formData.paymentType === 'hourly') {
-      return `$${milestone.price} / hr`;
-    } else {
-      return `$${milestone.price}`;
-    }
-  };
-
   return (
     <section className='p-6 pt-7.5'>
-        <AddMilestoneModal 
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSubmit={handleMilestoneSubmit}
-            paymentType={formData.paymentType}
-            defaultPrice={formData.price}
-        />
       <section className='w-full max-w-275 m-auto pb-64'>
         <h1 className='pb-7.5 font-semibold text-xl'>Create Job</h1>
         
@@ -864,48 +715,6 @@ const CreateJob: React.FC = () => {
         className="focus:outline-none"
       >
         $
-      </button>
-    </div>
-    
-    <div className='pb-7.5 mb-7.5'>
-      {formData.milestones.map((milestone, index) => (
-        <div key={milestone.id} className="mb-5">
-          <div className='flex items-center justify-between border-b border-b-deepskyblue pb-2.5 mb-2.5'>
-            <h3 className='font-semibold'>Milestone {index + 1}</h3>
-            <button 
-              type='button'
-              className='w-fit border-none outline-none background-none'
-              onClick={() => removeMilestone(milestone.id)}
-            >
-              <FiTrash size={20} />
-            </button>
-          </div>
-          <textarea
-            value={milestone.description}
-            placeholder='Enter Milestone Description'
-            onChange={(e) => updateMilestoneDescription(milestone.id, e.target.value)}
-            className="text-sm w-full pt-2 border-none rounded-md outline-none resize-none"
-            rows={2}
-          />
-          <p aria-label='price' className="mb-2.5">{formatMilestonePrice(milestone)}</p>
-          <div className="flex items-center mb-5 gap-2">
-            <p aria-label="due_date" className='font-semibold text-sm'>Due</p>
-            <DatePicker
-              selected={milestone.dueDate ? new Date(milestone.dueDate) : null}
-              onChange={(date) => updateMilestoneDueDate(milestone.id, date)}
-              dateFormat="MM/dd/yyyy"
-              className="outline-none rounded-md p-1 text-sm"
-            />
-          </div>
-          {index !== formData.milestones.length - 1 && <hr className="my-4 border-t border-gray-200" />}
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={addMilestone}
-        className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
-      >
-        Add Milestone
       </button>
     </div>
   </>

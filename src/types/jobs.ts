@@ -75,7 +75,6 @@ export interface JobFormData {
   employmentType: 'Full Time' | 'part-time';
   paymentType: 'hourly' | 'fixed-price' | 'retainer';
   price: number;
-  milestones: Milestone[];
   startDate: Date | null;
   retainerAmount: number;
   retainerFrequency: string;

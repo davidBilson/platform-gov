@@ -52,7 +52,7 @@ const Verification: React.FC = () => {
   
   useEffect(() => {
     if (!userId) {
-      router.replace('/auth/sign-up');
+      router.replace('/account/sign-up');
     }
   }, [userId, router]);
   
