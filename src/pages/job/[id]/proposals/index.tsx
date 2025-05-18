@@ -33,7 +33,7 @@ const SingleJobProposals = () => {
           <h2 className=' font-semibold text-xl'>Proposals</h2>
           <div className='flex items-center gap-7.5'>
             <div className="flex flex-wrap items-center justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
-              <input type="text" placeholder="Filter By" />
+              <input type="text" placeholder="Filter By"  className="text-boldblue placeholder:text-boldblue font-semibold outline-none w-[80%]"/>
               <button type="button" className="focus:outline-none"><IoMdArrowDropdown /></button>
             </div>
             <div className="flex flex-wrap items-center justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
