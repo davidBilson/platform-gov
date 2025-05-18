@@ -5,9 +5,11 @@ import { Job, ApiResponse} from '@/types/jobs';
 import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
 import axios from 'axios';
+import { useRouter } from 'next/router';
 
 const OpenJobs = () => {
 
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const { userId } = useAuthStore();
 
@@ -47,7 +49,7 @@ const OpenJobs = () => {
             <p>No open jobs at the moment.</p>
           ) : (
             openJobs.map(job => (
-              <div key={job._id} className='border-b border-b-[#ccc] pb-10 mb-8'>
+              <div key={job._id} onClick={() => router.push(`/job/${job._id}/proposals`)} className='border-b cursor-pointer border-b-[#ccc] pb-10 mb-8'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2'>
 
                   <p className="text-[12px] text-[#808080]">
@@ -102,7 +104,7 @@ const OpenJobs = () => {
             <p>No active jobs at the moment.</p>
           ) : (
             activeJobs.map(job => (
-              <div key={job._id} className='border-b border-b-[#ccc] pb-10 mb-8'>
+              <div key={job._id} onClick={() => router.push(`/job/${job._id}/proposals`)} className='border-b border-b-[#ccc] cursor-pointer pb-10  mb-8'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2'>
                   
                   <p className="text-[12px] text-[#808080]">
@@ -118,7 +120,11 @@ const OpenJobs = () => {
                   >
                     {job?.status === 'active' 
                       ? 'In Progress'
-                      : `${job.proposalsCount} ${job.proposalsCount < 2 ? 'Proposal' : 'Proposals'}`
+                      :`
+                        ${job.proposalsCount} ${job.proposalsCount < 2 
+                        ? 'Proposal' 
+                        : 'Proposals'}
+                      `
                     }
                   </Link>
                 </div>
