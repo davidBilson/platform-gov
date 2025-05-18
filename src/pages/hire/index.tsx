@@ -30,13 +30,14 @@ const HireContractor: NextPage = () => {
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
     
     const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('Full Time - 40h/w');
-    const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
-    const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
     const [job, setJob] = useState<Jobs | null>(null);
-    const [, setIsLoading] = useState(false);
+    const [loading, setIsLoading] = useState(false);
+    
+    const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
+    const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
     
     const [formData, setFormData] = useState<FormData>({
         startDate: null,
@@ -127,6 +128,15 @@ const HireContractor: NextPage = () => {
         }
     };
 
+    useEffect(() => {
+        if (!acceptedLegalAgreement && showLegalAgreement) {
+            return;
+        }
+        if (acceptedLegalAgreement && !showLegalAgreement) {
+            handleSubmit()
+        }
+    }, [acceptedLegalAgreement, showLegalAgreement])
+
     const handleSubmit = async () => {
         setIsLoading(true);
         
@@ -188,7 +198,14 @@ const HireContractor: NextPage = () => {
 
     return (
     <>
-        { showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} /> }
+        { 
+            showLegalAgreement &&
+            <Legalagreement
+                setShowLegalAgreement={setShowLegalAgreement}
+                acceptedLegalAgreement={acceptedLegalAgreement}
+                setAcceptedLegalAgreement={setAcceptedLegalAgreement}
+            />
+        }
         <main className='w-full max-w-300 mx-auto p-6 pb-80'>
             <section>
                 <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>
@@ -325,9 +342,6 @@ const HireContractor: NextPage = () => {
                 </div>
             </section>
 
-
-
-            {/* action buttons */}
             <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
               <button
                 onClick={cancelHire}
@@ -338,10 +352,11 @@ const HireContractor: NextPage = () => {
               </button>
               
               <button
-                onClick={handleSubmit}
-                className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
+                onClick={() => setShowLegalAgreement(true)}
+                className="disabled:opacity-70 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
+                disabled={showLegalAgreement}
               >
-                Send Contract
+                {loading ? "Processing..." : "Send Contract"}
               </button>
 
             </div>

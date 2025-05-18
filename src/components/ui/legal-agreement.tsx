@@ -7,7 +7,7 @@ interface LegalAgreementProps {
   acceptedLegalAgreement: boolean;
 }
 
-const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAcceptedLegalAgreement } : LegalAgreementProps) => {
+const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAcceptedLegalAgreement }: LegalAgreementProps) => {
 
   const closeModal = () => {
     if (!acceptedLegalAgreement) {
@@ -15,6 +15,7 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
     }
     setShowLegalAgreement(false);
   }
+
   const cancelLegalAgreement = () => {
     setShowLegalAgreement(false);
   }
@@ -62,7 +63,7 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
           </button>
 
           <button
-            className='bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:cursor-not-allowed'
+            className={`bg-boldblue text-white border border-boldblue py-2.5 px-5 font-semibold rounded-lg cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed`}
             disabled={!(acceptedLegalAgreement)}
             onClick={closeModal}
           >
