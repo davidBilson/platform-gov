@@ -54,11 +54,16 @@ const OpenJobs = () => {
                     Posted {new Date(job.createdAt).toLocaleDateString()} {new Date(job.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>
 
-                  <Link 
-                    href={`/job/${job._id}/proposals`} 
-                    className='bg-[#009DDE] text-[15px] text-center flex justify-center items-center text-white font-bold w-[114px] h-[30px] rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer'
+                  <Link
+                    href={`/job/${job._id}/proposals`}
+                    className={`self-end text-xs sm:text-sm text-center flex justify-center items-center text-white font-bold w-fit sm:w-28.5 h-fit sm:h-7.5 px-2 py-1 sm:px-0 sm:py-1  rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer ${
+                      job?.status === 'active' ? 'bg-aquagreen' : 'bg-deepskyblue'
+                    }`}
                   >
-                    {job.proposalsCount} Proposals
+                    {job?.status === 'active' 
+                      ? 'In Progress'
+                      : `${job.proposalsCount} ${job.proposalsCount < 2 ? 'Proposal' : 'Proposals'}`
+                    }
                   </Link>
                 </div>
 
@@ -82,7 +87,7 @@ const OpenJobs = () => {
 
                 <p className='text-[16px] mb-[15px]'>{job.description}</p>
 
-                <button disabled className='bg-[#009DDE] text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
+                <button disabled className='bg-deepskyblue text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
                   {job.jobCategory}
                 </button>
               </div>
@@ -104,11 +109,17 @@ const OpenJobs = () => {
                     Posted {new Date(job.createdAt).toLocaleDateString()} {new Date(job.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </p>
 
-                  <Link 
-                    href={`/job/${job._id}/proposals`} 
-                    className='bg-[#009DDE] text-[15px] text-center flex justify-center items-center text-white font-bold w-[114px] h-[30px] rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer'
+                  <Link
+                    // href={take to contract page instead for that particular job}
+                    href={`/job/${job._id}/proposals`}
+                    className={`self-end text-xs sm:text-sm text-center flex justify-center items-center text-white font-bold w-fit sm:w-28.5 h-fit sm:h-7.5 px-2 py-1 sm:px-0 sm:py-1  rounded-full hover:shadow-lg hover:opacity-70 transition duration-300 ease-in-out cursor-pointer ${
+                      job?.status === 'active' ? 'bg-aquagreen' : 'bg-deepskyblue'
+                    }`}
                   >
-                    {job.proposalsCount} Proposals
+                    {job?.status === 'active' 
+                      ? 'In Progress'
+                      : `${job.proposalsCount} ${job.proposalsCount < 2 ? 'Proposal' : 'Proposals'}`
+                    }
                   </Link>
                 </div>
 
@@ -132,7 +143,7 @@ const OpenJobs = () => {
 
                 <p className='text-[16px] mb-[15px]'>{job.description}</p>
 
-                <button disabled className='bg-[#009DDE] text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
+                <button disabled className='bg-deepskyblue text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
                   {job.jobCategory}
                 </button>
               </div>
