@@ -12,6 +12,8 @@ import { Jobs } from '@/types/jobs';
 import { submitHireContract } from '@/api/hiring';
 import { updateJobApplicationStatus } from '@/api/status-api';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
+import Legalagreement from '@/components/ui/legal-agreement';
+import LoadingAnimation from '@/components/ui/loading';
 
 interface FormData {
     startDate: Date | null;
@@ -21,21 +23,28 @@ interface FormData {
 }
 
 const HireContractor: NextPage = () => {
+
     const router = useRouter();
+
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
-
-    const [datePickerOpen, setDatePickerOpen] = useState(false);
-    const datePickerRef = useRef<DatePicker>(null);
+    
+    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('Full Time - 40h/w');
+    const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
-    const employmentDropdownRef = useRef<HTMLDivElement>(null);
-    const employmentInputRef = useRef<HTMLInputElement>(null);
-
-    const cancelHire = () => {
-        clearHireData();
-        router.back();
-    };
-
+    const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const [job, setJob] = useState<Jobs | null>(null);
+    const [, setIsLoading] = useState(false);
+    
+    const [formData, setFormData] = useState<FormData>({
+        startDate: null,
+        rate: '',
+        employmentType: 'full-time',
+        paymentType: 'hourly',
+    });
+    
     const employmentOptions = [
         'One Time',
         'Full Time - 10h/w',
@@ -62,29 +71,10 @@ const HireContractor: NextPage = () => {
         'Part Time - 60h/w'
     ];
 
-    const [job, setJob] = useState<Jobs | null>(null);
+    const employmentDropdownRef = useRef<HTMLDivElement>(null);
+    const employmentInputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const [, setIsLoading] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('Full Time - 40h/w');
-
-    const [formData, setFormData] = useState<FormData>({
-        startDate: null,
-        rate: '',
-        employmentType: 'full-time',
-        paymentType: 'hourly',
-    });
-
-    const getPaymentInfo = () => {
-        if (job?.paymentType === 'hourly') {
-          return `Hourly | $${job?.price}`;
-        } else if (job?.paymentType === 'fixed-price') {
-          return `Fixed Price | $${job?.price}`;
-        } else if (job?.paymentType === 'retainer' && job?.retainerAmount && job?.retainerFrequency) {
-          return `Retainer | $${job?.retainerAmount}/${job?.retainerFrequency.toLowerCase()}`;
-        }
-        return '';
-      };
+    const datePickerRef = useRef<DatePicker>(null);
 
     useEffect(() => {
         const loadJob = async () => {
@@ -99,7 +89,6 @@ const HireContractor: NextPage = () => {
                 }
             }
         };
-        
         loadJob();
     }, [jobId]);
 
@@ -115,6 +104,22 @@ const HireContractor: NextPage = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    const cancelHire = () => {
+        clearHireData();
+        router.back();
+    };
+
+    const getPaymentInfo = () => {
+        if (job?.paymentType === 'hourly') {
+          return `Hourly | $${job?.price}`;
+        } else if (job?.paymentType === 'fixed-price') {
+          return `Fixed Price | $${job?.price}`;
+        } else if (job?.paymentType === 'retainer' && job?.retainerAmount && job?.retainerFrequency) {
+          return `Retainer | $${job?.retainerAmount}/${job?.retainerFrequency.toLowerCase()}`;
+        }
+        return '';
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -146,7 +151,7 @@ const HireContractor: NextPage = () => {
         }
         
         setIsLoading(false);
-      };
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -176,14 +181,17 @@ const HireContractor: NextPage = () => {
     };
 
     if (!router.isReady) {
-        return <div>Loading router...</div>;
+        return <div className='h-screen w-full flex items-center justify-center'>
+            <LoadingAnimation />
+        </div>;
     }
 
     return (
+    <>
+        { showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} /> }
         <main className='w-full max-w-300 mx-auto p-6 pb-80'>
             <section>
                 <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>
-
                 <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
                     <article className='flex flex-col gap-5 '>
                         <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
@@ -338,6 +346,7 @@ const HireContractor: NextPage = () => {
 
             </div>
         </main>
+    </>
     );
 };
 
