@@ -30,7 +30,7 @@ const HireContractor: NextPage = () => {
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
     
-    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('One Time');
+    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('');
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
