@@ -8,7 +8,8 @@ interface HireContractorParams {
   contractorId: string | null;
   applicationId: string | null;
   rate: string;
-  employmentType: 'one-time' | 'full-time' | 'part-time';
+  paymentType?: string;
+  employmentType: string;
   startDate: Date | null;
   selectedFiles: File[];
 }
@@ -21,6 +22,7 @@ export const submitHireContract = async ({
   userId,
   contractorId,
   applicationId,
+  paymentType,
   employmentType,
   startDate,
   selectedFiles
@@ -44,9 +46,10 @@ export const submitHireContract = async ({
     formDataToSend.append('contractorId', contractorId || '');
     formDataToSend.append('applicationId', applicationId || '');
     formDataToSend.append('rate', rate);
+    formDataToSend.append('paymentType', paymentType || '');
     formDataToSend.append('employmentType', employmentType);
     formDataToSend.append('startDate', startDate.toISOString());
-    formDataToSend.append('clientNotes', ''); // Add empty notes if none provided
+    formDataToSend.append('clientNotes', '');
 
     // Append file if exists
     if (selectedFiles.length > 0) {

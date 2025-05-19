@@ -18,8 +18,8 @@ import LoadingAnimation from '@/components/ui/loading';
 interface FormData {
     startDate: Date | null;
     rate: string;
-    employmentType: 'one-time' | 'full-time' | 'part-time';
-    paymentType: 'hourly' | 'fixed';
+    employmentType: string;
+    paymentType?: string;
 }
 
 const HireContractor: NextPage = () => {
@@ -42,8 +42,8 @@ const HireContractor: NextPage = () => {
     const [formData, setFormData] = useState<FormData>({
         startDate: null,
         rate: '',
-        employmentType: 'full-time',
-        paymentType: 'hourly',
+        employmentType: '',
+        paymentType: job?.paymentType,
     });
     
     const employmentOptions = [
@@ -146,6 +146,7 @@ const HireContractor: NextPage = () => {
           contractorId,
           applicationId,
           rate: formData.rate,
+          paymentType: formData.paymentType,
           employmentType: formData.employmentType,
           startDate: formData.startDate,
           selectedFiles

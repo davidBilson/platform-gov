@@ -53,7 +53,9 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
       <h2 className='pb-5 mb-7.5 text-darkgray border-b border-b-deepskyblue'>Active Proposals</h2>
       
       {applications.length === 0 ? (
-        <p className="text-gray-500 text-center py-5">No active proposals</p>
+        <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">
+          <p className="text-center text-gray-600">No active proposals</p>
+        </section>
       ) : (
         applications.map((application) => (
           <article key={application?._id} className="">

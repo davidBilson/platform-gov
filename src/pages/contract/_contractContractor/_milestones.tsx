@@ -56,7 +56,6 @@ const ContractorMilestones = ({
     });
   };
 
-  // Render different states
   if (!mutualContractId) {
     return (
       <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">

@@ -15,10 +15,14 @@ interface Job {
   jobCategory?: string;
   requiredCertifications?: string[];
   requiredSkills?: string[];
+  price?: number; // Added price property
+  retainerAmount?: number; // Added retainerAmount property
+  retainerFrequency?: string; // Added retainerFrequency property
   clientLogo?: string;
   clientName?: string;
   clientIndustry?: string;
   clientSpecializations?: string[];
+  userId?: { _id: string }; // Added userId property
 }
 
 interface FreelancerProfile {
@@ -62,7 +66,16 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
     }
   };
 
-  
+  const getPaymentInfo = (): string => {
+    if (job.paymentType === 'hourly') {
+      return `Hourly | $${job.price}`;
+    } else if (job.paymentType === 'fixed-price') {
+      return `Fixed Price | $${job.price}`;
+    } else if (job.paymentType === 'retainer' && job.retainerAmount && job.retainerFrequency) {
+      return `Retainer | $${job.retainerAmount}/${job.retainerFrequency.toLowerCase()}`;
+    }
+    return '';
+  };
 
   if (!job) {
     return <div className='flex items-center justify-center h-[60vh]'><LoadingAnimation /></div>
@@ -87,12 +100,12 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
         <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
           <div className="flex items-center gap-1.25">
             <FaRegHourglass size={15} />
-            {job?.paymentType ?? ""} | {job?.employmentType ?? ""}
+            {getPaymentInfo()} | {job.employmentType}
           </div>
           
           <div className="flex items-center gap-1.25">
             <FaLocationDot size={15} />
-            {job?.location ?? ""}
+            {job.location}
           </div>
         </div>
 

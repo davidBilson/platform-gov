@@ -46,7 +46,9 @@ const OpenJobs = () => {
           
           <h2 className='font-semibold text-xl mb-[15px]'>Open Jobs</h2>
           {openJobs.length === 0 ? (
-            <p>No open jobs at the moment.</p>
+            <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">
+              <p className="text-center text-sm text-gray-500 mt-2">No open jobs at the moment.</p>
+            </section>
           ) : (
             openJobs.map(job => (
               <div key={job._id} onClick={() => router.push(`/job/${job._id}/proposals`)} className='border-b cursor-pointer border-b-[#ccc] pb-10 mb-8'>
@@ -101,9 +103,13 @@ const OpenJobs = () => {
           <h2 className='font-semibold text-xl mb-[15px]'>Active Jobs</h2>
           
           {activeJobs.length === 0 ? (
-            <p>No active jobs at the moment.</p>
+            <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">
+              <p className="text-center text-sm text-gray-500 mt-2">No active jobs at the moment.</p>
+            </section>
           ) : (
             activeJobs.map(job => (
+                    // router.push={take to contract page instead for that particular job}
+
               <div key={job._id} onClick={() => router.push(`/job/${job._id}/proposals`)} className='border-b border-b-[#ccc] cursor-pointer pb-10  mb-8'>
                 <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2'>
                   

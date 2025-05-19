@@ -22,6 +22,9 @@ interface Job {
   jobCategory?: string;
   requiredCertifications?: string[];
   requiredSkills?: string[];
+  price?: number; // Added price property
+  retainerAmount?: number; // Added retainerAmount property
+  retainerFrequency?: string; // Added retainerFrequency property
   clientLogo?: string;
   clientName?: string;
   clientIndustry?: string;
@@ -158,6 +161,17 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const isJobAlreadyAccepted = hiringOffer?.status === "accepted";
   const canAcceptJob = contractSigned && hiringOffer?.status === "offered";
 
+  const getPaymentInfo = (): string => {
+    if (job.paymentType === 'hourly') {
+      return `Hourly | $${job.price}`;
+    } else if (job.paymentType === 'fixed-price') {
+      return `Fixed Price | $${job.price}`;
+    } else if (job.paymentType === 'retainer' && job.retainerAmount && job.retainerFrequency) {
+      return `Retainer | $${job.retainerAmount}/${job.retainerFrequency.toLowerCase()}`;
+    }
+    return '';
+  };
+
   return (
     <>
     <section className='w-full max-w-275 m-auto pb-64'>
@@ -171,12 +185,12 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
           <div className="flex items-center gap-1.25">
             <FaRegHourglass size={15} />
-            {job?.paymentType ?? ""} | {job?.employmentType ?? ""}
+            {getPaymentInfo()} | {job.employmentType}
           </div>
           
           <div className="flex items-center gap-1.25">
             <FaLocationDot size={15} />
-            {job?.location ?? ""}
+            {job.location}
           </div>
         </div>
 

@@ -108,7 +108,6 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) =
     }
   };
 
-  // Fixed condition: Show "No mutual contract established" when mutualContractId is NOT available
   if (!mutualContractId) {
     return (
       <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">
