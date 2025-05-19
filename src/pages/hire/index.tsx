@@ -30,7 +30,7 @@ const HireContractor: NextPage = () => {
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
     
-    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('Full Time - 10h/w');
+    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('One Time');
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -157,7 +157,7 @@ const HireContractor: NextPage = () => {
             
             clearHireData();
             router.push('/job/manage');
-            
+
           } else {
             toast.error("Contract submission not successful");
           }
