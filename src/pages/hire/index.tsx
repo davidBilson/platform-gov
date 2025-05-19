@@ -14,6 +14,7 @@ import { updateJobApplicationStatus } from '@/api/status-api';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import Legalagreement from '@/components/ui/legal-agreement';
 import LoadingAnimation from '@/components/ui/loading';
+import { toast } from 'react-toastify';
 
 interface FormData {
     startDate: Date | null;
@@ -29,7 +30,7 @@ const HireContractor: NextPage = () => {
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
     
-    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('Full Time - 40h/w');
+    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('Full Time - 10h/w');
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -43,7 +44,7 @@ const HireContractor: NextPage = () => {
         startDate: null,
         rate: '',
         employmentType: '',
-        paymentType: job?.paymentType,
+        paymentType: '',
     });
     
     const employmentOptions = [
@@ -140,29 +141,37 @@ const HireContractor: NextPage = () => {
     const handleSubmit = async () => {
         setIsLoading(true);
         
-        const success = await submitHireContract({
-          jobId,
-          userId,
-          contractorId,
-          applicationId,
-          rate: formData.rate,
-          paymentType: formData.paymentType,
-          employmentType: formData.employmentType,
-          startDate: formData.startDate,
-          selectedFiles
-        });
-
-        const newJobStatus = "active";
-        await updateJobStatus(userId, jobId, newJobStatus)
-      
-        if (success) {
-            updateJobApplicationStatus({applicationId: applicationId, status: "active"})
+        try {
+          const success = await submitHireContract({
+            jobId,
+            userId,
+            contractorId,
+            applicationId,
+            rate: formData.rate,
+            paymentType: formData.paymentType,
+            employmentType: formData.employmentType,
+            startDate: formData.startDate,
+            selectedFiles
+          });
+          
+          if (success) {
+            await Promise.all([
+              updateJobApplicationStatus({applicationId: applicationId, status: "active"}),
+              updateJobStatus(userId, jobId, "active")
+            ]);
+            
             clearHireData();
             router.push('/job/manage');
+          } else {
+            toast.error("Contract submission not successful");
+          }
+        } catch (error) {
+            console.log(error);
+          toast.error("Error during submission:");
+        } finally {
+          setIsLoading(false);
         }
-        
-        setIsLoading(false);
-    };
+      };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -190,6 +199,17 @@ const HireContractor: NextPage = () => {
         });
         setShowEmploymentDropdown(false);
     };
+
+    useEffect(() => {
+        setFormData({
+            ...formData,
+            paymentType: job?.paymentType
+        });
+        console.log(job?.paymentType)
+    }, [job])
+
+    
+
 
     if (!router.isReady) {
         return <div className='h-screen w-full flex items-center justify-center'>
