@@ -82,15 +82,37 @@ export const submitHireContract = async ({
   }
 };
 
-export const getHiringOffer = async (jobId: string, applicationId: string) => {
+export const getHiringOffer = async (jobId: string, applicationId: string)  => {
+  // Validate required parameters
+  if (!jobId || !applicationId) {
+    return {
+      success: false,
+      data: null,
+      error: {
+        message: 'Missing required parameters: jobId or applicationId',
+        status: 400
+      }
+    };
+  }
+
   try {
     const endPoint = process.env.NEXT_PUBLIC_GET_HIRING_OFFER;
     
+    if (!endPoint) {
+      console.error('API endpoint not defined in environment variables');
+      return {
+        success: false,
+        data: null,
+        error: {
+          message: 'API configuration error',
+          status: 500
+        }
+      };
+    }
+    
     const response = await axios.post(`${baseURL}${endPoint}`,
-      {
-        jobId,
-        applicationId
-      }
+      { jobId, applicationId },
+      { timeout: 10000 } // Add timeout to prevent hanging requests
     );
     
     return {
@@ -101,7 +123,7 @@ export const getHiringOffer = async (jobId: string, applicationId: string) => {
   } catch (error) {
     console.error('Error fetching hiring offer:', error);
     
-    // Return a structured error response instead of undefined
+    // Return a structured error response
     return {
       success: false,
       data: null,
@@ -116,20 +138,44 @@ export const getHiringOffer = async (jobId: string, applicationId: string) => {
 export const acceptHiringOffer = async (
   { hiringId, contractorId }: { hiringId: string, contractorId: string }
 ): Promise<boolean> => {
+  // Validate required parameters
+  if (!hiringId || !contractorId) {
+    toast.error('Missing required information to accept offer');
+    return false;
+  }
+
   try {
     const endPoint = process.env.NEXT_PUBLIC_ACCEPT_HIRING_CONTRACT?.replace(':id', hiringId);
-    const response = await axios.put(`${baseURL}${endPoint}`, { contractorId });
+    
+    if (!endPoint) {
+      toast.error('API configuration error');
+      return false;
+    }
+    
+    const response = await axios.put(`${baseURL}${endPoint}`, 
+      { contractorId },
+      { timeout: 10000 } // Add timeout to prevent hanging requests
+    );
 
     if (response.data.success) {
       toast.success('Hiring offer accepted successfully!');
       return true;
     }
+    
     toast.error(response.data.message || 'Failed to accept offer');
     return false;
   } catch (err) {
-    console.error(err);
+    console.error('Error accepting hiring offer:', err);
+    
     if (axios.isAxiosError(err)) {
-      toast.error(err.response?.data?.error || 'Failed to accept offer');
+      // Handle specific error cases
+      if (err.code === 'ECONNABORTED') {
+        toast.error('Request timed out. Please try again later.');
+      } else if (err.response?.status === 404) {
+        toast.error('Hiring offer not found or already processed');
+      } else {
+        toast.error(err.response?.data?.error || 'Failed to accept offer');
+      }
     } else {
       toast.error('An unknown error occurred');
     }
@@ -153,15 +199,30 @@ export const contractorSignHiringOffer = async (hiringId: string, contractorId: 
   }
 };
 
-export const getContractorSignature = async (hiringId: string, contractorId: string): Promise<boolean> => {
+export const getContractorSignature =async (hiringId: string, contractorId: string): Promise<boolean> => {
+  if (!hiringId || !contractorId) {
+    console.error('Missing required parameters for getContractorSignature');
+    return false;
+  }
+
   try {
     const endPoint = process.env.NEXT_PUBLIC_GET_CONTRACTOR_OFFER_SIGNATURE?.replace(':id', hiringId);
+    
+    if (!endPoint) {
+      console.error('API endpoint not defined in environment variables');
+      return false;
+    }
+    
     const response = await axios.get(`${baseURL}${endPoint}`, {
-      params: { contractorId }
+      params: { contractorId },
+      timeout: 8000 // Add timeout to prevent hanging requests
     });
+    
     return response.data.data.contractorSigned || false;
   } catch (err) {
     console.error('Error checking contractor signature:', err);
+    
+    // Don't show toast for this function as it's not user-critical
     return false;
   }
 };

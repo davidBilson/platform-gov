@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
-import RateUserModal from '@/components/rating/rateUserModal';
-// import RatingStars from '@/components/ui/rating';
-import ProfilePicture from '@/components/profile/profilePicture';
 import { format } from 'date-fns';
+import { toast } from 'react-toastify';
+
+import ProfilePicture from '@/components/profile/profilePicture';
+import RateUserModal from '@/components/rating/rateUserModal';
 import SignContractModal from '../_signContractModal';
 import LoadingAnimation from '@/components/ui/loading';
+
 import useAuthStore from '@/store/useAuth';
 import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
-import { toast } from 'react-toastify';
 import { createContract } from '@/api/contract-api';
 
 interface Job {
@@ -22,14 +23,14 @@ interface Job {
   jobCategory?: string;
   requiredCertifications?: string[];
   requiredSkills?: string[];
-  price?: number; // Added price property
-  retainerAmount?: number; // Added retainerAmount property
-  retainerFrequency?: string; // Added retainerFrequency property
+  price?: number;
+  retainerAmount?: number;
+  retainerFrequency?: string;
   clientLogo?: string;
   clientName?: string;
   clientIndustry?: string;
   clientSpecializations?: string[];
-  userId?: { _id: string }; // Added userId property
+  userId?: { _id: string };
 }
 
 interface HiringDocument {
@@ -43,7 +44,7 @@ interface HiringDocument {
   };
   clientNotes: string;
   applicationId: { coverLetter: string };
-  status: string; // Added status property
+  status: string;
 }
 
 interface DetailsProps {
@@ -51,15 +52,16 @@ interface DetailsProps {
   jobId: string;
   applicationId: string;
 }
-const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
+const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const [showSignContractModal, setShowSignContractModal] = useState(false);
   const [contractSigned, setContractSigned] = useState(false);
   const [showRateUserModal, setShowRateUserModal] = useState(false);
   
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  const [hiringOffer, setHiringOffer] = useState<HiringDocument>();
+  const [hiringOffer, setHiringOffer] = useState<HiringDocument | null>(null);
   const [hiringId, setHiringId] = useState<string>('');
   
   const { userId, role } = useAuthStore();
@@ -82,80 +84,127 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const postedDate = job?.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
 
   useEffect(() => {
-    if (!userId || role !== 'contractor'){
+    let isMounted = true;
+    
+    // Only fetch if all required data is available
+    if (!userId || role !== 'contractor' || !jobId || !applicationId) {
+      setLoading(false);
       return;
     }
 
     const fetchHiringOffer = async () => {
       try {
         setLoading(true);
+        setError(null);
+        
         const response = await getHiringOffer(jobId, applicationId);
+        
+        // Check if component is still mounted before updating state
+        if (!isMounted) return;
         
         if (response.success && response.data) {
           setHiringOffer(response.data);
           setHiringId(response.data._id);
         } else {
-          console.error('Failed to fetch hiring offer:', response.error);
+          // Handle case when data is not found but API didn't throw an error
+          if (response.error?.status === 404) {
+            setError("Hiring offer not found. It may have been removed or is not available.");
+          } else {
+            setError(response.error?.message || "Failed to load hiring offer data.");
+          }
         }
       } catch (error) {
-        console.error(error);
+        if (!isMounted) return;
+        
+        console.error("Error in fetchHiringOffer:", error);
+        setError("An unexpected error occurred while fetching data.");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchHiringOffer();
+
+    // Cleanup function to prevent state updates if component unmounts
+    return () => {
+      isMounted = false;
+    };
   }, [jobId, applicationId, userId, role]);
 
+  // Check signature status when hiringId is available
+  useEffect(() => {
+    let isMounted = true;
+    
+    if (!hiringId || !userId) {
+      return;
+    }
+
+    const checkSignatureStatus = async () => {
+      try {
+        const isSigned = await getContractorSignature(hiringId, userId);
+        
+        if (isMounted) {
+          setContractSigned(isSigned);
+        }
+      } catch (err) {
+        console.error('Error checking contractor signature:', err);
+        // We don't set an error state here as this is not a critical functionality
+      }
+    };
+
+    checkSignatureStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [hiringId, userId]);
+
   const acceptJob = async () => {
+    // Validate required data before proceeding
+    if (!hiringId || !userId) {
+      toast.error('Missing required information to accept job');
+      return;
+    }
+    
     try {
       if (hiringOffer?.status === "accepted") {
         toast.info('Job has already been accepted');
         return;
       }
       
-      await acceptHiringOffer({ hiringId, contractorId: userId });
-      await createContract({
-        hiringId: hiringId, 
-        clientId: job?.userId?._id, 
-        contractorId: userId
+      // Accept the hiring offer
+      const acceptResult = await acceptHiringOffer({ 
+        hiringId, 
+        contractorId: userId 
       });
+      
+      if (!acceptResult) {
+        // If accepting the offer failed, don't try to create contract
+        return;
+      }
+      
+      // Only create contract if we have the client ID
+      if (job?.userId?._id) {
+        await createContract({
+          hiringId: hiringId, 
+          clientId: job.userId._id, 
+          contractorId: userId
+        });
+      } else {
+        toast.warning('Contract creation incomplete - missing client information');
+      }
       
       // Update local state to reflect the accepted status
       setHiringOffer(prev => prev ? {...prev, status: "accepted"} : prev);
       
-      toast.success('Job accepted');
+      toast.success('Job accepted successfully');
     } catch (error) {
-      console.error(error);
-      toast.error('Failed to accept job');
+      console.error("Error accepting job:", error);
+      toast.error('Failed to accept job. Please try again later.');
     }
   };
-
-  const checkSignatureStatus = async () => {
-    const contractorId = userId;
-    
-    const isSigned = await getContractorSignature(hiringId, contractorId);
-    
-    if (isSigned) {
-      setContractSigned(true);
-    } else {
-      console.log('Contractor has not signed yet');
-    }
-  };
-
-  useEffect(() => {
-    if (hiringId) {
-      checkSignatureStatus();
-    }
-  }, [hiringId]);
-
-  if (loading) {
-    return (
-      <div className='flex items-center justify-center h-[60vh]'>
-        <LoadingAnimation />
-      </div>
-    );
-  }
 
   // Calculate button disabled state correctly
   const isJobAlreadyAccepted = hiringOffer?.status === "accepted";
@@ -171,6 +220,50 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     }
     return '';
   };
+
+  // Render loading state
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-[60vh]'>
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className='flex flex-col items-center justify-center h-[60vh] px-4 text-center'>
+        <img 
+          src="/assets/error_icon.svg" 
+          alt="Error" 
+          className="w-16 h-16 mb-4"
+          onError={(e) => {
+            e.currentTarget.src = ""; // Fallback if image doesn't exist
+            e.currentTarget.style.display = "none";
+          }}
+        />
+        <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-boldblue text-white rounded-lg hover:bg-opacity-90 transition"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  // If user is not a contractor, show appropriate message
+  if (role !== 'contractor') {
+    return (
+      <div className='flex flex-col items-center justify-center h-[60vh] px-4 text-center'>
+        <h2 className="text-xl font-bold mb-2">Access Restricted</h2>
+        <p className="text-gray-600">This hiring offer is only available to contractors.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -320,42 +413,48 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     )}
 
       {/* action buttons */}
-      <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
-        
-        <button 
-          onClick={() => !contractSigned && setShowSignContractModal(true)}
-          className={`flex items-center justify-center gap-2 rounded-lg border transition transform duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold
-            ${contractSigned 
-              ? 'border-gray-400 bg-gray-100 opacity-70 cursor-not-allowed text-gray-500' 
-              : 'border-boldblue bg-white active:scale-95 hover:shadow-lg cursor-pointer'
-            }`
-          }
-          disabled={contractSigned}
-        > 
-          <img 
-            src="/assets/documents_logo.svg" 
-            alt="document_logo" 
-            className={contractSigned ? 'opacity-60' : ''}
-          />
-          <span className="h-fit w-fit">
-            {contractSigned ? "Documents Signed" : "Sign Documents"}
-          </span>
-        </button>
-        
-        <button
-          onClick={acceptJob}
-          disabled={isJobAlreadyAccepted || !canAcceptJob}
-          className={`transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold rounded-lg border ${
-            canAcceptJob
-              ? 'cursor-pointer bg-boldblue border-boldblue text-white'
-              : isJobAlreadyAccepted
-                ? 'bg-gray-100 border-gray-400 text-gray-500 cursor-not-allowed'
-                : 'bg-white border-lightblue text-lightblue cursor-not-allowed'
-          }`}
-        >
-          {isJobAlreadyAccepted ? "Job Accepted" : "Accept Job"}
-        </button>
-      </div>
+      {hiringOffer && (
+        <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
+          
+          <button 
+            onClick={() => !contractSigned && setShowSignContractModal(true)}
+            className={`flex items-center justify-center gap-2 rounded-lg border transition transform duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold
+              ${contractSigned 
+                ? 'border-gray-400 bg-gray-100 opacity-70 cursor-not-allowed text-gray-500' 
+                : 'border-boldblue bg-white active:scale-95 hover:shadow-lg cursor-pointer'
+              }`
+            }
+            disabled={contractSigned}
+          > 
+            <img 
+              src="/assets/documents_logo.svg" 
+              alt="document_logo" 
+              className={contractSigned ? 'opacity-60' : ''}
+              onError={(e) => {
+                e.currentTarget.src = ""; // Fallback if image doesn't exist
+                e.currentTarget.style.display = "none";
+              }}
+            />
+            <span className="h-fit w-fit">
+              {contractSigned ? "Documents Signed" : "Sign Documents"}
+            </span>
+          </button>
+          
+          <button
+            onClick={acceptJob}
+            disabled={isJobAlreadyAccepted || !canAcceptJob}
+            className={`transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold rounded-lg border ${
+              canAcceptJob
+                ? 'cursor-pointer bg-boldblue border-boldblue text-white'
+                : isJobAlreadyAccepted
+                  ? 'bg-gray-100 border-gray-400 text-gray-500 cursor-not-allowed'
+                  : 'bg-white border-lightblue text-lightblue cursor-not-allowed'
+            }`}
+          >
+            {isJobAlreadyAccepted ? "Job Accepted" : "Accept Job"}
+          </button>
+        </div>
+      )}
     </>
   )
 }

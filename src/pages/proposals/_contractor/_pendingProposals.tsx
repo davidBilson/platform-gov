@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
-import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
+import { FaLocationDot } from 'react-icons/fa6';
 import { format } from 'date-fns';
 import ProposalModal from './_proposalModal';
 import { Application } from '@/types/proposals';
@@ -72,8 +72,7 @@ const PendingProposals = ({ applications = [] }: PendingProposalsProps) => {
             
             <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
               <div className="flex items-center gap-1.25">
-                <FaRegHourglass size={15} />
-                {`Hourly | $${application?.proposedRate}`} | {application?.availability || "Full Time"}
+                {`Proposed Rate: $${application?.proposedRate}`} | Availability: {application?.availability || "Full Time"}
               </div>
               
               <div className="flex items-center gap-1.25">
