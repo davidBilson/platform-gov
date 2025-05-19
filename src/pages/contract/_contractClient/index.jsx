@@ -159,7 +159,8 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
         // Render tab content if we have the necessary data
         switch (activeTab) {
             case 'details':
-                return job && <Details 
+                return job && 
+                <Details 
                     job={job} 
                     jobId={jobId} 
                     applicationDetail={applicationDetail} 

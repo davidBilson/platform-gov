@@ -94,8 +94,19 @@ const SignContractModal = ({ hiringOffer, contractSigned, onClose, updateContrac
                 <div className="p-4 rounded-lg">
                   <h3 className="font-semibold text-gray-700">Offer Terms</h3>
                   <div className="mt-2 space-y-2">
-                    <p><span className="text-sm">Rate:</span> ${hiringOffer?.offerDetails?.rate ?? ""}/{hiringOffer?.offerDetails?.paymentType ?? ""}</p>
-                    <p><span className="text-sm">Employment Type:</span> {hiringOffer?.offerDetails?.employmentType ?? ""}</p>
+                    <p><span className="text-sm">Rate:</span> ${hiringOffer?.offerDetails?.rate ?? ""} {" "} 
+                    {hiringOffer?.offerDetails?.paymentType == 'hourly' && '(Hourly)'}
+                    {hiringOffer?.offerDetails?.paymentType == 'fixed-price' && '(Fixed Price)'}
+                    {hiringOffer?.offerDetails?.paymentType == 'retainer' && '(Retainer)'}
+                  </p>
+                    <p>
+                      <span className="text-sm">
+                        Employment Type:{' '}
+                      </span> 
+                        {hiringOffer?.offerDetails?.employmentType == 'full-time' && 'Full Time'}
+                        {hiringOffer?.offerDetails?.employmentType == 'one-time' && 'One Time'}
+                        {hiringOffer?.offerDetails?.employmentType == 'part-time' && 'Part Time'}
+                    </p>
                     <p><span className="text-sm">Start Date:</span> {formatDate(hiringOffer?.offerDetails?.startDate) ?? ""}</p>
                   </div>
                 </div>

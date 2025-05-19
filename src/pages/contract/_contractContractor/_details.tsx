@@ -431,12 +431,12 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
             }
             disabled={contractSigned}
           > 
-            <img 
+            <img
               src="/assets/documents_logo.svg" 
               alt="document_logo" 
               className={contractSigned ? 'opacity-60' : ''}
               onError={(e) => {
-                e.currentTarget.src = ""; // Fallback if image doesn't exist
+                e.currentTarget.src = "";
                 e.currentTarget.style.display = "none";
               }}
             />

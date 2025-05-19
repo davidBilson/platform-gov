@@ -118,11 +118,6 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
           <span className='px-2.5 py-1.25 text-xs text-boldblue font-semibold border border-boldblue rounded-full'>{job?.jobCategory ?? ""}</span>
         </div>
       </div>
-      
-      {/* Skills and Certifications section */}
-      {/* <div className="py-7.5 border-b border-b-deepskyblue">
-      </div>
-         */}
 
         <div className="mb-3.75">
           <h3 className="font-semibold mb-3.75">Required Certifications</h3>
@@ -162,13 +157,6 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
               )
             }
         </div>
-
-        {/* 
-          <div>
-            <h3 className="font-semibold mb-3.75">Security Clearance</h3>
-            <TopSecret />
-          </div> 
-        */}
 
       </div>
       
