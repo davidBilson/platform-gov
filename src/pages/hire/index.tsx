@@ -49,28 +49,8 @@ const HireContractor: NextPage = () => {
     
     const employmentOptions = [
         'One Time',
-        'Full Time - 10h/w',
-        'Full Time - 15h/w',
-        'Full Time - 20h/w',
-        'Full Time - 25h/w',
-        'Full Time - 30h/w',
-        'Full Time - 35h/w',
-        'Full Time - 40h/w',
-        'Full Time - 45h/w',
-        'Full Time - 50h/w',
-        'Full Time - 55h/w',
-        'Full Time - 60h/w',
-        'Part Time - 10h/w',
-        'Part Time - 15h/w',
-        'Part Time - 20h/w',
-        'Part Time - 25h/w',
-        'Part Time - 30h/w',
-        'Part Time - 35h/w',
-        'Part Time - 40h/w',
-        'Part Time - 45h/w',
-        'Part Time - 50h/w',
-        'Part Time - 55h/w',
-        'Part Time - 60h/w'
+        'Full Time',
+        'Part Time'
     ];
 
     const employmentDropdownRef = useRef<HTMLDivElement>(null);
@@ -83,8 +63,15 @@ const HireContractor: NextPage = () => {
             if (jobId) {
                 try {
                     const jobData = await fetchJob(jobId as string);
+
                     setJob(jobData);
-                    console.log(jobData);
+
+                    if (jobData) {
+                        setFormData({
+                            ...formData,
+                            rate: JSON.stringify(jobData.price)
+                        });
+                    }
                 } catch (error) {
                     console.error('Error loading job:', error);
                     setJob(null);
@@ -139,6 +126,12 @@ const HireContractor: NextPage = () => {
     }, [acceptedLegalAgreement, showLegalAgreement])
 
     const handleSubmit = async () => {
+        
+        if  (!formData.rate || !formData.paymentType || !formData.employmentType || !formData.startDate) {
+            toast.error('Incomplete credentials!')
+            return;
+        }
+
         setIsLoading(true);
         
         try {
@@ -153,7 +146,9 @@ const HireContractor: NextPage = () => {
             startDate: formData.startDate,
             selectedFiles
           });
-          
+
+          toast.success('Contract sent!')
+
           if (success) {
             await Promise.all([
               updateJobApplicationStatus({applicationId: applicationId, status: "active"}),
@@ -162,14 +157,15 @@ const HireContractor: NextPage = () => {
             
             clearHireData();
             router.push('/job/manage');
+            
           } else {
             toast.error("Contract submission not successful");
           }
         } catch (error) {
             console.log(error);
-          toast.error("Error during submission:");
+            toast.error("Error during submission:");
         } finally {
-          setIsLoading(false);
+            setIsLoading(false);
         }
       };
 
@@ -205,11 +201,7 @@ const HireContractor: NextPage = () => {
             ...formData,
             paymentType: job?.paymentType
         });
-        console.log(job?.paymentType)
     }, [job])
-
-    
-
 
     if (!router.isReady) {
         return <div className='h-screen w-full flex items-center justify-center'>

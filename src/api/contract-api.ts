@@ -8,19 +8,13 @@ export const createContract = async (contractData: {
   clientId?: string;
   contractorId: string;
 })  => {
-  // Validate required parameters
-  if (!contractData.hiringId || !contractData.contractorId) {
-    toast.error('Missing Info');
-    throw new Error('Missing required parameters');
-  }
+  
+  console.log('validate hiringId: ', contractData.hiringId)
+  console.log('validate clientId: ', contractData.clientId)
+  console.log('validate userId: ', contractData.contractorId)
 
   try {
     const endpoint = process.env.NEXT_PUBLIC_CREATE_CONTRACT;
-    
-    if (!endpoint) {
-      toast.error('API configuration error');
-      throw new Error('API endpoint not defined');
-    }
     
     const response = await axios.post(
       `${baseURL}${endpoint}`,
@@ -47,30 +41,6 @@ export const createContract = async (contractData: {
     throw error;
   }
 };
-
-
-// export const getSingleContract = async (contractData: {
-//   jobId: string;
-//   clientId: string;
-//   contractorId: string;
-// }) => {
-//   try {
-//     const endpoint = process.env.NEXT_PUBLIC_GET_SINGLE_CONTRACT; // Make sure to add this to your env
-//     const response = await axios.post(
-//       `${baseURL}${endpoint}`,
-//       contractData
-//     );
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error fetching contract:', error);
-//     if (axios.isAxiosError(error)) {
-//       console.error(error.response?.data?.message || 'Failed to fetch contract');
-//     } else {
-//       console.error('An unknown error occurred');
-//     }
-//     throw error;
-//   }
-// };
 
 export const getSingleContract = async (contractData: {
     jobId: string;

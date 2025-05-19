@@ -12,6 +12,7 @@ import LoadingAnimation from '@/components/ui/loading';
 import useAuthStore from '@/store/useAuth';
 import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
 import { createContract } from '@/api/contract-api';
+import { useRouter } from 'next/router';
 
 interface Job {
   createdAt?: string;
@@ -54,6 +55,8 @@ interface DetailsProps {
 }
 
 const Details = ({ job, jobId, applicationId }: DetailsProps) => {
+
+  const router = useRouter()
   const [showSignContractModal, setShowSignContractModal] = useState(false);
   const [contractSigned, setContractSigned] = useState(false);
   const [showRateUserModal, setShowRateUserModal] = useState(false);
@@ -63,6 +66,13 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   
   const [hiringOffer, setHiringOffer] = useState<HiringDocument | null>(null);
   const [hiringId, setHiringId] = useState<string>('');
+  const  [clientId, setClientId] = useState<string>('');
+
+  useEffect(() => {
+    if (job?.userId?._id) {
+      setClientId(job?.userId._id)
+    }
+  }, [job])
   
   const { userId, role } = useAuthStore();
 
@@ -167,38 +177,33 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
       toast.error('Missing required information to accept job');
       return;
     }
-    
+
     try {
+
       if (hiringOffer?.status === "accepted") {
         toast.info('Job has already been accepted');
         return;
       }
       
-      // Accept the hiring offer
-      const acceptResult = await acceptHiringOffer({ 
+      await acceptHiringOffer({ 
         hiringId, 
         contractorId: userId 
       });
+
+      console.log('hiringId: ',hiringId)
+      console.log('clientId: ', clientId)
+      console.log('userId: ', userId)
       
-      if (!acceptResult) {
-        // If accepting the offer failed, don't try to create contract
-        return;
-      }
-      
-      // Only create contract if we have the client ID
       if (job?.userId?._id) {
         await createContract({
           hiringId: hiringId, 
-          clientId: job.userId._id, 
+          clientId: clientId, 
           contractorId: userId
         });
-      } else {
-        toast.warning('Contract creation incomplete - missing client information');
       }
       
-      // Update local state to reflect the accepted status
       setHiringOffer(prev => prev ? {...prev, status: "accepted"} : prev);
-      
+      router.reload();
       toast.success('Job accepted successfully');
     } catch (error) {
       console.error("Error accepting job:", error);
