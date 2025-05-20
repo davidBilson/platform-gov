@@ -1,8 +1,9 @@
+// client
 // components/Milestones/ClientMilestones.tsx
 import React, { useState, useEffect } from 'react';
 // import { LuTrash } from "react-icons/lu";
 import AddNewMilestoneModal from './_addMilestoneModal';
-import { getMilestones, approveMilestone, markMilestonePaid } from '@/api/milestone-api';
+import { getMilestones, approveMilestone, markMilestonePaid } from '@/api/contract/milestone-api';
 // import DisputeModal from './_disputeModal';
 import useAuthStore from '@/store/useAuth';
 

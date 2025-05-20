@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { format } from 'date-fns';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
@@ -43,10 +42,6 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
     }
     return job.location;
   };
-
-  useEffect(() => {
-    console.log(job)
-  }, [job])
 
   return (
     <section className='w-full max-w-275 m-auto pb-64'>

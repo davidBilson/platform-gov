@@ -2,32 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Job } from '@/types/jobs';
 import { submitWorkSummary, getRetainerDetails } from '@/api/contract/retainer-api';
 
+
 interface RetainerProps {
   job: Job;
   mutualContractId: string;
 }
 
-const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
+const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [retainerData, setRetainerData] = useState<any>(null);
-  const [summaryText, setSummaryText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [canSubmit, setCanSubmit] = useState(false);
 
   useEffect(() => {
     if (mutualContractId) {
       fetchRetainerData();
     }
   }, [mutualContractId]);
-
-  useEffect(() => {
-    if (retainerData?.nextPaymentDate) {
-      const now = new Date();
-      const paymentDate = new Date(retainerData.nextPaymentDate);
-      const diffInHours = (paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-      setCanSubmit(diffInHours <= 48); // Within 48 hours window
-    }
-  }, [retainerData]);
 
   const fetchRetainerData = async () => {
     try {
@@ -40,13 +30,12 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
     }
   };
 
-  const handleSubmitSummary = async () => {
+  const handleStartRetainer = async () => {
     try {
-      await submitWorkSummary(mutualContractId, summaryText);
-      setSummaryText('');
+      await startRetainerContract(mutualContractId);
       await fetchRetainerData();
     } catch (error) {
-      console.error('Error submitting work summary:', error);
+      console.error('Error starting retainer:', error);
     }
   };
 
@@ -84,26 +73,18 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
         )}
       </section>
 
-      {canSubmit && (
+      {!retainerData?.startDate && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-blue-800 mb-4">
-            📝 Reminder: You are required to submit your Work Summary no later than one day before your 
-            next billing date to ensure your payment is processed on time. Failure to do so may result 
-            in payment delays.
+            ⚠️ Important: Clicking the {'"Start Job"'} button below will activate this retainer contract. 
+            From that moment, your billing cycle begins based on the agreed frequency — whether weekly, 
+            bi-weekly, or monthly — and you will be automatically charged at the end of each billing period.
           </p>
-          <textarea
-            value={summaryText}
-            onChange={(e) => setSummaryText(e.target.value)}
-            placeholder="Describe the work completed during this period..."
-            className="w-full p-2 border border-gray-300 rounded mb-3"
-            rows={4}
-          />
           <button
-            onClick={handleSubmitSummary}
-            disabled={!summaryText.trim()}
-            className={`px-4 py-2 rounded text-sm ${summaryText.trim() ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+            onClick={handleStartRetainer}
+            className="bg-boldblue hover:bg-boldblue text-white px-4 py-2 rounded text-sm"
           >
-            Submit Work Summary
+            Start Job
           </button>
         </div>
       )}
@@ -136,4 +117,4 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   );
 };
 
-export default ContractorRetainer;
+export default ClientRetainer;

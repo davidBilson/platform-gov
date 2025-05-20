@@ -1,5 +1,6 @@
+// CONTRACTOR
 import React, { useState, useEffect } from 'react';
-import { getMilestones, completeMilestone } from '@/api/milestone-api';
+import { getMilestones, completeMilestone } from '@/api/contract/milestone-api';
 
 interface Milestone {
   _id: string;

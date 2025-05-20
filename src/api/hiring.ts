@@ -158,7 +158,6 @@ export const acceptHiringOffer = async (
     );
 
     if (response.data.success) {
-      toast.success('Hiring offer accepted successfully!');
       return true;
     }
     

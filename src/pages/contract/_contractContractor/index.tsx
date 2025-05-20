@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import Details from './_details';
-import Timesheet from './_timesheet';
-import Messages from '../../../components/chat/_messages'
-import Milestones from './_milestones';
-import Retainer from './_retainer';
-import { fetchJob } from '@/api/job-api';
-import { Jobs } from '@/types/jobs';
-import useAuthStore from '@/store/useAuth';
-import { getSingleContract } from '@/api/contract-api';
+// CONTRACTOR
+import Messages from '../../../components/chat/_messages';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { getSingleContract } from '@/api/contract/contract-api';
 import { useQuery } from '@tanstack/react-query';
+import useAuthStore from '@/store/useAuth';
+import { fetchJob } from '@/api/job-api';
+import Milestones from './_milestones';
+import { Jobs } from '@/types/jobs';
+import Details from './_details';
+import ContractorTimesheet from './_timesheet';
+import ContractorRetainer from './_retainer';
 
 interface ContractContractorProps {
     hiringId?: string;
@@ -17,22 +18,33 @@ interface ContractContractorProps {
     tab?: string;
 }
 
-const TAB_OPTIONS = ['details', 'milestones', 'messages'];
-
 const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps) => {
-    
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState<Jobs | null>(null);
-
-    const [mutualContractId, setMutualContractId] = useState('')
+    const [mutualContractId, setMutualContractId] = useState('');
+    const [middleTab, setMiddleTab] = useState('milestone');
     
-    const { userId, name} = useAuthStore();
+    const { userId, name } = useAuthStore();
+
+    // Use useMemo to update tabOptions whenever middleTab changes
+    const tabOptions = useMemo(() => {
+        return ['details', middleTab, 'messages'];
+    }, [middleTab]);
 
     const fetchJobData = useCallback(async () => {
         if (!jobId) return;
         try {
             const jobData = await fetchJob(jobId as string);
             setJob(jobData);
+            
+            if (jobData?.paymentType === 'hourly') {
+                setMiddleTab('timesheet');
+            } else if (jobData?.paymentType === 'retainer') {
+                setMiddleTab('retainer');
+            } else {
+                // Default to milestone for fixed-price or if not specified
+                setMiddleTab('milestone');
+            }
         } catch (error) {
             console.error('Error loading job:', error);
             setJob(null);
@@ -43,14 +55,19 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         fetchJobData();
     }, [fetchJobData]);
 
-
-
-    // Set active tab when tab prop changes
     useEffect(() => {
-        if (tab && TAB_OPTIONS.includes(tab)) {
-            setActiveTab(tab);
+        if (activeTab !== 'details' && activeTab !== 'messages' && activeTab !== middleTab) {
+            setActiveTab(middleTab);
         }
-    }, [tab]);
+    }, [activeTab, middleTab]);
+
+    useEffect(() => {
+        if (tab) {
+            if (tab === 'details' || tab === 'messages' || tab === middleTab) {
+                setActiveTab(tab);
+            }
+        }
+    }, [tab, middleTab]);
 
    useQuery({
         queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
@@ -61,8 +78,15 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                 clientId: job.userId._id,
                 contractorId: userId
             });
-            setMutualContractId(response?.data._id)
-            console.log(response?.data._id)
+            
+            if (response?.data) {
+                setMutualContractId(response.data._id);
+                
+                if (response.data.paymentStructure) {
+                    setMiddleTab(response.data.paymentStructure);
+                }
+            }
+            
             return response?.data || null;
         },
         enabled: !!job?.userId?._id && !!userId,
@@ -71,7 +95,6 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         },
         refetchIntervalInBackground: true,
         staleTime: Infinity
-
     });
 
     const renderTabContent = () => {
@@ -88,11 +111,11 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                     />
                 );
             case 'timesheet':
-                return <Timesheet />;
-            case 'milestones':
+                return <ContractorTimesheet mutualContractId={mutualContractId} />;
+            case 'milestone':
                 return <Milestones mutualContractId={mutualContractId} />;
             case 'retainer':
-                return <Retainer />;
+                return <ContractorRetainer job={job} mutualContractId={mutualContractId} />;
             case 'messages':
                 return (
                     <Messages
@@ -120,7 +143,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
                 <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
                 <div className='flex items-center md:gap-10 pt-5.5'>
-                    {TAB_OPTIONS.map((tabOption) => (
+                    {tabOptions.map((tabOption) => (
                         <button 
                             key={tabOption}
                             onClick={() => setActiveTab(tabOption)}
@@ -140,7 +163,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                 {renderTabContent()}
             </section>
         </main>
-    )
-}
+    );
+};
 
 export default ContractContractor;

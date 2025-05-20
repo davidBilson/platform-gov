@@ -1,39 +1,55 @@
-import React, { useEffect, useState, useCallback } from 'react';
+// client
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Details from './_details';
 import Timesheet from './_timesheet';
 import Messages from '../../../components/chat/_messages';
 import { fetchApplication, fetchJob } from '@/api/job-api';
 import useAuthStore from '@/store/useAuth';
 import Milestones from './_milestones';
-import { getSingleContract } from '@/api/contract-api';
+import { getSingleContract } from '@/api/contract/contract-api';
 import { useQuery } from '@tanstack/react-query';
 import LoadingAnimation from '@/components/ui/loading';
-
-const TAB_OPTIONS = ['details', "milestones", 'messages'];
+import ClientTimesheet from './_timesheet';
+import ClientRetainer from './_retainer';
 
 const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
+    const { userId, name } = useAuthStore();
+    
     const [applicationDetail, setApplicationDetail] = useState(null);
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState(null);
     const [mutualContractId, setMutualContractId] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [middleTab, setMiddleTab] = useState('milestone');
     
-    const { userId, name } = useAuthStore();
+    // Use useMemo to update tabOptions whenever middleTab changes
+    const tabOptions = useMemo(() => {
+        return ['details', middleTab, 'messages'];
+    }, [middleTab]);
 
-    // Fetch job data
     const fetchJobData = useCallback(async () => {
         if (!jobId) {
             setLoading(false);
             return;
         }
-        
+
         try {
             setLoading(true);
             const jobData = await fetchJob(jobId);
-            
+
             if (jobData) {
                 setJob(jobData);
+                
+                // Set middleTab based on payment type
+                if (jobData.paymentType === 'hourly') {
+                    setMiddleTab('timesheet');
+                } else if (jobData.paymentType === 'retainer') {
+                    setMiddleTab('retainer');
+                } else {
+                    // Default to milestone for fixed-price or if not specified
+                    setMiddleTab('milestone');
+                }
             } else {
                 setError('Job information could not be found.');
             }
@@ -45,13 +61,11 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
         }
     }, [jobId]);
 
-    // Fetch application data
     const fetchApplicationData = useCallback(async () => {
         if (!proposalId) {
             console.warn('No proposal ID provided');
             return;
         }
-      
         try {
             const application = await fetchApplication(proposalId);
             
@@ -59,29 +73,24 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
                 setApplicationDetail(application.data);
             } else {
                 console.warn('No application data received');
-                // We don't set error here as it's not critical - might be fixed with job data
             }
         } catch (error) {
             console.error('Error loading application:', error);
-            // Don't set error state here to avoid blocking the main UI
         }
     }, [proposalId]);
 
-    // Load initial data
     useEffect(() => {
         fetchJobData();
         fetchApplicationData();
     }, [fetchJobData, fetchApplicationData]);
 
-    // Query for contract data using react-query
-    const { 
+    const {
         data: contractData,
         isLoading: contractLoading,
         error: contractError
     } = useQuery({
         queryKey: ['mutualContract', jobId, userId, applicationDetail?.freelancerId],
         queryFn: async () => {
-            // Make sure we have all necessary data before querying
             if (!jobId || !userId || !applicationDetail?.freelancerId) {
                 return null;
             }
@@ -91,28 +100,22 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
                 clientId: userId,
                 contractorId: applicationDetail.freelancerId
             };
-            
-            // Log what we're querying with
-            console.log('Querying contract with:', contractQueryParams);
-            
+
             const response = await getSingleContract(contractQueryParams);
-            
+
             if (response.success && response.data) {
-                // Only set contract ID if we have valid data
                 if (response.data._id) {
                     setMutualContractId(response.data._id);
+                    if (response.data.paymentStructure) {
+                        setMiddleTab(response.data.paymentStructure);
+                    }
                 }
                 return response.data;
             }
-            
             if (response.error) {
-                console.warn('Contract query error:', response.error);
-                
-                // Special handling for 404 - contract may not exist yet
                 if (response.error.status === 404) {
-                    return null; // Not an error, just not found yet
+                    return null;
                 }
-                
                 throw new Error(response.error.message || 'Failed to fetch contract');
             }
             
@@ -120,18 +123,21 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
         },
         enabled: !!jobId && !!userId && !!applicationDetail?.freelancerId,
         refetchInterval: (query) => {
-            // If we don't have data yet, poll every 5 seconds
             return query.state.error || !query.state.data ? 5000 : false;
         },
         refetchIntervalInBackground: true,
-        staleTime: 60000, // 1 minute instead of Infinity to ensure fresh data
-        retry: 3, // Retry failed requests 3 times before giving up
-        retryDelay: (attemptIndex) => Math.min(1000 * (2 ** attemptIndex), 30000) // Exponential backoff
+        staleTime: 60000,
+        retry: 3,
+        retryDelay: (attemptIndex) => Math.min(1000 * (2 ** attemptIndex), 30000)
     });
 
-    // Render content based on active tab
+    useEffect(() => {
+        if (activeTab !== 'details' && activeTab !== 'messages' && activeTab !== middleTab) {
+            setActiveTab(middleTab);
+        }
+    }, [activeTab, middleTab]);
+
     const renderTabContent = () => {
-        // Show loading state while initial data loads
         if (loading) {
             return (
                 <div className='flex items-center justify-center h-[60vh]'>
@@ -140,7 +146,6 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
             );
         }
         
-        // Show error message if critical data failed to load
         if (error) {
             return (
                 <div className='flex flex-col items-center justify-center h-[60vh] px-4 text-center'>
@@ -156,7 +161,6 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
             );
         }
 
-        // Render tab content if we have the necessary data
         switch (activeTab) {
             case 'details':
                 return job && 
@@ -166,8 +170,10 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
                     applicationDetail={applicationDetail} 
                 />;
             case 'timesheet':
-                return <Timesheet />;
-            case 'milestones':
+                return <ClientTimesheet mutualContractId={mutualContractId} />;
+            case 'retainer':
+                return <ClientRetainer job={job} mutualContractId={mutualContractId} />;
+            case 'milestone':
                 return <Milestones 
                     mutualContractId={mutualContractId}
                     isLoading={contractLoading && !mutualContractId} 
@@ -201,7 +207,7 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
                 <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
                 <div className='flex items-center md:gap-10 pt-5.5'>
-                    {TAB_OPTIONS.map((tabOption) => (
+                    {tabOptions.map((tabOption) => (
                         <button
                             key={tabOption}
                             onClick={() => setActiveTab(tabOption)}

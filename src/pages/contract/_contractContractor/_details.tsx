@@ -11,7 +11,7 @@ import LoadingAnimation from '@/components/ui/loading';
 
 import useAuthStore from '@/store/useAuth';
 import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
-import { createContract } from '@/api/contract-api';
+import { createContract } from '@/api/contract/contract-api';
 import { useRouter } from 'next/router';
 
 interface Job {

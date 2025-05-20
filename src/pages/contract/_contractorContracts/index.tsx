@@ -3,10 +3,50 @@ import ActiveContracts from './_activeContracts';
 import CompletedContracts from './_completedContracts';
 import InactiveContracts from './_inactiveContracts';
 import { TbAdjustmentsHorizontal } from "react-icons/tb";
+import useAuthStore from '@/store/useAuth';
+import { useEffect, useState } from 'react';
+import { getContractorContracts } from '@/api/contract/contract-api';
+import { Contract } from '@/types/contracts';
+import LoadingAnimation from '@/components/ui/loading';
 
 const ContractorContracts = () => {
+  const { userId } = useAuthStore();
+  const [contracts, setContracts] = useState<{
+    active: Contract[];
+    inactive: Contract[];
+    completed: Contract[];
+  }>({
+    active: [],
+    inactive: [],
+    completed: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContracts = async () => {
+      if (userId) {
+        try {
+          const data = await getContractorContracts(userId);
+          setContracts(data || { active: [], inactive: [], completed: [] });
+        } catch (error) {
+          console.error('Error in component when fetching contracts:', error);
+          // Even on error, set default empty arrays
+          setContracts({ active: [], inactive: [], completed: [] });
+        } finally {
+          // Always set loading to false regardless of success/failure
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchContracts();
+  }, [userId]);
+
+  if (loading) {
+    return <div className='flex items-center justify-center h-[60vh]'><LoadingAnimation /></div>
+  }
+
   return (
-    
     <>
       <div className='flex items-center gap-7.5 mb-9.25'>
         <div className="flex flex-wrap items-center justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
@@ -20,7 +60,6 @@ const ContractorContracts = () => {
             className="focus:outline-none"
           >
             <IoMdArrowDropdown />
-          {/* <IoMdArrowDropup /> */}
           </button>
         </div>
         <button
@@ -31,14 +70,10 @@ const ContractorContracts = () => {
         </button>
       </div>
 
-      {/* mutually assured contracts */}
-      <ActiveContracts />
-      {/* client has sent contract, and contractor is yet to finalize or accept contract  */}
-      <InactiveContracts />
-      {/* finished contracts */}
-      <CompletedContracts />
+      <ActiveContracts contracts={contracts.active} />
+      <InactiveContracts contracts={contracts.inactive} />
+      <CompletedContracts contracts={contracts.completed} />
     </>
-
   );
 };
 

@@ -64,7 +64,7 @@ const CreateJob  = () => {
     
     const datePickerRef = useRef(null);
     
-    const retainerFrequencyOptions = ['Hour', 'Day', 'Week', 'Month'];
+    const retainerFrequencyOptions = ['weekly', 'bi-weekly', 'monthly'];
 
     useEffect(() => {
       const fetchData = async () => {
@@ -692,7 +692,9 @@ const CreateJob  = () => {
             className="outline-none placeholder:font-semibold w-full"
           />
           <span className="focus:outline-none">
-            {formData.retainerFrequency}s
+            {formData.retainerFrequency == 'weekly' && "weeks"}
+            {formData.retainerFrequency == 'bi-weekly' && "weeks"}
+            {formData.retainerFrequency == 'monthly' && "months"}
           </span>
         </div>
       </fieldset>

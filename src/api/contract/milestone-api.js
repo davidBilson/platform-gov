@@ -1,4 +1,3 @@
-// api/milestone-api.ts
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -13,7 +12,7 @@ export const addMilestone = async (contractId, milestoneData, userId) => {
       ...milestoneData,
       userId
     };
-    
+
     const response = await axios.post(
       `${baseURL}${endpoint}`,
       requestBody
@@ -21,6 +20,7 @@ export const addMilestone = async (contractId, milestoneData, userId) => {
     
     toast.success('Milestone added successfully!');
     return response.data;
+    
   } catch (error) {
     console.error('Error adding milestone:', error);
     if (axios.isAxiosError(error)) {

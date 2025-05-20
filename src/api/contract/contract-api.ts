@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { Contract } from '@/types/contracts';
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -112,6 +113,25 @@ export const getSingleContract = async (contractData: {
         status: axios.isAxiosError(error) && error.response ? error.response.status : 500,
         code: axios.isAxiosError(error) ? error.code : 'UNKNOWN_ERROR'
       }
+    };
+  }
+};
+
+export const getContractorContracts = async (contractorId: string): Promise<{
+  active: Contract[];
+  inactive: Contract[];
+  completed: Contract[];
+} | null> => {
+  try {
+    const endpoint = process.env.NEXT_PUBLIC_GET_CONTRACTOR_CONTRACTS?.replace(':id', contractorId);
+    const response = await axios.get(`${baseURL}${endpoint}`);
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching contractor contracts:', error);
+    return {
+      active: [],
+      inactive: [],
+      completed: []
     };
   }
 };

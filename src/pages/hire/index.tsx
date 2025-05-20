@@ -69,7 +69,8 @@ const HireContractor: NextPage = () => {
                     if (jobData) {
                         setFormData({
                             ...formData,
-                            rate: JSON.stringify(jobData.price)
+                            rate: jobData.paymentType === 'retainer' ? JSON.stringify(jobData.retainerAmount) : JSON.stringify(jobData.price)
+
                         });
                     }
                 } catch (error) {
@@ -146,8 +147,6 @@ const HireContractor: NextPage = () => {
             startDate: formData.startDate,
             selectedFiles
           });
-
-          toast.success('Contract sent!')
 
           if (success) {
             await Promise.all([

@@ -4,7 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { IoMdCalendar } from 'react-icons/io';
 import { format } from 'date-fns';
 import { toast } from 'react-toastify';
-import { addMilestone } from '@/api/milestone-api';
+import { addMilestone } from '@/api/contract/milestone-api';
 import useAuthStore from '@/store/useAuth';
 
 interface ModalProps {
