@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React, { useState, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
-import RateUserModal from '../../../components/rating/rateUserModal';
+// import RateUserModal from '../../../components/rating/rateUserModal';
 import StatusTag from '@/components/tags/statusTag';
 
 interface Job {
@@ -143,7 +143,7 @@ const InactiveContracts: React.FC<InactiveContractsProps> = ({ offers = [] }) =>
           className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
           onClick={handleOverlayClick}
         >
-          <RateUserModal onClose={handleClose} userToRate={"Contractor"} />
+          {/* <RateUserModal onClose={handleClose} userToRate={"Contractor"} /> */}
         </div>
       )}
     </>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
-import RateUserModal from '@/components/rating/rateUserModal';
+// import RateUserModal from '@/components/rating/rateUserModal';
 import { format } from 'date-fns';
 import LoadingAnimation from '@/components/ui/loading';
 import ProfileCard from '@/components/profile/ProfileCard';
@@ -175,7 +175,7 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
         className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
         onClick={handleOverlayClick}
       >
-          <RateUserModal userToRate='Contractor' onClose={handleClose} />
+          {/* <RateUserModal userToRate='Contractor' onClose={handleClose} /> */}
       </div>
     )}
     </>

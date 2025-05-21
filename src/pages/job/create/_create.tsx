@@ -39,7 +39,7 @@ const CreateJob  = () => {
         price: 0,
         startDate: null,
         retainerAmount: 0,
-        retainerFrequency: '',
+        retainerFrequency: 'weekly',
         retainerDuration: null,
     });
 
@@ -55,7 +55,7 @@ const CreateJob  = () => {
     const [locationInput, setLocationInput] = useState<string>("");
     
     const [requiredCertificationInput, setRequiredCertificationInput] = useState<string>("");
-    const [retainerFrequencyInput, setRetainerFrequencyInput] = useState<string>('Week');
+    const [retainerFrequencyInput, setRetainerFrequencyInput] = useState<string>('');
     const [requiredSkillInput, setRequiredSkillInput] = useState<string>("");
     const [jobCategoryInput, setJobCategoryInput] = useState<string>("");
     
@@ -614,7 +614,7 @@ const CreateJob  = () => {
             className="outline-none placeholder:font-semibold w-full"
           />
           <span className="focus:outline-none">
-            Amount
+            amount
           </span>
         </div>
       </fieldset>
@@ -623,15 +623,14 @@ const CreateJob  = () => {
     {/* To be paid */}
     <span className='text-sm whitespace-nowrap'>To be paid</span>
 
-    {/* Every */}
     <div className="w-full lg:w-auto flex-1 relative">
       <fieldset className="w-full border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
-        <legend className="px-2 text-boldblue text-[10px]">Every</legend>
+        <legend className="px-2 text-boldblue text-[10px]">Schedule</legend>
         <div className="flex justify-between items-center gap-2">
           <span className="focus:outline-none">{""}</span>
           <input
             type="text"
-            placeholder='Week'
+            placeholder='weekly'
             value={retainerFrequencyInput}
             onChange={(e) => setRetainerFrequencyInput(e.target.value)}
             onClick={() => {

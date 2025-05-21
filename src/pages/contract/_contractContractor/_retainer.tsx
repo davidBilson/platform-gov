@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Jobs } from '@/types/jobs';
 import { submitWorkSummary, getRetainerDetails } from '@/api/contract/retainer-api';
-import LoadingAnimation from '@/components/ui/loading';
 
 interface RetainerProps {
   job: Jobs | null;
@@ -22,7 +21,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
 
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
   const [summaryText, setSummaryText] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [canSubmit, setCanSubmit] = useState(false);
 
   useEffect(() => {
@@ -75,18 +74,19 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
-  if (loading) {
-    return <section className="w-full p-6 flex items-center justify-center">
-      <LoadingAnimation />
-    </section>
-  }
+  // if (loading) {
+  //   return <section className="w-full p-6 flex items-center justify-center">
+  //     <LoadingAnimation />
+  //   </section>
+  // }
 
   return (
     <section className="w-full">
+      
       <section className="relative mb-4">
         <button 
           onClick={() => setShowDetails(!showDetails)}
-          className="bg-skyblue border border-boldblue text-boldblue w-30 px-2 py-1 rounded-sm outline-none hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-xs"
+          className="bg-skyblue border border-lightblue text-boldblue w-30 px-2 py-1 rounded-sm outline-none hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-xs"
         >
           {showDetails ? 'Hide Job Details' : 'View Job Details'}
         </button>
@@ -101,13 +101,16 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
         )}
       </section>
 
-      {canSubmit && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <p className="text-sm text-blue-800 mb-4">
+      <div className="bg-lightblue/10 border border-lightblue rounded-lg p-4 mb-6">
+          <p className="text-sm text-boldblue">
             📝 Reminder: You are required to submit your Work Summary no later than one day before your 
             next billing date to ensure your payment is processed on time. Failure to do so may result 
             in payment delays.
           </p>
+        </div>
+
+      {canSubmit && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <textarea
             value={summaryText}
             onChange={(e) => setSummaryText(e.target.value)}

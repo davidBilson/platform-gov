@@ -2,7 +2,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 // import { format } from 'date-fns';
 // import RatingStars from '@/components/ui/rating';
-import RateUserModal from '../../../components/rating/rateUserModal';
+// import RateUserModal from '../../../components/rating/rateUserModal';
 import StatusTag from '@/components/tags/statusTag';
 
 // interface ActiveProposalsProps {
@@ -81,7 +81,7 @@ const CompletedContracts
           className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
           onClick={handleOverlayClick}
         >
-            <RateUserModal onClose={handleClose} userToRate={"Contractor"} />
+            {/* <RateUserModal onClose={handleClose} userToRate={"Contractor"} /> */}
         </div>
       )}
     </>

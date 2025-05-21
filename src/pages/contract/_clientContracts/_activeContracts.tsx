@@ -1,9 +1,11 @@
 // _activeContracts.tsx
 import Link from 'next/link';
-import React, { useState, MouseEvent } from 'react';
+import React, { 
+  // useState, 
+  MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
-import RateUserModal from '../../../components/rating/rateUserModal';
+// import RateUserModal from '../../../components/rating/rateUserModal';
 import StatusTag from '@/components/tags/statusTag';
 
 interface Job {
@@ -55,17 +57,17 @@ interface ActiveContractsProps {
 
 const ActiveContracts: React.FC<ActiveContractsProps> = ({ offers = [] }) => {
   const router = useRouter();
-  const [showRateUserModal, setShowRateUserModal] = useState(false);
+  // const [showRateUserModal, setShowRateUserModal] = useState(false);
 
-  const handleClose = () => {
-    setShowRateUserModal(false);
-  };
+  // const handleClose = () => {
+  //   setShowRateUserModal(false);
+  // };
 
-  const handleOverlayClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
+  // const handleOverlayClick = (e: MouseEvent<HTMLDivElement>) => {
+  //   if (e.target === e.currentTarget) {
+  //     handleClose();
+  //   }
+  // };
 
   const formatDate = (dateString: string): string => {
     try {
@@ -137,14 +139,14 @@ const ActiveContracts: React.FC<ActiveContractsProps> = ({ offers = [] }) => {
         </section>
       </section>
 
-      {showRateUserModal && (
+      {/* {showRateUserModal && (
         <div 
           className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
           onClick={handleOverlayClick}
         >
           <RateUserModal onClose={handleClose} userToRate={"Contractor"} />
         </div>
-      )}
+      )} */}
     </>
   );
 };
