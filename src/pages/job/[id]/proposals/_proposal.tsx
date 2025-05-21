@@ -36,28 +36,27 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
 
   useEffect(() => {
     const checkHiringStatus = async () => {
-
       if (userId && proposalData.jobId && proposalData.contractorId) {
-        const response = await trackHiringStatus({
+        const result = await trackHiringStatus({
           jobId: proposalData.jobId,
           contractorId: proposalData.contractorId,
           clientId: userId
-        })
-
-        if (response) {
-          setContractorHired(true)
-          setContractorHiredStatus(response.data.hiringStatus)
+        });
+  
+        if (result && result.found) {
+          setContractorHired(true);
+          setContractorHiredStatus(result.data.data.hiringStatus);
         } else {
           updateJobApplicationStatus({
             applicationId: proposalData.applicationId,
             status: "viewed",
-          })
+          });
         }
-        
       }
-    }
+    };
+    
     checkHiringStatus();
-  }, [userId, proposalData.jobId, proposalData.contractorId]);
+  }, [userId, proposalData.jobId, proposalData.contractorId, proposalData.applicationId]);
 
   const navigateToContract = (tab: string) => {
     router.push({

@@ -6,6 +6,7 @@ import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import { truncateDescription } from '@/utils/truncateDescription';
 
 const OpenJobs = () => {
 
@@ -89,7 +90,7 @@ const OpenJobs = () => {
                   </div>
                 </div>
 
-                <p className='text-[16px] mb-[15px]'>{job.description}</p>
+                <p className='text-[16px] mb-[15px]'>{truncateDescription(job.description)}</p>
 
                 <button disabled className='bg-deepskyblue text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
                   {job.jobCategory}
@@ -153,7 +154,8 @@ const OpenJobs = () => {
                   </div>
                 </div>
 
-                <p className='text-[16px] mb-[15px]'>{job.description}</p>
+                <p className='text-[16px] mb-[15px]'>{truncateDescription(job.description)}</p>
+
 
                 <button disabled className='bg-deepskyblue text-[15px] text-white font-bold px-2 h-[30px] rounded-full'>
                   {job.jobCategory}

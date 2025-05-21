@@ -100,9 +100,9 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
                 clientId: userId,
                 contractorId: applicationDetail.freelancerId
             };
-
+    
             const response = await getSingleContract(contractQueryParams);
-
+    
             if (response.success && response.data) {
                 if (response.data._id) {
                     setMutualContractId(response.data._id);
@@ -112,23 +112,18 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
                 }
                 return response.data;
             }
-            if (response.error) {
-                if (response.error.status === 404) {
-                    return null;
-                }
-                throw new Error(response.error.message || 'Failed to fetch contract');
-            }
-            
             return null;
         },
         enabled: !!jobId && !!userId && !!applicationDetail?.freelancerId,
         refetchInterval: (query) => {
-            return query.state.error || !query.state.data ? 5000 : false;
+            return !query.state.data ? 5000 : false;
         },
         refetchIntervalInBackground: true,
         staleTime: 60000,
-        retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * (2 ** attemptIndex), 30000)
+        retry: (failureCount, error) => {
+            return failureCount < 2;
+        },
+        retryDelay: 5000
     });
 
     useEffect(() => {

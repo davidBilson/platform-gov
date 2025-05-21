@@ -61,6 +61,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         }
     }, [activeTab, middleTab]);
 
+    
     useEffect(() => {
         if (tab) {
             if (tab === 'details' || tab === 'messages' || tab === middleTab) {
@@ -68,33 +69,62 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             }
         }
     }, [tab, middleTab]);
+    
+    useEffect(() => {
+        const fetchMutualContract = async () => {
+            if (!job?.userId?._id || !userId) return null;
+            
+            const response = await getSingleContract({
+                jobId: jobId,
+                clientId: job.userId._id,
+                contractorId: userId
+            });
+            if (response.success && response.data) {
+                setMutualContractId(response.data._id);
+                
+                if (response.data.paymentStructure) {
+                    setMiddleTab(response.data.paymentStructure);
+                }
+                return response.data;
+            }
+            return null;
+        }
+        fetchMutualContract();
+    }, [job, userId, jobId])
 
-   useQuery({
+    useQuery({
         queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
         queryFn: async () => {
             if (!job?.userId?._id || !userId) return null;
+            
             const response = await getSingleContract({
                 jobId: jobId,
                 clientId: job.userId._id,
                 contractorId: userId
             });
             
-            if (response?.data) {
+            // Set contract ID regardless of success/failure
+            if (response.success && response.data) {
                 setMutualContractId(response.data._id);
                 
                 if (response.data.paymentStructure) {
                     setMiddleTab(response.data.paymentStructure);
                 }
+                return response.data;
             }
-            
-            return response?.data || null;
+            return null;
         },
         enabled: !!job?.userId?._id && !!userId,
         refetchInterval: (query) => {
             return !query.state.data ? 20000 : false;
         },
         refetchIntervalInBackground: true,
-        staleTime: Infinity
+        staleTime: Infinity,
+        // Add retry configuration to prevent excessive retries on 404
+        retry: (failureCount, error) => {
+            console.log(error)
+            return failureCount < 3;
+        }
     });
 
     const renderTabContent = () => {

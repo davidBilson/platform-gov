@@ -2,7 +2,6 @@ import { toast } from 'react-toastify';
 import Logo from '@/components/ui/logo';
 import { contractorSignHiringOffer } from '@/api/hiring';
 import useAuthStore from '@/store/useAuth';
-import { useEffect } from 'react';
 
 interface HiringDocument {
   _id?: string;
@@ -67,10 +66,6 @@ const SignContractModal = ({ hiringOffer, contractSigned, onClose, updateContrac
   const openDocumentInNewTab = (docUrl: string) => {
     window.open(docUrl, '_blank', 'noopener,noreferrer');
   };
-
-  useEffect(() => {
-    console.log(hiringOffer);
-  }, [hiringOffer]);
 
   return (
     <section 

@@ -12,7 +12,7 @@ import LoadingAnimation from '@/components/ui/loading';
 import useAuthStore from '@/store/useAuth';
 import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
 import { createContract } from '@/api/contract/contract-api';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 
 interface Job {
   createdAt?: string;
@@ -56,7 +56,7 @@ interface DetailsProps {
 
 const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
-  const router = useRouter()
+  // const router = useRouter()
   const [showSignContractModal, setShowSignContractModal] = useState(false);
   const [contractSigned, setContractSigned] = useState(false);
   const [showRateUserModal, setShowRateUserModal] = useState(false);
@@ -66,7 +66,9 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   
   const [hiringOffer, setHiringOffer] = useState<HiringDocument | null>(null);
   const [hiringId, setHiringId] = useState<string>('');
-  const  [clientId, setClientId] = useState<string>('');
+  const [clientId, setClientId] = useState<string>('');
+  // Add a new state variable for job acceptance status
+  const [jobAcceptanceStatus, setJobAcceptanceStatus] = useState<string>('');
 
   useEffect(() => {
     if (job?.userId?._id) {
@@ -115,6 +117,8 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         if (response.success && response.data) {
           setHiringOffer(response.data);
           setHiringId(response.data._id);
+          // Set the initial job acceptance status
+          setJobAcceptanceStatus(response.data.status);
         } else {
           // Handle case when data is not found but API didn't throw an error
           if (response.error?.status === 404) {
@@ -180,7 +184,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
     try {
 
-      if (hiringOffer?.status === "accepted") {
+      if (jobAcceptanceStatus === "accepted") {
         toast.info('Job has already been accepted');
         return;
       }
@@ -202,8 +206,12 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         });
       }
       
+      // Update the job acceptance status state variable
+      setJobAcceptanceStatus("accepted");
+      
+      // Also update the hiringOffer object to keep state consistent
       setHiringOffer(prev => prev ? {...prev, status: "accepted"} : prev);
-      router.reload();
+      
       toast.success('Job accepted successfully');
     } catch (error) {
       console.error("Error accepting job:", error);
@@ -211,9 +219,9 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     }
   };
 
-  // Calculate button disabled state correctly
-  const isJobAlreadyAccepted = hiringOffer?.status === "accepted";
-  const canAcceptJob = contractSigned && hiringOffer?.status === "offered";
+  // Calculate button disabled state correctly using the state variable
+  const isJobAlreadyAccepted = jobAcceptanceStatus === "accepted";
+  const canAcceptJob = contractSigned && jobAcceptanceStatus === "offered";
 
   const getPaymentInfo = (): string => {
     if (job.paymentType === 'hourly') {
@@ -397,7 +405,20 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
         onClick={handleOverlayClick}
       >
-          <RateUserModal userToRate='Client' onClose={handleClose} />
+          <RateUserModal 
+             onClose={handleClose}
+             userToRate={""}
+             contractId={""}
+             jobId={""}
+             reviewerId={""}
+             revieweeId={""}
+             role={"contractor"}
+             existingRating={{
+                id: '',
+                rating: 0,
+                comments: ''
+             }}
+          />
       </div>
     )}
 

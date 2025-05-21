@@ -2,28 +2,22 @@ import Link from 'next/link';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import { Contract } from '@/types/contracts';
 import ProfilePicture from '@/components/profile/profilePicture';
-import RateFeedbackCard from '@/components/rating/rateFeedbackCard';
-import RateUserBtn from '@/components/rating/rateUserBtn';
-import RatingStars from '@/components/rating/ratingStars';
-
 interface ActiveContractsProps {
   contracts: Contract[];
 }
 
 const ActiveContracts = ({ contracts }: ActiveContractsProps) => {
-  // Render even if contracts array is empty (don't return null)
+
   return (
     <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>
       <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold'>Active Contracts</h2>
-      <RateFeedbackCard />
-      <RateUserBtn />
-      <RatingStars rating={3} />
       <section className='flex flex-col gap-12.5'>
         {contracts.length === 0 ? (
           <p>No active contracts found</p>
         ) : 
         contracts.map((contract) => (
           <article key={contract._id} className="mb-7.5">
+            
             <section className='flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5'>
               <div>
                 <p className='text-xs text-mediumgray font-semibold mb-5'>
@@ -39,15 +33,15 @@ const ActiveContracts = ({ contracts }: ActiveContractsProps) => {
               <div className="w-8.75 h-8.75 bg-cyan-200 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
                 {contract.jobId?.clientLogo || contract.clientId?.profile?.logo ? (
                   <ProfilePicture 
-                    source={contract.jobId?.clientLogo || contract.clientId?.profile?.logo} 
+                    source={contract.jobId.clientLogo || contract.clientId?.profile?.logo} 
                     alt={contract.jobId?.clientName || contract.clientId?.name || 'Client'} 
-                    dimesion={35}
+                    dimension={35}
                   />
                 ) : (
                   <span>{contract.jobId?.clientName?.charAt(0) || contract.clientId?.name?.charAt(0) || 'C'}</span>
                 )}
               </div>
-              <Link href={''} className="font-semibold text-sm hover:underline">
+              <Link href={``} className="font-semibold text-sm hover:underline">
                 {contract.jobId?.clientName || contract.clientId?.name || 'Client'}
               </Link>
             </div>
@@ -57,7 +51,7 @@ const ActiveContracts = ({ contracts }: ActiveContractsProps) => {
                   <div className="flex items-center gap-1.25">
                     <FaRegHourglass size={15} /> 
                     {contract.paymentStructure.charAt(0).toUpperCase()}{contract.paymentStructure.substring(1)}{" | "}
-                    ${contract.jobId?.retainerAmount ?? contract.jobId?.price}{" | "}
+                    ${contract.jobId?.price ?? contract.jobId?.retainerAmount}{" | "}
                     {contract.jobId?.employmentType || ''}
                   </div>
                   <div className="flex items-center gap-1.25">
@@ -67,11 +61,32 @@ const ActiveContracts = ({ contracts }: ActiveContractsProps) => {
               </div>
 
               <div className='font-bold text-sm'>
-                <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}>Contract Detail</Link>{" | "}
-                <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}> Manage Timesheet</Link>{" | "}
+                <Link 
+                  className='cursor-pointer hover:text-deepskyblue hover:underline' 
+                  href={{
+                    pathname: `/contract/${contract.hiringId._id}`,
+                    query: {
+                      jobId: contract?.jobId && contract.jobId._id,
+                      proposalId: contract.hiringId?.applicationId
+                    }
+                  }}
+
+                >Contract Detail</Link>{" | "}
+                <Link 
+                  className='cursor-pointer hover:text-deepskyblue hover:underline' 
+                  href={{
+                    pathname: `/contract/${contract.hiringId._id}`,
+                    query: {
+                      jobId: contract?.jobId && contract.jobId._id,
+                      proposalId: contract.hiringId?.applicationId,
+                      tab: contract.paymentStructure
+                    }
+                  }}
+                > Manage {contract.paymentStructure.charAt(0).toUpperCase() + contract.paymentStructure.slice(1)}</Link>{" | "}
                 <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}>Submit For Payment</Link>{" | "}
               </div>
             </section>
+
           </article>
         ))}
       </section>

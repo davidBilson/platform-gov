@@ -1,16 +1,17 @@
-// External packages
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FaCheckCircle } from 'react-icons/fa';
 
 import useAuthStore from '@/store/useAuth';
-import { ReactLib, Data, Icons, UI } from '@/utils/jobs/_imports';
+import { ReactLib, Icons, UI } from '@/utils/jobs/_imports';
 import type { JobFormData } from '@/utils/jobs/_imports';
 import { getSpecificCountryStates } from '@/utils/getLocations/getAllCountriesAndStates';
+import { skillsList } from '@/utils/skillsExpertiseCertificationList/skillsList';
+import { certificationsList } from '@/utils/skillsExpertiseCertificationList/certificationList';
+import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
 
 const { useState, useEffect, useRef } = ReactLib;
-const { jobCategoryList, requiredCertificationsList, requiredSkillsList } = Data;
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
 const { DatePicker } = UI;
 
@@ -19,7 +20,11 @@ type StateWithCountry = [string, string];
 const CreateJob  = () => {
 
     const { userId } = useAuthStore();
-    
+
+    const requiredCertificationsList = certificationsList;
+    const jobCategoryList = expertiseList;
+    const requiredSkillsList = skillsList;
+
     const [formData, setFormData] = useState<JobFormData>({
         userId: userId,
         location: "",
@@ -29,12 +34,12 @@ const CreateJob  = () => {
         requiredSkills: [],
         requiredCertifications: [],
         requiresRegisteredLobbyist: false,
-        employmentType: 'Full Time',
-        paymentType: 'hourly',
+        employmentType: '',
+        paymentType: '',
         price: 0,
         startDate: null,
         retainerAmount: 0,
-        retainerFrequency: 'Week',
+        retainerFrequency: '',
         retainerDuration: null,
     });
 
@@ -260,7 +265,6 @@ const CreateJob  = () => {
       const createJobEndpoint =process.env.NEXT_PUBLIC_CREATE_JOBS;
 
     try {
-
         await axios.post(`${baseURL}${createJobEndpoint}`, formData);
 
       toast.success('Job created successfully');

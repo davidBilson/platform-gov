@@ -77,7 +77,7 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) =
           <div className="flex gap-2 mt-2">
             <button 
               onClick={() => handleApprove(milestone._id)}
-              className="px-3 py-1 bg-aquagreen text-white rounded text-sm"
+              className="px-3 py-1 bg-aquagreen text-white rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
             >
               Approve
             </button>
@@ -93,7 +93,7 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) =
         return (
           <button 
             onClick={() => handleMarkPaid(milestone._id)}
-            className="px-3 py-1 bg-purple-500 text-white rounded text-sm mt-2"
+            className="px-3 py-1 bg-purple-500 text-white rounded text-sm mt-2 hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
           >
             Mark as Paid
           </button>
@@ -129,9 +129,6 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) =
                 <div key={milestone._id} className='flex flex-col items-start gap-2.5 w-full'>
                   <div className='flex items-center justify-between w-full border-b border-b-lightblue pb-2.5'>
                     <h3 className='font-semibold'>{milestone.name}</h3>
-                    {/* <button className='w-fit h-fit'>
-                      <LuTrash size={20} />
-                    </button> */}
                   </div>
                   {milestone.description && <p className='text-sm'>{milestone.description}</p>}
                   <p>${milestone.amount.toFixed(2)}</p>

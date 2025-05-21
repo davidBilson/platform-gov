@@ -17,7 +17,7 @@ export interface Timesheet {
 }
 
 export interface Retainer {
-  recurringAmount: number;
+  retainerAmount: number;
   frequency: string;
   nextPaymentDate?: Date;
   paymentHistory: [];
@@ -33,25 +33,33 @@ export interface JobInfo {
   price: number;
   clientName?: string;
   clientLogo?: string;
+  retainerAmount: number;
 }
 
 export interface ClientInfo {
   _id: string;
   name: string;
   email: string;
-  profile?: {
-    logo?: string;
+  profile: {
+    logo: string;
     overview?: string;
     industry?: string;
+    _id: string;
+    user: string;
   };
+}
+
+export interface HiringInfo {
+  _id: string;
+  applicationId: string;
 }
 
 export interface Contract {
   _id: string;
-  hiringId: string;
-  jobId: JobInfo | string;
+  hiringId: HiringInfo;
+  jobId: JobInfo;
   contractorId: string;
-  clientId: ClientInfo | string;
+  clientId: ClientInfo;
   startDate: Date;
   endDate?: Date;
   status: string;

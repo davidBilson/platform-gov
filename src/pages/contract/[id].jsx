@@ -1,5 +1,5 @@
 import useAuthStore from '@/store/useAuth'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import ContractClient from './_contractClient'
 import ContractContractor from './_contractContractor'
@@ -14,6 +14,9 @@ const AllContracts = () => {
   const tab = router.query.tab || 'details';
 
 
+  useEffect(() => {
+    console.log(jobId)
+  }, [jobId])
 
   return (
     <main className='w-full max-w-275 mx-auto p-5 pb-20 md:p-6'>

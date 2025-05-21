@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
-import Image from 'next/image';
 import { Contract } from '@/types/contracts';
+import ProfilePicture from '@/components/profile/profilePicture';
 
 interface CompletedContractsProps {
   contracts: Contract[];
@@ -19,6 +19,7 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
         ) : 
         contracts.map((contract) => (
           <article key={contract._id} className="mb-7.5">
+            
             <section className='flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5'>
               <div>
                 <p className='text-xs text-mediumgray font-semibold mb-5'>
@@ -28,44 +29,66 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
                   {contract.jobId?.jobTitle || 'Job Title'}
                 </h3>
               </div>
-              <div className='text-right'>
-                <p className='text-sm font-bold'>This Week</p>
-                <p className='text-xl'>25/40 hours</p>
-              </div>
             </section>
 
             <div className="flex items-center gap-5 mb-5">
               <div className="w-8.75 h-8.75 bg-cyan-200 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
                 {contract.jobId?.clientLogo || contract.clientId?.profile?.logo ? (
-                  <Image 
-                    src={contract.jobId?.clientLogo || contract.clientId?.profile?.logo} 
+                  <ProfilePicture 
+                    source={contract.jobId.clientLogo || contract.clientId?.profile?.logo} 
                     alt={contract.jobId?.clientName || contract.clientId?.name || 'Client'} 
-                    width={35}
-                    height={35} 
-                    className="rounded-full border" 
+                    dimension={35}
                   />
                 ) : (
                   <span>{contract.jobId?.clientName?.charAt(0) || contract.clientId?.name?.charAt(0) || 'C'}</span>
                 )}
               </div>
-              <Link href={''} className="font-semibold text-sm hover:underline">
+              <Link href={``} className="font-semibold text-sm hover:underline">
                 {contract.jobId?.clientName || contract.clientId?.name || 'Client'}
               </Link>
             </div>
 
             <section className='flex flex-col md:flex-row items-start md:items-center justify-between gap-5'>
               <div className="flex flex-wrap items-center gap-10 text-sm font-semibold">
-                <div className="flex items-center gap-1.25">
-                  <FaRegHourglass size={15} /> 
-                  {contract.paymentStructure} | ${contract.jobId?.price || '0'} | {contract.jobId?.employmentType || 'Full Time'}
-                </div>
-                <div className="flex items-center gap-1.25">
-                  <FaLocationDot size={15} />
-                  {contract.jobId?.location || 'Remote'}
-                </div>
+                  <div className="flex items-center gap-1.25">
+                    <FaRegHourglass size={15} /> 
+                    {contract.paymentStructure.charAt(0).toUpperCase()}{contract.paymentStructure.substring(1)}{" | "}
+                    ${contract.jobId?.price ?? contract.jobId?.retainerAmount}{" | "}
+                    {contract.jobId?.employmentType || ''}
+                  </div>
+                  <div className="flex items-center gap-1.25">
+                    <FaLocationDot size={15} />
+                    {contract.jobId?.location || 'Remote'}
+                  </div>
               </div>
-              <p className='font-bold text-sm'>Contract Detail | Manage Timesheet | Submit For Payment</p>
+
+              <div className='font-bold text-sm'>
+                <Link 
+                  className='cursor-pointer hover:text-deepskyblue hover:underline' 
+                  href={{
+                    pathname: `/contract/${contract.hiringId._id}`,
+                    query: {
+                      jobId: contract?.jobId && contract.jobId._id,
+                      proposalId: contract.hiringId?.applicationId
+                    }
+                  }}
+
+                >Contract Detail</Link>{" | "}
+                <Link 
+                  className='cursor-pointer hover:text-deepskyblue hover:underline' 
+                  href={{
+                    pathname: `/contract/${contract.hiringId._id}`,
+                    query: {
+                      jobId: contract?.jobId && contract.jobId._id,
+                      proposalId: contract.hiringId?.applicationId,
+                      tab: contract.paymentStructure
+                    }
+                  }}
+                > Manage {contract.paymentStructure.charAt(0).toUpperCase() + contract.paymentStructure.slice(1)}</Link>{" | "}
+                <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}>Submit For Payment</Link>{" | "}
+              </div>
             </section>
+
           </article>
         ))}
       </section>

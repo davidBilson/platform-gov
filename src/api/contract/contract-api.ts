@@ -43,20 +43,13 @@ export const createContract = async (contractData: {
   }
 };
 
+// Updated getSingleContract function with better error handling
 export const getSingleContract = async (contractData: {
-    jobId: string;
-    clientId: string;
-    contractorId: string;
-  }) => {
-  // Validate required parameters
+  jobId: string;
+  clientId: string;
+  contractorId: string;
+}) => {
   if (!contractData.jobId || !contractData.clientId || !contractData.contractorId) {
-    console.warn('getSingleContract called with missing parameters:', 
-      JSON.stringify({
-        hasJobId: !!contractData.jobId,
-        hasClientId: !!contractData.clientId,
-        hasContractorId: !!contractData.contractorId
-      })
-    );
     
     return {
       success: false,
@@ -72,7 +65,6 @@ export const getSingleContract = async (contractData: {
     const endpoint = process.env.NEXT_PUBLIC_GET_SINGLE_CONTRACT;
     
     if (!endpoint) {
-      console.error('GET_SINGLE_CONTRACT endpoint not defined in environment variables');
       return {
         success: false,
         data: null,
@@ -100,9 +92,17 @@ export const getSingleContract = async (contractData: {
       error: null
     };
   } catch (error) {
-    console.error('Error fetching contract:', error);
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return {
+        success: false,
+        data: null,
+        error: {
+          message: 'Contract not found',
+          status: 404
+        }
+      };
+    }
     
-    // Return a structured error response
     return {
       success: false,
       data: null,
@@ -116,6 +116,7 @@ export const getSingleContract = async (contractData: {
     };
   }
 };
+
 
 export const getContractorContracts = async (contractorId: string): Promise<{
   active: Contract[];

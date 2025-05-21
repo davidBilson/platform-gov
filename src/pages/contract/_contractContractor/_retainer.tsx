@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Job } from '@/types/jobs';
+import { Jobs } from '@/types/jobs';
 import { submitWorkSummary, getRetainerDetails } from '@/api/contract/retainer-api';
+import LoadingAnimation from '@/components/ui/loading';
 
 interface RetainerProps {
-  job: Job;
+  job: Jobs | null;
   mutualContractId: string;
 }
 
 const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   const [showDetails, setShowDetails] = useState(false);
-  const [retainerData, setRetainerData] = useState<any>(null);
+  interface RetainerData {
+    nextPaymentDate?: string;
+    paymentHistory?: {
+      periodStart: string;
+      periodEnd: string;
+      amount: number;
+      status: 'paid' | 'pending';
+    }[];
+  }
+
+  const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
   const [summaryText, setSummaryText] = useState('');
   const [loading, setLoading] = useState(true);
   const [canSubmit, setCanSubmit] = useState(false);
@@ -64,6 +75,12 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
+  if (loading) {
+    return <section className="w-full p-6 flex items-center justify-center">
+      <LoadingAnimation />
+    </section>
+  }
+
   return (
     <section className="w-full">
       <section className="relative mb-4">
@@ -76,10 +93,10 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
         
         {showDetails && (
           <article className="border border-boldblue w-fit h-fit text-sm text-boldblue p-3 rounded-sm absolute top-10 z-10 bg-white flex flex-col gap-2">
-            <p><span className="font-bold">Payment Type:</span> {job.paymentType}</p>
-            <p><span className="font-bold">Amount:</span> ${job.retainerAmount}</p>
-            <p><span className="font-bold">Frequency:</span> {job.retainerFrequency}</p>
-            <p><span className="font-bold">Duration:</span> {job.retainerDuration}</p>
+            <p><span className="font-bold">Payment Type:</span> {job?.paymentType}</p>
+            <p><span className="font-bold">Amount:</span> ${job?.retainerAmount}</p>
+            <p><span className="font-bold">Frequency:</span> {job?.retainerFrequency}</p>
+            <p><span className="font-bold">Duration:</span> {job?.retainerDuration}</p>
           </article>
         )}
       </section>
@@ -117,7 +134,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           </tr>
         </thead>
         <tbody className="text-sm">
-          {retainerData?.paymentHistory?.map((payment: any, i: number) => (
+          {retainerData?.paymentHistory?.map((payment: { periodStart: string; periodEnd: string; amount: number; status: 'paid' | 'pending'; }, i: number) => (
             <tr key={i} className="border-b border-b-lightblue py-2.5 mb-2.5">
               <td className="py-2.5 px-4">
                 {formatPeriod(payment.periodStart, payment.periodEnd)}

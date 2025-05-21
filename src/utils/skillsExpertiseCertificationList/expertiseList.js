@@ -1,10 +1,10 @@
 export const expertiseList = [
-    // Software Development  
+    "Microservices Architecture",
+    "Software Development",  
     "Frontend Development",  
     "Backend Development",  
     "Full Stack Development",  
     "API Development",  
-    "Microservices Architecture",  
     "Serverless Computing",  
     "Embedded Systems",  
     "Game Development",  

@@ -13,21 +13,53 @@ export const trackJobStatus = async (jobId: string) => {
     }
 };
 
+// export const trackHiringStatus = async (params: {
+//   jobId: string;
+//   contractorId: string;
+//   clientId: string;
+// }) => {
+//   try {
+//     if (!params.jobId || !params.contractorId || !params.clientId) {
+//       return;
+//     }
+
+//     const response = await axios.post(
+//       `${BASE_URL}${process.env.NEXT_PUBLIC_TRACK_HIRING_STATUS}`,
+//       params
+//     );
+//     if (response) {
+//       return response.data;
+//     }
+//   } catch (error) {
+//     console.error('Error tracking hiring status:', error);
+//   }
+// };
+
 export const trackHiringStatus = async (params: {
   jobId: string;
   contractorId: string;
   clientId: string;
 }) => {
   try {
+    if (!params.jobId || !params.contractorId || !params.clientId) {
+      return { found: false, reason: 'missing_params' };
+    }
+
     const response = await axios.post(
       `${BASE_URL}${process.env.NEXT_PUBLIC_TRACK_HIRING_STATUS}`,
       params
     );
-    if (response) {
-      return response.data;
-    }
+    
+    return { found: true, data: response.data };
   } catch (error) {
+
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return { found: false, reason: 'not_found' };
+    }
+    
+    // For all other errors, log and return a general error status
     console.error('Error tracking hiring status:', error);
+    return { found: false, reason: 'error', error };
   }
 };
 

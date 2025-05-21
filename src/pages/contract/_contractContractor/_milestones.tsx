@@ -105,7 +105,7 @@ const ContractorMilestones = ({
               {milestone.status === 'pending' && (
                 <button 
                   onClick={() => handleComplete(milestone._id)}
-                  className="px-3 py-1 bg-aquagreen hover:opacity-70 transition text-white rounded-lg text-sm mt-2"
+                  className="px-3 py-1 bg-aquagreen cursor-pointer hover:opacity-70 transition text-white rounded-lg text-sm mt-2"
                 >
                   Mark Complete
                 </button>

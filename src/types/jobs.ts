@@ -72,8 +72,8 @@ export interface JobFormData {
   requiredSkills: string[];
   requiredCertifications: string[];
   requiresRegisteredLobbyist: boolean;
-  employmentType: 'Full Time' | 'part-time';
-  paymentType: 'hourly' | 'fixed-price' | 'retainer';
+  employmentType: string;
+  paymentType: string;
   price: number;
   startDate: Date | null;
   retainerAmount: number;
