@@ -1,40 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  startRetainerContract, 
+  getRetainerDetails,
+  RetainerData,
+  RetainerPaymentHistory
+} from '@/api/contract/retainer-api';
+import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
-import { startRetainerContract, getRetainerDetails } from '@/api/contract/retainer-api';
 
-// Types based on the mongoose schema
-export interface Job {
+interface Job {
   _id: string;
   paymentType: string;
   retainerAmount: number;
   retainerFrequency: 'weekly' | 'bi-weekly' | 'monthly';
   retainerDuration: string;
-}
-
-export interface RetainerPaymentHistory {
-  amount: number;
-  paymentDate: Date;
-  periodStart: string;
-  periodEnd: string;
-  transactionId?: string;
-  status: 'pending' | 'completed' | 'failed' | 'paid'; // Added 'paid' to match UI implementation
-}
-
-export interface RetainerWorkSummary {
-  _id: string;
-  text: string;
-  submittedAt: Date;
-  forPeriod: Date;
-}
-
-export interface RetainerData {
-  recurringAmount?: number;
-  frequency?: 'weekly' | 'bi-weekly' | 'monthly';
-  nextPaymentDate?: Date;
-  lastPaymentDate?: Date;
-  paymentHistory?: RetainerPaymentHistory[];
-  startDate?: string;
-  workSummaries?: RetainerWorkSummary[];
 }
 
 interface RetainerProps {
@@ -45,17 +24,23 @@ interface RetainerProps {
 const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
-  const [, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [starting, setStarting] = useState<boolean>(false);
+  const { userId } = useAuthStore();
 
+  // Fetch retainer data when component mounts or contract ID changes
   useEffect(() => {
     if (mutualContractId) {
       fetchRetainerData();
+    } else {
+      setLoading(false);
     }
   }, [mutualContractId]);
 
   const fetchRetainerData = async (): Promise<void> => {
     try {
-      const data = await getRetainerDetails(mutualContractId);
+      setLoading(true);
+      const data = await getRetainerDetails(mutualContractId, userId);
       setRetainerData(data);
     } catch (error) {
       console.error('Error fetching retainer data:', error);
@@ -65,32 +50,49 @@ const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
   };
 
   const handleStartRetainer = async (): Promise<void> => {
+    
+    if (!mutualContractId) {
+      toast.warn('contractor has not signed contract');
+      return;
+    };
+    
     try {
-      if (!mutualContractId) {
-        toast.warn('No mutual contract');
-        return;
-      }
-
-      await startRetainerContract(mutualContractId);
+      setStarting(true);
+      await startRetainerContract(mutualContractId, userId);
       await fetchRetainerData();
     } catch (error) {
       console.error('Error starting retainer:', error);
+    } finally {
+      setStarting(false);
     }
   };
 
   const formatDate = (dateString: string): string => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (e) {
+      console.log(e)
+      return 'Invalid date';
+    }
   };
 
   const formatPeriod = (start: string, end: string): string => {
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
+
+  if (loading) {
+    return (
+      <section className="w-full p-6 flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full">
@@ -121,9 +123,14 @@ const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
           </p>
           <button
             onClick={handleStartRetainer}
-            className="bg-boldblue hover:bg-boldblue text-white px-4 py-2 rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+            disabled={starting}
+            className={`cursor-pointer ${
+              starting 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-boldblue hover:opacity-70'
+            } text-white px-4 py-2 rounded text-sm transition duration-300 ease-in-out`}
           >
-            Start Job
+            {starting ? 'Starting...' : 'Start Job'}
           </button>
         </div>
       )}
@@ -137,19 +144,31 @@ const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
           </tr>
         </thead>
         <tbody className="text-sm">
-          {retainerData?.paymentHistory?.map((payment, i) => (
-            <tr key={i} className="border-b border-b-lightblue py-2.5 mb-2.5">
-              <td className="py-2.5 px-4">
-                {formatPeriod(payment.periodStart, payment.periodEnd)}
-              </td>
-              <td className="py-2.5 px-4">${payment.amount}</td>
-              <td className="py-2.5 px-4">
-                <span className={`${payment.status === 'paid' || payment.status === 'completed' ? 'text-green-500' : 'text-yellow-500'}`}>
-                  {payment.status === 'paid' || payment.status === 'completed' ? '✓ Paid' : 'Pending'}
-                </span>
+          {retainerData?.paymentHistory && retainerData.paymentHistory.length > 0 ? (
+            retainerData.paymentHistory.map((payment: RetainerPaymentHistory, i: number) => (
+              <tr key={i} className="border-b border-b-lightblue py-2.5 mb-2.5">
+                <td className="py-2.5 px-4">
+                  {formatPeriod(payment.periodStart, payment.periodEnd)}
+                </td>
+                <td className="py-2.5 px-4">${payment.amount}</td>
+                <td className="py-2.5 px-4">
+                  <span className={`${
+                    payment.status === 'paid' || payment.status === 'completed'
+                      ? 'text-green-500'
+                      : 'text-yellow-500'
+                  }`}>
+                    {payment.status === 'paid' || payment.status === 'completed' ? '✓ Paid' : 'Pending'}
+                  </span>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={3} className="py-4 text-center text-gray-500">
+                No payment history available
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </section>
