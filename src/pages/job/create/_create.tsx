@@ -251,7 +251,6 @@ const CreateJob  = () => {
     }
   }, [jobCategoryInput, formData.jobCategory, showJobCategoryDropdown]);
 
-  // Form submission
   const handleSubmit = async (e: React.FormEvent ) => {
       e.preventDefault();
       setIsSubmitting(true);
@@ -261,6 +260,7 @@ const CreateJob  = () => {
 
     try {
         await axios.post(`${baseURL}${createJobEndpoint}`, formData);
+        console.log(formData);
         toast.success('Job created successfully');
         router.push('/')
       
