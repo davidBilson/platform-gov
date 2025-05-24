@@ -1,4 +1,4 @@
-// src/services/ratingService.ts
+
 import axios from 'axios';
 
 interface Rating {
@@ -24,19 +24,13 @@ interface CreateRatingParams {
   comments?: string;
 }
 
-interface UpdateRatingParams {
-  id: string;
-  rating?: number;
-  comments?: string;
-  userId: string;
-}
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
-// Create a new rating
 export const createRating = async (params: CreateRatingParams): Promise<Rating> => {
   try {
-    const response = await axios.post(`${BASE_URL}${process.env?.NEXT_PUBLIC_CREATE_NEW_RATING}`, params);
+    console.log(params);
+    const endPoint = process.env.NEXT_PUBLIC_CREATE_NEW_RATING;
+    const response = await axios.post(`${baseUrl}${endPoint}`, params);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -49,7 +43,7 @@ export const createRating = async (params: CreateRatingParams): Promise<Rating> 
 // Get all ratings for a user
 export const getUserRatings = async (userId: string, role?: 'client' | 'contractor'): Promise<Rating[]> => {
   try {
-    let url = `${BASE_URL}${process.env.NEXT_PUBLIC_GET_USER_RATINGS?.replace(':id', userId)}`;
+    let url = `${baseUrl}${process.env.NEXT_PUBLIC_GET_USER_RATINGS?.replace(':id', userId)}`;
     if (role) {
       url += `?role=${role}`;
     }
@@ -66,7 +60,7 @@ export const getUserRatings = async (userId: string, role?: 'client' | 'contract
 // Get a specific rating by ID
 export const getRatingById = async (id: string): Promise<Rating> => {
   try {
-    const response = await axios.get(`${BASE_URL}${process.env.NEXT_PUBLIC_GET_RATING_BY_ID?.replace(':id', id)}`);
+    const response = await axios.get(`${baseUrl}${process.env.NEXT_PUBLIC_GET_RATING_BY_ID?.replace(':id', id)}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -76,41 +70,10 @@ export const getRatingById = async (id: string): Promise<Rating> => {
   }
 };
 
-// Update a rating
-export const updateRating = async (params: UpdateRatingParams): Promise<Rating> => {
-  try {
-    const response = await axios.put(`${BASE_URL}${process.env.NEXT_PUBLIC_UPDATE_RATING?.replace(':id', params.id)}`, {
-      rating: params.rating,
-      comments: params.comments,
-      userId: params.userId
-    });
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Failed to update rating');
-    }
-    throw new Error('Failed to update rating');
-  }
-};
-
-// Delete a rating
-export const deleteRating = async (id: string, userId: string): Promise<void> => {
-  try {
-    await axios.delete(`${BASE_URL}${process.env.NEXT_PUBLIC_DELETE_RATING?.replace(':id', id)}`, {
-      params: { userId }
-    });
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Failed to delete rating');
-    }
-    throw new Error('Failed to delete rating');
-  }
-};
-
 // Get ratings for a contract
 export const getContractRatings = async (contractId: string): Promise<Rating[]> => {
   try {
-    const response = await axios.get(`${BASE_URL}${process.env.NEXT_PUBLIC_GET_CONTRACT_RATINGS?.replace(':id', contractId)}`);
+    const response = await axios.get(`${baseUrl}${process.env.NEXT_PUBLIC_GET_CONTRACT_RATINGS?.replace(':id', contractId)}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -123,7 +86,7 @@ export const getContractRatings = async (contractId: string): Promise<Rating[]> 
 // Get ratings for a job
 export const getJobRatings = async (jobId: string): Promise<Rating[]> => {
   try {
-    const response = await axios.get(`${BASE_URL}${process.env.NEXT_PUBLIC_GET_JOB_RATINGS?.replace(':id', jobId)}`);
+    const response = await axios.get(`${baseUrl}${process.env.NEXT_PUBLIC_GET_JOB_RATINGS?.replace(':id', jobId)}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

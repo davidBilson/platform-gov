@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { 
   getTimesheetLogs, 
   approveTimesheetEntry, 
-  disputeTimesheetEntry 
+  disputeTimesheetEntry, 
+  setContractMaxHours
 } from '@/api/contract/timesheet-api';
 import { formatDuration } from '@/utils/contract/format';
 import Image from 'next/image';
 import { LuClock } from 'react-icons/lu';
 import useAuthStore from '@/store/useAuth';
+import { endContract, getSingleContract } from '@/api/contract/contract-api';
+import { toast } from 'react-toastify';
 
 interface WorkSession {
   _id: string;
@@ -23,7 +26,7 @@ interface WorkSession {
   status: 'pending' | 'approved' | 'disputed' | 'active';
 }
 
-const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) => {
+const ClientTimesheet = ({ mutualContractId, contractStatus }: { mutualContractId?: string; contractStatus: string; }) => {
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [sessions, setSessions] = useState<WorkSession[]>([]);
@@ -32,6 +35,10 @@ const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) =>
   const [disputingSessionId, setDisputingSessionId] = useState<string | null>(null);
   const { userId } = useAuthStore();
 
+  const [maxHours, setMaxHours] = useState<number | null>(null);
+  const [showSetHoursModal, setShowSetHoursModal] = useState(false);
+  const [newMaxHours, setNewMaxHours] = useState('');
+
   const fetchSessions = async () => {
     if (!mutualContractId) return;
     
@@ -39,10 +46,34 @@ const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) =>
       setIsLoading(true);
       const response = await getTimesheetLogs(mutualContractId);
       setSessions((response.data || []).filter((s: WorkSession) => s.status !== 'active'));
+
+      const contractResponse = await getSingleContract({contractorId: userId});
+      setMaxHours(contractResponse.data.maxHours || null);
     } catch (error) {
       console.error('Error fetching sessions:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSetMaxHours = async () => {
+    if (!mutualContractId || !newMaxHours) return;
+    
+    try {
+      const hours = parseFloat(newMaxHours);
+      if (isNaN(hours)) {
+        toast.error('Please enter a valid number of hours');
+        return;
+      }
+
+      await setContractMaxHours(mutualContractId, hours);
+      setMaxHours(hours);
+      setShowSetHoursModal(false);
+      setNewMaxHours('');
+      toast.success('Maximum hours set successfully');
+    } catch (error) {
+      console.error('Error setting max hours:', error);
+      toast.error('Failed to set maximum hours');
     }
   };
 
@@ -65,7 +96,6 @@ const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) =>
     if (!mutualContractId || !disputingSessionId || !disputeReason || !userId) return;
     
     try {
-      // Pass both the reason and userId
       await disputeTimesheetEntry(mutualContractId, disputingSessionId, disputeReason, userId);
       setDisputingSessionId(null);
       setDisputeReason('');
@@ -74,6 +104,36 @@ const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) =>
       console.error('Error disputing session:', error);
     }
   };
+
+  const calculateDuration = (start: string, end?: string) => {
+    const startTime = new Date(start).getTime();
+    const endTime = end ? new Date(end).getTime() : Date.now();
+    const diffMs = endTime - startTime;
+    
+    const seconds = Math.floor(diffMs / 1000);
+    return Math.max(seconds, 0); // Remove the 24-hour cap, only ensure non-negative
+};
+
+const normalizeDuration = (session: WorkSession): number => {
+    if (session.duration) {
+        // If duration exists, use it but normalize the units
+        const duration = session.duration > 86400 ? 
+            Math.floor(session.duration / 1000) : // Convert ms to seconds
+            session.duration; // Already in seconds
+        
+        // Remove the 24-hour cap, only ensure positive
+        return Math.max(duration, 0);
+    }
+    
+    // Fallback: calculate from start/end times
+    if (session.startTime && session.endTime) {
+        return calculateDuration(session.startTime, session.endTime);
+    }
+    
+    return 0;
+};
+
+  
 
   if (!mutualContractId) {
     return (
@@ -88,44 +148,111 @@ const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) =>
 
   return (
     <div className="space-y-6">
+      {
+        contractStatus === 'completed' ? 
+        (
+            <p className="text-aquagreen">This contract has ended</p>
+        ) : 
+        (
+          <div className="flex justify-between items-center">
+            {
+              maxHours !== null ? 
+              (
+                <div className="text-sm text-gray-600">
+                  Contract hours: {maxHours} (max)
+                </div>
+              ) : 
+              (
+                <button
+                  onClick={() => setShowSetHoursModal(true)}
+                  className="px-3 py-2 bg-boldblue text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+                >
+                  Set Max Hours
+                </button>
+              )
+            }
+            <button
+              onClick={() => endContract(mutualContractId, userId)}
+              className="px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+            >
+              End Contract
+            </button>
+          </div>
+        )
+      }
+
+      {showSetHoursModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text font-semibold mb-4 text-boldblue">Set Maximum Hours</h3>
+            <input
+              type="number"
+              value={newMaxHours}
+              onChange={(e) => setNewMaxHours(e.target.value)}
+              className="w-full p-2 border border-deepskyblue placeholder:text-boldblue text-boldblue focus:outline-boldblue focus:outline rounded mb-4"
+              placeholder="0"
+              min="1"
+              step="1"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowSetHoursModal(false)}
+                className="text-s text-boldblue px-4 py-2 border border-boldblue rounded hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSetMaxHours}
+                disabled={!newMaxHours}
+                className={`text-sm transition duration-300 ease-in-out  px-4 py-2 bg-boldblue text-white rounded ${
+                  !newMaxHours ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'
+                }`}
+              >
+                Set Hours
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Weekly Summary */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h3 className="text-lg font-medium mb-4">Weekly Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
           <div className="bg-lightblue/50 p-3 rounded">
-            <p className="text-sm text-gray-500">Total Hours</p>
-            <p className="text-xl font-semibold">
-              {formatDuration(
-                sessions.reduce((total, session) => total + (session.duration || 0), 0)
-              )}
-            </p>
+              <p className="text-sm text-mediumgray">Total Hours</p>
+              <p className="text-xl font-semibold">
+                {formatDuration(
+                    sessions.reduce((total, session) => total + normalizeDuration(session), 0)
+                )}
+              </p>
           </div>
+
           <div className="bg-aquagreen/20 p-4 rounded">
-            <p className="text-sm text-gray-500">Approved Hours</p>
+            <p className="text-sm text-mediumgray">Approved Hours</p>
             <p className="text-xl font-semibold">
-              {formatDuration(
-                sessions
-                  .filter(s => s.status === 'approved')
-                  .reduce((total, session) => total + (session.duration || 0), 0)
-              )}
+                {formatDuration(
+                    sessions
+                        .filter(s => s.status === 'approved')
+                        .reduce((total, session) => total + normalizeDuration(session), 0)
+                )}
             </p>
           </div>
+
           <div className="bg-yellow-50 p-3 rounded">
-            <p className="text-sm text-gray-500">Pending Hours</p>
+            <p className="text-sm text-mediumgray">Pending Hours</p>
             <p className="text-xl font-semibold">
-              {formatDuration(
-                sessions
-                  .filter(s => s.status === 'pending')
-                  .reduce((total, session) => total + (session.duration || 0), 0)
-              )}
+                {formatDuration(
+                    sessions
+                        .filter(s => s.status === 'pending')
+                        .reduce((total, session) => total + normalizeDuration(session), 0)
+                )}
             </p>
           </div>
+
         </div>
       </div>
       
-      {/* Work Diary */}
       <div className="bg-white p-4 rounded-lg shadow">
-        
         <h3 className="text-lg font-semibold text-boldblue mb-7.5">Work Diary</h3>
         
         {isLoading ? (
@@ -145,7 +272,7 @@ const ClientTimesheet = ({ mutualContractId }: { mutualContractId?: string }) =>
                     </p>
                     <p className="text-sm text-mediumgray flex items-center">
                       <LuClock className="mr-1" size={14} />
-                      {formatDuration(session.duration)}
+                      {formatDuration(normalizeDuration(session))}
                     </p>
                   </div>
                   <span className={`text-xs px-2 py-1 font-semibold rounded ${

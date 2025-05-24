@@ -30,7 +30,7 @@ export interface HiringDocument {
     offerDetails: {
       rate: number;
       paymentType: 'hourly' | 'fixed-price' | 'retainer';
-      employmentType: 'one-time' | 'full-time' | 'part-time';
+      employmentType: 'Full-time' | 'Part-time';
       startDate: string;
       estimatedEndDate?: string;
       milestones?: Array<{

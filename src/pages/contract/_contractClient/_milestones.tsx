@@ -6,6 +6,7 @@ import AddNewMilestoneModal from './_addMilestoneModal';
 import { getMilestones, approveMilestone, markMilestonePaid } from '@/api/contract/milestone-api';
 // import DisputeModal from './_disputeModal';
 import useAuthStore from '@/store/useAuth';
+import { endContract } from '@/api/contract/contract-api';
 
 interface Milestone {
   _id: string;
@@ -17,11 +18,11 @@ interface Milestone {
   completionDate?: string;
 }
 
-const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) => {
+const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContractId?: string; contractStatus: string; }) => {
   const [showNewMilestoneModal, setShowNewMilestoneModal] = useState(false);
   
   const [milestones, setMilestones] = useState<Milestone[]>([]);
-  const { role } = useAuthStore()
+  const { role, userId } = useAuthStore()
 
   const fetchMilestones = async () => {
     try {
@@ -150,16 +151,25 @@ const ClientMilestones = ({ mutualContractId }: { mutualContractId?: string }) =
             )}
           </section>
 
-        {role === 'client' && (
+        {role === 'client'  && (
           <button 
+            disabled={contractStatus === 'completed' && true}
             onClick={() => setShowNewMilestoneModal(true)}
-            className='transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer
+            className='disabled:cursor-not-allowed disabled:opacity-70 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer
             bg-boldblue rounded-lg px-5 py-2.75 text-sm text-white font-semibold mt-5'
           >
-            Add Milestone
+            { contractStatus === 'completed' ? 'Contract Completed' : 'Add Milestone' }
           </button>
         )}
       </section>
+
+      <button
+        disabled={contractStatus === 'completed' && true}
+        onClick={() => endContract(mutualContractId, userId)}
+        className="disabled:cursor-not-allowed disabled:opacity-70 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+      >
+        End Contract
+      </button>
 
       {showNewMilestoneModal && (
         <div 

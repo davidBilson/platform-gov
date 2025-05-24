@@ -1,7 +1,9 @@
+// contractor
 import Link from 'next/link';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import { Contract } from '@/types/contracts';
 import ProfilePicture from '@/components/profile/profilePicture';
+import RateUserBtn from '@/components/rating/rateUserBtn';
 
 interface CompletedContractsProps {
   contracts: Contract[];
@@ -18,8 +20,8 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
           <p>No completed contracts found</p>
         ) : 
         contracts.map((contract) => (
-          <article key={contract._id} className="mb-7.5">
-            
+          <article key={contract._id} className="mb-7.5 flex items-start">
+            <div>
             <section className='flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5'>
               <div>
                 <p className='text-xs text-mediumgray font-semibold mb-5'>
@@ -88,7 +90,15 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
                 <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}>Submit For Payment</Link>{" | "}
               </div>
             </section>
-
+            </div>
+            
+            <RateUserBtn 
+              contract={contract}
+              onRatingSubmitted={() => {
+                console.log('Rating submitted successfully');
+              }}
+            />
+            
           </article>
         ))}
       </section>

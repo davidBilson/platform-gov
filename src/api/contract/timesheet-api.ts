@@ -1,3 +1,4 @@
+// timesheet-api.ts 
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -135,6 +136,44 @@ export const disputeTimesheetEntry = async (
   } catch (error) {
     console.error('Error disputing timesheet entry:', error);
     toast.error('Failed to dispute timesheet entry');
+    throw error;
+  }
+};
+
+
+export const logHoursManually = async (contractId: string, formData: FormData) => {
+  try {
+    const endpoint = process.env.NEXT_PUBLIC_LOG_HOURS_MANUALLY
+      ?.replace(':contractId', contractId);
+    
+    const response = await axios.post(
+      `${baseURL}${endpoint}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error logging hours manually:', error);
+    throw error;
+  }
+};
+
+export const setContractMaxHours = async (contractId: string, hours: number) => {
+  try {
+    const endpoint = process.env.NEXT_PUBLIC_SET_MAX_HOURS
+      ?.replace(':contractId', contractId);
+    
+    const response = await axios.put(
+      `${baseURL}${endpoint}`,
+      { hours }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error setting max hours:', error);
     throw error;
   }
 };

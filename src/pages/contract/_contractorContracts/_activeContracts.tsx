@@ -7,6 +7,7 @@ interface ActiveContractsProps {
 }
 
 const ActiveContracts = ({ contracts }: ActiveContractsProps) => {
+  
 
   return (
     <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>

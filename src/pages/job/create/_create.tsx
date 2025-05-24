@@ -12,7 +12,7 @@ import { certificationsList } from '@/utils/skillsExpertiseCertificationList/cer
 import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
 
 const { useState, useEffect, useRef } = ReactLib;
-const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleFill, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
+const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
 const { DatePicker } = UI;
 
 type StateWithCountry = [string, string];
@@ -34,13 +34,13 @@ const CreateJob  = () => {
         requiredSkills: [],
         requiredCertifications: [],
         requiresRegisteredLobbyist: false,
-        employmentType: '',
+        employmentType: 'Part-time',
         paymentType: '',
         price: 0,
         startDate: null,
         retainerAmount: 0,
         retainerFrequency: 'weekly',
-        retainerDuration: null,
+        retainerDuration: 0,
     });
 
     const router = useRouter()
@@ -92,7 +92,7 @@ const CreateJob  = () => {
     };
   
     const handleRetainerDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseInt(e.target.value) || 1;
+        const value = parseInt(e.target.value) || 0;
         setFormData(prev => ({
         ...prev,
         retainerDuration: value
@@ -125,7 +125,7 @@ const CreateJob  = () => {
         }));
     };
 
-    const handleEmploymentTypeChange = (type: 'Full Time' | 'part-time') => {
+    const handleEmploymentTypeChange = (type: 'Full-time' | 'Part-time') => {
         setFormData(prev => ({
         ...prev,
         employmentType: type
@@ -151,22 +151,17 @@ const CreateJob  = () => {
     const addTag = (type: 'requiredSkills' | 'requiredCertifications', value: string) => {
         if (!value.trim()) return;
         
-        // Check if the tag already exists - if it does, remove it instead of adding
         if (formData[type].includes(value.trim())) {
-        // Find index of the item
         const index = formData[type].indexOf(value.trim());
-        // Remove the item
         removeTag(type, index);
         return;
         }
         
-        // Otherwise add as before
         setFormData(prev => ({
         ...prev,
         [type]: [...prev[type], value.trim()]
         }));
         
-        // Clear the input but DO NOT close the dropdown
         if (type === 'requiredSkills') {
         setRequiredSkillInput("");
         } else if (type === 'requiredCertifications') {
@@ -266,9 +261,8 @@ const CreateJob  = () => {
 
     try {
         await axios.post(`${baseURL}${createJobEndpoint}`, formData);
-
-      toast.success('Job created successfully');
-      router.push('/')
+        toast.success('Job created successfully');
+        router.push('/')
       
     } catch (error) {
       console.error('Error creating job:', error);
@@ -302,7 +296,7 @@ const CreateJob  = () => {
                       setTimeout(() => setShowJobCategoryDropdown(false), 200);
                     }
                   }}
-
+                  required
                   placeholder="Job Category" 
                   className="outline-none placeholder:font-semibold w-[80%] cursor-pointer" 
                 />
@@ -339,6 +333,7 @@ const CreateJob  = () => {
           {/* Job Title */}
           <div className="mb-7.5">
             <textarea
+              required
               name="jobTitle"
               value={formData.jobTitle}
               onChange={handleInputChange}
@@ -351,6 +346,7 @@ const CreateJob  = () => {
           {/* Job Description */}
           <div className='mb-8 pb-7.5 border-b border-b-deepskyblue'>
             <textarea
+              required
               name="description"
               value={formData.description}
               onChange={handleInputChange}
@@ -510,29 +506,32 @@ const CreateJob  = () => {
             </span>
           </div>
 
-          {/* Fulltime or parttime */} {/* Hourly | Fixed Price | Retainer */}
           <div>
-            {/* Employment Type Toggle */}
-            <div className='flex items-center text-sm gap-2.25 mb-7.5'>
-              Full-time
-              <span className='w-full flex items-center border border-deepskyblue max-w-14.5 rounded-full'>
-                {formData.employmentType === 'Full Time' ? (
-                  <RiCheckboxBlankCircleFill 
-                    color='#0B5F94' 
-                    size={25} 
-                    className="cursor-pointer"
-                    onClick={() => handleEmploymentTypeChange('part-time')}
-                  />
-                ) : (
-                  <RiCheckboxBlankCircleFill 
-                    color='#0B5F94' 
-                    size={25} 
-                    className="cursor-pointer ml-auto"
-                    onClick={() => handleEmploymentTypeChange('Full Time')}
-                  />
-                )}
+            <div className='flex items-center text-sm gap-4 mb-7.5'>
+              <span className={formData.employmentType === 'Full-time' ? 'text-boldblue font-medium' : 'text-gray-500'}>
+                Full-time
               </span>
-              Part-time 
+              
+              {/* Toggle Switch */}
+              <div 
+                className="relative w-14 h-7.5  border border-boldblue rounded-full cursor-pointer transition-colors duration-200 ease-in-out"
+                style={{
+                  backgroundColor: formData.employmentType === 'Part-time' ? '#ffffff' : '#ffffff'
+                }}
+                onClick={() => handleEmploymentTypeChange(
+                  formData.employmentType === 'Full-time' ? 'Part-time' : 'Full-time'
+                )}
+              >
+                <div 
+                  className={`absolute top-0.5 w-6 h-6 bg-boldblue rounded-full shadow-md transition-transform duration-200 ease-in-out ${
+                    formData.employmentType === 'Part-time' ? 'translate-x-7' : 'translate-x-0.5'
+                  }`}
+                />
+              </div>
+              
+              <span className={formData.employmentType === 'Part-time' ? 'text-boldblue font-medium' : 'text-gray-500'}>
+                Part-time
+              </span>
             </div>
             {/* Payment Type Selection */}
             <div className='flex items-center gap-15 mb-7.5 text-sm text-darkgray'>
@@ -752,6 +751,7 @@ const CreateJob  = () => {
                 <div className="relative w-full max-w-75">
                   <div className="w-full max-w-75 flex justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
                     <input 
+                      required
                       type="text"
                       value={locationInput}
                       onChange={(e) => setLocationInput(e.target.value)}

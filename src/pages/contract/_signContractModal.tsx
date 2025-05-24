@@ -82,46 +82,47 @@ const SignContractModal = ({ hiringOffer, contractSigned, onClose, updateContrac
             <section className='w-full h-6/10 overflow-y-auto'>
               <div className="flex flex-col gap-4">
                 <div className="p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-700">Job Details</h3>
+                  <h3 className="font-bold text-mediumgray">Job Details</h3>
                   <p className="mt-2 text-sm">{hiringOffer?.jobId?.description ?? ""}</p>
                 </div>
                 
                 <div className="p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-700">Offer Terms</h3>
+                  <h3 className="font-bold text-mediumgray">Offer Terms</h3>
                   <div className="mt-2 space-y-2">
-                    <p><span className="text-sm">Rate:</span> ${hiringOffer?.offerDetails?.rate ?? ""} {" "} 
-                    {hiringOffer?.offerDetails?.paymentType == 'hourly' && '(Hourly)'}
-                    {hiringOffer?.offerDetails?.paymentType == 'fixed-price' && '(Fixed Price)'}
-                    {hiringOffer?.offerDetails?.paymentType == 'retainer' && '(Retainer)'}
+                    <p className="text-sm">
+                      <span className="font-semibold">Pay:</span>{" "}
+                      ${hiringOffer?.offerDetails?.rate ?? ""} {" "} 
+                    {hiringOffer?.offerDetails?.paymentType == 'hourly' && 'per hour'}
+                    {hiringOffer?.offerDetails?.paymentType == 'fixed-price' && 'total (one-time payment)'}
+                    {hiringOffer?.offerDetails?.paymentType == 'retainer' && 'retainer'}
                   </p>
-                    <p>
-                      <span className="text-sm">
-                        Employment Type:{' '}
+                    <p className="text-sm">
+                      <span className="font-semibold">
+                        Type:{' '}
                       </span> 
-                        {hiringOffer?.offerDetails?.employmentType == 'full-time' && 'Full Time'}
-                        {hiringOffer?.offerDetails?.employmentType == 'one-time' && 'One Time'}
-                        {hiringOffer?.offerDetails?.employmentType == 'part-time' && 'Part Time'}
+                        {hiringOffer?.offerDetails?.employmentType == 'Full-time' && 'Full-time Role'}
+                        {hiringOffer?.offerDetails?.employmentType == 'Part-time' && 'Part-time Role'}
                     </p>
-                    <p><span className="text-sm">Start Date:</span> {formatDate(hiringOffer?.offerDetails?.startDate) ?? ""}</p>
+                    <p className="text-sm"><span className="font-semibold">Start Date:</span> {formatDate(hiringOffer?.offerDetails?.startDate) ?? ""}</p>
                   </div>
                 </div>
               </div>
 
               {hiringOffer?.clientNotes && (
                 <div className="p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-700">Client Notes</h3>
+                  <h3 className="font-bold text-mediumgray">Client Notes</h3>
                   <p className="mt-2 text-sm">{hiringOffer?.clientNotes ?? ""}</p>
                 </div>
               )}
 
               <div className="p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-700">Your Application</h3>
+                <h3 className="font-bold text-mediumgray">Your Application</h3>
                 <p className="mt-2 text-sm">{hiringOffer?.applicationId?.coverLetter ?? ""}</p>
               </div>
 
               {hiringOffer.documents && hiringOffer.documents.length > 0 && (
                 <div className="p-4 rounded-lg">
-                  <h3 className="font-semibold text-gray-700 mb-2">Attached Documents</h3>
+                  <h3 className="font-bold text-mediumgray mb-2">Attached Documents</h3>
                   {hiringOffer.documents.map((doc, index) => (
                     <button 
                       key={doc._id || index}

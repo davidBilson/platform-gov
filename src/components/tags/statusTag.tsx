@@ -7,13 +7,18 @@ interface StatusProps {
 const StatusTag = ({ status }: StatusProps) => {
   
   const getStatusColor = () => {
+    // ['active', 'paused', 'completed', 'cancelled', 'disputed']
     switch (status.toLowerCase()) {
       case 'active':
         return 'bg-boldblue';
-      case 'pending':
-        return 'bg-aquagreen';
-      case 'inactive':
+      case 'paused':
         return 'bg-mediumgray';
+      case 'cancelled':
+        return 'bg-red-700';
+      case 'disputed':
+        return 'bg-red-700';
+      case 'completed':
+        return 'bg-aquagreen';
       default:
         return 'bg-boldblue';
     }

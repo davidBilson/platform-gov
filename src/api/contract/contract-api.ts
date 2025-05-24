@@ -1,3 +1,4 @@
+// contract-api.ts 
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Contract } from '@/types/contracts';
@@ -45,8 +46,8 @@ export const createContract = async (contractData: {
 
 // Updated getSingleContract function with better error handling
 export const getSingleContract = async (contractData: {
-  jobId: string;
-  clientId: string;
+  jobId?: string;
+  clientId?: string;
   contractorId: string;
 }) => {
   if (!contractData.jobId || !contractData.clientId || !contractData.contractorId) {
@@ -118,13 +119,13 @@ export const getSingleContract = async (contractData: {
 };
 
 
-export const getContractorContracts = async (contractorId: string): Promise<{
+export const getContracts = async (contractorId: string): Promise<{
   active: Contract[];
   inactive: Contract[];
   completed: Contract[];
 } | null> => {
   try {
-    const endpoint = process.env.NEXT_PUBLIC_GET_CONTRACTOR_CONTRACTS?.replace(':id', contractorId);
+    const endpoint = process.env.NEXT_PUBLIC_GET_CONTRACTS?.replace(':id', contractorId);
     const response = await axios.get(`${baseURL}${endpoint}`);
     return response.data.data;
   } catch (error) {
@@ -134,5 +135,23 @@ export const getContractorContracts = async (contractorId: string): Promise<{
       inactive: [],
       completed: []
     };
+  }
+};
+
+export const endContract = async (contractId: string, userId: string) => {
+  try {
+    const endpoint = process.env.NEXT_PUBLIC_END_CONTRACT
+      ?.replace(':contractId', contractId);
+    
+    const response = await axios.put(`${baseURL}${endpoint}`, { userId });
+    
+    console.log(response);
+    
+    toast.info(response.data.message)
+    return response.data;
+  } catch (error) {
+    toast.error(error?.message)
+    console.error('Error ending contract:', error);
+    throw error;
   }
 };

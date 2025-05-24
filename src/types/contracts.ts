@@ -48,6 +48,11 @@ export interface ClientInfo {
     user: string;
   };
 }
+export interface ContractorInfo {
+  _id: string;
+  name: string;
+  email: string;
+}
 
 export interface HiringInfo {
   _id: string;
@@ -58,7 +63,7 @@ export interface Contract {
   _id: string;
   hiringId: HiringInfo;
   jobId: JobInfo;
-  contractorId: string;
+  contractorId: ContractorInfo;
   clientId: ClientInfo;
   startDate: Date;
   endDate?: Date;

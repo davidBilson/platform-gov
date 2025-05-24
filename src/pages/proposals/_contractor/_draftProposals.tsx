@@ -39,7 +39,7 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
         description: application?.jobId?.description || 'No description provided',
         location: application?.jobId?.location || 'Remote',
         clientName: application?.jobId?.clientName || 'Client',
-        clientLogo: application?.jobId?.clientLogo || 'https://res.cloudinary.com/dhktac9xz/image/upload/v1745753771/profiles/1745753767314-858168824_uft9ll.png',
+        clientLogo: application?.jobId?.clientLogo || '',
         clientId: application?.jobId?.clientId || application?.jobId?.userId
       };
     }
@@ -50,22 +50,9 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
       description: 'No description provided',
       location: 'Remote',
       clientName: 'Client',
-      clientLogo: 'https://res.cloudinary.com/dhktac9xz/image/upload/v1745753771/profiles/1745753767314-858168824_uft9ll.png',
+      clientLogo: '',
     };
   };
-
-  // Convert availability from enum values to display text
-  // const getAvailabilityDisplay = (availability?: string): string => {
-  //   const availabilityMap: Record<string, string> = {
-  //     'immediate': 'Immediately',
-  //     'one_week': 'Within one week',
-  //     'two_weeks': 'Within two weeks',
-  //     'one_month': 'Within one month',
-  //     'custom': 'Custom'
-  //   };
-    
-  //   return availability ? availabilityMap[availability] || 'Full Time' : 'Full Time';
-  // };
 
   return (
     <section className='w-full max-w-275 m-auto border-b border-b-skyblue pb-10 mb-7.5'>
@@ -93,7 +80,7 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
 
               <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
                 <div className="flex items-center gap-1.25">
-                  {`Proposed Rate: $${application?.proposedRate || 'N/A'}`} | Availability: {application?.availability || "Full Time"}
+                  {`Proposed Rate: $${application?.proposedRate || 'N/A'}`} | Availability: {application?.availability || "Full-time"}
                 </div>
                 
                 <div className="flex items-center gap-1.25">

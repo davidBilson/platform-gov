@@ -7,6 +7,7 @@ import {
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
+import { endContract } from '@/api/contract/contract-api';
 
 interface Job {
   _id: string;
@@ -171,6 +172,12 @@ const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
           )}
         </tbody>
       </table>
+      <button
+            onClick={() => endContract(mutualContractId, userId)}
+            className="my-7.5 block px-3 py-1 bg-red-500/30 hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-red-600 rounded text-sm"
+          >
+            End Contract
+          </button>
     </section>
   );
 };

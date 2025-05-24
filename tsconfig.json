@@ -18,6 +18,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/profile/_business/open-jobs.js", "src/pages/_business-profile/business-profile.js", "src/utils/profiles/profile.contractor.utils.js", "src/pages/profile/_business/create.js", "src/pages/profile/_business/index.js", "src/pages/job/create.tsx", "src/store/useFeed.js", "src/utils/getLocations/getAllCountriesAndStates.js", "src/pages/job/[id]/proposals/_proposalsList.tsx", "src/components/chat/_messages.jsx", "src/pages/contract/_contractClient/index.jsx", "src/pages/contract/_clientContracts/index.jsx", "src/api/contract/milestone-api.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/profile/_business/open-jobs.js", "src/pages/_business-profile/business-profile.js", "src/utils/profiles/profile.contractor.utils.js", "src/pages/profile/_business/create.js", "src/pages/profile/_business/index.js", "src/pages/job/create.tsx", "src/store/useFeed.js", "src/utils/getLocations/getAllCountriesAndStates.js", "src/pages/job/[id]/proposals/_proposalsList.tsx", "src/components/chat/_messages.jsx", "src/pages/contract/_contractClient/index.jsx", "src/pages/contract/_clientContracts/index.tsx", "src/api/contract/milestone-api.js"],
   "exclude": ["node_modules"]
 }

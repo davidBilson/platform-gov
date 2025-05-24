@@ -22,11 +22,12 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState<Jobs | null>(null);
     const [mutualContractId, setMutualContractId] = useState('');
+    const [contract, setContract] = useState(null);
+    const [contractStatus, setContractStatus] = useState('');
     const [middleTab, setMiddleTab] = useState('milestone');
     
     const { userId, name } = useAuthStore();
 
-    // Use useMemo to update tabOptions whenever middleTab changes
     const tabOptions = useMemo(() => {
         return ['details', middleTab, 'messages'];
     }, [middleTab]);
@@ -81,7 +82,8 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             });
             if (response.success && response.data) {
                 setMutualContractId(response.data._id);
-                
+                setContract(response.data);
+                setContractStatus(response?.data?.status);
                 if (response.data.paymentStructure) {
                     setMiddleTab(response.data.paymentStructure);
                 }
@@ -137,15 +139,17 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                             userId: job.userId ? { _id: job.userId._id } : undefined
                         }} 
                         jobId={jobId} 
-                        applicationId={proposalId} 
+                        applicationId={proposalId}
+                        contract={contract}
                     />
                 );
             case 'timesheet':
-                return <ContractorTimesheet mutualContractId={mutualContractId} />;
+                return <ContractorTimesheet contractStatus={contractStatus} mutualContractId={mutualContractId} />;
             case 'milestone':
                 return <Milestones mutualContractId={mutualContractId} />;
             case 'retainer':
                 return <ContractorRetainer job={job} mutualContractId={mutualContractId} />;
+            
             case 'messages':
                 return (
                     <Messages

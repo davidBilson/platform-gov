@@ -19,7 +19,7 @@ const AllContracts = () => {
   }, [jobId])
 
   return (
-    <main className='w-full max-w-275 mx-auto p-5 pb-20 md:p-6'>
+    <main className='container mx-auto p-5 pb-20 md:p-6'>
       {role === "client" && <ContractClient hiringId={hiringId} jobId={jobId} proposalId={proposalId} tab={tab} />}
       
       {role === "contractor" && <ContractContractor hiringId={hiringId} jobId={jobId} proposalId={proposalId} tab={tab} />}

@@ -30,7 +30,6 @@ const HireContractor: NextPage = () => {
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
     
-    const [selectedEmploymentType, setSelectedEmploymentType] = useState<string>('');
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -48,9 +47,8 @@ const HireContractor: NextPage = () => {
     });
     
     const employmentOptions = [
-        'One Time',
-        'Full Time',
-        'Part Time'
+        'Full-time',
+        'Part-time'
     ];
 
     const employmentDropdownRef = useRef<HTMLDivElement>(null);
@@ -65,10 +63,11 @@ const HireContractor: NextPage = () => {
                     const jobData = await fetchJob(jobId as string);
 
                     setJob(jobData);
-
+                    console.log(jobData)
                     if (jobData) {
                         setFormData({
                             ...formData,
+                            employmentType: jobData.employmentType,
                             rate: jobData.paymentType === 'retainer' ? JSON.stringify(jobData.retainerAmount) : JSON.stringify(jobData.price)
 
                         });
@@ -122,7 +121,7 @@ const HireContractor: NextPage = () => {
             return;
         }
         if (acceptedLegalAgreement && !showLegalAgreement) {
-            handleSubmit()
+            handleSubmit();
         }
     }, [acceptedLegalAgreement, showLegalAgreement])
 
@@ -168,29 +167,10 @@ const HireContractor: NextPage = () => {
         }
       };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
+      const handleEmploymentTypeSelect = (option: string) => {
         setFormData({
             ...formData,
-            [name]: value,
-        });
-    };
-
-    const handleEmploymentTypeSelect = (option: string) => {
-        let employmentType: 'one-time' | 'full-time' | 'part-time';
-        
-        if (option === 'One Time') {
-            employmentType = 'one-time';
-        } else if (option.startsWith('Full Time')) {
-            employmentType = 'full-time';
-        } else {
-            employmentType = 'part-time';
-        }
-
-        setSelectedEmploymentType(option);
-        setFormData({
-            ...formData,
-            employmentType
+            employmentType: option // Just use the option directly
         });
         setShowEmploymentDropdown(false);
     };
@@ -202,7 +182,8 @@ const HireContractor: NextPage = () => {
         });
     }, [job])
 
-    if (!router.isReady) {
+
+    if (loading) {
         return <div className='h-screen w-full flex items-center justify-center'>
             <LoadingAnimation />
         </div>;
@@ -221,23 +202,45 @@ const HireContractor: NextPage = () => {
         <main className='w-full max-w-300 mx-auto p-6 pb-80'>
             <section>
                 <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>
+                {/* skeleten loader */}
+                {!job ? (
                 <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
-                    <article className='flex flex-col gap-5 '>
-                        <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
-                        <div className="flex flex-wrap items-center gap-10 text-sm font-semibold">
-                            <div className="flex items-center gap-1.25">
-                                <FaRegHourglass size={15} />
-                                {getPaymentInfo()} | {job?.employmentType}
-                            </div>
-                            
-                            <div className="flex items-center gap-1.25">
-                                <FaLocationDot size={15} />
-                                {job?.location}
-                            </div>
-                            </div>
-                        <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
+                    <article className='flex flex-col gap-5'>
+                    <div className='h-6 bg-lightblue/70 rounded-md w-3/4 animate-pulse'></div>
+                    <div className="flex flex-wrap items-center gap-10">
+                        <div className="flex items-center gap-1.25">
+                        <div className='w-4 h-4 bg-lightblue/60 rounded animate-pulse'></div>
+                        <div className='h-4 bg-lightblue/40 rounded w-32 animate-pulse'></div>
+                        </div>
+                        
+                        <div className="flex items-center gap-1.25">
+                        <div className='w-4 h-4 bg-lightblue/30 rounded animate-pulse'></div>
+                        <div className='h-4 bg-lightblue/20 rounded w-24 animate-pulse'></div>
+                        </div>
+                    </div>
+                    <div className='h-6 bg-lightblue/10 rounded-full w-24 animate-pulse'></div>
                     </article>
                 </section>
+                ) : (
+                // Actual job content
+                <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
+                    <article className='flex flex-col gap-5'>
+                    <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
+                    <div className="flex flex-wrap items-center gap-10 text-sm font-semibold">
+                        <div className="flex items-center gap-1.25">
+                        <FaRegHourglass size={15} />
+                        {getPaymentInfo()} | {job?.employmentType}
+                        </div>
+                        
+                        <div className="flex items-center gap-1.25">
+                        <FaLocationDot size={15} />
+                        {job?.location}
+                        </div>
+                    </div>
+                    <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
+                    </article>
+                </section>
+                )}
 
                 <h3 className='font-semibold text-sm mb-5'>Contractor</h3>
 
@@ -250,7 +253,7 @@ const HireContractor: NextPage = () => {
                     <p className='font-semibold text-sm mb-5'>Terms</p>
 
                     <div className='flex flex-col lg:grid lg:grid-rows-1  lg:grid-cols-3 gap-4'>
-                        {/* Employment Type Dropdown */}
+                        
                         <div className="relative w-full max-w-75 lg:max-w-full lg:col-span-1 ">
                             <div 
                                 className="flex items-center justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue cursor-pointer"
@@ -262,7 +265,7 @@ const HireContractor: NextPage = () => {
                                     placeholder="Select employment type"
                                     className="outline-none w-full placeholder:font-semibold bg-transparent cursor-pointer"
                                     readOnly
-                                    value={selectedEmploymentType}
+                                    value={formData.employmentType}
                                 />
                                 <IoMdArrowDropdown size={20} className="text-boldblue" />
                             </div>
@@ -285,20 +288,18 @@ const HireContractor: NextPage = () => {
                             )}
                         </div>
 
-                        {/* Rate Input */}
                         <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 lg:max-w-full lg:col-span-1  px-5 py-4 text-sm text-boldblue">
                             <input 
                                 type="text" 
                                 name="rate"
+                                disabled
                                 value={formData.rate}
-                                onChange={handleInputChange}
                                 className="outline-none placeholder:font-semibold w-[80%]" 
                                 placeholder="Rate" 
                             />
                             <span>$</span>
                         </div>
                         
-                        {/* Date Picker */}
                         <div className="w-full max-w-75 lg:max-w-full lg:col-span-1  flex items-center justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
                             <DatePicker
                                 selected={formData.startDate}

@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   startWorkSession, 
   stopWorkSession, 
-  getTimesheetLogs 
+  getTimesheetLogs, 
+  logHoursManually
 } from '@/api/contract/timesheet-api';
 import useAuthStore from '@/store/useAuth';
 import { formatDuration } from '@/utils/contract/format';
 import Image from 'next/image';
 import { LuClock, LuPlay } from 'react-icons/lu';
 import { FaStopCircle } from "react-icons/fa";
+import { toast } from 'react-toastify';
 
 interface WorkSession {
   _id: string;
@@ -24,7 +26,7 @@ interface WorkSession {
   status: 'active' | 'pending' | 'approved' | 'disputed';
 }
 
-const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }) => {
+const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContractId?: string; contractStatus: string; }) => {
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [sessions, setSessions] = useState<WorkSession[]>([]);
@@ -36,23 +38,39 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { userId } = useAuthStore();
 
+  const [showManualLogModal, setShowManualLogModal] = useState(false);
+  const [manualHours, setManualHours] = useState('');
+  const [manualDescription, setManualDescription] = useState('');
+  const [manualScreenshots, setManualScreenshots] = useState<File[]>([]);
+  const [maxHours, setMaxHours] = useState<number | null>(null);
+  const [loggedHours, setLoggedHours] = useState(0);
+
   const fetchSessions = async () => {
     if (!mutualContractId) return;
     
     try {
+
       setIsLoading(true);
       const response = await getTimesheetLogs(mutualContractId);
       setSessions(response.data || []);
       
-      // Check for active session
+      const totalHours = (response.data || []).reduce((total, session) => {
+        const normalizedDuration = normalizeDuration(session);
+        return total + normalizedDuration;
+      }, 0) / 3600;
+      
+      setLoggedHours(totalHours);
+      
       const active = response.data.find((s: WorkSession) => s.status === 'active');
+      
       if (active) {
+        setMaxHours(response.data.maxHours)
         setActiveSession(active);
-        // Initialize elapsed time for active session
         const initialDuration = calculateDuration(active.startTime);
         setElapsedTime(initialDuration);
         startLiveTimer(active.startTime);
       }
+
     } catch (error) {
       console.error('Error fetching sessions:', error);
     } finally {
@@ -60,10 +78,45 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
     }
   };
 
+  const handleLogHoursManually = async () => {
+    if (!mutualContractId || !userId || !manualHours) return;
+    
+    try {
+      const hours = parseFloat(manualHours);
+      if (isNaN(hours)) {
+        toast.error('Please enter a valid number of hours');
+        return;
+      }
+
+      const seconds = Math.round(hours * 3600);
+      
+      const formData = new FormData();
+      formData.append('hours', seconds.toString());
+      formData.append('description', manualDescription);
+      formData.append('userId', userId);
+      
+      manualScreenshots.forEach((file, index) => {
+        formData.append('screenshots', file, `manual-screenshot-${index}-${Date.now()}-${file.name}`);
+      });
+
+      await logHoursManually(mutualContractId, formData);
+      
+      setShowManualLogModal(false);
+      setManualHours('');
+      setManualDescription('');
+      setManualScreenshots([]);
+      fetchSessions();
+      toast.success('Hours logged manually!');
+
+    } catch (error) {
+      console.error('Error logging hours manually:', error);
+      toast.error('Failed to log hours manually');
+    }
+  };
+
   useEffect(() => {
     fetchSessions();
     
-    // Cleanup timer on unmount
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
@@ -71,16 +124,13 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
     };
   }, [mutualContractId]);
 
-  // Start live timer that updates every second
   const startLiveTimer = (startTimeStr: string) => {
     const startTime = new Date(startTimeStr).getTime();
     
-    // Clear any existing interval
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
     
-    // Set up new interval
     timerIntervalRef.current = setInterval(() => {
       const currentTime = Date.now();
       const duration = Math.floor((currentTime - startTime) / 1000);
@@ -94,8 +144,8 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
     try {
       const response = await startWorkSession(mutualContractId, userId);
       setActiveSession(response.data);
-      setElapsedTime(0); // Reset elapsed time
-      startLiveTimer(response.data.startTime); // Start live timer
+      setElapsedTime(0);
+      startLiveTimer(response.data.startTime);
       fetchSessions();
     } catch (error) {
       console.error('Error starting session:', error);
@@ -110,9 +160,7 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
       formData.append('notes', notes);
       formData.append('userId', userId);
       
-      // FIX: Only append files once with proper naming
       screenshotFiles.forEach((file, index) => {
-        // Ensure consistent naming with unique identifiers
         formData.append('screenshots', file, `screenshot-${index}-${Date.now()}-${file.name}`);
       });
 
@@ -127,7 +175,6 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
       setNotes('');
       setScreenshotFiles([]);
       
-      // Stop the timer
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
@@ -142,7 +189,7 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
   const handleAddScreenshot = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      // Add validation for file types and sizes here
+
       const validFiles = files.filter(file => {
         const isValidType = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'].includes(file.type);
         const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
@@ -164,8 +211,28 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
   const calculateDuration = (start: string, end?: string) => {
     const startTime = new Date(start).getTime();
     const endTime = end ? new Date(end).getTime() : Date.now();
-    return Math.floor((endTime - startTime) / 1000);
-  };
+    const diffMs = endTime - startTime;
+    
+    const seconds = Math.floor(diffMs / 1000);
+    return Math.max(seconds, 0);
+};
+
+const normalizeDuration = (session: WorkSession): number => {
+    if (session.duration) {
+
+      const duration = session.duration > 86400 
+        ? Math.floor(session.duration / 1000) 
+        : session.duration;
+        
+        return Math.max(duration, 0);
+    }
+    
+    if (session.startTime && session.endTime) {
+        return calculateDuration(session.startTime, session.endTime);
+    }
+    
+    return 0;
+};
 
   if (!mutualContractId) {
     return (
@@ -180,6 +247,122 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
 
   return (
     <div className="space-y-6">
+      <div className="bg-white p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Hours Summary</h3>
+          {maxHours !== null && (
+            <div className="text-sm text-gray-600">
+              {loggedHours.toFixed(1)} / {maxHours} hours logged
+            </div>
+          )}
+        </div>
+        
+        {contractStatus === 'completed' ? (
+          <div className="bg-yellow-50 p-3 rounded text-center">
+            <p className="text-yellow-800">This contract has been completed</p>
+          </div>
+        ) : maxHours !== null && loggedHours >= maxHours ? (
+          <div className="bg-red-50 p-3 rounded text-center">
+            <p className="text-red-800">Maximum hours reached</p>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowManualLogModal(true)}
+              className="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition"
+            >
+              Log Hours Manually
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Manual Log Modal */}
+      {showManualLogModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Log Hours Manually</h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Hours</label>
+              <input
+                type="number"
+                step="0.25"
+                min="0.25"
+                value={manualHours}
+                onChange={(e) => setManualHours(e.target.value)}
+                className="w-full p-2 border rounded"
+                placeholder="Enter hours worked"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Description</label>
+              <textarea
+                value={manualDescription}
+                onChange={(e) => setManualDescription(e.target.value)}
+                className="w-full p-2 border rounded"
+                rows={3}
+                placeholder="What did you work on?"
+              />
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Screenshots (Optional)</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {manualScreenshots.map((file, index) => (
+                  <div key={index} className="relative w-16 h-16 rounded group">
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt={`Screenshot ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    <button
+                      onClick={() => setManualScreenshots(prev => prev.filter((_, i) => i !== index))}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-70 transition"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <label className="w-full border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer p-2">
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  accept="image/*" 
+                  multiple
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setManualScreenshots(prev => [...prev, ...Array.from(e.target.files!)]);
+                    }
+                  }}
+                />
+                <span className="text-sm">Add Screenshots</span>
+              </label>
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowManualLogModal(false)}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleLogHoursManually}
+                disabled={!manualHours}
+                className={`px-4 py-2 bg-blue-600 text-white rounded ${
+                  !manualHours ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                Log Hours
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="bg-white p-4 rounded-lg shadow">
         {activeSession ? (
           <div className="space-y-4">
@@ -277,8 +460,8 @@ const ContractorTimesheet = ({ mutualContractId }: { mutualContractId?: string }
                     </p>
                     {session.endTime && (
                       <p className="text-sm text-mediumgray flex items-center">
-                        <LuClock className="mr-1" size={14} />
-                        {formatDuration(session.duration || calculateDuration(session.startTime, session.endTime))}
+                          <LuClock className="mr-1" size={14} />
+                          {formatDuration(normalizeDuration(session))}
                       </p>
                     )}
                   </div>

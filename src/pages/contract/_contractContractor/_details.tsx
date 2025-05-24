@@ -5,14 +5,13 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 
 import ProfilePicture from '@/components/profile/profilePicture';
-import RateUserModal from '@/components/rating/rateUserModal';
 import SignContractModal from '../_signContractModal';
 import LoadingAnimation from '@/components/ui/loading';
 
 import useAuthStore from '@/store/useAuth';
 import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api/hiring';
 import { createContract } from '@/api/contract/contract-api';
-// import { useRouter } from 'next/router';
+import RateUserBtn from '@/components/rating/rateUserBtn';
 
 interface Job {
   createdAt?: string;
@@ -52,14 +51,13 @@ interface DetailsProps {
   job: Job;
   jobId: string;
   applicationId: string;
+  contractStatus? :string;
 }
 
-const Details = ({ job, jobId, applicationId }: DetailsProps) => {
+const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
 
-  // const router = useRouter()
   const [showSignContractModal, setShowSignContractModal] = useState(false);
   const [contractSigned, setContractSigned] = useState(false);
-  const [showRateUserModal, setShowRateUserModal] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +65,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const [hiringOffer, setHiringOffer] = useState<HiringDocument | null>(null);
   const [hiringId, setHiringId] = useState<string>('');
   const [clientId, setClientId] = useState<string>('');
-  // Add a new state variable for job acceptance status
   const [jobAcceptanceStatus, setJobAcceptanceStatus] = useState<string>('');
 
   useEffect(() => {
@@ -79,7 +76,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   const { userId, role } = useAuthStore();
 
   const handleClose = () => {
-    setShowRateUserModal(false);
     setShowSignContractModal(false);
   };
 
@@ -98,7 +94,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   useEffect(() => {
     let isMounted = true;
     
-    // Only fetch if all required data is available
     if (!userId || role !== 'contractor' || !jobId || !applicationId) {
       setLoading(false);
       return;
@@ -111,16 +106,13 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         
         const response = await getHiringOffer(jobId, applicationId);
         
-        // Check if component is still mounted before updating state
         if (!isMounted) return;
         
         if (response.success && response.data) {
           setHiringOffer(response.data);
           setHiringId(response.data._id);
-          // Set the initial job acceptance status
           setJobAcceptanceStatus(response.data.status);
         } else {
-          // Handle case when data is not found but API didn't throw an error
           if (response.error?.status === 404) {
             setError("Hiring offer not found. It may have been removed or is not available.");
           } else {
@@ -141,13 +133,11 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
     fetchHiringOffer();
 
-    // Cleanup function to prevent state updates if component unmounts
     return () => {
       isMounted = false;
     };
   }, [jobId, applicationId, userId, role]);
 
-  // Check signature status when hiringId is available
   useEffect(() => {
     let isMounted = true;
     
@@ -164,7 +154,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         }
       } catch (err) {
         console.error('Error checking contractor signature:', err);
-        // We don't set an error state here as this is not a critical functionality
       }
     };
 
@@ -176,7 +165,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
   }, [hiringId, userId]);
 
   const acceptJob = async () => {
-    // Validate required data before proceeding
     if (!hiringId || !userId) {
       toast.error('Missing required information to accept job');
       return;
@@ -194,10 +182,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         contractorId: userId 
       });
 
-      console.log('hiringId: ',hiringId)
-      console.log('clientId: ', clientId)
-      console.log('userId: ', userId)
-      
       if (job?.userId?._id) {
         await createContract({
           hiringId: hiringId, 
@@ -206,20 +190,18 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
         });
       }
       
-      // Update the job acceptance status state variable
       setJobAcceptanceStatus("accepted");
       
-      // Also update the hiringOffer object to keep state consistent
       setHiringOffer(prev => prev ? {...prev, status: "accepted"} : prev);
       
       toast.success('Job accepted successfully');
+
     } catch (error) {
       console.error("Error accepting job:", error);
       toast.error('Failed to accept job. Please try again later.');
     }
   };
 
-  // Calculate button disabled state correctly using the state variable
   const isJobAlreadyAccepted = jobAcceptanceStatus === "accepted";
   const canAcceptJob = contractSigned && jobAcceptanceStatus === "offered";
 
@@ -234,7 +216,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     return '';
   };
 
-  // Render loading state
   if (loading) {
     return (
       <div className='flex items-center justify-center h-[60vh]'>
@@ -243,7 +224,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     );
   }
 
-  // Render error state
   if (error) {
     return (
       <div className='flex flex-col items-center justify-center h-[60vh] px-4 text-center'>
@@ -252,7 +232,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
           alt="Error" 
           className="w-16 h-16 mb-4"
           onError={(e) => {
-            e.currentTarget.src = ""; // Fallback if image doesn't exist
+            e.currentTarget.src = "";
             e.currentTarget.style.display = "none";
           }}
         />
@@ -268,7 +248,6 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
     );
   }
 
-  // If user is not a contractor, show appropriate message
   if (role !== 'contractor') {
     return (
       <div className='flex flex-col items-center justify-center h-[60vh] px-4 text-center'>
@@ -280,7 +259,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
   return (
     <>
-    <section className='w-full max-w-275 m-auto pb-64'>
+    <section className='w-full m-auto pb-64'>
       
       <div className="pt-7.5">
         
@@ -395,32 +374,20 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
 
           </section>
 
+      {
+        contract && contract?.status === 'completed' &&
+        <RateUserBtn 
+          contract={contract}
+          onRatingSubmitted={() => {
+            console.log('Rating submitted successfully');
+          }}
+        />
+      }
         </article>
       </div>
-
     </section>
 
-    {showRateUserModal && (
-      <div 
-        className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
-        onClick={handleOverlayClick}
-      >
-          <RateUserModal 
-             onClose={handleClose}
-             userToRate={""}
-             contractId={""}
-             jobId={""}
-             reviewerId={""}
-             revieweeId={""}
-             role={"contractor"}
-             existingRating={{
-                id: '',
-                rating: 0,
-                comments: ''
-             }}
-          />
-      </div>
-    )}
+    
 
     {showSignContractModal && (
       <div 
@@ -432,7 +399,7 @@ const Details = ({ job, jobId, applicationId }: DetailsProps) => {
             updateContractSigned={updateContractSigned}
             contractSigned={contractSigned}
             hiringOffer={hiringOffer}
-            onClose={handleClose} 
+            onClose={handleClose}
           />
         )}
       </div>

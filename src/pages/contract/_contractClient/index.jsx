@@ -1,7 +1,6 @@
 // client
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Details from './_details';
-import Timesheet from './_timesheet';
 import Messages from '../../../components/chat/_messages';
 import { fetchApplication, fetchJob } from '@/api/job-api';
 import useAuthStore from '@/store/useAuth';
@@ -12,18 +11,20 @@ import LoadingAnimation from '@/components/ui/loading';
 import ClientTimesheet from './_timesheet';
 import ClientRetainer from './_retainer';
 
-const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
+const ContractClient = ({ jobId, proposalId, tab }) => {
+
     const { userId, name } = useAuthStore();
     
     const [applicationDetail, setApplicationDetail] = useState(null);
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState(null);
     const [mutualContractId, setMutualContractId] = useState('');
+    const [contract, setContract] = useState(null);
+    const [contractStatus, setContractStatus] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [middleTab, setMiddleTab] = useState('milestone');
     
-    // Use useMemo to update tabOptions whenever middleTab changes
     const tabOptions = useMemo(() => {
         return ['details', middleTab, 'messages'];
     }, [middleTab]);
@@ -106,6 +107,8 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
             if (response.success && response.data) {
                 if (response.data._id) {
                     setMutualContractId(response.data._id);
+                    setContract(response.data);
+                    setContractStatus(response?.data?.status);
                     if (response.data.paymentStructure) {
                         setMiddleTab(response.data.paymentStructure);
                     }
@@ -162,14 +165,16 @@ const ContractClient = ({ hiringId, jobId, proposalId, tab }) => {
                 <Details 
                     job={job} 
                     jobId={jobId} 
-                    applicationDetail={applicationDetail} 
+                    applicationDetail={applicationDetail}
+                    contract={contract}
                 />;
             case 'timesheet':
-                return <ClientTimesheet mutualContractId={mutualContractId} />;
+                return <ClientTimesheet contractStatus={contractStatus} mutualContractId={mutualContractId} />;
             case 'retainer':
-                return <ClientRetainer job={job} mutualContractId={mutualContractId} />;
+                return <ClientRetainer contractStatus={contractStatus} job={job} mutualContractId={mutualContractId} />;
             case 'milestone':
                 return <Milestones 
+                    contractStatus={contractStatus}
                     mutualContractId={mutualContractId}
                     isLoading={contractLoading && !mutualContractId} 
                 />;

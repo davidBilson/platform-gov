@@ -1,89 +1,98 @@
+// client
 import Link from 'next/link';
-import React, { useState } from 'react';
-// import { format } from 'date-fns';
-// import RatingStars from '@/components/ui/rating';
-// import RateUserModal from '../../../components/rating/rateUserModal';
+import { MouseEvent } from 'react';
+import { useRouter } from 'next/router';
+import { format } from 'date-fns';
 import StatusTag from '@/components/tags/statusTag';
+import { Contract } from '@/types/contracts';
+import RateUserBtn from '@/components/rating/rateUserBtn';
 
-// interface ActiveProposalsProps {
-//   applications: Application[];
-// }
+interface ContractsProps {
+  contracts?: Contract[];
+}
 
-const CompletedContracts
-// React.FC<ActiveProposalsProps> 
-= (
-  // { applications = [] }
-) => {
+const CompletedContracts = ({ contracts = [] }: ContractsProps) => {
+  
+  const router = useRouter();
+  
+  const formatDate = (date: string | Date): string => {
+      try {
+        return format(typeof date === 'string' ? new Date(date) : date, 'MM/dd/yyyy');
+      } catch (error) {
+        console.log('Date formatting error:', error);
+        return 'Invalid date';
+      }
+    };
 
-  const [showRateUserModal, setShowRateUserModal] = useState(false);
-
-  const handleClose = () => {
-    setShowRateUserModal(false);
+  const getStatusDisplay = (status: string): string => {
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
+  const viewContract = (contractId: string, jobId?: string, applicationId?: string) => {
+    const query: { jobId?: string; proposalId?: string } = {};
+    
+    if (jobId) query.jobId = jobId;
+    if (applicationId) query.proposalId = applicationId;
+
+    router.push({
+      pathname: `/contract/${contractId}`,
+      query: Object.keys(query).length > 0 ? query : undefined
+    });
   };
-
-  // const truncateDescription = (text: string | undefined, maxLength = 200): string => {
-  //   if (!text) return '';
-  //   if (text.length <= maxLength) return text;
-  //   return text.slice(0, maxLength) + '...';
-  // };
-
-  // const formatDate = (dateString: string): string => {
-  //   try {
-  //     return format(new Date(dateString), 'MM/dd/yyyy');
-  //   } catch (error) {
-  //     console.log(error)
-  //     return 'Invalid date';
-  //   }
-  // };
-
-  // const openProposalModal = (proposal: Application): void => {
-  //   setSelectedProposal(proposal);
-  // };
-
-
 
   return (
     <>
-      <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>
+       <section className='pb-5 mb-12.5'>
         <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold'>Completed Contracts</h2>
-
-            <article className='flex flex-wrap md:justify-between gap-5 items-start'>
-              <section className='flex flex-col items-start gap-3.75'>
+        
+        <section className='flex flex-col gap-12.5'>
+          {contracts.length === 0 ? (
+            <p className="text-gray-500 italic">No completed contracts found</p>
+          ) : (
+            contracts.map((contract) => (
+              <article 
+                key={contract._id} 
+                onClick={() => {
+                  viewContract(
+                    contract._id,
+                    contract.jobId?._id, 
+                    contract.hiringId?.applicationId
+                  );
+                }}
+                className='flex flex-wrap md:justify-between gap-5 items-start pb-10 border-b border-b-lightblue cursor-pointer'
+              >
+                <section className='flex flex-col items-start gap-3.75'>
                   <p className='text-xs text-boldblue font-semibold'>
-                    {'10/3/2024'} - {'Present'}
+                    {formatDate(contract.createdAt)} - Present
                   </p>
                   <h3 className="text-xl font-semibold">
-                    {/* {typeof application.jobId === 'object' ? application.jobId.jobTitle : "Job Title"} */}
-                    Job Title
+                    {contract.jobId?.jobTitle || "Job Title Not Available"}
                   </h3>
-                  <Link  href={''} className="font-semibold text-sm hover:underline">
-                    Contractor Name
+                  
+                  <Link 
+                    href={`/profile/${contract.contractorId?._id}`} 
+                    className=" text-darkgray hover:underline"
+                    onClick={(e: MouseEvent<HTMLAnchorElement>) => e.stopPropagation()}
+                  >
+                    {
+                      `${contract.contractorId?.name || "Contractor Name Not Available"}`.replace(/\b\w/g, c => c.toUpperCase())
+                    }
                   </Link>
-                  <StatusTag status="inactive" />
-              </section>
-              <button 
-                onClick={() => setShowRateUserModal(true)} 
-                className="bg-boldblue  text-sm text-white font-semibold py-2.5 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">
-                Rate this Contractor
-              </button>
-              {/* if rating exists render component below - show this otherwise show the button above */}
-              {/* <RatingStars rating={4} /> */}
-            </article>
+                  <StatusTag status={getStatusDisplay(contract.status)} />
+                </section>
+                
+                <RateUserBtn 
+                  contract={contract}
+                  onRatingSubmitted={() => {
+                    console.log('Rating submitted successfully');
+                  }}
+                />
+                
+              </article>
+            ))
+          )}
+        </section>
       </section>
-      {showRateUserModal && (
-        <div 
-          className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
-          onClick={handleOverlayClick}
-        >
-            {/* <RateUserModal onClose={handleClose} userToRate={"Contractor"} /> */}
-        </div>
-      )}
     </>
   );
 };

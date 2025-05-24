@@ -10,7 +10,7 @@ const AllContracts = () => {
   if (userId) {
 
   }
-  return <main className='w-full max-w-275 mx-auto p-5 pb-20 md:p-6'>
+  return <main className='w-full container mx-auto p-5 pb-20 md:p-6'>
       {
         role === "client" && <ClientContracts />
       }

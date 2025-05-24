@@ -1,9 +1,9 @@
-import { useState } from 'react';
+
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
-// import RateUserModal from '@/components/rating/rateUserModal';
 import { format } from 'date-fns';
 import LoadingAnimation from '@/components/ui/loading';
 import ProfileCard from '@/components/profile/ProfileCard';
+import RateUserBtn from '@/components/rating/rateUserBtn';
 
 interface Job {
   createdAt?: string;
@@ -15,14 +15,14 @@ interface Job {
   jobCategory?: string;
   requiredCertifications?: string[];
   requiredSkills?: string[];
-  price?: number; // Added price property
-  retainerAmount?: number; // Added retainerAmount property
-  retainerFrequency?: string; // Added retainerFrequency property
+  price?: number;
+  retainerAmount?: number;
+  retainerFrequency?: string;
   clientLogo?: string;
   clientName?: string;
   clientIndustry?: string;
   clientSpecializations?: string[];
-  userId?: { _id: string }; // Added userId property
+  userId?: { _id: string };
 }
 
 interface FreelancerProfile {
@@ -49,22 +49,15 @@ interface DetailsProps {
   applicationDetail?: ApplicationDetail;
   job: Job;
   jobId: string;
+  contract?: any;
 }
 
-const Details = ({applicationDetail, job }: DetailsProps) => {
+const Details = ({applicationDetail, job, contract }: DetailsProps) => {
 
-  const [showRateUserModal, setShowRateUserModal] = useState(false);
   const postedDate = job?.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
 
-  const handleClose = () => {
-    setShowRateUserModal(false);
-  };
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleClose();
-    }
-  };
+
 
   const getPaymentInfo = (): string => {
     if (job.paymentType === 'hourly') {
@@ -83,32 +76,21 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
 
   return (
     <>
-     <section className='w-full max-w-275 m-auto pb-64'>
+     <section className='w-full m-auto pb-64'>
       
       <div className="pt-7.5">
-
-        {/* <div className="flex flex-wrap gap-2 items-center text-xs text-gray-500 mb-3.75">
-          <p className='text-xs font-semibold text-boldblue'><strong>Contract Start:</strong> 12/12/2025 {" | "}</p>
-          <p className='text-xs font-semibold text-boldblue'><strong>Contract Renewed:</strong> 12/12/2025 {" | "}</p>
-          <p className='text-xs font-semibold text-boldblue'><strong>Contract End:</strong> 12/12/2025 {" | "}</p>
-        </div> */}
-
         <p className='font-semibold text-xs text-boldblue'>Posted {postedDate}</p>
-        
         <h1 className="text-xl font-bold my-3.75">{job?.jobTitle ?? ""}</h1>
-        
         <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
           <div className="flex items-center gap-1.25">
             <FaRegHourglass size={15} />
             {getPaymentInfo()} | {job.employmentType}
           </div>
-          
           <div className="flex items-center gap-1.25">
             <FaLocationDot size={15} />
             {job.location}
           </div>
         </div>
-
       </div>
       
       {/* Description section */}
@@ -162,22 +144,23 @@ const Details = ({applicationDetail, job }: DetailsProps) => {
       
       <div className="py-7.5 mt-7.5 border-y border-y-deepskyblue">
         <h2 className="font-semibold mb-3.75">Contractor/Consultant Information</h2>
-        <article className='flex flex-wrap justify-between items-start gap-5'>
+        <article className='flex flex-wrap lg:flex-nowrap justify-between items-start gap-5'>
           <section>
             {applicationDetail && <ProfileCard data={applicationDetail} />}
           </section>
+          {
+            contract && contract?.status === 'completed' &&
+            <RateUserBtn 
+              contract={contract}
+              onRatingSubmitted={() => {
+                console.log('Rating submitted successfully');
+              }}
+            />
+          }
         </article>
       </div>
 
     </section>
-    {showRateUserModal && (
-      <div 
-        className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
-        onClick={handleOverlayClick}
-      >
-          {/* <RateUserModal userToRate='Contractor' onClose={handleClose} /> */}
-      </div>
-    )}
     </>
   )
 }
