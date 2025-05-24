@@ -42,7 +42,7 @@ const ContractorFeed: React.FC = () => {
         setFilteredContractors(applyFilters(data));
       }
     } catch (err) {
-      console.log(err)
+      console.error(err)
       setError('Failed to fetch contractors');
     } finally {
       setLoading(false);

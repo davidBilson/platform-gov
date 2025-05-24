@@ -47,11 +47,27 @@ interface HiringDocument {
   status: string;
 }
 
+interface Contract {
+    _id: string;
+    status: string;
+    jobId?: {
+      _id: string;
+    };
+    contractorId?: {
+      _id: string;
+      name: string;
+    };
+    clientId?: {
+      _id: string;
+      name: string;
+    };
+}
+
 interface DetailsProps {
   job: Job;
   jobId: string;
   applicationId: string;
-  contractStatus? :string;
+  contract: Contract;
 }
 
 const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
@@ -376,12 +392,7 @@ const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
 
       {
         contract && contract?.status === 'completed' &&
-        <RateUserBtn 
-          contract={contract}
-          onRatingSubmitted={() => {
-            console.log('Rating submitted successfully');
-          }}
-        />
+        <RateUserBtn contract={contract} />
       }
         </article>
       </div>

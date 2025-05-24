@@ -5,12 +5,14 @@ import {
   getTimesheetLogs, 
   logHoursManually
 } from '@/api/contract/timesheet-api';
+import { AxiosError } from 'axios';
 import useAuthStore from '@/store/useAuth';
 import { formatDuration } from '@/utils/contract/format';
 import Image from 'next/image';
 import { LuClock, LuPlay } from 'react-icons/lu';
 import { FaStopCircle } from "react-icons/fa";
 import { toast } from 'react-toastify';
+import { getSingleContract } from '@/api/contract/contract-api';
 
 interface WorkSession {
   _id: string;
@@ -54,12 +56,17 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
       const response = await getTimesheetLogs(mutualContractId);
       setSessions(response.data || []);
       
-      const totalHours = (response.data || []).reduce((total, session) => {
+      const totalHours = (response.data || []).reduce((total: number, session: WorkSession) => {
         const normalizedDuration = normalizeDuration(session);
         return total + normalizedDuration;
       }, 0) / 3600;
       
       setLoggedHours(totalHours);
+
+      const contractResponse = await getSingleContract({ mutualContractId });
+      if (contractResponse.success && contractResponse.data) {
+        setMaxHours(contractResponse.data.maxHours || null);
+      }
       
       const active = response.data.find((s: WorkSession) => s.status === 'active');
       
@@ -80,37 +87,53 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
 
   const handleLogHoursManually = async () => {
     if (!mutualContractId || !userId || !manualHours) return;
-    
-    try {
-      const hours = parseFloat(manualHours);
-      if (isNaN(hours)) {
-        toast.error('Please enter a valid number of hours');
-        return;
-      }
+  
+  try {
+    const hours = parseFloat(manualHours);
+    if (isNaN(hours) || hours <= 0) {
+      toast.error('Please enter a valid number of hours (greater than 0)');
+      return;
+    }
 
-      const seconds = Math.round(hours * 3600);
-      
-      const formData = new FormData();
-      formData.append('hours', seconds.toString());
-      formData.append('description', manualDescription);
-      formData.append('userId', userId);
+    // Check max hours before sending to backend
+    if (maxHours !== null && (loggedHours + hours) > maxHours) {
+      toast.error(`Cannot log ${hours} hours. This would exceed the maximum of ${maxHours} hours. Current logged: ${loggedHours.toFixed(2)} hours.`);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('hours', hours.toString());
+    formData.append('description', manualDescription);
+    formData.append('userId', userId);
       
       manualScreenshots.forEach((file, index) => {
         formData.append('screenshots', file, `manual-screenshot-${index}-${Date.now()}-${file.name}`);
       });
-
+  
       await logHoursManually(mutualContractId, formData);
       
       setShowManualLogModal(false);
       setManualHours('');
       setManualDescription('');
       setManualScreenshots([]);
-      fetchSessions();
-      toast.success('Hours logged manually!');
-
+      await fetchSessions(); // Refresh the sessions
+      toast.success(`${hours} hours logged manually!`);
+  
     } catch (error) {
       console.error('Error logging hours manually:', error);
-      toast.error('Failed to log hours manually');
+      
+      // More specific error handling
+      if (error instanceof Error && 'response' in error && (error as AxiosError<{ message: string }>).response?.data?.message) {
+        if (error instanceof AxiosError && error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        }
+      } else if (error instanceof AxiosError && error.response?.status === 400) {
+        toast.error('Invalid request. Please check your input.');
+      } else if (error instanceof AxiosError && error.response?.status === 404) {
+        toast.error('Contract not found or invalid.');
+      } else {
+        toast.error('Failed to log hours manually. Please try again.');
+      }
     }
   };
 
@@ -164,12 +187,6 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
         formData.append('screenshots', file, `screenshot-${index}-${Date.now()}-${file.name}`);
       });
 
-      console.log('Stopping session with formData:');
-      for (const pair of formData.entries()) {
-        console.log(pair[0] + ': ' + (pair[1] instanceof File ? 
-          `${pair[1].name} (${pair[1].type}, ${pair[1].size} bytes)` : pair[1]));
-      }
-
       await stopWorkSession(mutualContractId, activeSession._id, formData);
       setActiveSession(null);
       setNotes('');
@@ -217,22 +234,17 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
     return Math.max(seconds, 0);
 };
 
-const normalizeDuration = (session: WorkSession): number => {
+  const normalizeDuration = (session: WorkSession): number => {
     if (session.duration) {
-
-      const duration = session.duration > 86400 
-        ? Math.floor(session.duration / 1000) 
-        : session.duration;
-        
-        return Math.max(duration, 0);
+      return Math.max(session.duration, 0);
     }
     
     if (session.startTime && session.endTime) {
-        return calculateDuration(session.startTime, session.endTime);
+      return calculateDuration(session.startTime, session.endTime);
     }
     
     return 0;
-};
+  };
 
   if (!mutualContractId) {
     return (
@@ -247,20 +259,46 @@ const normalizeDuration = (session: WorkSession): number => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-4 rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium">Hours Summary</h3>
-          {maxHours !== null && (
-            <div className="text-sm text-gray-600">
-              {loggedHours.toFixed(1)} / {maxHours} hours logged
-            </div>
-          )}
-        </div>
-        
-        {contractStatus === 'completed' ? (
-          <div className="bg-yellow-50 p-3 rounded text-center">
-            <p className="text-yellow-800">This contract has been completed</p>
+      <div>
+        <p className='pb-3.75 text-boldblue font-semibold'>Maximum Hours: {maxHours ?? '0'}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <div className="bg-lightblue/50 p-3 rounded">
+              <p className="text-sm text-mediumgray">Total Hours</p>
+              <p className="text-xl font-semibold">
+                {formatDuration(
+                    sessions.reduce((total, session) => total + normalizeDuration(session), 0)
+                )}
+              </p>
           </div>
+
+          <div className="bg-aquagreen/20 p-4 rounded">
+            <p className="text-sm text-mediumgray">Approved Hours</p>
+            <p className="text-xl font-semibold">
+                {formatDuration(
+                    sessions
+                        .filter(s => s.status === 'approved')
+                        .reduce((total, session) => total + normalizeDuration(session), 0)
+                )}
+            </p>
+          </div>
+
+          <div className="bg-yellow-50 p-3 rounded">
+            <p className="text-sm text-mediumgray">Pending Hours</p>
+            <p className="text-xl font-semibold">
+                {formatDuration(
+                    sessions
+                        .filter(s => s.status === 'pending')
+                        .reduce((total, session) => total + normalizeDuration(session), 0)
+                )}
+            </p>
+          </div>
+
+        </div>
+      </div>
+      <div className='flex items-center flex-wrap gap-3.75'>
+        {contractStatus === 'completed' ? (
+          <p className="text-aquagreen">This contract has ended</p>
         ) : maxHours !== null && loggedHours >= maxHours ? (
           <div className="bg-red-50 p-3 rounded text-center">
             <p className="text-red-800">Maximum hours reached</p>
@@ -269,46 +307,52 @@ const normalizeDuration = (session: WorkSession): number => {
           <div className="flex gap-2">
             <button
               onClick={() => setShowManualLogModal(true)}
-              className="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition"
+              className="px-4 py-2 bg-deepskyblue text-white text-sm rounded-md hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
             >
               Log Hours Manually
             </button>
           </div>
         )}
+        {!activeSession && <button
+            onClick={handleStartSession}
+            className="px-4 py-2 flex items-center justify-center bg-aquagreen text-white text-sm rounded hover:bg-aquagreen hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+          >
+            <LuPlay className="mr-2" />
+            Start Work Session
+          </button>}
       </div>
 
-      {/* Manual Log Modal */}
       {showManualLogModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 h-screen flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">Log Hours Manually</h3>
+            <h3 className="text font-semibold mb-4 text-boldblue">Log Hours Manually</h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Hours</label>
+              <label className="block text-sm font-medium mb-2 text-boldblue">Hours</label>
               <input
                 type="number"
                 step="0.25"
                 min="0.25"
                 value={manualHours}
                 onChange={(e) => setManualHours(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border border-deepskyblue placeholder:text-boldblue text-boldblue focus:outline-boldblue focus:outline rounded mb-4"
                 placeholder="Enter hours worked"
               />
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Description</label>
+              <label className="block text-sm font-medium mb-2 text-boldblue">Description</label>
               <textarea
                 value={manualDescription}
                 onChange={(e) => setManualDescription(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border border-deepskyblue placeholder:text-boldblue text-boldblue focus:outline-boldblue focus:outline rounded mb-4"
                 rows={3}
                 placeholder="What did you work on?"
               />
             </div>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Screenshots (Optional)</label>
+              <label className="block text-sm font-medium mb-2 text-boldblue">Screenshots (Optional)</label>
               <div className="flex flex-wrap gap-2 mb-2">
                 {manualScreenshots.map((file, index) => (
                   <div key={index} className="relative w-16 h-16 rounded group">
@@ -327,7 +371,7 @@ const normalizeDuration = (session: WorkSession): number => {
                   </div>
                 ))}
               </div>
-              <label className="w-full border-2 border-dashed border-gray-300 rounded flex items-center justify-center cursor-pointer p-2">
+              <label className="w-full border-2 border-dashed border-deepskyblue rounded flex items-center justify-center cursor-pointer p-2">
                 <input 
                   type="file" 
                   className="hidden" 
@@ -339,21 +383,21 @@ const normalizeDuration = (session: WorkSession): number => {
                     }
                   }}
                 />
-                <span className="text-sm">Add Screenshots</span>
+                <span className="text-sm text-boldblue">Add Screenshots</span>
               </label>
             </div>
             
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowManualLogModal(false)}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 border border-boldblue text-boldblue rounded hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleLogHoursManually}
                 disabled={!manualHours}
-                className={`px-4 py-2 bg-blue-600 text-white rounded ${
+                className={`px-4 py-2 bg-boldblue hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-white rounded ${
                   !manualHours ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
@@ -363,9 +407,9 @@ const normalizeDuration = (session: WorkSession): number => {
           </div>
         </div>
       )}
-      <div className="bg-white p-4 rounded-lg shadow">
+      <div>
         {activeSession ? (
-          <div className="space-y-4">
+          <div className="space-y-4 bg-white p-4 rounded-lg shadow">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
@@ -429,13 +473,7 @@ const normalizeDuration = (session: WorkSession): number => {
             </button>
           </div>
         ) : (
-          <button
-            onClick={handleStartSession}
-            className="flex items-center justify-center w-full py-2 bg-aquagreen text-white rounded hover:bg-aquagreen hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-          >
-            <LuPlay className="mr-2" />
-            Start Work Session
-          </button>
+          <></>
         )}
       </div>
       

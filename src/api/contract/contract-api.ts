@@ -11,10 +11,6 @@ export const createContract = async (contractData: {
   contractorId: string;
 })  => {
   
-  console.log('validate hiringId: ', contractData.hiringId)
-  console.log('validate clientId: ', contractData.clientId)
-  console.log('validate userId: ', contractData.contractorId)
-
   try {
     const endpoint = process.env.NEXT_PUBLIC_CREATE_CONTRACT;
     
@@ -44,19 +40,22 @@ export const createContract = async (contractData: {
   }
 };
 
-// Updated getSingleContract function with better error handling
 export const getSingleContract = async (contractData: {
   jobId?: string;
   clientId?: string;
-  contractorId: string;
+  contractorId?: string;
+  mutualContractId?: string;
 }) => {
-  if (!contractData.jobId || !contractData.clientId || !contractData.contractorId) {
-    
+
+  const hasMutualId = contractData.mutualContractId;
+  const hasRequiredIds = contractData.jobId && contractData.clientId && contractData.contractorId;
+  
+  if (!hasMutualId && !hasRequiredIds) {
     return {
       success: false,
       data: null,
       error: {
-        message: 'Missing required parameters for contract lookup',
+        message: 'Missing required parameters: either mutualContractId or (jobId, clientId, and contractorId)',
         status: 400
       }
     };
@@ -80,7 +79,7 @@ export const getSingleContract = async (contractData: {
       `${baseURL}${endpoint}`,
       contractData,
       { 
-        timeout: 8000,  // Add timeout to prevent hanging requests
+        timeout: 8000,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -118,7 +117,6 @@ export const getSingleContract = async (contractData: {
   }
 };
 
-
 export const getContracts = async (contractorId: string): Promise<{
   active: Contract[];
   inactive: Contract[];
@@ -140,17 +138,16 @@ export const getContracts = async (contractorId: string): Promise<{
 
 export const endContract = async (contractId: string, userId: string) => {
   try {
-    const endpoint = process.env.NEXT_PUBLIC_END_CONTRACT
-      ?.replace(':contractId', contractId);
+    const endpoint = process.env.NEXT_PUBLIC_END_CONTRACT?.replace(':contractId', contractId);
     
     const response = await axios.put(`${baseURL}${endpoint}`, { userId });
-    
-    console.log(response);
-    
-    toast.info(response.data.message)
     return response.data;
+
   } catch (error) {
-    toast.error(error?.message)
+    const errorMessage = axios.isAxiosError(error) && error.response?.data?.message 
+      ? error.response.data.message 
+      : error instanceof Error ? error.message : 'An unknown error occurred';
+    toast.error(errorMessage);
     console.error('Error ending contract:', error);
     throw error;
   }

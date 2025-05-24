@@ -1,8 +1,6 @@
-import { IoMdArrowDropdown } from 'react-icons/io';
 import ActiveContracts from './_activeContracts';
 import CompletedContracts from './_completedContracts';
 import InactiveContracts from './_inactiveContracts';
-import { TbAdjustmentsHorizontal } from "react-icons/tb";
 import useAuthStore from '@/store/useAuth';
 import { useEffect, useState } from 'react';
 import { Contract } from '@/types/contracts';

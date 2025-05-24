@@ -27,19 +27,7 @@ export const stopWorkSession = async (
   formData: FormData
 ) => {
   try {
-    const endpoint = process.env.NEXT_PUBLIC_STOP_WORK_SESSION
-      ?.replace(':contractId', contractId)
-      .replace(':sessionId', sessionId);
-    
-    // Debug log FormData contents
-    console.log('FormData being sent:');
-    for (const [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}: ${value.name} (${value.type}, ${value.size} bytes)`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
-    }
+    const endpoint = process.env.NEXT_PUBLIC_STOP_WORK_SESSION?.replace(':contractId', contractId).replace(':sessionId', sessionId);
     
     const response = await axios.put(
       `${baseURL}${endpoint}`,
@@ -144,7 +132,7 @@ export const disputeTimesheetEntry = async (
 export const logHoursManually = async (contractId: string, formData: FormData) => {
   try {
     const endpoint = process.env.NEXT_PUBLIC_LOG_HOURS_MANUALLY
-      ?.replace(':contractId', contractId);
+      ?.replace(':id', contractId);
     
     const response = await axios.post(
       `${baseURL}${endpoint}`,
@@ -165,7 +153,7 @@ export const logHoursManually = async (contractId: string, formData: FormData) =
 export const setContractMaxHours = async (contractId: string, hours: number) => {
   try {
     const endpoint = process.env.NEXT_PUBLIC_SET_MAX_HOURS
-      ?.replace(':contractId', contractId);
+      ?.replace(':id', contractId);
     
     const response = await axios.put(
       `${baseURL}${endpoint}`,

@@ -306,9 +306,9 @@ const handleSubmit = (e: React.FormEvent): void => {
     <main className="p-6">
       
       <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
-        {/* Bio */}
+=
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-col sm:flex-row sm:items-center gap-5">
-          {/* Profile picture && Name */}
+          
           <div className="relative w-22 h-22  bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">
             <div className="w-[88px] rounded-full h-[88px] overflow-hidden absolute flex items-center justify-center">
               {formData?.profileImageUrl ? (
@@ -339,7 +339,6 @@ const handleSubmit = (e: React.FormEvent): void => {
           <p className="text-black font-semibold text-xl">{name}</p>
         </div>
   
-        {/* About Me / Bio */}
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <textarea
             ref={textareaRef}
@@ -349,7 +348,7 @@ const handleSubmit = (e: React.FormEvent): void => {
             onInput={handleTextAreaInputWrapper}
             maxLength={300}
             rows={1}
-            className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden h-[200px] scrollbar-hide"
+            className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden scrollbar-hide"
             placeholder="About Me/Bio"
           ></textarea>
           <div className="text-right text-xs text-gray-500 mt-1">
@@ -357,7 +356,6 @@ const handleSubmit = (e: React.FormEvent): void => {
           </div>
         </div>
   
-        {/* Rate per hour */}
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
             <input 
@@ -372,7 +370,6 @@ const handleSubmit = (e: React.FormEvent): void => {
           </div>
         </div>
   
-        {/* Primary position/Title + Skills + Expertise */}
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
           <input 
             type="text" 
@@ -383,19 +380,20 @@ const handleSubmit = (e: React.FormEvent): void => {
             placeholder="Primary position/Title" 
           />
 
-<div className="relative w-full max-w-75 mb-7.5">
-  <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
-    <input 
-      type="text"
-      value={formData.profession}
-      onChange={(e) => setFormData({...formData, profession: e.target.value})}
-      onFocus={() => setShowProfessionalFieldsDropdown(true)}
-      onBlur={() => setTimeout(() => setShowProfessionalFieldsDropdown(false), 200)}
-      className="outline-none placeholder:font-semibold w-[80%]" 
-      placeholder="Professional Field" 
-    />
-    <IoIosSearch />
-  </div>
+        <div className="relative w-full max-w-75 mb-7.5">
+          
+          <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+            <input 
+              type="text"
+              value={formData.profession}
+              onChange={(e) => setFormData({...formData, profession: e.target.value})}
+              onFocus={() => setShowProfessionalFieldsDropdown(true)}
+              onBlur={() => setTimeout(() => setShowProfessionalFieldsDropdown(false), 200)}
+              className="outline-none placeholder:font-semibold w-[80%]" 
+              placeholder="Professional Field" 
+            />
+            <IoIosSearch />
+          </div>
   
   {showProfessionalFieldsDropdown && (
     <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"

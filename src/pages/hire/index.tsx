@@ -63,7 +63,6 @@ const HireContractor: NextPage = () => {
                     const jobData = await fetchJob(jobId as string);
 
                     setJob(jobData);
-                    console.log(jobData)
                     if (jobData) {
                         setFormData({
                             ...formData,

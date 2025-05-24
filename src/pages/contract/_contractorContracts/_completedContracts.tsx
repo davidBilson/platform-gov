@@ -92,12 +92,7 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
             </section>
             </div>
             
-            <RateUserBtn 
-              contract={contract}
-              onRatingSubmitted={() => {
-                console.log('Rating submitted successfully');
-              }}
-            />
+            <RateUserBtn contract={contract} />
             
           </article>
         ))}

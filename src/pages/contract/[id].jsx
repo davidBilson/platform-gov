@@ -13,11 +13,6 @@ const AllContracts = () => {
   const jobId = router.query.jobId;
   const tab = router.query.tab || 'details';
 
-
-  useEffect(() => {
-    console.log(jobId)
-  }, [jobId])
-
   return (
     <main className='container mx-auto p-5 pb-20 md:p-6'>
       {role === "client" && <ContractClient hiringId={hiringId} jobId={jobId} proposalId={proposalId} tab={tab} />}
@@ -27,4 +22,4 @@ const AllContracts = () => {
   )
 }
 
-export default AllContracts
+export default AllContracts;

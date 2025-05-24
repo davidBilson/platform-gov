@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   getTimesheetLogs, 
   approveTimesheetEntry, 
   disputeTimesheetEntry, 
   setContractMaxHours
 } from '@/api/contract/timesheet-api';
+import { getSingleContract, endContract } from '@/api/contract/contract-api';
 import { formatDuration } from '@/utils/contract/format';
 import Image from 'next/image';
 import { LuClock } from 'react-icons/lu';
 import useAuthStore from '@/store/useAuth';
-import { endContract, getSingleContract } from '@/api/contract/contract-api';
 import { toast } from 'react-toastify';
 
 interface WorkSession {
@@ -18,91 +19,149 @@ interface WorkSession {
   endTime: string;
   duration: number;
   notes?: string;
-  screenshots?: {
+  screenshots?: Array<{
     imagePath: string;
     publicId: string;
     uploadedAt: string;
-  }[];
+  }>;
   status: 'pending' | 'approved' | 'disputed' | 'active';
 }
 
-const ClientTimesheet = ({ mutualContractId, contractStatus }: { mutualContractId?: string; contractStatus: string; }) => {
-
+const ClientTimesheet = ({ 
+  mutualContractId, 
+  contractStatus 
+}: { 
+  mutualContractId?: string; 
+  contractStatus: string; 
+}) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [sessions, setSessions] = useState<WorkSession[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
   const [disputingSessionId, setDisputingSessionId] = useState<string | null>(null);
-  const { userId } = useAuthStore();
-
-  const [maxHours, setMaxHours] = useState<number | null>(null);
   const [showSetHoursModal, setShowSetHoursModal] = useState(false);
   const [newMaxHours, setNewMaxHours] = useState('');
+  // Add state to track which approve button is loading
+  const [approvingSessionId, setApprovingSessionId] = useState<string | null>(null);
+  
+  const { userId } = useAuthStore();
+  const queryClient = useQueryClient();
 
-  const fetchSessions = async () => {
-    if (!mutualContractId) return;
-    
-    try {
-      setIsLoading(true);
+  // Query for contract data (including max hours)
+  const { data: contractData, isLoading: contractLoading } = useQuery({
+    queryKey: ['contract', mutualContractId],
+    queryFn: async () => {
+      if (!mutualContractId) return null;
+      const response = await getSingleContract({ mutualContractId });
+      return response.success ? response.data : null;
+    },
+    enabled: !!mutualContractId,
+    staleTime: 30000,
+  });
+
+  // Query for timesheet sessions
+  const { data: sessions = [] as WorkSession[], isLoading: sessionsLoading } = useQuery({
+    queryKey: ['timesheet-logs', mutualContractId],
+    queryFn: async () => {
+      if (!mutualContractId) return [];
       const response = await getTimesheetLogs(mutualContractId);
-      setSessions((response.data || []).filter((s: WorkSession) => s.status !== 'active'));
+      return (response.data || []).filter((s: WorkSession) => s.status !== 'active');
+    },
+    enabled: !!mutualContractId,
+    staleTime: 10000, // 10 seconds
+  });
 
-      const contractResponse = await getSingleContract({contractorId: userId});
-      setMaxHours(contractResponse.data.maxHours || null);
-    } catch (error) {
-      console.error('Error fetching sessions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSetMaxHours = async () => {
-    if (!mutualContractId || !newMaxHours) return;
-    
-    try {
-      const hours = parseFloat(newMaxHours);
-      if (isNaN(hours)) {
-        toast.error('Please enter a valid number of hours');
-        return;
-      }
-
-      await setContractMaxHours(mutualContractId, hours);
-      setMaxHours(hours);
+  // Mutation for setting max hours
+  const setMaxHoursMutation = useMutation({
+    mutationFn: async (hours: number) => {
+      if (!mutualContractId) throw new Error('No contract ID');
+      return await setContractMaxHours(mutualContractId, hours);
+    },
+    onSuccess: () => {
+      // Invalidate and refetch both contract and sessions data
+      queryClient.invalidateQueries({ queryKey: ['contract', mutualContractId] });
+      queryClient.invalidateQueries({ queryKey: ['timesheet-logs', mutualContractId] });
+      
       setShowSetHoursModal(false);
       setNewMaxHours('');
       toast.success('Maximum hours set successfully');
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error setting max hours:', error);
       toast.error('Failed to set maximum hours');
     }
-  };
+  });
 
-  useEffect(() => {
-    fetchSessions();
-  }, [mutualContractId]);
-
-  const handleApprove = async (sessionId: string) => {
-    if (!mutualContractId || !userId) return;
-    
-    try {
-      await approveTimesheetEntry(mutualContractId, sessionId, userId);
-      fetchSessions();
-    } catch (error) {
+  // Mutation for approving timesheet entry
+  const approveMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      if (!mutualContractId || !userId) throw new Error('Missing required data');
+      setApprovingSessionId(sessionId); // Set which session is being approved
+      return await approveTimesheetEntry(mutualContractId, sessionId, userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timesheet-logs', mutualContractId] });
+      setApprovingSessionId(null); // Clear the approving state
+    },
+    onError: (error) => {
       console.error('Error approving session:', error);
+      setApprovingSessionId(null); // Clear the approving state on error
     }
-  };
+  });
 
-  const handleDispute = async () => {
-    if (!mutualContractId || !disputingSessionId || !disputeReason || !userId) return;
-    
-    try {
-      await disputeTimesheetEntry(mutualContractId, disputingSessionId, disputeReason, userId);
+  // Mutation for disputing timesheet entry
+  const disputeMutation = useMutation({
+    mutationFn: async ({ sessionId, reason }: { sessionId: string; reason: string }) => {
+      if (!mutualContractId || !userId) throw new Error('Missing required data');
+      return await disputeTimesheetEntry(mutualContractId, sessionId, reason, userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timesheet-logs', mutualContractId] });
       setDisputingSessionId(null);
       setDisputeReason('');
-      fetchSessions();
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Error disputing session:', error);
     }
+  });
+
+  // Mutation for ending contract
+  const endContractMutation = useMutation({
+    mutationFn: async () => {
+      if (!mutualContractId || !userId) throw new Error('Missing required data');
+      return await endContract(mutualContractId, userId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contract', mutualContractId] });
+      toast.success('Contract ended successfully');
+    },
+    onError: (error) => {
+      console.error('Error ending contract:', error);
+      toast.error('Failed to end contract');
+    }
+  });
+
+  const handleSetMaxHours = async () => {
+    if (!newMaxHours) return;
+    
+    const hours = parseFloat(newMaxHours);
+    if (isNaN(hours) || hours <= 0) {
+      toast.error('Please enter a valid number of hours');
+      return;
+    }
+
+    setMaxHoursMutation.mutate(hours);
+  };
+
+  const handleApprove = (sessionId: string) => {
+    approveMutation.mutate(sessionId);
+  };
+
+  const handleDispute = () => {
+    if (!disputingSessionId || !disputeReason.trim()) return;
+    disputeMutation.mutate({ sessionId: disputingSessionId, reason: disputeReason });
+  };
+
+  const handleEndContract = () => {
+      endContractMutation.mutate();
   };
 
   const calculateDuration = (start: string, end?: string) => {
@@ -111,29 +170,27 @@ const ClientTimesheet = ({ mutualContractId, contractStatus }: { mutualContractI
     const diffMs = endTime - startTime;
     
     const seconds = Math.floor(diffMs / 1000);
-    return Math.max(seconds, 0); // Remove the 24-hour cap, only ensure non-negative
-};
+    return Math.max(seconds, 0);
+  };
 
-const normalizeDuration = (session: WorkSession): number => {
+  const normalizeDuration = (session: WorkSession): number => {
     if (session.duration) {
-        // If duration exists, use it but normalize the units
-        const duration = session.duration > 86400 ? 
-            Math.floor(session.duration / 1000) : // Convert ms to seconds
-            session.duration; // Already in seconds
-        
-        // Remove the 24-hour cap, only ensure positive
-        return Math.max(duration, 0);
+      const duration = session.duration > 86400 ? 
+        Math.floor(session.duration / 1000) :
+        session.duration;
+      
+      return Math.max(duration, 0);
     }
     
-    // Fallback: calculate from start/end times
     if (session.startTime && session.endTime) {
-        return calculateDuration(session.startTime, session.endTime);
+      return calculateDuration(session.startTime, session.endTime);
     }
     
     return 0;
-};
+  };
 
-  
+  const isLoading = contractLoading || sessionsLoading;
+  const maxHours = contractData?.maxHours ?? null;
 
   if (!mutualContractId) {
     return (
@@ -148,39 +205,29 @@ const normalizeDuration = (session: WorkSession): number => {
 
   return (
     <div className="space-y-6">
-      {
-        contractStatus === 'completed' ? 
-        (
-            <p className="text-aquagreen">This contract has ended</p>
-        ) : 
-        (
-          <div className="flex justify-between items-center">
-            {
-              maxHours !== null ? 
-              (
-                <div className="text-sm text-gray-600">
-                  Contract hours: {maxHours} (max)
-                </div>
-              ) : 
-              (
-                <button
-                  onClick={() => setShowSetHoursModal(true)}
-                  className="px-3 py-2 bg-boldblue text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-                >
-                  Set Max Hours
-                </button>
-              )
-            }
-            <button
-              onClick={() => endContract(mutualContractId, userId)}
-              className="px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-            >
-              End Contract
-            </button>
-          </div>
-        )
-      }
+      {contractStatus === 'completed' ? (
+        <p className="text-aquagreen">This contract has ended</p>
+      ) : (
+        <div className="flex justify-between items-center">
+            
+          <button
+            onClick={() => setShowSetHoursModal(true)}
+            disabled={setMaxHoursMutation.isPending}
+            className="px-3 py-2 bg-boldblue text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
+          >
+            {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Max Hours'}
+          </button>
+          <button
+            onClick={handleEndContract}
+            disabled={endContractMutation.isPending}
+            className="px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
+          >
+            {endContractMutation.isPending ? 'Ending...' : 'End Contract'}
+          </button>
+        </div>
+      )}
 
+      {/* Set Max Hours Modal */}
       {showSetHoursModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -196,62 +243,70 @@ const normalizeDuration = (session: WorkSession): number => {
             />
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setShowSetHoursModal(false)}
-                className="text-s text-boldblue px-4 py-2 border border-boldblue rounded hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+                onClick={() => {
+                  setShowSetHoursModal(false);
+                  setNewMaxHours('');
+                }}
+                disabled={setMaxHoursMutation.isPending}
+                className="text-s text-boldblue px-4 py-2 border border-boldblue rounded hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSetMaxHours}
-                disabled={!newMaxHours}
-                className={`text-sm transition duration-300 ease-in-out  px-4 py-2 bg-boldblue text-white rounded ${
-                  !newMaxHours ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-70 cursor-pointer'
+                disabled={!newMaxHours || setMaxHoursMutation.isPending}
+                className={`text-sm transition duration-300 ease-in-out px-4 py-2 bg-boldblue text-white rounded ${
+                  !newMaxHours || setMaxHoursMutation.isPending 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:opacity-70 cursor-pointer'
                 }`}
               >
-                Set Hours
+                {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Hours'}
               </button>
             </div>
           </div>
         </div>
       )}
-      {/* Weekly Summary */}
-      <div className="bg-white p-4 rounded-lg shadow">
+
+      {/* Hours Summary */}
+      <div>
+        <p className='pb-3.75 text-boldblue font-semibold'>Maximum Hours: {maxHours ?? '0'}</p>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
           <div className="bg-lightblue/50 p-3 rounded">
-              <p className="text-sm text-mediumgray">Total Hours</p>
-              <p className="text-xl font-semibold">
-                {formatDuration(
-                    sessions.reduce((total, session) => total + normalizeDuration(session), 0)
-                )}
-              </p>
+            <p className="text-sm text-mediumgray">Total Hours</p>
+            <p className="text-xl font-semibold">
+              {formatDuration(
+                sessions.reduce((total: number, session: WorkSession) => total + normalizeDuration(session), 0)
+              )}
+            </p>
           </div>
 
           <div className="bg-aquagreen/20 p-4 rounded">
             <p className="text-sm text-mediumgray">Approved Hours</p>
             <p className="text-xl font-semibold">
-                {formatDuration(
-                    sessions
-                        .filter(s => s.status === 'approved')
-                        .reduce((total, session) => total + normalizeDuration(session), 0)
-                )}
+              {formatDuration(
+                sessions
+                  .filter((s: WorkSession) => s.status === 'approved')
+                  .reduce((total: number, session: WorkSession) => total + normalizeDuration(session), 0)
+              )}
             </p>
           </div>
 
           <div className="bg-yellow-50 p-3 rounded">
             <p className="text-sm text-mediumgray">Pending Hours</p>
             <p className="text-xl font-semibold">
-                {formatDuration(
-                    sessions
-                        .filter(s => s.status === 'pending')
-                        .reduce((total, session) => total + normalizeDuration(session), 0)
-                )}
+              {formatDuration(
+                sessions
+                  .filter((s: WorkSession) => s.status === 'pending')
+                  .reduce((total: number, session: WorkSession) => total + normalizeDuration(session), 0)
+              )}
             </p>
           </div>
-
         </div>
       </div>
       
+      {/* Work Diary */}
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="text-lg font-semibold text-boldblue mb-7.5">Work Diary</h3>
         
@@ -263,7 +318,7 @@ const normalizeDuration = (session: WorkSession): number => {
           <p className="text-gray-500 text-center py-4">No work sessions yet</p>
         ) : (
           <div className="space-y-4">
-            {sessions.map((session) => (
+            {sessions.map((session: WorkSession) => (
               <div key={session._id} className="border-b border-lightblue pb-4 last:border-b-0">
                 <div className="flex justify-between items-start">
                   <div>
@@ -316,13 +371,15 @@ const normalizeDuration = (session: WorkSession): number => {
                   <div className="flex gap-2 mt-3">
                     <button
                       onClick={() => handleApprove(session._id)}
-                      className="px-3 py-1 bg-aquagreen text-white rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+                      disabled={approvingSessionId === session._id}
+                      className="px-3 py-1 bg-aquagreen text-white rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
                     >
-                      Approve
+                      {approvingSessionId === session._id ? 'Approving...' : 'Approve'}
                     </button>
                     <button
                       onClick={() => setDisputingSessionId(session._id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+                      disabled={disputeMutation.isPending}
+                      className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
                     >
                       Dispute
                     </button>
@@ -353,25 +410,28 @@ const normalizeDuration = (session: WorkSession): number => {
                   setDisputingSessionId(null);
                   setDisputeReason('');
                 }}
-                className="px-4 py-2 border rounded"
+                disabled={disputeMutation.isPending}
+                className="px-4 py-2 border rounded disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDispute}
-                disabled={!disputeReason.trim()}
+                disabled={!disputeReason.trim() || disputeMutation.isPending}
                 className={`px-4 py-2 bg-red-500 text-white rounded ${
-                  !disputeReason.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                  !disputeReason.trim() || disputeMutation.isPending 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:opacity-70 cursor-pointer'
                 }`}
               >
-                Submit Dispute
+                {disputeMutation.isPending ? 'Submitting...' : 'Submit Dispute'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-
+      {/* Image Modal */}
       {selectedImage && (
         <div className="fixed inset-0 bg-black/30 bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
           <div className="relative max-w-full max-h-full">

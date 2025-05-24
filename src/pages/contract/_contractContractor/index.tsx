@@ -18,11 +18,27 @@ interface ContractContractorProps {
     tab?: string;
 }
 
+interface Contract {
+    _id: string;
+    status: string;
+    jobId?: {
+      _id: string;
+    };
+    contractorId?: {
+      _id: string;
+      name: string;
+    };
+    clientId?: {
+      _id: string;
+      name: string;
+    };
+}
+
 const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps) => {
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState<Jobs | null>(null);
     const [mutualContractId, setMutualContractId] = useState('');
-    const [contract, setContract] = useState(null);
+    const [contract, setContract] = useState<Contract | null>();
     const [contractStatus, setContractStatus] = useState('');
     const [middleTab, setMiddleTab] = useState('milestone');
     
@@ -140,7 +156,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                         }} 
                         jobId={jobId} 
                         applicationId={proposalId}
-                        contract={contract}
+                        contract={contract as Contract}
                     />
                 );
             case 'timesheet':

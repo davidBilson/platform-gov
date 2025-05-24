@@ -83,9 +83,6 @@ const CompletedContracts = ({ contracts = [] }: ContractsProps) => {
                 
                 <RateUserBtn 
                   contract={contract}
-                  onRatingSubmitted={() => {
-                    console.log('Rating submitted successfully');
-                  }}
                 />
                 
               </article>

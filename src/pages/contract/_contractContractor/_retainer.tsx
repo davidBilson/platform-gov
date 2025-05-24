@@ -6,17 +6,10 @@ import {
   RetainerPaymentHistory 
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
-
-interface Job {
-  _id: string;
-  paymentType: string;
-  retainerAmount: number;
-  retainerFrequency: 'weekly' | 'bi-weekly' | 'monthly';
-  retainerDuration: string;
-}
+import { Jobs } from '@/types/jobs';
 
 interface RetainerProps {
-  job: Job | null;
+  job: Jobs | null;
   mutualContractId: string;
 }
 
@@ -38,13 +31,12 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
     }
   }, [mutualContractId]);
 
-  // Determine if submission window is open (within 48 hours of next payment)
   useEffect(() => {
     if (retainerData?.nextPaymentDate) {
       const now = new Date();
       const paymentDate = new Date(retainerData.nextPaymentDate);
       const diffInHours = (paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-      setCanSubmit(diffInHours <= 48); // Within 48 hours window
+      setCanSubmit(diffInHours <= 48);
     } else {
       setCanSubmit(false);
     }

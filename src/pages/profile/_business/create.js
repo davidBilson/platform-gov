@@ -1,3 +1,4 @@
+import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
 import React, { useState, useEffect } from 'react';
 import { FaSearch } from "react-icons/fa";
 import { IoMdImages } from "react-icons/io";
@@ -6,9 +7,7 @@ import useAuthStore from '@/store/useAuth';
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
 import { IoCloseOutline } from "react-icons/io5";
-import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
 import { IoIosSearch } from "react-icons/io";
-
 
 const CreateBusinessProfile = () => {
   const [business, setBusiness] = useState({
@@ -57,7 +56,6 @@ const CreateBusinessProfile = () => {
         setBusiness(data.data);
         return data.data;
       } else {
-        console.log("No business profile found. Ready to create one.");
         return null;
       }
     } catch (err) {

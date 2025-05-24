@@ -28,7 +28,6 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const createRating = async (params: CreateRatingParams): Promise<Rating> => {
   try {
-    console.log(params);
     const endPoint = process.env.NEXT_PUBLIC_CREATE_NEW_RATING;
     const response = await axios.post(`${baseUrl}${endPoint}`, params);
     return response.data;

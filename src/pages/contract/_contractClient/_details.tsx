@@ -44,12 +44,26 @@ interface ApplicationDetail {
   freelancerId: string;
   freelancerProfileId: FreelancerProfile;
 }
-
+interface Contract {
+  _id: string;
+  status: string;
+  jobId?: {
+    _id: string;
+  };
+  contractorId?: {
+    _id: string;
+    name: string;
+  };
+  clientId?: {
+    _id: string;
+    name: string;
+  };
+}
 interface DetailsProps {
   applicationDetail?: ApplicationDetail;
   job: Job;
   jobId: string;
-  contract?: any;
+  contract?: Contract;
 }
 
 const Details = ({applicationDetail, job, contract }: DetailsProps) => {
@@ -152,9 +166,6 @@ const Details = ({applicationDetail, job, contract }: DetailsProps) => {
             contract && contract?.status === 'completed' &&
             <RateUserBtn 
               contract={contract}
-              onRatingSubmitted={() => {
-                console.log('Rating submitted successfully');
-              }}
             />
           }
         </article>

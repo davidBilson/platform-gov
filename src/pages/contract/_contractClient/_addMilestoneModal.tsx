@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { IoMdCalendar } from 'react-icons/io';
@@ -22,10 +22,6 @@ const AddNewMilestoneModal = ({ contractId, onClose, onMilestoneAdded }: ModalPr
   const datePickerRef = useRef(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { userId } = useAuthStore();
-
-  useEffect(() => {
-    console.log(contractId)
-  }, [])
 
   const handleSubmit = async () => {
     if (!task.trim()) {
