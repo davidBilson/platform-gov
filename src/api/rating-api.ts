@@ -39,17 +39,27 @@ export const createRating = async (params: CreateRatingParams): Promise<Rating> 
   }
 };
 
-// Get all ratings for a user
 export const getUserRatings = async (userId: string, role?: 'client' | 'contractor'): Promise<Rating[]> => {
   try {
     let url = `${baseUrl}${process.env.NEXT_PUBLIC_GET_USER_RATINGS?.replace(':id', userId)}`;
     if (role) {
       url += `?role=${role}`;
     }
+    
+    
     const response = await axios.get(url);
-    return response.data;
+    
+    
+    if (Array.isArray(response.data)) {
+      return response.data;
+    } else {
+      console.warn('Expected array but received:', response.data);
+      return [];
+    }
   } catch (error) {
+    console.error('Error fetching user ratings:', error);
     if (axios.isAxiosError(error)) {
+      console.error('Response data:', error.response?.data);
       throw new Error(error.response?.data?.message || 'Failed to fetch user ratings');
     }
     throw new Error('Failed to fetch user ratings');

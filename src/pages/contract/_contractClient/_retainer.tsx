@@ -20,14 +20,19 @@ interface Job {
 interface RetainerProps {
   job: Job;
   mutualContractId: string;
+  contractStatus: string;
 }
 
-const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
+const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [starting, setStarting] = useState<boolean>(false);
   const { userId } = useAuthStore();
+
+  useEffect(() => {
+    console.log(contractStatus);
+  }, [contractStatus])
 
   // Fetch retainer data when component mounts or contract ID changes
   useEffect(() => {
@@ -172,12 +177,16 @@ const ClientRetainer = ({ job, mutualContractId }: RetainerProps) => {
           )}
         </tbody>
       </table>
+      {contractStatus === 'completed' ? (
+        <p className="text-aquagreen">This contract has ended</p>
+      ) :(
       <button
-            onClick={() => endContract(mutualContractId, userId)}
-            className="my-7.5 block px-3 py-1 bg-red-500/30 hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-red-600 rounded text-sm"
-          >
+        disabled={contractStatus == 'completed' && true}
+        onClick={() => endContract(mutualContractId, userId)}
+        className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+      >
             End Contract
-          </button>
+          </button>)}
     </section>
   );
 };

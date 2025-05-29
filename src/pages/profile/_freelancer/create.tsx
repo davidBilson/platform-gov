@@ -208,7 +208,7 @@ const CreateFreelancerProfile = () => {
     if (e.target.name === 'bio') {
       const words = e.target.value.split(/\s+/).filter(Boolean);
       if (words.length > 300) {
-        // Truncate to 300 words if exceeded
+        
         const truncatedText = words.slice(0, 300).join(' ');
         setFormData({
           ...formData,
@@ -304,9 +304,7 @@ const handleSubmit = (e: React.FormEvent): void => {
     <>
     { showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} /> }
     <main className="p-6">
-      
       <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
-=
         <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-col sm:flex-row sm:items-center gap-5">
           
           <div className="relative w-22 h-22  bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0">

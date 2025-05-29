@@ -151,7 +151,7 @@ const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContract
             )}
           </section>
 
-        {role === 'client'  && (
+        {role === 'client'  &&contractStatus !== 'completed' && (
           <button 
             disabled={contractStatus === 'completed' && true}
             onClick={() => setShowNewMilestoneModal(true)}
@@ -163,13 +163,16 @@ const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContract
         )}
       </section>
 
+      {contractStatus === 'completed' ? (
+        <p className="text-aquagreen mt-7">This contract has ended</p>
+      ) :(
       <button
-        disabled={contractStatus === 'completed' && true}
+        disabled={contractStatus == 'completed' && true}
         onClick={() => endContract(mutualContractId, userId)}
-        className="disabled:cursor-not-allowed disabled:opacity-70 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+        className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
       >
-        End Contract
-      </button>
+            End Contract
+          </button>)}
 
       {showNewMilestoneModal && (
         <div 

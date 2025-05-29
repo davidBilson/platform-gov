@@ -60,6 +60,7 @@ export interface HiringInfo {
 }
 
 export interface Contract {
+  id: string;
   _id: string;
   hiringId: HiringInfo;
   jobId: JobInfo;

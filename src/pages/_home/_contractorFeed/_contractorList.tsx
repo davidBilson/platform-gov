@@ -4,6 +4,7 @@ import { FaUser } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import Image from 'next/image';
 import { IoLocationOutline } from 'react-icons/io5';
+import Link from 'next/link';
 
 
 const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
@@ -80,11 +81,10 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
                       </div>
                     }
                   </div>
-
                   <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 w-1/2 h-full'>
-                    <p className="text-lg md:text-xl font-semibold">
+                    <Link href={`/profile/${contractor.user._id}`} className="text-lg md:text-xl font-semibold cursor-pointer hover:underline">
                       {contractor.user.name.split(' ')[0]} {contractor.user.name.split(' ')[1]?.charAt(0)}.
-                    </p>
+                    </Link>
                     <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
                     <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
                   </div>

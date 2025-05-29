@@ -21,19 +21,20 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
         ) : 
         contracts.map((contract) => (
           <article key={contract._id} className="mb-7.5 flex items-start">
-            <div>
-            <section className='flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5'>
-              <div>
-                <p className='text-xs text-mediumgray font-semibold mb-5'>
-                  {new Date(contract.startDate).toLocaleDateString()} - {contract.endDate ? new Date(contract.endDate).toLocaleDateString() : 'Present'}
-                </p>
-                <h3 className="text-xl font-semibold mb-3.75">
-                  {contract.jobId?.jobTitle || 'Job Title'}
-                </h3>
-              </div>
-            </section>
+            <div className='w-full'>
+              <section className='flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5w-full'>
+                <div>
+                  <p className='text-xs text-mediumgray font-semibold mb-5'>
+                    {new Date(contract.startDate).toLocaleDateString()} - {contract.endDate ? new Date(contract.endDate).toLocaleDateString() : 'Present'}
+                  </p>
+                  <h3 className="text-xl font-semibold mb-3.75">
+                    {contract.jobId?.jobTitle || 'Job Title'}
+                  </h3>
+                </div>
+                <RateUserBtn contract={contract} />
+              </section>
 
-            <div className="flex items-center gap-5 mb-5">
+            <div className="flex items-center gap-5 my-5">
               <div className="w-8.75 h-8.75 bg-cyan-200 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
                 {contract.jobId?.clientLogo || contract.clientId?.profile?.logo ? (
                   <ProfilePicture 
@@ -87,12 +88,12 @@ const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
                     }
                   }}
                 > Manage {contract.paymentStructure.charAt(0).toUpperCase() + contract.paymentStructure.slice(1)}</Link>{" | "}
-                <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}>Submit For Payment</Link>{" | "}
+                <Link className='cursor-pointer hover:text-deepskyblue hover:underline' href={`/contract/${contract._id}`}>Submit For Payment</Link>
               </div>
             </section>
             </div>
             
-            <RateUserBtn contract={contract} />
+           
             
           </article>
         ))}

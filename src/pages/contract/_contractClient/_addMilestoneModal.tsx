@@ -52,9 +52,9 @@ const AddNewMilestoneModal = ({ contractId, onClose, onMilestoneAdded }: ModalPr
         amount
       }, userId);
 
-      toast.success('Milestone added successfully!');
-      onMilestoneAdded(); // Trigger the refetch in parent
-      onClose(); // Close the modal
+      // toast.success('Milestone added successfully!');
+      onMilestoneAdded();
+      onClose();
     } catch (error) {
       console.error('Error adding milestone:', error);
       toast.error('Failed to add milestone');

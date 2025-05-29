@@ -46,8 +46,8 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
     <>
       {
         showComments && comments ? (
-          <div className="flex flex-col gap-2.5 bg-skyblue rounded-lg w-full max-w-75 p-5">
-            <h3 className='font-bold text-[15px]'>Your Feedback</h3>
+          <div className="flex flex-col gap-2.5 bg-skyblue rounded-lg w-50 p-5">
+            {/* <h3 className='font-bold text-[15px]'>Your Feedback</h3> */}
               
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -72,7 +72,7 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
         ) : (
           <div className={`${classes.container} ${showComments && comments ? 'space-y-3' : ''}`}>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 w-50 p-5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   star <= rating ? (
                     <FaStar

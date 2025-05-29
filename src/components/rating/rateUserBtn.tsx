@@ -58,7 +58,8 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingRating, setExistingRating] = useState<ExistingRating | null>(null);
+  const [givenRating, setGivenRating] = useState<ExistingRating | null>(null); // Rating I gave
+  const [receivedRating, setReceivedRating] = useState<ExistingRating | null>(null); // Rating I received
   const [loading, setLoading] = useState(true);
   
   const { userId, role } = useAuthStore();
@@ -113,9 +114,9 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
     };
   };
 
-  // Check if user has already rated this contract
+  // Check for both given and received ratings
   useEffect(() => {
-    const checkExistingRating = async () => {
+    const checkExistingRatings = async () => {
       if (!contract._id || !userId) {
         setLoading(false);
         return;
@@ -125,18 +126,33 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
         setLoading(true);
         const ratings: Rating[] = await getContractRatings(contract._id);
         
-        // Find rating by current user - handle both populated and non-populated cases
-        const userRating = ratings.find((rating: Rating) => {
+        // Find rating GIVEN by current user (where I am the reviewer)
+        const userGivenRating = ratings.find((rating: Rating) => {
           const reviewerId = typeof rating.reviewer === 'string' 
             ? rating.reviewer 
             : rating.reviewer._id;
           return reviewerId === userId;
         });
         
-        if (userRating) {
-          const convertedRating = convertRatingToExistingRating(userRating);
-          if (convertedRating) {
-            setExistingRating(convertedRating);
+        // Find rating RECEIVED by current user (where I am the reviewee)
+        const userReceivedRating = ratings.find((rating: Rating) => {
+          const revieweeId = typeof rating.reviewee === 'string' 
+            ? rating.reviewee 
+            : rating.reviewee._id;
+          return revieweeId === userId;
+        });
+        
+        if (userGivenRating) {
+          const convertedGivenRating = convertRatingToExistingRating(userGivenRating);
+          if (convertedGivenRating) {
+            setGivenRating(convertedGivenRating);
+          }
+        }
+
+        if (userReceivedRating) {
+          const convertedReceivedRating = convertRatingToExistingRating(userReceivedRating);
+          if (convertedReceivedRating) {
+            setReceivedRating(convertedReceivedRating);
           }
         }
       } catch (err) {
@@ -149,7 +165,7 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
       }
     };
 
-    checkExistingRating();
+    checkExistingRatings();
   }, [contract._id, userId]);
 
   const handleRatingSubmit = async (rating: number, comments: string) => {
@@ -171,8 +187,8 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
         comments
       });
 
-      // Update local state with the new rating
-      setExistingRating({
+      // Update local state with the new GIVEN rating
+      setGivenRating({
         _id: newRating._id || 'temp-id',
         rating,
         comments,
@@ -201,37 +217,50 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
     );
   }
 
-  if (existingRating) {
+  // Show received rating if it exists (what the other person said about me)
+  if (receivedRating) {
     return (
+      <div className="flex flex-col gap-1">
         <RatingDisplay
-          rating={existingRating.rating}
-          comments={existingRating.comments}
+          rating={receivedRating.rating}
+          comments={receivedRating.comments}
           size="sm"
-          showComments={!!existingRating.comments}
+          showComments={!!receivedRating.comments}
         />
+      </div>
     );
   }
 
-  return (
-    <>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsModalOpen(true);
-        }}
-        className="bg-boldblue text-xs text-white font-semibold py-2.75 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer"
-      >
-        Rate {revieweeInfo.role}
-      </button>
+  // Show rate button only if user hasn't given a rating yet
+  if (!givenRating) {
+    return (
+      <>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsModalOpen(true);
+          }}
+          className="bg-boldblue text-xs text-white font-semibold py-2.75 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer"
+        >
+          Rate {revieweeInfo.role}
+        </button>
 
-      <RatingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleRatingSubmit}
-        revieweeName={revieweeInfo.name}
-        isSubmitting={isSubmitting}
-      />
-    </>
+        <RatingModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleRatingSubmit}
+          revieweeName={revieweeInfo.name}
+          isSubmitting={isSubmitting}
+        />
+      </>
+    );
+  }
+
+  // If user has given a rating but hasn't received one yet, show a neutral message
+  return (
+    <div className="text-xs text-gray-500 italic">
+      Waiting for {revieweeInfo.name}&apos;s rating
+    </div>
   );
 };
 
