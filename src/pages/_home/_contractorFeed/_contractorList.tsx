@@ -1,13 +1,99 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ContractorListProps } from '@/types/contractors';
 import { FaUser } from "react-icons/fa";
 import { MdStar, MdStarBorder } from "react-icons/md";
 import Image from 'next/image';
 import { IoLocationOutline } from 'react-icons/io5';
 import Link from 'next/link';
+import { getUserRatings } from '@/api/rating-api';
 
+interface Rating {
+  _id: string;
+  contractId: string;
+  jobId: string;
+  reviewer: string;
+  reviewee: string | { _id: string; name: string };
+  role: 'client' | 'contractor';
+  rating: number;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ContractorWithRating {
+  contractor: any; // Use your actual contractor type
+  rating: { average: number; count: number };
+  loading: boolean;
+}
 
 const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
+  const [contractorsWithRatings, setContractorsWithRatings] = useState<ContractorWithRating[]>([]);
+  const [ratingsLoading, setRatingsLoading] = useState<boolean>(true);
+
+  // Function to get contractor ratings
+  const getContractorRatings = useCallback(async (contractorId: string): Promise<{ average: number; count: number }> => {
+    try {
+      const ratings = await getUserRatings(contractorId, 'contractor');
+      
+      if (!ratings || ratings.length === 0) {
+        return { average: 0, count: 0 };
+      }
+      
+      const sum = ratings.reduce((acc: number, rating: Rating) => acc + rating.rating, 0);
+      const average = sum / ratings.length;
+      
+      return { 
+        average: Math.round(average * 10) / 10, // Round to 1 decimal
+        count: ratings.length 
+      };
+    } catch (error) {
+      console.error(`Error fetching ratings for contractor ${contractorId}:`, error);
+      return { average: 0, count: 0 };
+    }
+  }, []);
+
+  // Fetch ratings for all contractors
+  useEffect(() => {
+    const fetchAllRatings = async () => {
+      if (!contractors || contractors.length === 0) {
+        setRatingsLoading(false);
+        return;
+      }
+
+      setRatingsLoading(true);
+      
+      try {
+        const contractorsWithRatingsData = await Promise.all(
+          contractors.map(async (contractor) => {
+            const contractorId = contractor.user._id || contractor._id;
+            const rating = await getContractorRatings(contractorId);
+            
+            return {
+              contractor,
+              rating,
+              loading: false
+            };
+          })
+        );
+
+        setContractorsWithRatings(contractorsWithRatingsData);
+      } catch (error) {
+        console.error('Error fetching contractor ratings:', error);
+        // Set contractors with default ratings if fetching fails
+        const defaultContractors = contractors.map(contractor => ({
+          contractor,
+          rating: { average: 0, count: 0 },
+          loading: false
+        }));
+        setContractorsWithRatings(defaultContractors);
+      } finally {
+        setRatingsLoading(false);
+      }
+    };
+
+    fetchAllRatings();
+  }, [contractors, getContractorRatings]);
+
   if (!contractors || contractors.length === 0) {
     return <section>No contractors found</section>;
   }
@@ -18,29 +104,36 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
     return text.slice(0, maxLength) + '...';
   };
   
-  const renderRating = () => {
-    const rating = 4  // mock rating
-    const maxRating = 5;
-
+  // Render rating component
+  const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false, count: number = 0) => {
+    const filledStars = Math.floor(rating);
+    
     return (
-      <div className="flex items-center">
-        {Array.from({ length: maxRating }).map((_, i) => (
-          i < rating ? 
-            <MdStar key={i} className="text-deepskyblue text-lg" /> : 
-            <MdStarBorder key={i} className="text-deepskyblue text-lg" />
-        ))}
+      <div className="flex items-center gap-1">
+        <div className="flex">
+          {Array.from({ length: maxRating }).map((_, i) => (
+            i < filledStars ? 
+              <MdStar key={i} className="text-deepskyblue text-lg" /> : 
+              <MdStarBorder key={i} className="text-deepskyblue text-lg" />
+          ))}
+        </div>
+        {showCount && count > 0 && (
+          <span className="text-sm text-boldblue ml-1">
+            ({rating.toFixed(1)})
+          </span>
+        )}
       </div>
     );
-  };
+  }, []);
 
   // Sort contractors to prioritize 'Janus Global Advisors'
-  const sortedContractors = [...contractors].sort((a, b) => {
+  const sortedContractorsWithRatings = [...contractorsWithRatings].sort((a, b) => {
     // Check if contractor a is affiliated with Janus Global Advisors
-    if (a.firmAffiliation === 'Janus Global Advisors' && b.firmAffiliation !== 'Janus Global Advisors') {
+    if (a.contractor.firmAffiliation === 'Janus Global Advisors' && b.contractor.firmAffiliation !== 'Janus Global Advisors') {
       return -1; // a comes before b
     }
     // Check if contractor b is affiliated with Janus Global Advisors
-    if (a.firmAffiliation !== 'Janus Global Advisors' && b.firmAffiliation === 'Janus Global Advisors') {
+    if (a.contractor.firmAffiliation !== 'Janus Global Advisors' && b.contractor.firmAffiliation === 'Janus Global Advisors') {
       return 1; // b comes before a
     }
     // If both have same affiliation status, maintain original order
@@ -49,7 +142,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
 
   return (
     <section className="pt-7.5 pb-10 flex flex-col gap-7.5">
-        {sortedContractors.map((contractor) => (
+        {sortedContractorsWithRatings.map(({ contractor, rating, loading }) => (
           <div 
             key={contractor._id} 
           >
@@ -95,7 +188,11 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
                 <div className='w-full md:max-w-[80%] mt-4 md:mt-0'>
                   <div className='mb-3 md:mb-6.25 flex items-center justify-between flex-wrap'>
                     <h3 className='font-bold text-sm text-boldblue'>{contractor.primaryPosition}</h3>
-                    {renderRating()}
+                    {ratingsLoading ? (
+                      <span className="text-sm text-gray-500">Loading...</span>
+                    ) : (
+                      renderRating(rating.average, 5, true, rating.count)
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-2 md:gap-2.5 mb-3 md:mb-3.75">
                     {contractor.skills.slice(0, 3).map((skill, index) => (

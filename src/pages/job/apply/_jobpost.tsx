@@ -1,8 +1,11 @@
 import { format } from 'date-fns';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
+import { MdStar, MdStarBorder } from "react-icons/md";
 import Link from 'next/link';
 import { Jobs } from '@/types/jobs';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getUserRatings } from '@/api/rating-api';
 
 interface JobPostProps {
   job: Jobs;
@@ -15,7 +18,23 @@ interface LocationObject {
   state?: string;
 }
 
+interface Rating {
+  _id: string;
+  contractId: string;
+  jobId: string;
+  reviewer: string | { _id: string; name: string };
+  reviewee: string | { _id: string; name: string };
+  role: 'client' | 'contractor';
+  rating: number;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
+  const [clientRatings, setClientRatings] = useState<Rating[]>([]);
+  const [ratingsLoading, setRatingsLoading] = useState<boolean>(false);
+
   // Format the date
   const postedDate = job.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
   
@@ -36,12 +55,77 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
     if (Array.isArray(job.clientLocation) && job.clientLocation.length > 0) {
       const locationObj = job.clientLocation[0] as unknown as LocationObject;
       if (locationObj && typeof locationObj === 'object' && 'country' in locationObj && 'state' in locationObj) {
-        
         return `${locationObj.state}${locationObj.state && ','} ${locationObj.country}`;
       }
     }
     return job.location;
   };
+
+  // Function to get client ratings
+  const getClientRatings = useCallback(async (clientId: string): Promise<void> => {
+    try {
+      setRatingsLoading(true);
+      const ratings = await getUserRatings(clientId, 'client');
+      const processedRatings = (ratings || []).map(rating => ({
+        ...rating,
+        _id: rating._id || '',
+        createdAt: rating.createdAt ? String(rating.createdAt) : '',
+        updatedAt: rating.updatedAt ? String(rating.updatedAt) : '',
+      }));
+      setClientRatings(processedRatings);
+    } catch (error) {
+      console.error('Error fetching client ratings:', error);
+      setClientRatings([]);
+    } finally {
+      setRatingsLoading(false);
+    }
+  }, []);
+
+  // Fetch client ratings on component mount
+  useEffect(() => {
+    const clientId = job.userId?._id || job.userId;
+    
+    if (clientId) {
+      getClientRatings(String(clientId));
+    }
+  }, [job.userId, getClientRatings]);
+
+  // Calculate overall client rating
+  const overallRating = useMemo((): { average: number; count: number } => {
+    if (!clientRatings || clientRatings.length === 0) {
+      return { average: 0, count: 0 };
+    }
+    
+    const sum = clientRatings.reduce((acc, rating) => acc + rating.rating, 0);
+    const average = sum / clientRatings.length;
+    
+    return { 
+      average: Math.round(average * 10) / 10,
+      count: clientRatings.length 
+    };
+  }, [clientRatings]);
+
+  // Helper function to render star ratings
+  const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false) => {
+    const filledStars = Math.floor(rating);
+    
+    return (
+      <div className="flex items-center gap-1">
+        <div className="flex">
+          {Array.from({ length: maxRating }).map((_, i) => (
+            i < filledStars ? 
+              <MdStar key={i} className="text-deepskyblue text-lg" /> : 
+              <MdStarBorder key={i} className="text-deepskyblue text-lg" />
+          ))}
+        </div>
+        {showCount && (
+          <span className="text-sm text-gray-600 ml-1">
+            ({rating.toFixed(1)})
+          </span>
+        )}
+      </div>
+    );
+  }, []);
 
   return (
     <section className='w-full max-w-275 m-auto pb-64'>
@@ -119,7 +203,24 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
               <img src={job.clientLogo} alt={job.clientName} className="w-full h-full object-cover" />
             )}
           </div>
-          <Link href="" className="cursor-pointer hover:underline font-medium">{job.clientName}</Link>
+          <div className="flex flex-col">
+            <Link href="" className="cursor-pointer hover:underline font-medium">{job.clientName}</Link>
+            {/* Client Rating */}
+            <div className="flex items-center gap-2 mt-1">
+              {ratingsLoading ? (
+                <span className="text-xs text-gray-500">Loading ratings...</span>
+              ) : overallRating.count > 0 ? (
+                <>
+                  {renderRating(overallRating.average)}
+                  <span className="text-xs text-gray-600">
+                    ({overallRating.average.toFixed(1)}) • {overallRating.count} review{overallRating.count !== 1 ? 's' : ''}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xs text-gray-500">No reviews yet</span>
+              )}
+            </div>
+          </div>
         </div>
         
         <div className="flex flex-col gap-4">
@@ -161,6 +262,46 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
           Apply
         </button>
       </div>
+
+      {/* Client Ratings Section */}
+      {clientRatings.length > 0 && (
+        <section className='my-7'>
+          <h3 className='font-semibold mb-4'>Recent Reviews</h3>
+          <div className='space-y-4'>
+            {clientRatings.slice(0, 3).map((rating, index) => (
+              <div key={rating._id || index} className='bg-gray-50 p-4 rounded-lg'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h4 className='font-semibold'>
+                    {typeof rating.reviewer === 'object' && rating.reviewer !== null && 'name' in rating.reviewer 
+                      ? (rating.reviewer as { name: string }).name 
+                      : rating.reviewer}
+                  </h4>
+                  <span className='text-sm text-gray-500'>
+                    {new Date(rating.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className='mb-3.75'>
+                  {rating.jobId.jobTitle}
+                </p>
+                <div className='flex items-center gap-2 mb-2'>
+                  {renderRating(rating.rating)}
+                </div>
+                {rating.comments && (
+                  <p className='text-sm text-gray-700'>{rating.comments}</p>
+                )}
+              </div>
+            ))}
+            
+            {clientRatings.length > 3 && (
+              <div className='text-center'>
+                <button className='text-boldblue text-sm font-semibold hover:underline'>
+                  View all {clientRatings.length} reviews
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </section>
   );
 };
