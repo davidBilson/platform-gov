@@ -7,23 +7,27 @@ import { IoLocationOutline } from 'react-icons/io5';
 import Link from 'next/link';
 import { getUserRatings } from '@/api/rating-api';
 
-interface Rating {
-  _id: string;
-  contractId: string;
-  jobId: string;
-  reviewer: string;
-  reviewee: string | { _id: string; name: string };
-  role: 'client' | 'contractor';
-  rating: number;
-  comments?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface ContractorWithRating {
-  contractor: any; // Use your actual contractor type
+  contractor: {
+    _id?: string; // Made optional to handle potential undefined
+    user: {
+      _id: string;
+      name: string;
+    };
+    profileImage?: string;
+    primaryPosition: string;
+    profession?: string;
+    location: {
+      state: string;
+    };
+    firmAffiliation?: string;
+    skills: string[];
+    expertise: string[];
+    certifications: string[];
+    bio: string;
+  };
   rating: { average: number; count: number };
-  loading: boolean;
 }
 
 const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
@@ -39,7 +43,11 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
         return { average: 0, count: 0 };
       }
       
-      const sum = ratings.reduce((acc: number, rating: Rating) => acc + rating.rating, 0);
+      // Handle the ratings without explicit typing to avoid conflicts
+      const sum = ratings.reduce((acc: number, rating: { rating?: number }) => {
+        return acc + (rating.rating ?? 0);
+      }, 0);
+      
       const average = sum / ratings.length;
       
       return { 
@@ -65,13 +73,21 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
       try {
         const contractorsWithRatingsData = await Promise.all(
           contractors.map(async (contractor) => {
-            const contractorId = contractor.user._id || contractor._id;
+            // Handle potential undefined _id
+            const contractorId = contractor.user._id || contractor._id || '';
+            if (!contractorId) {
+              console.warn('Contractor missing ID:', contractor);
+              return {
+                contractor,
+                rating: { average: 0, count: 0 }
+              };
+            }
+            
             const rating = await getContractorRatings(contractorId);
             
             return {
               contractor,
-              rating,
-              loading: false
+              rating
             };
           })
         );
@@ -82,8 +98,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
         // Set contractors with default ratings if fetching fails
         const defaultContractors = contractors.map(contractor => ({
           contractor,
-          rating: { average: 0, count: 0 },
-          loading: false
+          rating: { average: 0, count: 0 }
         }));
         setContractorsWithRatings(defaultContractors);
       } finally {
@@ -94,16 +109,6 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
     fetchAllRatings();
   }, [contractors, getContractorRatings]);
 
-  if (!contractors || contractors.length === 0) {
-    return <section>No contractors found</section>;
-  }
-
-  // Truncate description if it's too long
-  const truncateBio = (text: string, maxLength = 200): string => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + '...';
-  };
-  
   // Render rating component
   const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false, count: number = 0) => {
     const filledStars = Math.floor(rating);
@@ -126,6 +131,16 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
     );
   }, []);
 
+  if (!contractors || contractors.length === 0) {
+    return <section>No contractors found</section>;
+  }
+
+  // Truncate description if it's too long
+  const truncateBio = (text: string, maxLength = 200): string => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
+
   // Sort contractors to prioritize 'Janus Global Advisors'
   const sortedContractorsWithRatings = [...contractorsWithRatings].sort((a, b) => {
     // Check if contractor a is affiliated with Janus Global Advisors
@@ -142,9 +157,9 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
 
   return (
     <section className="pt-7.5 pb-10 flex flex-col gap-7.5">
-        {sortedContractorsWithRatings.map(({ contractor, rating, loading }) => (
+        {sortedContractorsWithRatings.map(({ contractor, rating }, index) => (
           <div 
-            key={contractor._id} 
+            key={contractor._id || contractor.user._id || index} // Better key handling
           >
             {/* Add a visual indicator for Janus Global Advisors contractors */}
             {contractor.firmAffiliation === 'Janus Global Advisors' && (
@@ -202,7 +217,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
                     ))}
                     
                     {contractor.expertise.slice(0, 2).map((exp, index) => (
-                      <span key={`skill-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
+                      <span key={`expertise-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
                         {exp}
                       </span>
                     ))}

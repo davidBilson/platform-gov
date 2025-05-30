@@ -21,7 +21,7 @@ interface LocationObject {
 interface Rating {
   _id: string;
   contractId: string;
-  jobId: string;
+  jobId: string | { jobTitle: string };
   reviewer: string | { _id: string; name: string };
   reviewee: string | { _id: string; name: string };
   role: 'client' | 'contractor';
@@ -281,7 +281,9 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
                   </span>
                 </div>
                 <p className='mb-3.75'>
-                  {rating.jobId.jobTitle}
+                  {typeof rating.jobId === 'object' && rating.jobId !== null && 'jobTitle' in rating.jobId 
+                    ? (rating.jobId as { jobTitle: string }).jobTitle 
+                    : ''}
                 </p>
                 <div className='flex items-center gap-2 mb-2'>
                   {renderRating(rating.rating)}

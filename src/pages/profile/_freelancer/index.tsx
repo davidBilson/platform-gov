@@ -354,7 +354,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
                         {typeof rating.reviewer === 'object' && rating.reviewer !== null && 'name' in rating.reviewer ? (rating.reviewer as { name: string }).name : rating.reviewer}
                       </h4>
                       <p className='mb-3.75'>
-                        {rating.jobId.jobTitle}
+                        {typeof rating.jobId === 'object' && rating.jobId && 'jobTitle' in rating.jobId ? (rating.jobId as { jobTitle: string }).jobTitle : ''}
                       </p>
                       <div className='flex items-center gap-2 mb-2'>
                         {renderRating(rating.rating)}
