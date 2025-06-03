@@ -270,7 +270,7 @@ const UserNavbar = () => {
                     <p 
                       className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
                     >
-                      {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                      {name ? name.trim().split(/\s+/).map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
                     </p>
                   )
                 }
@@ -410,7 +410,7 @@ const UserNavbar = () => {
                 <p 
                   className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
                 >
-                  {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                  {name ? name.trim().split(/\s+/).map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
                 </p>
               )
             }
@@ -482,7 +482,7 @@ const UserNavbar = () => {
                     <p 
                       className="w-12 h-12 bg-[#A0D9F6] flex items-center justify-center rounded-full text-xl text-[#333] font-medium cursor-pointer"
                     >
-                      {name ? name.split(' ').map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
+                      {name ? name.trim().split(/\s+/).map((n: string) => n[0].toUpperCase()).join('') : 'KD'}
                     </p>
                   )
                 }
