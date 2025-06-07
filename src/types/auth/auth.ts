@@ -1,7 +1,7 @@
-// @/types/auth.ts
 
-export type UserType = 'contractor' | 'client';
+export type UserType = 'contractor' | 'client' | 'admin';
 
+// ************* SIGN UP *************
 export interface SignupFormData {
   userType: UserType;
   firstName: string;
@@ -29,18 +29,7 @@ export interface ErrorResponse {
   message?: string;
 }
 
-export interface AuthStore {
-  setFormData: (data: {
-    role?: UserType;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    password?: string;
-    userId?: string;
-  }) => void;
-  setUserId: (id: string) => void;
-  setVerificationStep: (step: string) => void;
-}
+// ************* SIGN IN *************
 
 export interface SignInFormData {
   email: string;
@@ -61,4 +50,20 @@ export interface SignInApiResponse {
       isPhoneVerified: boolean;
     };
   };
+}
+
+export interface SignInResponse {
+  success: boolean;
+  data?: {
+    user: {
+      _id: string;
+      name: string;
+      role: UserType;
+      email: string;
+      phoneNumber: string;
+      isEmailVerified: boolean;
+      isPhoneVerified: boolean;
+    };
+  };
+  error?: string;
 }

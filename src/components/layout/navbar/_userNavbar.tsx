@@ -8,7 +8,7 @@ import { useContractorFilter } from '@/store/useContractorFilter';
 import { useJobFilter } from '@/store/useJobFilter';
 
 import Logo from '@/components/ui/logo';
-import NotificationsDropdown from '@/components/ui/notificationDropdown';
+import NotificationsDropdown from '@/components/notifications/notificationDropdown';
 
 import { FaBell } from 'react-icons/fa6';
 import { FiLogOut, FiSearch } from 'react-icons/fi';
@@ -16,6 +16,7 @@ import { HiMenuAlt3 } from 'react-icons/hi';
 import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
 import ProfilePicture from '@/components/profile/profilePicture';
 import { fetchProfilePicture } from '../../../api/profile-api';
+import NotificationCount from "@/components/notifications/notificationCount";
 
 const UserNavbar = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -31,13 +32,12 @@ const UserNavbar = () => {
   const { setFeedType, feedType } = useFeedStore();
   const { name, role, resetAll, userId } = authStore();
 
-  // const [ profilePicture, setProfilePicture] = useState<string | null>(null);
   
   const { data: profilePicture } = useQuery({
     queryKey: ['profilePicture', userId],
     queryFn: () => fetchProfilePicture(userId),
-    enabled: !!userId, // Only fetch if userId exists
-    staleTime: Infinity // Cache indefinitely
+    enabled: !!userId, 
+    staleTime: Infinity
   });
 
   const { searchTerm: contractorSearchTerm, setSearchTerm: setContractorSearchTerm } = useContractorFilter();
@@ -255,9 +255,7 @@ const UserNavbar = () => {
                 className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
               >
                   <FaBell size={24} />
-                  <span className="absolute -top-1 -right-2 text-red-500 font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                  </span>
+                  <NotificationCount />
               </button>
               <NotificationsDropdown notificationsOpen={notificationsOpen} />
             </div>
@@ -327,9 +325,7 @@ const UserNavbar = () => {
                 className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
               >
                   <FaBell size={24} />
-                  <span className="absolute -top-1 -right-2 text-red-500 font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                  </span>
+                  <NotificationCount />
               </button>
               <NotificationsDropdown notificationsOpen={notificationsOpen} />
             </div>
@@ -394,9 +390,7 @@ const UserNavbar = () => {
                 className="text-boldblue hover:text-deepskyblue transition-colors cursor-pointer"
               >
                   <FaBell size={24} />
-                  <span className="absolute -top-1 -right-2 text-red-500  font-extrabold text-sm rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                  </span>
+                  <NotificationCount />
               </button>
               <NotificationsDropdown notificationsOpen={notificationsOpen} />
             </div>

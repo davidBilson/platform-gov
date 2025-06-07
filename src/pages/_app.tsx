@@ -9,11 +9,13 @@ import { useEffect } from "react";
 import useAuthStore from "@/store/useAuth";
 import { ToastContainer } from 'react-toastify';
 import AOS from 'aos';
+import useNotification from '@/store/useNotification';
+import useSocket from '@/store/useSocket';
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { userId, isLoading, initAuth, verificationStep } = useAuthStore();
-
+  
   const publicRoutes = [
     '/account/sign-up',
     '/account/sign-in',
@@ -21,7 +23,8 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
     '/account/reset-password',
     '/account/verification',
     '/privacy-policy',
-    '/'
+    '/',
+    '/admin'
   ];
 
   const isPublicRoute =
@@ -32,7 +35,10 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   
     useEffect(() => {
       initAuth();
-    }, [initAuth]);
+      if (userId) {
+        useSocket.getState().connect();
+      }
+    }, [initAuth, userId]);
   
     useEffect(() => {
       if (!isLoading && !userId && !isPublicRoute) {
@@ -68,6 +74,22 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
 }
 
 export default function App({ Component, pageProps }: AppProps) {
+
+  const socket = useSocket(state => state.socket);
+  const { init, fetchNotifications } = useNotification();
+
+  useEffect(() => {
+      fetchNotifications();
+  }, [fetchNotifications]);
+  
+  useEffect(() => {
+    const initialize = async () => {
+      if (socket && socket.connected) {
+        init(socket);
+      }
+    };
+    initialize();
+  }, [socket, init]);
 
   useEffect(() => {
     AOS.init({

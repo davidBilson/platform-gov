@@ -1,32 +1,13 @@
-// src/pages/account/signin.tsx or src/app/account/signin/page.tsx
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import axios, { AxiosError } from 'axios';
 import useAuthStore from '@/store/useAuth';
-import { SignInFormData, SignInApiResponse } from '@/types/auth';
-
-interface ErrorResponse {
-  message?: string;
-}
-
-
-interface AuthStore {
-  setFormData: (data: {
-    role?: string;
-    name?: string;
-    email?: string;
-    phoneNumber?: string;
-    userId?: string;
-  }) => void;
-  setUserId: (id: string) => void;
-  setEmailVerified: (status: boolean) => void;
-  setPhoneVerified: (status: boolean) => void;
-}
+import { SignInFormData } from '@/types/auth/auth';
+import { signInUser } from '@/api/auth-api';
 
 const SignIn = () => {
   const router = useRouter();
-  const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore() as AuthStore;
+  const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore();
   
   const [formData, setLocalFormData] = useState<SignInFormData>({
     email: '',
@@ -54,27 +35,19 @@ const SignIn = () => {
     setErrorMessage('');
     
     try {
-
-      const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
-      const signinEndpoint = process.env.NEXT_PUBLIC_SIGNIN;
+      const result = await signInUser(formData);
       
-      const res = await axios.post<SignInApiResponse>(
-        `${apiHost}${signinEndpoint}`, 
-        {
-          email: formData.email,
-          password: formData.password,
-        }
-      );
-      
-      const responseData = res.data;
-      
-      // Check if we have user data in the response
-      if (!responseData.data?.user?._id) {
-        console.warn('Response received but user data is missing:', responseData);
+      if (!result.success) {
+        setErrorMessage(result.error || 'Sign in failed');
         return;
       }
       
-      const userData = responseData.data.user;
+      if (!result.data?.user) {
+        setErrorMessage('Invalid response from server');
+        return;
+      }
+      
+      const userData = result.data.user;
       
       // Update auth store with user data - now including name and role properly
       setUserId(userData._id);
@@ -90,31 +63,19 @@ const SignIn = () => {
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
       
-      // Redirect based on verification status
-      if (userData.isEmailVerified) {
-        router.push('/');
-      }
 
-      if (!userData.isEmailVerified) {
+      if (userData.role === 'admin') {
+        router.push('/admin');
+      } else if (userData.isEmailVerified) {
+        router.push('/');
+      } else if (!userData.isEmailVerified) {
         router.push('/account/verification');
       }
       
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError<ErrorResponse>;
-        
-        if (axiosError.response) {
-          const errorResponseData = axiosError.response.data as ErrorResponse;
-          setErrorMessage(errorResponseData.message || 'Invalid email or password');
-        } else if (axiosError.request) {
-          setErrorMessage('No response from server. Please check your connection.');
-        } else {
-          setErrorMessage('Failed to process your request. Please try again.');
-        }
-      } else {
-        const err = error as Error;
-        setErrorMessage(err.message || 'An unexpected error occurred');
-      }
+      // This catch block handles any unexpected errors from the signInUser function
+      const err = error as Error;
+      setErrorMessage(err.message || 'An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }

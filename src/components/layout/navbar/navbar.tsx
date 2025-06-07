@@ -7,15 +7,15 @@ import useAuthStore from '@/store/useAuth';
 import { usePathname } from 'next/navigation';
 
 const Navbar: React.FC = () => {
-  const { userId, userType } = useAuthStore();
+  const { userId, role } = useAuthStore();
   const pathname = usePathname() || '';
   
   // Function to determine which navbar to render
   const renderNavbar = () => {
     // Special case for admin routes
-    if (pathname.startsWith('/admin') && userId && userType === 'admin') {
+    if (pathname.startsWith('/admin') && userId && role === 'admin') {
       return <AdminNavbar />;
-    }
+    } 
     
     // Special case for privacy policy
     if (pathname === '/privacy-policy') {

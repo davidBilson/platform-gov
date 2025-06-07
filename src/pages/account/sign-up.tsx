@@ -2,12 +2,12 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
 import useAuthStore from '@/store/useAuth';
-import { SignupFormData, SignupApiResponse, ErrorResponse,  AuthStore } from '@/types/auth';
+import { SignupFormData, SignupApiResponse, ErrorResponse } from '@/types/auth/auth';
 
 
 const Signup = () => {
 
-  const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore() as AuthStore;
+  const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore();
   
   const [formData, setLocalFormData] = useState<SignupFormData>({
     userType: 'contractor',
