@@ -257,7 +257,7 @@ const UserNavbar = () => {
                   <FaBell size={24} />
                   <NotificationCount />
               </button>
-              <NotificationsDropdown notificationsOpen={notificationsOpen} />
+              <NotificationsDropdown notificationsOpen={notificationsOpen} setNotificationsOpen={setNotificationsOpen} />
             </div>
             <div ref={profileDropdownRef} className="relative">
               <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('profile')}>
@@ -327,7 +327,7 @@ const UserNavbar = () => {
                   <FaBell size={24} />
                   <NotificationCount />
               </button>
-              <NotificationsDropdown notificationsOpen={notificationsOpen} />
+              <NotificationsDropdown notificationsOpen={notificationsOpen} setNotificationsOpen={setNotificationsOpen} />
             </div>
           
           <button onClick={() => {
@@ -392,7 +392,7 @@ const UserNavbar = () => {
                   <FaBell size={24} />
                   <NotificationCount />
               </button>
-              <NotificationsDropdown notificationsOpen={notificationsOpen} />
+              <NotificationsDropdown notificationsOpen={notificationsOpen} setNotificationsOpen={setNotificationsOpen} />
             </div>
 
         <div className="hidden lg:block relative" ref={profileDropdownRef}>

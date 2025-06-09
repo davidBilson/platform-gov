@@ -94,7 +94,6 @@ const str2ab = (str) => {
       return ab2str(decrypted);
     } catch (error) {
       console.error("Decryption error:", error);
-      // In case of decryption error, return a message indicating the issue
-      return "[Unable to decrypt message]";
+      return "";
     }
   };

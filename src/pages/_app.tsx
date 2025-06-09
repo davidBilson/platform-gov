@@ -5,12 +5,13 @@ import { ReactQueryProvider } from "@/providers/ReactQueryProvider"
 import Head from "next/head";
 import Navbar from "@/components/layout/navbar/navbar";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useAuthStore from "@/store/useAuth";
 import { ToastContainer } from 'react-toastify';
 import AOS from 'aos';
 import useNotification from '@/store/useNotification';
 import useSocket from '@/store/useSocket';
+import NotificationToast from "@/components/notifications/notificationToast";
 
 function AuthWrapper({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -35,10 +36,14 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
   
     useEffect(() => {
       initAuth();
+    }, [initAuth]);
+
+    // Connect socket when user is authenticated
+    useEffect(() => {
       if (userId) {
         useSocket.getState().connect();
       }
-    }, [initAuth, userId]);
+    }, [userId]);
   
     useEffect(() => {
       if (!isLoading && !userId && !isPublicRoute) {
@@ -76,20 +81,46 @@ function AuthWrapper({ children }: { children: React.ReactNode }) {
 export default function App({ Component, pageProps }: AppProps) {
 
   const socket = useSocket(state => state.socket);
-  const { init, fetchNotifications } = useNotification();
+  const isConnected = useSocket(state => state.isConnected);
+  const { markAsRead, notifications, init, fetchNotifications, reset } = useNotification();
+  const { userId } = useAuthStore();
+
+
+   const [toastNotification, setToastNotification] = useState(null);
+   const [lastNotificationId, setLastNotificationId] = useState(null);
 
   useEffect(() => {
-      fetchNotifications();
-  }, [fetchNotifications]);
-  
+    if (socket && isConnected && userId) {
+      const cleanup = init(socket);
+      return cleanup; 
+    } else if (!userId) {
+      reset();
+      setToastNotification(null);
+      setLastNotificationId(null);
+    }
+  }, [socket, isConnected, userId, init, reset]);
+
   useEffect(() => {
-    const initialize = async () => {
-      if (socket && socket.connected) {
-        init(socket);
+    if (userId) {
+      fetchNotifications();
+    }
+  }, [userId, fetchNotifications]);
+
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const latestNotification = notifications[0]; // Newest notification is first
+      
+      // Only show toast if this is a new notification we haven't seen before
+      if (latestNotification._id !== lastNotificationId) {
+        setToastNotification(latestNotification);
+        setLastNotificationId(latestNotification._id);
       }
-    };
-    initialize();
-  }, [socket, init]);
+    }
+  }, [notifications, lastNotificationId]);
+
+  const handleToastClose = () => {
+    setToastNotification(null);
+  };
 
   useEffect(() => {
     AOS.init({
@@ -141,6 +172,12 @@ export default function App({ Component, pageProps }: AppProps) {
             className={'text-xs font-bold'}
           />
           <Component {...pageProps} />
+
+          <NotificationToast
+            notification={toastNotification}
+            onClose={handleToastClose}
+            duration={4000}
+          />
         </AuthWrapper>
       </ReactQueryProvider>
     </>

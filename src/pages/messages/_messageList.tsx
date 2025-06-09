@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { fetchProfilePicture } from "@/api/profile-api";
 import ProfilePicture from "@/components/profile/profilePicture";
 
-interface Conversation {
-  threadId: string;
-  jobId?: string;
-  jobTitle?: string;
+interface UnifiedConversation {
+  userId: string;
   otherUser: {
     id: string;
     name: string;
@@ -14,46 +12,50 @@ interface Conversation {
     content: string;
     isCurrentUser: boolean;
     createdAt: string;
+    jobTitle?: string;
   };
   unreadCount: number;
+  jobThreads: Array<{
+    threadId: string;
+    jobId: string;
+    jobTitle: string;
+    lastMessage: {
+      content: string;
+      isCurrentUser: boolean;
+      createdAt: string;
+    };
+    unreadCount: number;
+  }>;
 }
 
 interface MessageListProps {
-  conversations: Conversation[];
+  conversations: UnifiedConversation[];
   loading: boolean;
-  onSelect: (conversation: Conversation) => void;
+  onSelect: (conversation: UnifiedConversation) => void;
   selectedId?: string;
 }
 
 export default function MessageList({ conversations, loading, onSelect, selectedId }: MessageListProps) {
-  // Use a state object to store profile pictures keyed by user ID
   const [profilePictures, setProfilePictures] = useState<Record<string, string>>({});
-  // Use a ref to track which user IDs we've already attempted to load
   const processedUserIds = useRef<Set<string>>(new Set());
 
-  // Fetch profile pictures when conversations change
   useEffect(() => {
-    // Skip if no conversations
     if (conversations.length === 0) return;
     
     const loadProfilePictures = async () => {
       const newProfilePictures: Record<string, string> = {};
       
-      // Get list of user IDs that need pictures loaded (ones we haven't tried yet)
       const userIdsToLoad = conversations
+        .filter(conv => conv.userId !== 'govlink') // Skip govlink
         .map(conv => conv.otherUser.id)
         .filter(userId => !processedUserIds.current.has(userId));
       
-      // If nothing to load, exit early
       if (userIdsToLoad.length === 0) return;
       
-      // Process each user individually
       for (const userId of userIdsToLoad) {
-        // Mark this user ID as processed so we don't try again
         processedUserIds.current.add(userId);
         
         try {
-          // Safe fetching that always returns a value (empty string on failure)
           const pfp = await fetchProfilePicture(userId);
           if (pfp) {
             newProfilePictures[userId] = pfp;
@@ -63,30 +65,26 @@ export default function MessageList({ conversations, loading, onSelect, selected
         }
       }
       
-      // Only update state if we have new pictures
       if (Object.keys(newProfilePictures).length > 0) {
         setProfilePictures(prev => ({...prev, ...newProfilePictures}));
       }
     };
     
     loadProfilePictures();
-  }, [conversations]); // Only depend on conversations
+  }, [conversations]);
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     
-    // If today, show time
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     
-    // If this year, show month and day
     if (date.getFullYear() === now.getFullYear()) {
       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
     
-    // Otherwise show date
     return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: '2-digit' });
   };
 
@@ -122,13 +120,13 @@ export default function MessageList({ conversations, loading, onSelect, selected
   return (
     <div className="w-full bg-white h-full rounded-xl overflow-hidden shadow-sm flex flex-col">
       {conversations.map((conversation) => {
-        const isSelected = conversation.threadId === selectedId;
+        const isSelected = conversation.userId === selectedId;
         const userId = conversation.otherUser.id;
         const profilePicture = profilePictures[userId];
         
         return (
           <div 
-            key={conversation.threadId} 
+            key={conversation.userId} 
             className={`px-4 py-3 border-b border-deepskyblue cursor-pointer transition-colors duration-150 ${
               isSelected 
                 ? 'bg-blue-50 hover:bg-blue-100' 
@@ -139,13 +137,13 @@ export default function MessageList({ conversations, loading, onSelect, selected
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${
-                  conversation.threadId === 'govlink' 
+                  conversation.userId === 'govlink' 
                     ? 'bg-deepskyblue text-white' 
                     : isSelected
                       ? 'bg-blue-100 text-deepskyblue'
                       : 'bg-deepskyblue text-gray-600'
                 }`}>
-                  {conversation.threadId === 'govlink' ? (
+                  {conversation.userId === 'govlink' ? (
                     <span className="font-medium text-sm">GL</span>
                   ) : (
                     <ProfilePicture 
@@ -164,13 +162,19 @@ export default function MessageList({ conversations, loading, onSelect, selected
                   </h4>
 
                   <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                    {conversation.threadId !== 'govlink' && formatTime(conversation.lastMessage.createdAt)}
+                    {conversation.userId !== 'govlink' && formatTime(conversation.lastMessage.createdAt)}
                   </span>
                 </div>
                 
-                {conversation.jobTitle && (
+                {/* Show job context for unified conversations */}
+                {conversation.lastMessage.jobTitle && (
                   <p className={`text-xs truncate mt-0.5 ${isSelected ? 'text-deepskyblue' : 'text-gray-600'}`}>
-                    {conversation.jobTitle}
+                    {conversation.lastMessage.jobTitle}
+                    {conversation.jobThreads.length > 1 && (
+                      <span className="ml-1 text-gray-400">
+                        (+{conversation.jobThreads.length - 1} more)
+                      </span>
+                    )}
                   </p>
                 )}
                 

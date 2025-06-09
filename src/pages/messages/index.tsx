@@ -8,6 +8,7 @@ import useAuthStore from '@/store/useAuth';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Socket } from 'socket.io-client';
+import { truncateDescription } from '@/utils/truncateDescription';
 
 interface Conversation {
   threadId: string;
@@ -25,17 +26,119 @@ interface Conversation {
   unreadCount: number;
 }
 
+interface UnifiedConversation {
+  userId: string; // The other user's ID - used as unified identifier
+  otherUser: {
+    id: string;
+    name: string;
+  };
+  lastMessage: {
+    content: string;
+    isCurrentUser: boolean;
+    createdAt: string;
+    jobTitle?: string; // Include job context in last message
+  };
+  unreadCount: number;
+  jobThreads: Array<{
+    threadId: string;
+    jobId: string;
+    jobTitle: string;
+    lastMessage: {
+      content: string;
+      isCurrentUser: boolean;
+      createdAt: string;
+    };
+    unreadCount: number;
+  }>;
+}
+
 export default function ChatIndex() {
   const { userId, name } = useAuthStore();
   const [allConversations, setAllConversations] = useState<Conversation[]>([]);
-  const [displayedConversations, setDisplayedConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [, setUnifiedConversations] = useState<UnifiedConversation[]>([]);
+  const [displayedConversations, setDisplayedConversations] = useState<UnifiedConversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<UnifiedConversation | null>(null);
+  const [selectedJobThread, setSelectedJobThread] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
-
-  
   const [socket, setSocket] = useState<Socket | null>(null);
+
+  // Function to unify conversations by user
+  const unifyConversations = (conversations: Conversation[]): UnifiedConversation[] => {
+    const userConversations = new Map<string, UnifiedConversation>();
+
+    conversations.forEach(conv => {
+      // Skip the special govlink conversation
+      if (conv.threadId === 'govlink') {
+        return;
+      }
+
+      const userId = conv.otherUser.id;
+      
+      if (!userConversations.has(userId)) {
+        // Create new unified conversation
+        userConversations.set(userId, {
+          userId,
+          otherUser: conv.otherUser,
+          lastMessage: {
+            ...conv.lastMessage,
+            jobTitle: conv.jobTitle
+          },
+          unreadCount: conv.unreadCount,
+          jobThreads: [{
+            threadId: conv.threadId,
+            jobId: conv.jobId!,
+            jobTitle: conv.jobTitle!,
+            lastMessage: conv.lastMessage,
+            unreadCount: conv.unreadCount
+          }]
+        });
+      } else {
+        // Update existing unified conversation
+        const existing = userConversations.get(userId)!;
+        
+        // Add this job thread to the list
+        existing.jobThreads.push({
+          threadId: conv.threadId,
+          jobId: conv.jobId!,
+          jobTitle: conv.jobTitle!,
+          lastMessage: conv.lastMessage,
+          unreadCount: conv.unreadCount
+        });
+
+        // Update overall unread count
+        existing.unreadCount += conv.unreadCount;
+
+        // Update last message if this conversation is more recent
+        if (new Date(conv.lastMessage.createdAt) > new Date(existing.lastMessage.createdAt)) {
+          existing.lastMessage = {
+            ...conv.lastMessage,
+            jobTitle: conv.jobTitle
+          };
+        }
+      }
+    });
+
+    // Convert map to array and sort by most recent message
+    const unified = Array.from(userConversations.values()).sort((a, b) => 
+      new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
+    );
+
+    // Add govlink conversation at the top if it exists
+    const govlinkConv = conversations.find(conv => conv.threadId === 'govlink');
+    if (govlinkConv) {
+      unified.unshift({
+        userId: 'govlink',
+        otherUser: govlinkConv.otherUser,
+        lastMessage: govlinkConv.lastMessage,
+        unreadCount: govlinkConv.unreadCount,
+        jobThreads: []
+      });
+    }
+
+    return unified;
+  };
 
   useEffect(() => {
     if (!userId) return;
@@ -55,7 +158,6 @@ export default function ChatIndex() {
     };
   }, [userId]);
 
-
   useEffect(() => {
     if (!socket) return;
   
@@ -69,21 +171,17 @@ export default function ChatIndex() {
       unreadCount?: number;
     }) => {
       setAllConversations(prevConversations => {
-        // Find if this conversation exists
         const existingConvIndex = prevConversations.findIndex(
           conv => conv.threadId === data.threadId
         );
   
-        // If conversation exists
         if (existingConvIndex >= 0) {
           const updatedConversations = [...prevConversations];
           const existingConv = updatedConversations[existingConvIndex];
           
-          // Only update unread count if this is not the current user
-          // AND if the conversation is not currently selected
           const shouldIncrementUnread = 
             !data.isCurrentUser && 
-            selectedConversation?.threadId !== data.threadId;
+            selectedJobThread !== data.threadId;
   
           updatedConversations[existingConvIndex] = {
             ...existingConv,
@@ -97,7 +195,6 @@ export default function ChatIndex() {
               : existingConv.unreadCount
           };
   
-          // Move to top
           updatedConversations.sort((a, b) => 
             new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
           );
@@ -107,45 +204,8 @@ export default function ChatIndex() {
   
         return prevConversations;
       });
-  
-      // Update displayed conversations with the same logic
-      setDisplayedConversations(prev => {
-        const existingConvIndex = prev.findIndex(
-          conv => conv.threadId === data.threadId
-        );
-  
-        if (existingConvIndex >= 0) {
-          const updated = [...prev];
-          const existingConv = updated[existingConvIndex];
-          
-          const shouldIncrementUnread = 
-            !data.isCurrentUser && 
-            selectedConversation?.threadId !== data.threadId;
-  
-          updated[existingConvIndex] = {
-            ...existingConv,
-            lastMessage: {
-              content: data.message.content,
-              isCurrentUser: data.isCurrentUser,
-              createdAt: data.message.createdAt
-            },
-            unreadCount: shouldIncrementUnread
-              ? (existingConv.unreadCount || 0) + (data.unreadCount || 1)
-              : existingConv.unreadCount
-          };
-  
-          updated.sort((a, b) => 
-            new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
-          );
-  
-          return updated;
-        }
-  
-        return prev;
-      });
     };
   
-    // Listen for both events
     socket.on('receive-message', handleConversationUpdate);
     socket.on('conversation-update', handleConversationUpdate);
   
@@ -153,10 +213,8 @@ export default function ChatIndex() {
       socket.off('receive-message', handleConversationUpdate);
       socket.off('conversation-update', handleConversationUpdate);
     };
-  }, [socket, userId, selectedConversation]);
+  }, [socket, userId, selectedJobThread]);
 
-
-  
   useEffect(() => {
     const fetchConversations = async () => {
       try {
@@ -164,7 +222,6 @@ export default function ChatIndex() {
         const endpoint = process.env.NEXT_PUBLIC_FETCH_CONVERSATIONS?.replace(':id', userId)
         const { data } = await axios.get(`${baseURL}${endpoint}`);
         setAllConversations(data.conversations);
-        setDisplayedConversations(data.conversations);
       } catch (error) {
         console.error('Error fetching conversations:', error);
       } finally {
@@ -186,6 +243,13 @@ export default function ChatIndex() {
     return () => window.removeEventListener('resize', handleResize);
   }, [userId]);
 
+  // Update unified conversations when allConversations changes
+  useEffect(() => {
+    const unified = unifyConversations(allConversations);
+    setUnifiedConversations(unified);
+    setDisplayedConversations(unified);
+  }, [allConversations]);
+
   useEffect(() => {
     if (isMobileView) {
       setShowSidebar(!selectedConversation);
@@ -193,37 +257,46 @@ export default function ChatIndex() {
   }, [selectedConversation, isMobileView]);
   
   const handleSearchResults = (filteredConversations: Conversation[]) => {
-    setDisplayedConversations(filteredConversations);
+    const unified = unifyConversations(filteredConversations);
+    setDisplayedConversations(unified);
   };
 
-  const handleSelectConversation = async (conversation: Conversation) => {
+  const handleSelectConversation = async (conversation: UnifiedConversation) => {
     setSelectedConversation(conversation);
+    
+    // For govlink, no specific thread selection needed
+    if (conversation.userId === 'govlink') {
+      setSelectedJobThread('govlink');
+      if (isMobileView) {
+        setShowSidebar(false);
+      }
+      return;
+    }
+
+    // For unified conversations, select the most recent job thread by default
+    const mostRecentThread = conversation.jobThreads
+      .sort((a, b) => new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime())[0];
+    
+    setSelectedJobThread(mostRecentThread.threadId);
+    
     if (isMobileView) {
       setShowSidebar(false);
     }
     
-    // Mark messages as read when conversation is selected
-    if (conversation.threadId !== 'govlink' && conversation.unreadCount > 0) {
+    // Mark messages as read for the selected thread
+    if (mostRecentThread.unreadCount > 0) {
       try {
         const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
         const endpoint = process.env.NEXT_PUBLIC_MARK_MESSAGES_READ
-          ?.replace(':threadId', conversation.threadId)
-          .replace(':userId', userId);
+          ?.replace(':threadId', mostRecentThread.threadId)
+          ?.replace(':userId', userId);
           
         await axios.put(`${baseURL}${endpoint}`);
         
         // Update conversations to reflect read status
         setAllConversations(prevConversations => 
           prevConversations.map(conv => 
-            conv.threadId === conversation.threadId 
-              ? { ...conv, unreadCount: 0 }
-              : conv
-          )
-        );
-        
-        setDisplayedConversations(prevConversations => 
-          prevConversations.map(conv => 
-            conv.threadId === conversation.threadId 
+            conv.threadId === mostRecentThread.threadId 
               ? { ...conv, unreadCount: 0 }
               : conv
           )
@@ -233,13 +306,59 @@ export default function ChatIndex() {
       }
     }
   };
+
+  const handleJobThreadSelect = (threadId: string) => {
+    setSelectedJobThread(threadId);
+    
+    // Mark messages as read for the newly selected thread
+    const threadConversation = allConversations.find(conv => conv.threadId === threadId);
+    if (threadConversation && threadConversation.unreadCount > 0) {
+      const markAsRead = async () => {
+        try {
+          const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+          const endpoint = process.env.NEXT_PUBLIC_MARK_MESSAGES_READ
+            ?.replace(':threadId', threadId)
+            ?.replace(':userId', userId);
+            
+          await axios.put(`${baseURL}${endpoint}`);
+          
+          setAllConversations(prevConversations => 
+            prevConversations.map(conv => 
+              conv.threadId === threadId 
+                ? { ...conv, unreadCount: 0 }
+                : conv
+            )
+          );
+        } catch (error) {
+          console.error('Error marking messages as read:', error);
+        }
+      };
+      markAsRead();
+    }
+  };
   
   const handleBackToList = () => {
     if (isMobileView) {
       setSelectedConversation(null);
+      setSelectedJobThread(null);
       setShowSidebar(true);
     }
   };
+
+  const getSelectedThreadDetails = () => {
+    if (!selectedJobThread || selectedJobThread === 'govlink') return null;
+    
+    const conversation = allConversations.find(conv => conv.threadId === selectedJobThread);
+    if (!conversation) return null;
+    
+    return {
+      jobId: conversation.jobId,
+      proposalId: selectedJobThread.split('-')[1],
+      otherUser: conversation.otherUser
+    };
+  };
+
+  const selectedThreadDetails = getSelectedThreadDetails();
 
   return (
     <main className="container mx-auto p-4 md:p-6 h-[calc(100vh-112px)] flex flex-col">
@@ -271,29 +390,51 @@ export default function ChatIndex() {
               conversations={displayedConversations} 
               loading={loading}
               onSelect={handleSelectConversation}
-              selectedId={selectedConversation?.threadId}
+              selectedId={selectedConversation?.userId}
             />
           </div>
         )}
         
         {(!isMobileView || !showSidebar) && (
-          <div className="flex-1 h-full">
-            {selectedConversation && selectedConversation.threadId == "govlink" ? (
+          <div className="flex-1 h-full flex flex-col">
+            {/* Job Thread Selector - Show when user has multiple job threads */}
+            {selectedConversation && selectedConversation.jobThreads.length > 1 && (
+              <div className="mb-4 rounded-lg">
+                <p className="text-xs text-boldblue mb-2">Select a job conversation:</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedConversation.jobThreads.map(thread => (
+                    <button
+                      key={thread.threadId}
+                      onClick={() => handleJobThreadSelect(thread.threadId)}
+                      className={`cursor-pointer px-3 py-1 rounded-full text-[10px] border transition-colors ${
+                        selectedJobThread === thread.threadId
+                          ? 'bg-deepskyblue text-white border-deepskyblue'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-deepskyblue'
+                      }`}
+                    >
+                      {truncateDescription(thread.jobTitle, 22)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedConversation && selectedConversation.userId === "govlink" ? (
               <div className='flex flex-col justify-center items-center h-full'>
                 <h2 className='font-bold text-lightblue mb-7.5'>Private Messaging Policy</h2>
                 <p className='p-6 bg-skyblue/50 rounded-lg text-mediumgray w-full max-w-150 text-sm'>To ensure safety and compliance, all communication between clients and consultants must occur within {"GovLink's"} platform until a contract is established. Sharing personal contact information (such as email addresses, phone numbers, or social media handles) before a contract begins is prohibited and may result in account restrictions. Once a contract is active, exchanging contact details is permitted within the contract workroom for necessary business purposes.</p>
               </div>
-            ) : selectedConversation  ? (
+            ) : selectedConversation && selectedThreadDetails ? (
               <Messages
-                jobId={selectedConversation.jobId}
-                proposalId={selectedConversation.threadId.split('-')[1]} // Extract proposalId from threadId
+                jobId={selectedThreadDetails.jobId}
+                proposalId={selectedThreadDetails.proposalId}
                 currentUser={{
                   _id: userId,
                   name: name,
                 }}
                 otherUser={{
-                  _id: selectedConversation.otherUser.id,
-                  name: selectedConversation.otherUser.name,
+                  _id: selectedThreadDetails.otherUser.id,
+                  name: selectedThreadDetails.otherUser.name,
                 }}
               />
             ) : (

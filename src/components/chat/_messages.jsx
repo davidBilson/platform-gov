@@ -221,7 +221,7 @@ const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
   }, {});
 
   return (
-    <section className='p-4 md:p-10 border border-lightblue rounded-lg flex flex-col justify-between h-[calc(100vh-300px)]'>
+    <section className='p-4 md:p-10 border border-lightblue rounded-lg flex flex-col justify-between h-[calc(100vh-340px)]'>
       <section className='flex flex-col space-y-4 flex-grow overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
           <div key={date} className="w-full">
@@ -232,7 +232,8 @@ const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
             </div>
             
             {dateMessages.map((message) => (
-              <div 
+              <>
+              {message.content !== "" && <div 
                 key={message._id} 
                 className={`w-full   flex flex-col relative mb-4 ${message.sender._id === currentUser._id ? 'self-end items-end' : 'self-start items-start'}`}
               >
@@ -252,6 +253,8 @@ const Messages = ({ jobId, proposalId, currentUser, otherUser }) => {
                   </span>
                 </div>
               </div>
+              }
+              </>
             ))}
           </div>
         ))}

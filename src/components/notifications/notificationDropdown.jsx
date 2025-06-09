@@ -5,7 +5,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(relativeTime);
 
-const NotificationDropdown = ({ notificationsOpen }) => {
+const NotificationDropdown = ({ notificationsOpen, setNotificationsOpen }) => {
   
   const { notifications } = useNotification();
   const recentNotifications = notifications.slice(0, 5);
@@ -16,7 +16,7 @@ const NotificationDropdown = ({ notificationsOpen }) => {
         {recentNotifications.map((notification) => (
           <div key={notification._id} className="border-b border-skyblue/10 hover:bg-skyblue/10 cursor-pointer flex items-center gap-2">
             <div className="flex-1">
-              <p className="text-xs text-gray-800 font-bold">{notification.title}</p>
+              <p className="text-xs text-deepskyblue font-bold">{notification.title}</p>
               <p className="text-xs text-gray-500">{notification.message}</p>
               <p className="text-[10px] text-gray-400 mt-1">
                 {dayjs(notification.createdAt).fromNow()}
@@ -29,7 +29,7 @@ const NotificationDropdown = ({ notificationsOpen }) => {
         )}
       </div>
       <div className='pt-5 mt-7.5 border-t border-t-deepskyblue text-center'>
-        <Link href="/notifications" className="text-sm text-boldblue font-bold hover:bg-skyblue/10 cursor-pointer">
+        <Link onClick={() => setNotificationsOpen(false)} href="/notifications" className="text-sm text-boldblue font-bold hover:bg-skyblue/10 cursor-pointer">
           See All Notifications
         </Link>
       </div>

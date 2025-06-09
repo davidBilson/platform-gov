@@ -1,0 +1,50 @@
+# Payment System Flow
+
+
+
+## 1: Client Hires a Contractor
+Tasks:
+* UX: Client views proposals.
+* UX: Client clicks “Hire”.
+* UX: Client sets contract terms.
+* UX: Client chooses a payment method.
+* API: POST /contracts – Link freelancer, job, and client. (update backend and db)
+* API: POST /contracts – Store contract terms. (update backend and db)
+* API: POST /payments/setup – Validate payment method (card, PayPal, etc.)
+* API: POST /payments/setup – Initiate escrow for fixed-price contracts  
+## 2: Escrow System Integration
+Tasks:
+* API: POST /escrow/deposit
+*  - Charge client’s funding source.
+*  - Create escrow wallet entry.
+*  - Confirm funds held securely.
+* API: GET /escrow/balance – Retrieve funding status for contract.
+
+## 3: Freelancer Submits Work
+Tasks:
+* UX: Freelancer submits milestone or deliverables for hourly or retainers.
+*  – Notify client of delivery (
+* Start 5/7/14-day escrow countdown timer 
+## 4: Client Approves Work and Releases Payment
+Tasks:
+* UX: Client reviews submitted work.
+* UX: Client clicks “Approve & Release Payment”.
+* API: POST /escrow/release – Transfer funds to freelancer’s Upwork wallet. (admin approves pending transaction??)
+* API: POST /escrow/release – Trigger email/notification to freelancer.
+* API: POST /transaction – Record transaction to ledger. 
+* API: POST /transaction – Deduct platform service fee (10% ??)
+
+## 5: Freelancer Withdraws Payment
+Tasks:
+* UX: Freelancer checks pending/available balance.
+* UX: Freelancer clicks “Get Paid”.
+* UX: Selects payout method (bank, PayPal, Payoneer).
+* API: GET /wallet – Retrieve pending and available balances.
+* API: POST /payouts/initiate – Validate and initiate withdrawal.
+* API: POST /payouts/initiate – Create ledger entry and process external transfer.
+
+## 6: Contract Completion and Feedback
+Tasks:
+* UX: Client ends contract.
+* UX: Both parties submit rating.
+*  Contract marked as completed.
