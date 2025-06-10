@@ -82,7 +82,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const socket = useSocket(state => state.socket);
   const isConnected = useSocket(state => state.isConnected);
-  const { markAsRead, notifications, init, fetchNotifications, reset } = useNotification();
+  const { notifications, init, fetchNotifications, reset } = useNotification();
   const { userId } = useAuthStore();
 
 
@@ -108,9 +108,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (notifications.length > 0) {
-      const latestNotification = notifications[0]; // Newest notification is first
+      const latestNotification = notifications[0];
       
-      // Only show toast if this is a new notification we haven't seen before
       if (latestNotification._id !== lastNotificationId) {
         setToastNotification(latestNotification);
         setLastNotificationId(latestNotification._id);

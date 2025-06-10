@@ -40,8 +40,13 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
 
   const [hasSubmittedApplication, setHasSubmittedApplication] = useState(false);
 
-  // Load saved draft if available
   useEffect(() => {
+
+    setFormData(prev => ({
+      ...prev,
+      proposedRate: (job.price ?? job.retainerAmount ?? '').toString(),
+    }));
+    
     const fetchSavedDraft = async () => {
       try {
         setIsLoading(true);
@@ -52,7 +57,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         
         if (response.data.success) {
   
-          // Check if user already has a submitted application
           const submittedApps = response.data.data.filter((app: ApplicationDraft) => {
             const appJobId = typeof app.jobId === 'object' ? app.jobId._id : app.jobId;
             return appJobId === job._id && app.status !== 'draft';
@@ -62,7 +66,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
             setHasSubmittedApplication(true);
           }
           
-          // Look for drafts only if there's no submitted application
           if (submittedApps.length === 0) {
             const drafts = response.data.data.filter((app: ApplicationDraft) => {
               const appJobId = typeof app.jobId === 'object' ? app.jobId._id : app.jobId;
@@ -73,11 +76,10 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
               const savedDraft = drafts[0];
               setDraftId(savedDraft._id);
               
-              // Populate form data with saved draft
               setFormData({
                 coverLetter: savedDraft.coverLetter || '',
                 proposedRate: savedDraft.proposedRate?.toString() || '',
-                attachment: null, // File objects can't be persisted
+                attachment: null,
                 acknowledgment: savedDraft.certificationAcknowledgment || false,
               });
               
@@ -103,7 +105,7 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
     } else {
       setIsLoading(false);
     }
-  }, [job._id, userId]);
+  }, [job._id, userId, job]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -350,7 +352,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           <h1 className='pb-5 md:pb-7.5 font-semibold text-lg md:text-xl'>Apply To This Job</h1>
           
           <form id="applicationForm" onSubmit={handleSubmit}>
-            {/* Cover Letter */}
             <div className='mb-5 md:mb-7.5'>
               <textarea
                 name="coverLetter"
@@ -361,7 +362,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
               />
             </div>
             
-            {/* Propose Your Rate */}
             <div className="mb-5 md:mb-7.5">
               <label className="block text-xs md:text-sm text-boldblue font-semibold mb-2">Propose Your Rate</label>
               <div className="w-full max-w-full md:max-w-75 flex justify-between bg-white border border-boldblue rounded-lg px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm text-boldblue">
@@ -388,7 +388,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
               </div>
             </div>
             
-            {/* Attach certification document */}
             <div className="mb-5 md:mb-7.5">
               <label className="block text-xs md:text-sm text-boldblue font-semibold mb-2">Attach certification document</label>
               <div className="w-full max-w-fit border border-boldblue rounded-lg px-4 md:px-5 py-3 md:py-4 text-xs md:text-sm text-white bg-boldblue">

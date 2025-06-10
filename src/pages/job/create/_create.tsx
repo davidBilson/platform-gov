@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FaCheckCircle } from 'react-icons/fa';
 
@@ -10,6 +9,7 @@ import { getSpecificCountryStates } from '@/utils/getLocations/getAllCountriesAn
 import { skillsList } from '@/utils/skillsExpertiseCertificationList/skillsList';
 import { certificationsList } from '@/utils/skillsExpertiseCertificationList/certificationList';
 import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
+import PaymentModal from '@/components/payment/PaymentModal';
 
 const { useState, useEffect, useRef } = ReactLib;
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
@@ -20,7 +20,6 @@ type StateWithCountry = [string, string];
 const CreateJob  = () => {
 
     const { userId } = useAuthStore();
-
     const requiredCertificationsList = certificationsList;
     const jobCategoryList = expertiseList;
     const requiredSkillsList = skillsList;
@@ -43,7 +42,8 @@ const CreateJob  = () => {
         retainerDuration: 0,
     });
 
-    const router = useRouter()
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [createdJobId, setCreatedJobId] = useState<string | null>(null);
 
     const [showRequiredCertificationsDropdown, setShowRequiredCertificationsDropdown] = useState<boolean>(false);
     const [showRetainerFrequencyDropdown, setShowRetainerFrequencyDropdown] = useState<boolean>(false);
@@ -147,7 +147,6 @@ const CreateJob  = () => {
         }));
     };
 
-    // Tag Management
     const addTag = (type: 'requiredSkills' | 'requiredCertifications', value: string) => {
         if (!value.trim()) return;
         
@@ -176,7 +175,6 @@ const CreateJob  = () => {
         }));
     };
 
-    // Dropdown effects
     useEffect(() => {
         if (showRequiredSkillsDropdown) {
         const availableSkills = requiredSkillsList.filter(skill => 
@@ -196,81 +194,86 @@ const CreateJob  = () => {
         }
     }, [requiredSkillInput, formData.requiredSkills, showRequiredSkillsDropdown]);
 
-  useEffect(() => {
-    if (showRequiredCertificationsDropdown) {
-      const availableCertifications = requiredCertificationsList.filter(certification => 
-        !formData.requiredCertifications.includes(certification)
-      );
-      
-      if (requiredCertificationInput.trim()) {
-        const filtered = availableCertifications.filter(certification => 
-          certification.toLowerCase().includes(requiredCertificationInput.toLowerCase())
+    useEffect(() => {
+      if (showRequiredCertificationsDropdown) {
+        const availableCertifications = requiredCertificationsList.filter(certification => 
+          !formData.requiredCertifications.includes(certification)
         );
-        setFilteredRequiredCertifications(filtered);
+        
+        if (requiredCertificationInput.trim()) {
+          const filtered = availableCertifications.filter(certification => 
+            certification.toLowerCase().includes(requiredCertificationInput.toLowerCase())
+          );
+          setFilteredRequiredCertifications(filtered);
+        } else {
+          setFilteredRequiredCertifications(availableCertifications);
+        }
       } else {
-        setFilteredRequiredCertifications(availableCertifications);
+        setFilteredRequiredCertifications(requiredCertificationsList.filter(certification => !formData.requiredCertifications.includes(certification)));
       }
-    } else {
-      setFilteredRequiredCertifications(requiredCertificationsList.filter(certification => !formData.requiredCertifications.includes(certification)));
-    }
-  }, [requiredCertificationInput, formData.requiredCertifications, showRequiredCertificationsDropdown]);
+    }, [requiredCertificationInput, formData.requiredCertifications, showRequiredCertificationsDropdown]);
 
-  useEffect(() => {
-    if (showLocationDropdown) {
-      const availableLocations = statesWithCountries.map(([state, country]) => `${state}, ${country}`);
-      
-      if (locationInput.trim()) {
-        const filtered = availableLocations.filter(location => 
-          location.toLowerCase().includes(locationInput.toLowerCase())
+    useEffect(() => {
+      if (showLocationDropdown) {
+        const availableLocations = statesWithCountries.map(([state, country]) => `${state}, ${country}`);
+        
+        if (locationInput.trim()) {
+          const filtered = availableLocations.filter(location => 
+            location.toLowerCase().includes(locationInput.toLowerCase())
+          );
+          setFilteredLocation(filtered);
+        } else {
+          setFilteredLocation(availableLocations);
+        }
+      } else {
+        setFilteredLocation(statesWithCountries.map(([state, country]) => `${state}, ${country}`));
+      }
+    }, [locationInput, formData.location, showLocationDropdown, statesWithCountries]);
+
+    useEffect(() => {
+      if (showJobCategoryDropdown) {
+        const availableCategories = jobCategoryList.filter(category => 
+          !formData.jobCategory?.includes(category)
         );
-        setFilteredLocation(filtered);
+        
+        if (jobCategoryInput.trim()) {
+          const filtered = availableCategories.filter(category => 
+            category.toLowerCase().includes(jobCategoryInput.toLowerCase())
+          );
+          setFilteredJobCategory(filtered);
+        } else {
+          setFilteredJobCategory(availableCategories);
+        }
       } else {
-        setFilteredLocation(availableLocations);
+        setFilteredJobCategory(jobCategoryList.filter(category => !formData.jobCategory?.includes(category)));
       }
-    } else {
-      setFilteredLocation(statesWithCountries.map(([state, country]) => `${state}, ${country}`));
-    }
-  }, [locationInput, formData.location, showLocationDropdown, statesWithCountries]);
+    }, [jobCategoryInput, formData.jobCategory, showJobCategoryDropdown]);
 
-  useEffect(() => {
-    if (showJobCategoryDropdown) {
-      const availableCategories = jobCategoryList.filter(category => 
-        !formData.jobCategory?.includes(category)
-      );
-      
-      if (jobCategoryInput.trim()) {
-        const filtered = availableCategories.filter(category => 
-          category.toLowerCase().includes(jobCategoryInput.toLowerCase())
-        );
-        setFilteredJobCategory(filtered);
-      } else {
-        setFilteredJobCategory(availableCategories);
+    const handleSubmit = async (e: React.FormEvent ) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        
+        const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
+        const createJobEndpoint =process.env.NEXT_PUBLIC_CREATE_JOBS;
+
+      try {
+          const response = await axios.post(`${baseURL}${createJobEndpoint}`, formData);
+          if (response.data.success) {
+            toast.success('Job created successfully');
+            setCreatedJobId(response.data.data._id);
+            toast.success('Job created successfully');
+            
+            if (formData.paymentType === 'fixed-price' || formData.paymentType === 'retainer') {
+              setShowPaymentModal(true);
+            }
+          }
+      } catch (error) {
+        console.error('Error creating job:', error);
+        toast.error('Error creating job');
+      } finally {
+          setIsSubmitting(false);
       }
-    } else {
-      setFilteredJobCategory(jobCategoryList.filter(category => !formData.jobCategory?.includes(category)));
-    }
-  }, [jobCategoryInput, formData.jobCategory, showJobCategoryDropdown]);
-
-  const handleSubmit = async (e: React.FormEvent ) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-      
-      const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-      const createJobEndpoint =process.env.NEXT_PUBLIC_CREATE_JOBS;
-
-    try {
-        await axios.post(`${baseURL}${createJobEndpoint}`, formData);
-        console.log(formData);
-        toast.success('Job created successfully');
-        router.push('/')
-      
-    } catch (error) {
-      console.error('Error creating job:', error);
-      toast.error('Error creating job');
-    } finally {
-        setIsSubmitting(false);
-    }
-  };
+    };
 
   return (
     <section className='p-6 pt-7.5'>
@@ -278,7 +281,7 @@ const CreateJob  = () => {
         <h1 className='pb-7.5 font-semibold text-xl'>Create Job</h1>
         
         <form id="createJobForm" onSubmit={handleSubmit}>
-          
+
           <div className="relative w-full max-w-75 mb-7.5">
             <div className="w-full max-w-75 flex justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
                 <input 
@@ -308,7 +311,7 @@ const CreateJob  = () => {
                   <IoMdArrowDropdown size={20} />
                 </button>
             </div>
-            {/* Job Category dropdown */}
+
             {showJobCategoryDropdown && (
               <div className="absolute z-20 w-full mt-1 bg-white  shadow-lg shadow-gray-400 rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
                 onMouseDown={(e) => e.preventDefault()}
@@ -330,7 +333,6 @@ const CreateJob  = () => {
             )}
           </div> 
           
-          {/* Job Title */}
           <div className="mb-7.5">
             <textarea
               required
@@ -343,7 +345,6 @@ const CreateJob  = () => {
             ></textarea>
           </div>
           
-          {/* Job Description */}
           <div className='mb-8 pb-7.5 border-b border-b-deepskyblue'>
             <textarea
               required
@@ -355,7 +356,6 @@ const CreateJob  = () => {
             />
           </div>
           
-          {/* Select Required Skills */}
           <div className="flex flex-wrap items-center mb-7.5 gap-2.5">
             <div className="relative w-full max-w-75">
               <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
@@ -378,7 +378,7 @@ const CreateJob  = () => {
                   <IoIosSearch />
                 </button>
               </div>
-              {/* Skills dropdown */}
+
               {showRequiredSkillsDropdown && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
                   onMouseDown={(e) => e.preventDefault()}
@@ -398,7 +398,7 @@ const CreateJob  = () => {
                 </div>
               )}
             </div>
-            {/* tags */}
+
             {formData.requiredSkills.map((skill, index) => (
               <div 
                 key={`skill-${index}`} 
@@ -416,7 +416,6 @@ const CreateJob  = () => {
             ))}
           </div>
           
-          {/* Select Required Certifications */}
           <div className="flex flex-wrap items-center pb-7.5 gap-2.5">
             <div className="relative w-full max-w-75">
               <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
@@ -439,7 +438,7 @@ const CreateJob  = () => {
                   <IoIosSearch />
                 </button>
               </div>
-              {/* Certifications dropdown */}
+
               {showRequiredCertificationsDropdown && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
                   onMouseDown={(e) => e.preventDefault()}
@@ -459,7 +458,7 @@ const CreateJob  = () => {
                 </div>
               )}
             </div>
-            {/* tags */}
+
             {formData.requiredCertifications.map((certification, index) => (
               <div 
                 key={`certification-${index}`} 
@@ -477,7 +476,6 @@ const CreateJob  = () => {
             ))}
           </div>
 
-          {/* Requires Registered Lobbyist */}
           <div aria-label='requires_registered_lobbyist' className='flex items-center gap-2.5 border-b border-b-deepskyblue pb-7.5 mb-7.5'>
             <input 
               type="checkbox" 
@@ -512,7 +510,6 @@ const CreateJob  = () => {
                 Full-time
               </span>
               
-              {/* Toggle Switch */}
               <div 
                 className="relative w-14 h-7.5  border border-boldblue rounded-full cursor-pointer transition-colors duration-200 ease-in-out"
                 style={{
@@ -533,7 +530,7 @@ const CreateJob  = () => {
                 Part-time
               </span>
             </div>
-            {/* Payment Type Selection */}
+
             <div className='flex items-center gap-15 mb-7.5 text-sm text-darkgray'>
               <div className='flex items-center gap-1.25'>
                 {formData.paymentType === 'hourly' ? (
@@ -553,6 +550,7 @@ const CreateJob  = () => {
                 )}
                 Hourly
               </div>
+             
               <div className='flex items-center gap-1.25'>
                 {formData.paymentType === 'fixed-price' ? (
                   <MdOutlineRadioButtonChecked 
@@ -571,6 +569,7 @@ const CreateJob  = () => {
                 )}
                 Fixed Price
               </div>
+              
               <div className='flex items-center gap-1.25'>
                 {formData.paymentType === 'retainer' ? (
                   <MdOutlineRadioButtonChecked 
@@ -592,95 +591,85 @@ const CreateJob  = () => {
             </div>
           </div>
 
-            {/* Retainer UI */}
-{/* Conditional rendering based on payment type */}
-{formData.paymentType === 'retainer' ? (
-  /* Retainer UI */
-  <div className='flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full mb-7.5'>
-    {/* Amount */}
-    <div className="w-full lg:w-auto flex-1">
-      <fieldset className="w-full border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
-        <legend className="px-2 text-boldblue text-[10px]">Amount</legend>
-        <div className="flex justify-between items-center gap-2">
-          <button type="button" className="focus:outline-none">
-            {"$"}
-          </button>
-          <input
-            type="text"
-            placeholder='500'
-            value={formData.retainerAmount || ''}
-            onChange={handleRetainerAmountChange}
-            className="outline-none placeholder:font-semibold w-full"
-          />
-          <span className="focus:outline-none">
-            amount
-          </span>
-        </div>
-      </fieldset>
-    </div>
+          {formData.paymentType === 'retainer' ? (
+            <div className='flex flex-col lg:flex-row items-start lg:items-center gap-4 w-full mb-7.5'>
+              {/* Amount */}
+              <div className="w-full lg:w-auto flex-1">
+                <fieldset className="w-full border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
+                  <legend className="px-2 text-boldblue text-[10px]">Amount</legend>
+                  <div className="flex justify-between items-center gap-2">
+                    <button type="button" className="focus:outline-none">
+                      {"$"}
+                    </button>
+                    <input
+                      type="text"
+                      placeholder='500'
+                      value={formData.retainerAmount || ''}
+                      onChange={handleRetainerAmountChange}
+                      className="outline-none placeholder:font-semibold w-full"
+                    />
+                    <span className="focus:outline-none">
+                      amount
+                    </span>
+                  </div>
+                </fieldset>
+              </div>
 
-    {/* To be paid */}
-    <span className='text-sm whitespace-nowrap'>To be paid</span>
+        <span className='text-sm whitespace-nowrap'>To be paid</span>
 
-    <div className="w-full lg:w-auto flex-1 relative">
-      <fieldset className="w-full border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
-        <legend className="px-2 text-boldblue text-[10px]">Schedule</legend>
-        <div className="flex justify-between items-center gap-2">
-          <span className="focus:outline-none">{""}</span>
-          <input
-            type="text"
-            placeholder='weekly'
-            value={retainerFrequencyInput}
-            onChange={(e) => setRetainerFrequencyInput(e.target.value)}
-            onClick={() => {
-              setShowRetainerFrequencyDropdown(true);
-            }}
-            onFocus={() => setShowRetainerFrequencyDropdown(true)}
-            onBlur={(e) => {
-              // Only close if the related dropdown item wasn't clicked
-              if (!e.relatedTarget || !e.relatedTarget.closest('.frequency-dropdown-item')) {
-                setTimeout(() => setShowRetainerFrequencyDropdown(false), 200);
-              }
-            }}
-            // onBlur={() => setTimeout(() => setShowRetainerFrequencyDropdown(false), 200)}
-            className="outline-none placeholder:font-semibold w-full"
-          />
-          <button 
-            type="button"
-            disabled
-            // onClick={() => setShowRetainerFrequencyDropdown(!showRetainerFrequencyDropdown)}
-            className="focus:outline-none"
-          >
-            <IoMdArrowDropdown size={20} />
-          </button>
-        </div>
-      </fieldset>
-      
-      {/* Frequency dropdown */}
-      {showRetainerFrequencyDropdown && (
-        <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          {retainerFrequencyOptions.map((frequency, idx) => (
-            <div 
-              key={`frequency-option-${idx}`} 
-              className="frequency-dropdown-item px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleRetainerFrequencyChange(frequency);
-              }}
-            >
-              {frequency}
+        <div className="w-full lg:w-auto flex-1 relative">
+          <fieldset className="w-full border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
+            <legend className="px-2 text-boldblue text-[10px]">Schedule</legend>
+            <div className="flex justify-between items-center gap-2">
+              <span className="focus:outline-none">{""}</span>
+              <input
+                type="text"
+                placeholder='weekly'
+                value={retainerFrequencyInput}
+                onChange={(e) => setRetainerFrequencyInput(e.target.value)}
+                onClick={() => {
+                  setShowRetainerFrequencyDropdown(true);
+                }}
+                onFocus={() => setShowRetainerFrequencyDropdown(true)}
+                onBlur={(e) => {
+                  if (!e.relatedTarget || !e.relatedTarget.closest('.frequency-dropdown-item')) {
+                    setTimeout(() => setShowRetainerFrequencyDropdown(false), 200);
+                  }
+                }}
+                className="outline-none placeholder:font-semibold w-full"
+              />
+              <button 
+                type="button"
+                disabled
+                className="focus:outline-none"
+              >
+                <IoMdArrowDropdown size={20} />
+              </button>
             </div>
-          ))}
+          </fieldset>
+      
+          {showRetainerFrequencyDropdown && (
+            <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {retainerFrequencyOptions.map((frequency, idx) => (
+                <div 
+                  key={`frequency-option-${idx}`} 
+                  className="frequency-dropdown-item px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleRetainerFrequencyChange(frequency);
+                  }}
+                >
+                  {frequency}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
-    </div>
 
-    {/* For the duration of */}
     <span className='text-sm whitespace-nowrap'>For the duration of</span>
 
-    {/* Duration */}
     <div className="w-full lg:w-auto flex-1">
       <fieldset className="w-full border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
         <legend className="px-2 text-boldblue text-[10px]">Duration</legend>
@@ -806,7 +795,6 @@ const CreateJob  = () => {
             </div>
         </form>
         
-        {/* Sticky Bottom */}
         <section className="flex items-center justify-center gap-2.5 py-7.5 px-6 fixed bottom-0 left-0 bg-skyblue w-full border-t border-t-boldblue">
           <button 
             type="button"
@@ -829,6 +817,14 @@ const CreateJob  = () => {
         </button>
         </section>
         </section>
+
+        {showPaymentModal && createdJobId && (
+        <PaymentModal
+          jobId={createdJobId}
+          onClose={() => setShowPaymentModal(false)}
+        />
+      )}
+
     </section>
   )
 }

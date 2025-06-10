@@ -13,7 +13,6 @@ const useNotification = create((set, get) => ({
     if (!socket || get().isInitialized) return;
   
     const handleNotification = (notification) => {
-      console.log('Received new notification:', notification);
       set(state => ({
         notifications: [notification, ...state.notifications],
         count: state.count + 1
@@ -46,7 +45,6 @@ const useNotification = create((set, get) => ({
         return;
       }
       const res = await axios.get(`${API_URL}/api/notifications/get-notifications/${userId}`);
-      console.log('Fetched notifications:', res.data);
       set({
         notifications: res.data,
         count: res.data.filter(n => !n.isRead).length

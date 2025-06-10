@@ -22,6 +22,7 @@ const NotificationIcon = ({ type }: { type: string }) => {
     welcome: User,
     new_rating: AlertCircle,
     new_message: MessageSquare,
+    new_application: Briefcase,
     application_viewed: Eye,
     application_active: Briefcase,
     offer_received: CreditCard,
@@ -48,6 +49,7 @@ const getTypeColor = (type: string) => {
     welcome: 'bg-purple-50 text-purple-600 border-purple-200',
     new_rating: 'bg-green-50 text-green-600 border-green-200',
     new_message: 'bg-blue-50 text-blue-600 border-blue-200',
+    new_application: 'bg-blue-50 text-blue-600 border-blue-200',
     application_viewed: 'bg-orange-50 text-orange-600 border-orange-200',
     application_active: 'bg-emerald-50 text-emerald-600 border-emerald-200',
     offer_received: 'bg-indigo-50 text-indigo-600 border-indigo-200',
@@ -99,9 +101,18 @@ const Notifications = () => {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount: number = notifications.filter((n: Notification) => !n.isRead).length;
   
-  const filteredNotifications = notifications.filter(notification => {
+  interface Notification {
+    _id: string;
+    type: string;
+    title: string;
+    message: string;
+    createdAt: string;
+    isRead: boolean;
+  }
+
+  const filteredNotifications = notifications.filter((notification: Notification) => {
     if (filter === 'all') return true;
     if (filter === 'unread') return !notification.isRead;
     if (filter === 'read') return notification.isRead;
@@ -204,88 +215,88 @@ const Notifications = () => {
 
         {/* Notifications List */}
         <div className="space-y-2">
-          {filteredNotifications.length === 0 ? (
+            {filteredNotifications.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-xl border border-deepskyblue">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <Bell className="w-8 h-8 text-gray-400" />
+              <Bell className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
               <p className="text-gray-500">
-                {filter === 'all' 
-                  ? "You don't have any notifications yet" 
-                  : `No ${filter} notifications found`
-                }
+              {filter === 'all' 
+                ? "You don't have any notifications yet" 
+                : `No ${filter} notifications found`
+              }
               </p>
             </div>
-          ) : (
-            filteredNotifications.map((notification) => (
+            ) : (
+            filteredNotifications.map((notification: Notification) => (
               <div
-                key={notification._id}
-                className={`group relative bg-white rounded-xl border transition-all hover:shadow-md cursor-pointer ${
-                  !notification.isRead 
-                    ? 'border-blue-200 bg-blue-50/30' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-                onClick={() => !notification.isRead && handleMarkAsRead(notification._id)}
+              key={notification._id}
+              className={`group relative bg-white rounded-xl border transition-all hover:shadow-md cursor-pointer ${
+                !notification.isRead 
+                ? 'border-blue-200 bg-blue-50/30' 
+                : 'border-gray-200 hover:border-gray-300'
+              }`}
+              onClick={() => !notification.isRead && handleMarkAsRead(notification._id)}
               >
-                <div className="p-4">
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center ${getTypeColor(notification.type)}`}>
-                      <NotificationIcon type={notification.type} />
-                    </div>
+              <div className="p-4">
+                <div className="flex items-start gap-4">
+                {/* Icon */}
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full border flex items-center justify-center ${getTypeColor(notification.type)}`}>
+                  <NotificationIcon type={notification.type} />
+                </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className={`font-semibold text-deepskyblue ${!notification.isRead ? 'font-bold' : ''}`}>
-                              {notification.title}
-                            </h3>
-                            {!notification.isRead && (
-                              <div className="w-2 h-2 bg-deepskyblue rounded-full"></div>
-                            )}
-                          </div>
-                          <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {formatTimestamp(notification.createdAt)}
-                          </p>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {!notification.isRead && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMarkAsRead(notification._id);
-                              }}
-                              disabled={loadingNotifications.has(notification._id) || isLoading}
-                              className="cursor-pointer p-2 text-gray-400 hover:text-deepskyblue hover:bg-blue-50 rounded-lg transition-colors"
-                              title="Mark as read"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => handleDelete(e, notification._id)}
-                            disabled={loadingNotifications.has(notification._id) || isLoading}
-                            className="cursor-pointer p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                    <h3 className={`font-semibold text-deepskyblue ${!notification.isRead ? 'font-bold' : ''}`}>
+                      {notification.title}
+                    </h3>
+                    {!notification.isRead && (
+                      <div className="w-2 h-2 bg-deepskyblue rounded-full"></div>
+                    )}
                     </div>
+                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                    {notification.message}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                    {formatTimestamp(notification.createdAt)}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!notification.isRead && (
+                    <button
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.stopPropagation();
+                      handleMarkAsRead(notification._id);
+                      }}
+                      disabled={loadingNotifications.has(notification._id) || isLoading}
+                      className="cursor-pointer p-2 text-gray-400 hover:text-deepskyblue hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Mark as read"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    )}
+                    <button
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleDelete(e, notification._id)}
+                    disabled={loadingNotifications.has(notification._id) || isLoading}
+                    className="cursor-pointer p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete"
+                    >
+                    <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                   </div>
                 </div>
+                </div>
+              </div>
               </div>
             ))
-          )}
+            )}
         </div>
       </div>
     </div>
