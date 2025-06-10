@@ -8,11 +8,11 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  modularizeImports: {
-    '@/components': {
-      transform: '@/components/{{member}}',
-    },
-  },
+  // modularizeImports: {
+  //   '@/components': {
+  //     transform: '@/components/{{member}}',
+  //   },
+  // },
 };
 
 export default nextConfig;
