@@ -4,7 +4,7 @@ import useAuthStore from './useAuth';
 
 const API_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-const useNotification = create((set, get) => ({
+export const useNotification = create((set, get) => ({
   notifications: [],
   count: 0,
   isInitialized: false,
@@ -101,5 +101,3 @@ const useNotification = create((set, get) => ({
   
   reset: () => set({ notifications: [], count: 0, isInitialized: false })
 }));
-
-export default useNotification;

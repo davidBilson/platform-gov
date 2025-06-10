@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import useAuthStore from "@/store/useAuth";
 import { ToastContainer } from 'react-toastify';
 import AOS from 'aos';
-import useNotification from '@/store/useNotification';
+import {useNotification} from '@/store/useNotification';
 import useSocket from '@/store/useSocket';
 import NotificationToast from "@/components/notifications/notificationToast";
 

@@ -1,4 +1,4 @@
-import useNotification from "../../store/useNotification";
+import {useNotification} from "../../store/useNotification";
 
 const NotificationCount = () => {
 

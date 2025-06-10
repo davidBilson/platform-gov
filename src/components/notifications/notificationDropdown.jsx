@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import useNotification from "@/store/useNotification";
+import {useNotification} from "@/store/useNotification";
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 

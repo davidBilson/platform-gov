@@ -15,7 +15,7 @@ import {
   User,
   Briefcase
 } from 'lucide-react';
-import useNotification from '@/store/useNotification';
+import {useNotification} from '@/store/useNotification';
 
 const NotificationIcon = ({ type }: { type: string }) => {
   const iconMap: Record<string, React.ElementType> = {
