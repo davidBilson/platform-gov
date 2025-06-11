@@ -238,10 +238,7 @@ export const createCategory = async (data: { name: string; label: string }) => {
 export const deleteCategory = async (id: string) => {
   try {
     const endPoint = process.env.NEXT_PUBLIC_DELETE_CATEGORY?.replace(':id', id);
-    const response = await axios.delete(
-      `${API_BASE_URL}${endPoint}`,
-      { data: withAdminId() }
-    );
+    const response = await axios.delete(`${API_BASE_URL}${endPoint}?adminId=${adminId}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -276,10 +273,8 @@ export const createItem = async (categoryId: string, value: string) => {
 export const deleteItem = async (id: string) => {
   try {
     const endPoint = process.env.NEXT_PUBLIC_DELETE_ITEM?.replace(':id', id);
-    const response = await axios.delete(
-      `${API_BASE_URL}${endPoint}`,
-      { data: withAdminId() }
-    );
+    const response = await axios.delete(`${API_BASE_URL}${endPoint}?adminId=${adminId}`);
+
     return response.data;
   } catch (error) {
     throw error;

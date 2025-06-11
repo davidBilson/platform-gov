@@ -242,6 +242,8 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     const state = get();
     let filtered = [...contractors];
 
+    filtered = filtered.filter(contractor => !contractor.user.isSuspended);
+
     // SEARCH TERM
     if (state.searchTerm) {
       const searchLower = state.searchTerm.toLowerCase();

@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import ContractorList from '../../_home/_contractorFeed/_contractorList';
 import ContractorFilter from '../../_home/_contractorFeed/_contractorFilter';
 import ContractorCountFilters from '../../_home/_contractorFeed/_contractorCountFilters';
-import { ContractorProfile, ContractorApiResponse } from '@/types/contractors';
+import { ContractorProfile } from '@/types/contractors';
 import { IoReload } from 'react-icons/io5';
 import { useContractorFilter } from '@/store/useContractorFilter';
 import LoadingAnimation from '@/components/ui/loading';
+import { fetchContractors } from '@/api/feed-api';
 
 const ContractorFeed: React.FC = () => {
-  const [contractors, setContractors] = useState<ContractorProfile[]>([]);
-  const [filteredContractors, setFilteredContractors] = useState<ContractorProfile[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filteredContractors, x] = useState<ContractorProfile[]>([]);
 
   const { 
     applyFilters,
@@ -29,36 +27,26 @@ const ContractorFeed: React.FC = () => {
     domainDetail,
   } = useContractorFilter();
 
-  const fetchContractors = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get<ContractorApiResponse>(
-        `${process.env.NEXT_PUBLIC_BASE_URL}${process.env.NEXT_PUBLIC_FETCH_ALL_CONTRACTORS}`
-      );
-      
-      if (response.data.success) {
-        const data = response.data.data;
-        setContractors(data);
-        setFilteredContractors(applyFilters(data));
-      }
-    } catch (err) {
-      console.error(err)
-      setError('Failed to fetch contractors');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: contractors = [],
+    isLoading: loading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['contractors'],
+    queryFn: fetchContractors,
+    staleTime: 5000, // 2 seconds
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
 
-  useEffect(() => {
-    fetchContractors();
-  }, []);
-
-  // Update filtered contractors whenever filters change
-  useEffect(() => {
+  const memoizedFilteredContractors = useMemo(() => {
     if (contractors.length > 0) {
-      const filtered = applyFilters(contractors);
-      setFilteredContractors(filtered);
+      return applyFilters(contractors);
     }
+    return [];
   }, [
     contractors,
     applyFilters,
@@ -74,6 +62,14 @@ const ContractorFeed: React.FC = () => {
     domainFocus,
     domainDetail
   ]);
+
+  useEffect(() => {
+    x(memoizedFilteredContractors);
+  }, [memoizedFilteredContractors]);
+
+  const handleRetry = () => {
+    refetch();
+  };
 
   return (
     <main className="container mx-auto p-6">
@@ -91,7 +87,10 @@ const ContractorFeed: React.FC = () => {
           <p>
             {"Cannot load contractors list at this time. "}
           </p>
-          <button onClick={() => fetchContractors()} className="bg-aquagreen text-white px-4 py-2 flex items-center gap-2 rounded-lg mx-auto text-sm mt-7.5 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out">
+          <button 
+            onClick={handleRetry} 
+            className="bg-aquagreen text-white px-4 py-2 flex items-center gap-2 rounded-lg mx-auto text-sm mt-7.5 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out"
+          >
             Retry <IoReload />
           </button>
         </div>

@@ -4,7 +4,6 @@ import {
   Users, 
   ShoppingBag, 
   FileText, 
-  ChevronDown,
   ChevronRight,
   LogOut,
   User,
@@ -12,6 +11,9 @@ import {
   DollarSign
 } from 'lucide-react';
 import Logo from '@/components/ui/logo';
+import useAuthStore from '@/store/useAuth';
+import useAdminStore from '@/store/useAdmin'; // Import the new admin store
+import { useRouter } from 'next/router';
 
 interface AdminSideBarProps {
   setActiveComponent: (component: string) => void;
@@ -19,15 +21,14 @@ interface AdminSideBarProps {
 
 const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [activeItem, setActiveItem] = useState('dashboard');
-  const [expandedItems, setExpandedItems] = useState<Record<string | number, boolean>>({});
+  const { resetAll } = useAuthStore();
+  const { activeComponent, setActiveComponent: setStoreActiveComponent } = useAdminStore();
+  const router = useRouter();
 
-  const toggleExpanded = (key: string | number) => {
-    setExpandedItems(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
+  const handleSignOut = () => {
+    resetAll();
+    router.push('/account/sign-in');
+  }
 
   const menuItems = [
     {
@@ -42,12 +43,6 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
       icon: Users,
       path: '/admin/users'
     },
-    // {
-    //   key: 'bank-records',
-    //   label: 'Bank Records',
-    //   icon: CreditCard,
-    //   path: '/admin/bank-records'
-    // },
     {
       key: 'contracts',
       label: 'Contracts',
@@ -70,7 +65,7 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
       key: 'fee-settings',
       label: 'Fee Settings',
       icon: DollarSign,
-      path: '/admin/contents'
+      path: '/admin/fee-settings'
     }
   ];
 
@@ -79,62 +74,37 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
     label?: string;
     icon?: React.ComponentType<{ size: number; className?: string }>;
     path?: string;
-    hasSubmenu?: boolean;
     submenu?: Array<MenuItemProps>;
     badge?: string;
   }
 
-  const MenuItem = ({ item, isSubmenuItem = false }: { item: MenuItemProps; isSubmenuItem?: boolean }) => {
+  const MenuItem = ({ item }: { item: MenuItemProps; isSubmenuItem?: boolean }) => {
     const Icon = item.icon;
-    const isActive = activeItem === item.key;
-    const isExpanded = expandedItems[item.key];
+    const isActive = activeComponent === item.key;
     
     return (
       <div className="mb-1">
         <button
           onClick={() => {
-            setActiveItem(item.key);
-            setActiveComponent(item.key); // Add this line
-            if (item.hasSubmenu) {
-              toggleExpanded(item.key);
-            }
+            setStoreActiveComponent(item.key); // Update Zustand store
+            setActiveComponent(item.key); // Keep the original prop function for backward compatibility
           }}
           className={`
-            w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all duration-200
+            w-full flex items-center justify-between p-2.5 rounded-lg text-left transition-all duration-200
             ${isActive 
               ? 'bg-deepskyblue text-white shadow-md shadow-darkgray' 
               : 'text-skyblue cursor-pointer hover:bg-deepskyblue/50 hover:text-white'
             }
-            ${isSubmenuItem ? 'pl-12 py-2' : ''}
+            ${isCollapsed ? 'justify-center' : 'justify-between'}
           `}
         >
           <div className="flex items-center gap-3">
-            {Icon && <Icon size={18} className="flex-shrink-0" />}
+            {Icon && <Icon size={18} />}
             {!isCollapsed && (
-              <>
                 <span className="font-medium">{item.label}</span>
-                {item.badge && (
-                  <span className="bg-deepskyblue text-white text-xs px-2 py-0.5 rounded-full">
-                    {item.badge}
-                  </span>
-                )}
-              </>
             )}
           </div>
-          {!isCollapsed && item.hasSubmenu && (
-            <div className="flex-shrink-0">
-              {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </div>
-          )}
         </button>
-        
-        {!isCollapsed && item.hasSubmenu && isExpanded && (
-          <div className="mt-1 space-y-1">
-            {item.submenu && item.submenu.map((subItem: { key: string }) => (
-              <MenuItem key={subItem.key} item={subItem} isSubmenuItem={true} />
-            ))}
-          </div>
-        )}
       </div>
     );
   };
@@ -160,7 +130,7 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 hover:bg-skyblue hover:text-boldblue cursor-pointer rounded-lg transition-colors"
+            className="p-2 hover:bg-deepskyblue text-white cursor-pointer rounded-lg transition-colors"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             <ChevronRight 
@@ -171,29 +141,16 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 p-4 overflow-y-auto">
-        <div className="space-y-2">
+        <div className="space-y-2 flex flex-col gap-3">
           {menuItems.map((item) => (
             <MenuItem key={item.key} item={item} />
           ))}
         </div>
       </nav>
 
-      {/* Bottom Section */}
-      <div 
-        className="border-t border-deepskyblue p-4"
-      >
-        <div className="space-y-2">
-          {/* {bottomMenuItems.map((item) => (
-            <MenuItem key={item.key} item={item} />
-          ))} */}
-        </div>
-        
-        {/* User Profile */}
-        <div 
-        // className="mt-4 pt-4 border-t border-deepskyblue"
-        >
+      <div className="border-t border-deepskyblue p-4">
+        <div>
           <div className={`flex items-center gap-3 p-2 rounded-lg  transition-colors ${isCollapsed ? 'justify-center ' : ''}`}>
             <div className="w-8 h-8 bg-gradient-to-br from-boldblue to-deepskyblue rounded-full flex items-center justify-center flex-shrink-0">
               <User size={16} />
@@ -206,11 +163,11 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
             )}
           </div>
           
-            <button className="w-full mt-2 flex items-center gap-3 p-2 text-crimson cursor-pointer border border-crimson hover:bg-crimson/20 bg-crimson/10 rounded-lg transition-colors">
+            <button onClick={handleSignOut} className="w-full mt-2 flex items-center gap-3 p-2 text-crimson cursor-pointer border border-crimson hover:bg-crimson/20 bg-crimson/10 rounded-lg transition-colors">
               <LogOut size={16} className='text-crimson' />
-            {!isCollapsed && (
-              <span className="text-sm">Sign Out</span>
-            )}
+              {!isCollapsed && (
+                <span className="text-sm">Sign Out</span>
+              )}
             </button>
         </div>
       </div>

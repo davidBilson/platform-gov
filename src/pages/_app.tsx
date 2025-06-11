@@ -4,90 +4,23 @@ import type { AppProps } from "next/app";
 import { ReactQueryProvider } from "@/providers/ReactQueryProvider"
 import Head from "next/head";
 import Navbar from "@/components/layout/navbar/navbar";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useAuthStore from "@/store/useAuth";
 import { ToastContainer } from 'react-toastify';
 import AOS from 'aos';
-import {useNotification} from '@/store/useNotification';
+import { useNotification } from '@/store/useNotification';
 import useSocket from '@/store/useSocket';
 import NotificationToast from "@/components/notifications/notificationToast";
-
-function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const { userId, isLoading, initAuth, verificationStep } = useAuthStore();
-  
-  const publicRoutes = [
-    '/account/sign-up',
-    '/account/sign-in',
-    '/account/forgot-password',
-    '/account/reset-password',
-    '/account/verification',
-    '/privacy-policy',
-    '/',
-    '/admin'
-  ];
-
-  const isPublicRoute =
-    publicRoutes.includes(router.pathname) ||
-    publicRoutes.some(route => router.pathname.startsWith(route + '/'));
-
-    const isVerificationPage = router.pathname === '/account/verification';
-  
-    useEffect(() => {
-      initAuth();
-    }, [initAuth]);
-
-    // Connect socket when user is authenticated
-    useEffect(() => {
-      if (userId) {
-        useSocket.getState().connect();
-      }
-    }, [userId]);
-  
-    useEffect(() => {
-      if (!isLoading && !userId && !isPublicRoute) {
-        router.replace('/account/sign-in');
-      }
-    }, [userId, isPublicRoute, isLoading, router]);
-  
-
-  useEffect(() => {
-    if (!isLoading) {
-
-      if (userId && router.pathname === '/account/sign-up') {
-
-        if (verificationStep !== 'completed') {
-          router.replace('/account/verification');
-        } else {
-          router.replace('/');
-        }
-        
-      } 
-
-      else if (isVerificationPage && !userId) {
-        router.replace('/account/sign-up');
-      }
-
-      else if (userId && router.pathname === '/account/sign-in') {
-        router.replace('/');
-      }
-    }
-  }, [userId, router.pathname, isLoading, router, verificationStep, isVerificationPage]);
-
-  return isPublicRoute || userId ? <>{children}</> : null;
-}
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function App({ Component, pageProps }: AppProps) {
-
   const socket = useSocket(state => state.socket);
   const isConnected = useSocket(state => state.isConnected);
   const { notifications, init, fetchNotifications, reset } = useNotification();
   const { userId } = useAuthStore();
 
-
-   const [toastNotification, setToastNotification] = useState(null);
-   const [lastNotificationId, setLastNotificationId] = useState(null);
+  const [toastNotification, setToastNotification] = useState(null);
+  const [lastNotificationId, setLastNotificationId] = useState(null);
 
   useEffect(() => {
     if (socket && isConnected && userId) {
@@ -156,7 +89,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <ReactQueryProvider>
         <Navbar />
-        <AuthWrapper>
+        <AuthProvider>
           <ToastContainer 
             position="top-center"
             autoClose={3000}
@@ -177,7 +110,7 @@ export default function App({ Component, pageProps }: AppProps) {
             onClose={handleToastClose}
             duration={4000}
           />
-        </AuthWrapper>
+        </AuthProvider>
       </ReactQueryProvider>
     </>
   );

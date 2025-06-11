@@ -4,6 +4,8 @@ export interface UserDetails {
   name: string;
   email: string;
   phoneNumber: string;
+  isSuspended: boolean;
+  isHighPriority: boolean;
 }
 
 export interface WorkHistory {

@@ -28,7 +28,7 @@ interface Rating {
   contractId: string;
   jobId: string;
   reviewer: string;
-  reviewee: string | { _id: string; name: string }; // Allow both string and object
+  reviewee: string | { _id: string; name: string };
   role: 'client' | 'contractor';
   rating: number;
   comments?: string;
@@ -41,14 +41,15 @@ interface ContractWithRating extends Contract {
 }
 
 const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
+
   const { userId } = useAuthStore() as { userId: string | null; name: string | null };
+
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [completedContracts, setCompletedContracts] = useState<Contract[]>([]);
   const [contractorRatings, setContractorRatings] = useState<Rating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(false);
 
-  // Helper function to normalize IDs
   const normalizeId = useCallback((id: unknown): string => {
     if (!id) return '';
     if (typeof id === 'object' && id !== null && '_id' in id) {
@@ -57,9 +58,6 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     return String(id);
   }, []);
 
-  // Helper function to extract name from reviewee
-
-  // Function to get contractor ratings
   const getContractorRatings = useCallback(async (contractorId: string): Promise<Rating[]> => {
     try {
       setRatingsLoading(true);
@@ -67,8 +65,8 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
       return (ratings || []).map(rating => ({
         ...rating,
         _id: rating._id || '', // Ensure _id is always a string
-        createdAt: rating.createdAt ? String(rating.createdAt) : '', // Convert createdAt to string
-        updatedAt: rating.updatedAt ? String(rating.updatedAt) : '', // Convert updatedAt to string
+        createdAt: rating.createdAt ? String(rating.createdAt) : '',
+        updatedAt: rating.updatedAt ? String(rating.updatedAt) : '',
       }));
     } catch (error) {
       console.error('Error fetching contractor ratings:', error);
@@ -99,8 +97,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   
   const getProfileData = useCallback(async (profileId: string): Promise<void> => {
     try {
-      const response = await fetchProfile(profileId) as FetchResponse;
-      
+      const response = await fetchProfile(profileId, 'contractor') as FetchResponse;
       if (response?.success && response?.data) {
         setProfileData(response.data);
       } else {
@@ -184,7 +181,6 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     });
   }, [completedContracts, contractorRatings, normalizeId]);
 
-  // Calculate overall contractor rating
   const overallRating = useMemo((): { average: number; count: number } => {
     if (!contractorRatings || contractorRatings.length === 0) {
       return { average: profileData?.rating || 0, count: 0 };

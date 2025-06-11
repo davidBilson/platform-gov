@@ -58,3 +58,14 @@ export const signInUser = async (formData: SignInFormData): Promise<SignInRespon
     };
   }
 };
+
+export const checkIfUserIsSuspended = async (userId: string) => {
+  try {
+    const endPoint = process.env.NEXT_PUBLIC_CHECK_USER_SUSPENDED?.replace(':id', userId);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}${endPoint}`);
+    
+    return response.data.data.isSuspended;
+  } catch (error) {
+    console.log(error)
+  }
+}

@@ -28,14 +28,14 @@ const ItemSkeleton = () => (
 );
 
 const ItemListSkeleton = () => (
-  <ul className="divide-y divide-gray-200">
-    {[1, 2, 3, 4, 5].map((i) => (
+  <ul className="divide-y divide-gray-200 h-[calc(40vh)]">
+    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
       <ItemSkeleton key={i} />
     ))}
   </ul>
 );
 
-const ManageList: React.FC<ManageListProps> = ({ categoryId }) => {
+const ManageList = ({ categoryId }: ManageListProps) => {
   const [items, setItems] = useState<Item[]>([]);
   const [newItem, setNewItem] = useState('');
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,7 @@ const ManageList: React.FC<ManageListProps> = ({ categoryId }) => {
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
             placeholder="Add new item"
-            className="flex-1 border border-deepskyblue/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-deepskyblue"
+            className="flex-1 border border-deepskyblue/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-deepskyblue text-sm"
             onKeyPress={(e) => e.key === 'Enter' && handleAddItem()}
           />
           <button
@@ -112,13 +112,13 @@ const ManageList: React.FC<ManageListProps> = ({ categoryId }) => {
         <ItemListSkeleton />
       ) : items.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          No items in this category yet
+          {""}
         </div>
       ) : (
-        <ul className="divide-y divide-gray-200">
+        <ul className="divide-y divide-gray-200 h-[calc(40vh)] overflow-y-auto">
           {items.map((item) => (
-            <li key={item._id} className="py-3 flex justify-between items-center">
-              <span className="text-gray-800">{item.value}?</span>
+            <li key={item._id} className="py-3 flex justify-between items-center text-xs">
+              <span className="text-gray-800">{item.value}</span>
               <button
                 onClick={() => handleDeleteItem(item._id)}
                 className="text-red-500 hover:text-red-700 cursor-pointer"

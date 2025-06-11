@@ -138,7 +138,7 @@ const CreateFreelancerProfile = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetchProfile(userId);
+      const response = await fetchProfile(userId, 'contractor');
       
       if (response.success && response.data) {
         setIsProfileExists(true);

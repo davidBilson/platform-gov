@@ -35,11 +35,15 @@ const JobList = ({ job }: JobListProps) => {
   return (
     <section className="border-b border-b-lightblue pt-7.5 pb-10">
       <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
+        {job.isPaymentVerified && (
+          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
+            Payment Verified
+          </span>
+        )}
         <p className='text-xs font-semibold text-boldblue'>Posted {postedTime}</p>
         {
           userId &&
           <div className='text-boldblue'>
-            {/* when user clicks on apply, it should navigate to /job/apply and take the job._id with it to that route */}
             <Link href={`/job/apply?id=${job._id}`} className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">Apply</Link> | 
             <button className="text-sm font-bold ml-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Save</button>
           </div>

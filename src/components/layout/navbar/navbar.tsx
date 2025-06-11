@@ -17,13 +17,11 @@ const Navbar: React.FC = () => {
       return <AdminNavbar />;
     } 
     
-    // Special case for privacy policy
     if (pathname === '/privacy-policy') {
-      return userId ? <UserNavbar /> : <GuestNavbar />;
+      return userId && (role === 'client' || role === 'contractor') ?  <UserNavbar /> : userId && role === 'admin' ? <AdminNavbar /> : <GuestNavbar />;
     }
     
-    // For all other routes, authenticated users see UserNavbar, guests see GuestNavbar
-    return userId ? <UserNavbar /> : <GuestNavbar />;
+    return userId && (role === 'client' || role === 'contractor') ? <UserNavbar /> : userId && role === 'admin' ? <AdminNavbar /> : <GuestNavbar />;
   };
 
   return renderNavbar();

@@ -19,6 +19,7 @@ import { fetchProfilePicture } from '../../../api/profile-api';
 import NotificationCount from "@/components/notifications/notificationCount";
 
 const UserNavbar = () => {
+
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
@@ -143,7 +144,7 @@ const UserNavbar = () => {
     ]
   };
 
-  const navItems = role === 'client' ? clientNavItems : contractorNavItems;
+  const navItems = role === 'client' ? clientNavItems :  contractorNavItems;
 
   const renderDesktopNavItem = (item: NavItem, index: number) => {
     const dropdownId = `desktop-${item.label.replace(' ', '-').toLowerCase()}`;
@@ -244,6 +245,7 @@ const UserNavbar = () => {
           </div>
           
           <div className="flex items-center gap-4">
+            
             <div className="relative">
               <button 
                 onClick={() => {
@@ -259,6 +261,7 @@ const UserNavbar = () => {
               </button>
               <NotificationsDropdown notificationsOpen={notificationsOpen} setNotificationsOpen={setNotificationsOpen} />
             </div>
+
             <div ref={profileDropdownRef} className="relative">
               <div className='w-fit h-fit cursor-pointer' onClick={() => toggleDropdown('profile')}>
                 {
@@ -411,7 +414,8 @@ const UserNavbar = () => {
           </div>
           
           <div className={`absolute top-full right-0 mt-2 w-40 bg-white border border-skyblue rounded shadow-md z-10 ${activeDropdown === 'profile' ? 'block' : 'hidden'}`}>
-            <button onClick={() => handleNavigation('/profile')} className="block w-full text-left px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
+            <button onClick={() => handleNavigation('/profile')} 
+            className="block w-full text-left px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
               Profile
             </button>
             <span onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">

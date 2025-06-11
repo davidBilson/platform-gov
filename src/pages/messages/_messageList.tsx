@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { fetchProfilePicture } from "@/api/profile-api";
 import ProfilePicture from "@/components/profile/profilePicture";
 
-interface UnifiedConversation {
-  userId: string;
+interface Conversation {
+  threadId: string;
+  jobId?: string;
+  jobTitle?: string;
   otherUser: {
     id: string;
     name: string;
@@ -12,30 +14,19 @@ interface UnifiedConversation {
     content: string;
     isCurrentUser: boolean;
     createdAt: string;
-    jobTitle?: string;
   };
   unreadCount: number;
-  jobThreads: Array<{
-    threadId: string;
-    jobId: string;
-    jobTitle: string;
-    lastMessage: {
-      content: string;
-      isCurrentUser: boolean;
-      createdAt: string;
-    };
-    unreadCount: number;
-  }>;
 }
 
 interface MessageListProps {
-  conversations: UnifiedConversation[];
+  conversations: Conversation[];
   loading: boolean;
-  onSelect: (conversation: UnifiedConversation) => void;
+  onSelect: (conversation: Conversation) => void;
   selectedId?: string;
 }
 
 export default function MessageList({ conversations, loading, onSelect, selectedId }: MessageListProps) {
+
   const [profilePictures, setProfilePictures] = useState<Record<string, string>>({});
   const processedUserIds = useRef<Set<string>>(new Set());
 
@@ -46,7 +37,6 @@ export default function MessageList({ conversations, loading, onSelect, selected
       const newProfilePictures: Record<string, string> = {};
       
       const userIdsToLoad = conversations
-        .filter(conv => conv.userId !== 'govlink') // Skip govlink
         .map(conv => conv.otherUser.id)
         .filter(userId => !processedUserIds.current.has(userId));
       
@@ -120,13 +110,13 @@ export default function MessageList({ conversations, loading, onSelect, selected
   return (
     <div className="w-full bg-white h-full rounded-xl overflow-hidden shadow-sm flex flex-col">
       {conversations.map((conversation) => {
-        const isSelected = conversation.userId === selectedId;
+        const isSelected = conversation.threadId === selectedId;
         const userId = conversation.otherUser.id;
         const profilePicture = profilePictures[userId];
         
         return (
           <div 
-            key={conversation.userId} 
+            key={conversation.threadId} 
             className={`px-4 py-3 border-b border-deepskyblue cursor-pointer transition-colors duration-150 ${
               isSelected 
                 ? 'bg-blue-50 hover:bg-blue-100' 
@@ -137,13 +127,13 @@ export default function MessageList({ conversations, loading, onSelect, selected
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm ${
-                  conversation.userId === 'govlink' 
+                  conversation.threadId === 'govlink' 
                     ? 'bg-deepskyblue text-white' 
                     : isSelected
                       ? 'bg-blue-100 text-deepskyblue'
                       : 'bg-deepskyblue text-gray-600'
                 }`}>
-                  {conversation.userId === 'govlink' ? (
+                  {conversation.threadId === 'govlink' ? (
                     <span className="font-medium text-sm">GL</span>
                   ) : (
                     <ProfilePicture 
@@ -162,19 +152,13 @@ export default function MessageList({ conversations, loading, onSelect, selected
                   </h4>
 
                   <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                    {conversation.userId !== 'govlink' && formatTime(conversation.lastMessage.createdAt)}
+                    {conversation.threadId !== 'govlink' && formatTime(conversation.lastMessage.createdAt)}
                   </span>
                 </div>
                 
-                {/* Show job context for unified conversations */}
-                {conversation.lastMessage.jobTitle && (
+                {conversation.jobTitle && (
                   <p className={`text-xs truncate mt-0.5 ${isSelected ? 'text-deepskyblue' : 'text-gray-600'}`}>
-                    {conversation.lastMessage.jobTitle}
-                    {conversation.jobThreads.length > 1 && (
-                      <span className="ml-1 text-gray-400">
-                        (+{conversation.jobThreads.length - 1} more)
-                      </span>
-                    )}
+                    {conversation.jobTitle}
                   </p>
                 )}
                 

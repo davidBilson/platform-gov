@@ -48,6 +48,8 @@ export interface SignInApiResponse {
       role: UserType;
       isEmailVerified: boolean;
       isPhoneVerified: boolean;
+      isSuspended?: boolean;
+      isHighPriority?: boolean;
     };
   };
 }
@@ -63,6 +65,8 @@ export interface SignInResponse {
       phoneNumber: string;
       isEmailVerified: boolean;
       isPhoneVerified: boolean;
+      isSuspended?: boolean;
+      isHighPriority?: boolean;
     };
   };
   error?: string;

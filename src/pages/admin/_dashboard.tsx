@@ -77,7 +77,6 @@ useEffect(() => {
     <div className="min-h-screen">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-boldblue mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome back! {"Here's what's"} happening on your platform.</p>
       </div>
 
       {/* Overview Cards */}

@@ -4,6 +4,7 @@ import OpenJobs from './_open-jobs';
 import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
+import { fetchProfile } from '@/api/profile-api';
 
 const BusinessProfile = () => {
   
@@ -11,9 +12,7 @@ const BusinessProfile = () => {
   const [loading, setLoading] = useState(true);
   
   const { userId } = useAuthStore();
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
   
-  // Fetch client profile on component mount
   useEffect(() => {
     const fetchBusinessProfile = async () => {
       if (!userId) {
@@ -23,9 +22,7 @@ const BusinessProfile = () => {
       
       try {
         setLoading(true);
-        const apiEndpoint = process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
-        const response = await fetch(`${BASE_URL}${apiEndpoint}`);
-        const data = await response.json();
+        const data = await fetchProfile(userId, 'client');
         
         if (data.success && data.data) {
           setClient(data.data);
@@ -38,7 +35,7 @@ const BusinessProfile = () => {
     };
 
     fetchBusinessProfile();
-  }, [userId, BASE_URL]);
+  }, [userId]);
 
   useEffect(() => {
     if(!client && !loading) {
@@ -46,7 +43,6 @@ const BusinessProfile = () => {
     }
   }, [client, loading]);
 
-  // Handle the loading state
   if (loading) {
     return (
       <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
@@ -63,10 +59,8 @@ const BusinessProfile = () => {
     <section className='p-5 pb-20 md:p-6'>
       <section className='w-full max-w-275 m-auto'>
         
-        {/* Company Logo and Name */}
         <div className='mb-6'>
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
-            {/* Company Logo */}
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
                 {client && client.logo ? (

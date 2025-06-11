@@ -1,18 +1,18 @@
+// profile-api.ts 
 import axios from 'axios';
 import { ProfileFormData } from "@/types/profile";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-
-export const fetchProfile = async (userId: string) => {
+export const fetchProfile = async (userId: string, userType: 'contractor' | 'client') => {
   try {
-    // Use the environment variable for the endpoint
-    const endpoint = process.env.NEXT_PUBLIC_FETCH_CONTRACTOR_PROFILE?.replace(':id', userId) || `/api/profile/${userId}`;
-    const response = await axios.get(`${API_BASE_URL}${endpoint}`);
+    const apiEndpoint = userType === 'contractor' ? process.env.NEXT_PUBLIC_FETCH_CONTRACTOR_PROFILE?.replace(':id', userId) : process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
+    const response = await axios.get(`${API_BASE_URL}${apiEndpoint}`);
+    
     return response.data;
   } catch (error) {
-    console.error('Error fetching profile:', error);
-    // throw error;
+    console.error(`Error fetching ${userType} profile:`, error);
+    throw error;
   }
 };
 
@@ -32,8 +32,8 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       certifications: formData.certifications,
       workHistory: formData.workHistory,
       degrees: formData.degrees,
-      firmAffiliation: formData.firmAffiliation || '', // Add this line
-      location: formData.location || { country: '', state: '' }, // Add this line
+      firmAffiliation: formData.firmAffiliation || '',
+      location: formData.location || { country: '', state: '' },
     };
     
     let response;

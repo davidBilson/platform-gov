@@ -10,10 +10,11 @@ import { getUserRatings } from '@/api/rating-api';
 
 interface ContractorWithRating {
   contractor: {
-    _id?: string; // Made optional to handle potential undefined
+    _id?: string;
     user: {
       _id: string;
       name: string;
+      isHighPriority?: boolean;
     };
     profileImage?: string;
     primaryPosition: string;
@@ -141,17 +142,30 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
     return text.slice(0, maxLength) + '...';
   };
 
-  // Sort contractors to prioritize 'Janus Global Advisors'
   const sortedContractorsWithRatings = [...contractorsWithRatings].sort((a, b) => {
-    // Check if contractor a is affiliated with Janus Global Advisors
-    if (a.contractor.firmAffiliation === 'Janus Global Advisors' && b.contractor.firmAffiliation !== 'Janus Global Advisors') {
+    // First priority: Janus Global Advisors contractors
+    const aIsJanus = a.contractor.firmAffiliation === 'Janus Global Advisors';
+    const bIsJanus = b.contractor.firmAffiliation === 'Janus Global Advisors';
+    
+    if (aIsJanus && !bIsJanus) {
       return -1; // a comes before b
     }
-    // Check if contractor b is affiliated with Janus Global Advisors
-    if (a.contractor.firmAffiliation !== 'Janus Global Advisors' && b.contractor.firmAffiliation === 'Janus Global Advisors') {
+    if (!aIsJanus && bIsJanus) {
       return 1; // b comes before a
     }
-    // If both have same affiliation status, maintain original order
+    
+    // If both have same Janus affiliation status, check high priority
+    const aIsHighPriority = a.contractor.user.isHighPriority === true;
+    const bIsHighPriority = b.contractor.user.isHighPriority === true;
+    
+    if (aIsHighPriority && !bIsHighPriority) {
+      return -1; // a comes before b
+    }
+    if (!aIsHighPriority && bIsHighPriority) {
+      return 1; // b comes before a
+    }
+    
+    // If both have same priority status, maintain original order
     return 0;
   });
 

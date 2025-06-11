@@ -819,11 +819,11 @@ const CreateJob  = () => {
         </section>
 
         {showPaymentModal && createdJobId && (
-        <PaymentModal
-          jobId={createdJobId}
-          onClose={() => setShowPaymentModal(false)}
-        />
-      )}
+          <PaymentModal
+            jobId={createdJobId}
+            onClose={() => setShowPaymentModal(false)}
+          />
+        )}
 
     </section>
   )

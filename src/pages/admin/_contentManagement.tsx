@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, List, Plus, Trash2 } from 'lucide-react';
+import { Settings, List, Trash2 } from 'lucide-react';
 import ManageList from '@/components/admin/contentManagement/manageList';
 import {
   getAllCategories,
@@ -16,7 +16,6 @@ interface Category {
   label: string;
 }
 
-// Skeleton Components
 const StatCardSkeleton = () => (
   <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm animate-pulse">
     <div className="flex items-center justify-between">
@@ -187,9 +186,7 @@ const ContentManagement = () => {
         )}
       </div>
 
-      {/* Tabs and Content */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        {/* Tab Navigation */}
         <div className="border-b border-gray-200">
           {loading ? (
             <TabSkeleton />
@@ -218,18 +215,17 @@ const ContentManagement = () => {
                   </button>
                 </div>
               ))}
-              <button
+              {/* <button
                 onClick={() => setShowAddModal(true)}
                 className="cursor-pointer ml-auto mr-4 p-2 text-gray-500 hover:text-deepskyblue"
                 aria-label="Add new category"
               >
                 <Plus size={20} />
-              </button>
+              </button> */}
             </nav>
           )}
         </div>
 
-        {/* Content Area */}
         <div className="min-h-[300px]">
           {loading ? (
             <ContentSkeleton />
@@ -247,7 +243,6 @@ const ContentManagement = () => {
         </div>
       </div>
 
-      {/* Add Category Modal */}
       <AddCategoryModal 
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}

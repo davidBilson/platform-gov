@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface AddCategoryModalProps {
@@ -12,9 +12,24 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   onClose, 
   onCreate 
 }) => {
+  const [systemName, setSystemName] = useState('');
   const [name, setName] = useState('');
   const [label, setLabel] = useState('');
   const [error, setError] = useState('');
+
+  // Function to convert string to camelCase
+  const toCamelCase = (str: string) => {
+    return str
+      .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+      })
+      .replace(/\s+/g, '');
+  };
+
+
+  useEffect(() => {
+    setName(toCamelCase(systemName));
+  }, [systemName]);
 
   const handleSubmit = () => {
     if (!name.trim() || !label.trim()) {
@@ -23,8 +38,17 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
     }
     
     onCreate(name.trim(), label.trim());
+    setSystemName('');
+    setLabel('');
+    setError('');
+  };
+
+  const handleClose = () => {
+    setSystemName('');
     setName('');
     setLabel('');
+    setError('');
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -34,7 +58,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-boldblue">Create New Category</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
             <X size={24} />
           </button>
         </div>
@@ -48,15 +72,16 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              System Name (unique identifier)
+              System Name ({name || "unique identifier"})
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={systemName}
+              onChange={(e) => setSystemName(e.target.value)}
               className="w-full border border-deepskyblue/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-deepskyblue"
               placeholder="e.g., departments"
             />
+            <p></p>
           </div>
           
           <div>
@@ -75,7 +100,7 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
         
         <div className="mt-6 flex justify-end space-x-3">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm cursor-pointer"
           >
             Cancel

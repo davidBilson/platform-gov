@@ -6,6 +6,7 @@ import { SignInFormData } from '@/types/auth/auth';
 import { signInUser } from '@/api/auth-api';
 
 const SignIn = () => {
+  
   const router = useRouter();
   const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore();
   
@@ -29,6 +30,7 @@ const SignIn = () => {
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    
     e.preventDefault();
     
     setIsSubmitting(true);
@@ -42,6 +44,16 @@ const SignIn = () => {
         return;
       }
       
+      if (result.data?.user.isSuspended) {
+        setErrorMessage('Your account is suspended. Please contact support.');
+        return;
+      }
+
+      if (!result.data?.user) {
+        setErrorMessage('Invalid response from server');
+        return;
+      }
+
       if (!result.data?.user) {
         setErrorMessage('Invalid response from server');
         return;
@@ -49,8 +61,8 @@ const SignIn = () => {
       
       const userData = result.data.user;
       
-      // Update auth store with user data - now including name and role properly
       setUserId(userData._id);
+
       setFormData({
         name: userData.name,
         role: userData.role,
@@ -59,7 +71,6 @@ const SignIn = () => {
         userId: userData._id
       });
       
-      // Set verification statuses
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
       
@@ -73,7 +84,6 @@ const SignIn = () => {
       }
       
     } catch (error) {
-      // This catch block handles any unexpected errors from the signInUser function
       const err = error as Error;
       setErrorMessage(err.message || 'An unexpected error occurred');
     } finally {
