@@ -9,7 +9,7 @@ interface InputFieldProps {
   inputMode?: 'decimal' | 'numeric';
   prefix?: string;
   suffix?: string;
-  error?: string;
+  error?: string | undefined;
   description?: string;
   field: keyof FeeSettingsErrors;
 }

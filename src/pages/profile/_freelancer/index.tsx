@@ -21,6 +21,7 @@ interface Contract {
   };
   startDate: string;
   endDate: string;
+  
 }
 
 interface Rating {
@@ -37,7 +38,7 @@ interface Rating {
 }
 
 interface ContractWithRating extends Contract {
-  ratingData?: Rating;
+  ratingData?: Rating | undefined;
 }
 
 const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {

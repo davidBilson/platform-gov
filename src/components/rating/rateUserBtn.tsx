@@ -26,7 +26,7 @@ interface RateUserBtnProps {
 interface ExistingRating {
   _id: string;
   rating: number;
-  comments?: string;
+  comments?: string | undefined;
   reviewer: {
     _id: string;
     name: string;

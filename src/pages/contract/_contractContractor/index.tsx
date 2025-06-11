@@ -138,7 +138,6 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         },
         refetchIntervalInBackground: true,
         staleTime: Infinity,
-        // Add retry configuration to prevent excessive retries on 404
         retry: (failureCount, error) => {
             console.log(error)
             return failureCount < 3;
@@ -152,7 +151,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                     <Details 
                         job={{
                             ...job,
-                            userId: job.userId ? { _id: job.userId._id } : undefined
+                            userId: job.userId ? { _id: job.userId._id } : { _id: '' }
                         }} 
                         jobId={jobId} 
                         applicationId={proposalId}

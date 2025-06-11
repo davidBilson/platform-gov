@@ -27,7 +27,7 @@ const SingleJobProposals = () => {
 
     <main className='container mx-auto p-6'>
 
-        <JobDetails jobId={id} />
+        <JobDetails jobId={id || ''} />
 
         <section className='flex flex-wrap items-start md:items-center gap-7.5 justify-between mb-7.5'>
           <h2 className=' font-semibold text-xl'>Proposals</h2>
@@ -43,7 +43,7 @@ const SingleJobProposals = () => {
           </div>
         </section>
 
-        <ProposalsList jobId={id} />
+        <ProposalsList jobId={id || ''} />
 
     </main>
 

@@ -20,7 +20,7 @@ interface FormData {
     startDate: Date | null;
     rate: string;
     employmentType: string;
-    paymentType?: string;
+    paymentType: string | undefined;
 }
 
 const HireContractor: NextPage = () => {
@@ -177,7 +177,7 @@ const HireContractor: NextPage = () => {
     useEffect(() => {
         setFormData({
             ...formData,
-            paymentType: job?.paymentType
+            paymentType: job?.paymentType ?? ''
         });
     }, [job])
 

@@ -2,7 +2,12 @@ import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
 
-const PaymentForm = ({ jobId, onSuccess }) => {
+interface PaymentFormProps {
+  jobId: string;
+  onSuccess: () => void;
+}
+
+const PaymentForm: React.FC<PaymentFormProps> = ({ jobId, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -28,7 +33,8 @@ const PaymentForm = ({ jobId, onSuccess }) => {
 
       onSuccess();
     } catch (err) {
-      setError(err.message || 'Payment failed');
+      console.error('Payment error:', err);
+      setError('Payment failed');
     } finally {
       setLoading(false);
     }

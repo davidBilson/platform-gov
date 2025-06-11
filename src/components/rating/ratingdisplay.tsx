@@ -4,7 +4,7 @@ import { FaStar, FaRegStar } from 'react-icons/fa6';
 
 interface RatingDisplayProps {
   rating: number;
-  comments?: string;
+  comments?: string | undefined;
   reviewerName?: string;
   showReviewerName?: boolean;
   size?: 'sm' | 'md' | 'lg';

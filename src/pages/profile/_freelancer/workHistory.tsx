@@ -9,17 +9,30 @@ interface Contract {
   };
   startDate?: string;
   endDate?: string;
-  ratingData?: {
-    rating: number;
-  };
+  ratingData?: Rating | undefined;
+}
+interface Rating {
+  _id: string;
+  contractId: string;
+  jobId: string;
+  reviewer: string;
+  reviewee: string | { _id: string; name: string };
+  role: 'client' | 'contractor';
+  rating: number;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+interface ContractWithRating extends Contract {
+  ratingData?: Rating | undefined;
 }
 
 interface WorkHistoryProps {
-  completedContracts: Contract[];
+  completedContracts: ContractWithRating[];
   renderRating?: (rating: number) => React.ReactNode;
 }
 
-const WorkHistory: React.FC<WorkHistoryProps> = ({ completedContracts, renderRating }) => {
+const WorkHistory = ({ completedContracts, renderRating }: WorkHistoryProps) => {
 
   // Function to format dates consistently
   const formatDate = (dateString: string) => {
