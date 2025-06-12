@@ -1,3 +1,4 @@
+// deposit method setup 
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Elements } from '@stripe/react-stripe-js';
@@ -6,7 +7,7 @@ import PaymentForm from '@/components/payment/PaymentForm';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUB_KEY!);
 
-const PaymentSetup = () => {
+const PaymentMethodSetup = () => {
   const router = useRouter();
   const { jobId } = router.query;
   const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
@@ -192,4 +193,4 @@ const PaymentSetup = () => {
   );
 };
 
-export default PaymentSetup;
+export default PaymentMethodSetup;

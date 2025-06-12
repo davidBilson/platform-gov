@@ -1,3 +1,4 @@
+// this should have two tabs, funded projects and funded projects history
 import React, { useState } from 'react';
 
 const FundProjectPage = () => {

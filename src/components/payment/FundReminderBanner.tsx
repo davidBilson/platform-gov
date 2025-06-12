@@ -14,7 +14,7 @@ const FundReminderBanner = ({ jobId }: { jobId: string }) => {
             This project requires funding to begin. Please fund the project to start the contract.
           </p>
           <p className="mt-3 text-sm md:mt-0 md:ml-6">
-            <Link href={`/payment/setup?jobId=${jobId}`} className="font-medium text-yellow-700 hover:text-yellow-600">
+            <Link href={`/payment/billing-setup?jobId=${jobId}`} className="font-medium text-yellow-700 hover:text-yellow-600">
               Fund now <span aria-hidden="true">&rarr;</span>
             </Link>
           </p>
