@@ -24,7 +24,7 @@ const PaymentModal = ({ jobId, onClose }: PaymentModalProps) => {
             Fund Later
           </button>
           <button
-            onClick={() => router.push(`/payment/billing-setup?jobId=${jobId}`)}
+            onClick={() => router.push(`/payment/fund-project?jobId=${jobId}`)}
             className="px-4 py-1 cursor-pointer bg-boldblue  hover:bg-boldblue/70 text-white rounded"
           >
             Set Up Payment

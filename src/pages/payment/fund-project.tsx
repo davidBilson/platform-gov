@@ -76,30 +76,15 @@ const FundProjectPage = () => {
       <div className="max-w-4xl mx-auto px-6 py-12">
         
         {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-boldblue mb-3">Fund Your Project</h1>
-          <p className="text-lg text-mediumgray max-w-2xl mx-auto">
+        <div className=" mb-6">
+          <h1 className="text-3xl font-bold text-boldblue mb-3">Fund Project</h1>
+          <p className="text-mediumgray">
             Review project details and confirm funding to activate your contract with secure escrow protection.
           </p>
         </div>
 
-        {/* Progress Indicator */}
-        <div className="flex items-center justify-center">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8 bg-aquagreen text-white rounded-full text-sm font-bold">
-              ✓
-            </div>
-            <div className="w-16 h-1 bg-lightgray mx-2">
-              <div className="w-full h-full bg-gradient-to-r from-aquagreen to-boldblue rounded"></div>
-            </div>
-            <div className="flex items-center justify-center w-8 h-8 bg-boldblue text-white rounded-full text-sm font-bold">
-              2
-            </div>
-          </div>
-        </div>
-
         <div className="bg-white rounded-2xl overflow-hidden">
-          <div className="p-8 lg:p-12">
+          <div>
             
             {/* Project Details */}
             <div className="mb-10">
