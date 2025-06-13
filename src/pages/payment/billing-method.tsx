@@ -16,32 +16,15 @@ const PaymentMethodSetup = () => {
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-6 py-12">
         
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-boldblue mb-3">Payment Setup</h1>
-          <p className="text-lg text-mediumgray max-w-2xl mx-auto">
-            Secure your project with our trusted payment system. Your information is protected with industry-standard encryption.
-          </p>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-boldblue">Payment Setup</h1>
         </div>
 
         <div className="overflow-hidden">
           {!paymentMethodSaved ? (
             <div className="p-8 lg:p-12">
-              <div className="flex items-center justify-center mb-8">
-                <div className="flex items-center">
-                  <div className="flex items-center justify-center w-8 h-8 bg-boldblue text-white rounded-full text-sm font-bold">
-                    1
-                  </div>
-                  <div className="w-16 h-1 bg-lightgray mx-2">
-                    <div className="w-full h-full bg-gradient-to-r from-boldblue to-deepskyblue rounded"></div>
-                  </div>
-                  <div className="flex items-center justify-center w-8 h-8 bg-lightgray text-mediumgray rounded-full text-sm font-bold">
-                    2
-                  </div>
-                </div>
-              </div>
 
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-darkgray mb-2">Choose Payment Method</h2>
                 <p className="text-mediumgray">Select your preferred payment option to continue</p>
               </div>
 
@@ -158,7 +141,7 @@ const PaymentMethodSetup = () => {
                 </p>
                 
                 <button
-                  onClick={() => router.push(`/payment/fund?jobId=${jobId}`)}
+                  onClick={() => router.push(`/payment/fund-project?jobId=${jobId}`)}
                   className="group relative inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-boldblue to-deepskyblue text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-boldblue/30"
                 >
                   <span className="mr-2">Fund Project</span>
