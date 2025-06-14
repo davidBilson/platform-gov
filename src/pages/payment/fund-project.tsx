@@ -1,11 +1,9 @@
-// this should have two tabs, funded projects and funded projects history
 import React, { useState } from 'react';
 
 const FundProjectPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Mock job details
   const jobDetails = {
     _id: "65f8a9b2c1d4e5f6g7h8i9j0",
     jobTitle: "Modern E-commerce Website Development",

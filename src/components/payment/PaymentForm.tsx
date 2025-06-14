@@ -7,7 +7,7 @@ interface PaymentFormProps {
   onSuccess: () => void;
 }
 
-const PaymentForm: React.FC<PaymentFormProps> = ({ jobId, onSuccess }) => {
+const PaymentForm = ({ jobId, onSuccess }: PaymentFormProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
