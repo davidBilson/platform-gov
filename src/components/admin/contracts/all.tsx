@@ -68,8 +68,8 @@ const AllContracts = () => {
       contract._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contract.clientId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contract.contractorId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.jobId.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contract.status.toLowerCase().includes(searchTerm.toLowerCase())
+      contract.jobId?.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.status.toLowerCase().includes(searchTerm.toLowerCase()) || ""
     );
     
     setFilteredContracts(filtered);
@@ -215,7 +215,7 @@ const AllContracts = () => {
                     {contract.contractorId?.name || 'N/A'}
                   </td>
                   <td className="px-4 py-3 text-gray-700">
-                    {contract.jobId.jobTitle || 'N/A'}
+                    {contract.jobId?.jobTitle || 'N/A'}
                   </td>
                   <td className="px-4 py-3 font-medium">
                     <div className="flex items-center">
