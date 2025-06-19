@@ -88,7 +88,7 @@ const FundProjectPage = () => {
     switch (job.paymentType) {
       case 'fixed-price': return job.price;
       case 'retainer': return job.retainerAmount || 0;
-      case 'hourly': return job.price * 40;
+      case 'hourly': return job.price * 10;
       default: return 0;
     }
   };
@@ -102,7 +102,7 @@ const FundProjectPage = () => {
       case 'retainer':
         return `First ${job.retainerFrequency} payment of ${job.retainerAmount}`;
       case 'hourly':
-        return 'Initial funding for estimated 40 hours of work';
+        return 'Initial funding for estimated 10 hours of work';
       default:
         return 'Total project amount will be held in escrow until completion';
     }
@@ -296,7 +296,7 @@ const FundProjectPage = () => {
                         {job.paymentType === 'retainer' 
                           ? `${job.retainerFrequency} payment` 
                           : job.paymentType === 'hourly' 
-                          ? 'Initial funding (40 hrs)' 
+                          ? 'Initial funding (10 hrs)' 
                           : 'Project amount'
                         }
                       </span>
