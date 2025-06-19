@@ -1,180 +1,121 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useAuthStore from '@/store/useAuth';
+import { getTransactionHistory } from '@/api/payment-api';
+import { PaymentHistoryData, Transaction, TransactionType, TransactionStatus, FilterOption, PaymentMethod } from '@/types/payment';
 
-type TransactionType = 'payment_received' | 'withdrawal' | 'refund' | 'chargeback';
-type TransactionStatus = 'completed' | 'pending' | 'disputed';
+const TransactionHistory = () => {
 
-interface Transaction {
-  id: string;
-  type: TransactionType;
-  description: string;
-  client?: string;
-  project?: string;
-  amount: number;
-  fee: number;
-  netAmount: number;
-  date: string;
-  status: TransactionStatus;
-  paymentMethod: string;
-  reference: string;
-}
+  const { userId, role } = useAuthStore();
 
-interface FilterOption {
-  value: string;
-  label: string;
-}
-
-interface Summary {
-  totalReceived: number;
-  totalWithdrawn: number;
-  totalFees: number;
-}
-
-const TransactionHistory: React.FC = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string>('all');
-  const [dateRange, setDateRange] = useState<string>('last30days');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-
-  // Mock transaction data
-  const mockTransactions: Transaction[] = [
-    {
-      id: 'TXN-001',
-      type: 'payment_received',
-      description: 'Payment for E-commerce Platform Development',
-      client: 'TechCorp Solutions',
-      project: 'Modern E-commerce Website',
-      amount: 2500,
-      fee: 75,
-      netAmount: 2425,
-      date: '2025-06-10T14:30:00Z',
-      status: 'completed',
-      paymentMethod: 'Bank Transfer',
-      reference: 'REF-2025-001'
-    },
-    {
-      id: 'TXN-002',
-      type: 'withdrawal',
-      description: 'Withdrawal to Bank Account',
-      amount: 1800,
-      fee: 5,
-      netAmount: 1795,
-      date: '2025-06-08T09:15:00Z',
-      status: 'completed',
-      paymentMethod: 'Bank Transfer',
-      reference: 'WTH-2025-002'
-    },
-    {
-      id: 'TXN-003',
-      type: 'payment_received',
-      description: 'Milestone Payment - Mobile App UI/UX Design',
-      client: 'StartupXYZ',
-      project: 'Mobile App Design System',
-      amount: 900,
-      fee: 27,
-      netAmount: 873,
-      date: '2025-06-05T16:45:00Z',
-      status: 'completed',
-      paymentMethod: 'Credit Card',
-      reference: 'REF-2025-003'
-    },
-    {
-      id: 'TXN-004',
-      type: 'refund',
-      description: 'Partial refund for cancelled project',
-      client: 'Marketing Agency Pro',
-      project: 'Website Redesign',
-      amount: 500,
-      fee: 0,
-      netAmount: 500,
-      date: '2025-06-03T11:20:00Z',
-      status: 'completed',
-      paymentMethod: 'Original Payment Method',
-      reference: 'RFD-2025-004'
-    },
-    {
-      id: 'TXN-005',
-      type: 'payment_received',
-      description: 'Final payment for Database Migration',
-      client: 'Enterprise Corp',
-      project: 'Legacy System Migration',
-      amount: 3200,
-      fee: 96,
-      netAmount: 3104,
-      date: '2025-05-28T13:00:00Z',
-      status: 'completed',
-      paymentMethod: 'Wire Transfer',
-      reference: 'REF-2025-005'
-    },
-    {
-      id: 'TXN-006',
-      type: 'withdrawal',
-      description: 'Withdrawal to PayPal',
-      amount: 2200,
-      fee: 22,
-      netAmount: 2178,
-      date: '2025-05-25T10:30:00Z',
-      status: 'pending',
-      paymentMethod: 'PayPal',
-      reference: 'WTH-2025-006'
-    },
-    {
-      id: 'TXN-007',
-      type: 'payment_received',
-      description: 'Retainer payment for API Development',
-      client: 'FinTech Solutions',
-      project: 'Payment Gateway Integration',
-      amount: 1500,
-      fee: 45,
-      netAmount: 1455,
-      date: '2025-05-20T08:45:00Z',
-      status: 'completed',
-      paymentMethod: 'ACH Transfer',
-      reference: 'REF-2025-007'
-    },
-    {
-      id: 'TXN-008',
-      type: 'chargeback',
-      description: 'Chargeback disputed - Under investigation',
-      client: 'Disputed Client Co',
-      project: 'Web Development Project',
-      amount: 800,
-      fee: 25,
-      netAmount: 775,
-      date: '2025-05-18T14:15:00Z',
-      status: 'disputed',
-      paymentMethod: 'Credit Card',
-      reference: 'CHB-2025-008'
+  const [data, setData] = useState<PaymentHistoryData>({
+    transactions: [],
+    summary: {
+      totalReceived: 0,
+      totalWithdrawn: 0,
+      totalRefunds: 0,
+      totalDisputes: 0
     }
-  ];
+  });
 
-  const filterOptions: FilterOption[] = [
-    { value: 'all', label: 'All Transactions' },
-    { value: 'payment_received', label: 'Payments Received' },
-    { value: 'withdrawal', label: 'Withdrawals' },
+  const [loading, setLoading] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const response = await getTransactionHistory(userId);
+      
+      if (response.success) {
+        setData({
+          transactions: response.data.transactions,
+          summary: response.data.summary
+        });
+      } else {
+        console.error('Failed to fetch transactions:', response.message);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const typeOptions: FilterOption[] = [
+    { value: 'all', label: 'All Types' },
+    { value: 'payment_method_added', label: 'Payment Method Added' },
+    { value: 'project_funding', label: 'Project Funding' },
+    { value: 'payout', label: 'Payouts' },
     { value: 'refund', label: 'Refunds' },
-    { value: 'chargeback', label: 'Chargebacks' }
+    { value: 'dispute', label: 'Disputes' }
   ];
 
-  const dateRangeOptions: FilterOption[] = [
-    { value: 'last7days', label: 'Last 7 days' },
-    { value: 'last30days', label: 'Last 30 days' },
-    { value: 'last90days', label: 'Last 90 days' },
-    { value: 'lastyear', label: 'Last year' },
-    { value: 'custom', label: 'Custom range' }
+  const statusOptions: FilterOption[] = [
+    { value: 'all', label: 'All Status' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'failed', label: 'Failed' },
+    { value: 'refunded', label: 'Refunded' },
+    { value: 'disputed', label: 'Disputed' }
   ];
+
+  const filteredTransactions = data.transactions.filter(transaction => {
+    if (selectedFilter !== 'all' && transaction.type !== selectedFilter) {
+      return false;
+    }
+    
+    if (selectedStatus !== 'all' && transaction.status !== selectedStatus) {
+      return false;
+    }
+    
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesDescription = transaction.description?.toLowerCase().includes(searchLower);
+      const matchesJobTitle = transaction.jobTitle?.toLowerCase().includes(searchLower);
+      const matchesId = transaction.id.toLowerCase().includes(searchLower);
+      const matchesPaymentId = transaction.stripePaymentIntentId?.toLowerCase().includes(searchLower);
+      
+      if (!matchesDescription && !matchesJobTitle && !matchesId && !matchesPaymentId) {
+        return false;
+      }
+    }
+    
+    if (startDate || endDate) {
+      const transactionDate = new Date(transaction.createdAt);
+      const start = startDate ? new Date(startDate) : null;
+      const end = endDate ? new Date(endDate) : null;
+      
+      if (start && transactionDate < start) {
+        return false;
+      }
+      if (end && transactionDate > end) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
 
   const getTransactionIcon = (type: TransactionType) => {
     switch (type) {
-      case 'payment_received':
+      case 'project_funding':
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-aquagreen to-aquagreen rounded-full flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-10 h-10 bg-aquagreen/50 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-aquagreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
             </svg>
           </div>
         );
-      case 'withdrawal':
+      case 'payout':
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-boldblue to-boldblue rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-deepskyblue to-deepskyblue rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
             </svg>
@@ -182,23 +123,31 @@ const TransactionHistory: React.FC = () => {
         );
       case 'refund':
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-deepskyblue to-deepskyblue rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-boldblue rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
           </div>
         );
-      case 'chargeback':
+      case 'dispute':
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-crimson to-crimson rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
         );
+      case 'payment_method_added':
+        return (
+          <div className="w-10 h-10 bg-aquagreen/20 rounded-full flex items-center justify-center">
+            <svg className="w-5 h-5 text-aquagreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+          </div>
+        );
       default:
         return (
-          <div className="w-10 h-10 bg-gradient-to-r from-mediumgray to-mediumgray rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-gray-500 to-gray-600 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -211,143 +160,153 @@ const TransactionHistory: React.FC = () => {
     switch (status) {
       case 'completed':
         return (
-          <span className="px-3 py-1 bg-gradient-to-r from-aquagreen/10 to-aquagreen/10 text-aquagreen text-sm font-medium rounded-full border border-aquagreen/20">
+          <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full border border-green-200">
             Completed
           </span>
         );
       case 'pending':
         return (
-          <span className="px-3 py-1 bg-gradient-to-r from-deepskyblue/10 to-deepskyblue/10 text-deepskyblue text-sm font-medium rounded-full border border-deepskyblue/20">
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm font-medium rounded-full border border-yellow-200">
             Pending
+          </span>
+        );
+      case 'failed':
+        return (
+          <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full border border-red-200">
+            Failed
+          </span>
+        );
+      case 'refunded':
+        return (
+          <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full border border-indigo-200">
+            Refunded
           </span>
         );
       case 'disputed':
         return (
-          <span className="px-3 py-1 bg-gradient-to-r from-crimson/10 to-crimson/10 text-crimson text-sm font-medium rounded-full border border-crimson/20">
+          <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full border border-red-200">
             Disputed
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 bg-gradient-to-r from-mediumgray/10 to-mediumgray/10 text-mediumgray text-sm font-medium rounded-full border border-mediumgray/20">
+          <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200">
             Unknown
           </span>
         );
     }
   };
 
+  const getPaymentMethodLabel = (method: PaymentMethod) => {
+    switch (method) {
+      case 'card':
+        return 'Credit Card';
+      case 'bank_account':
+        return 'Bank Transfer';
+      case 'paypal':
+        return 'PayPal';
+      default:
+        return method;
+    }
+  };
+
   const getAmountDisplay = (transaction: Transaction) => {
-    const isPositive = transaction.type === 'payment_received' || transaction.type === 'refund';
-    const amountColor = isPositive ? 'text-aquagreen' : 'text-darkgray';
+    const isPositive = transaction.type === 'project_funding' || transaction.type === 'payment_method_added' || transaction.type === 'refund';
+    const amountColor = isPositive ? 'text-green-600' : 'text-gray-700';
     const sign = isPositive ? '+' : '-';
 
     return (
       <div className="text-right">
         <div className={`text-lg font-bold ${amountColor}`}>
-          {sign}${Math.abs(transaction.amount).toLocaleString()}
+          {sign}${Math.abs(transaction.amount).toLocaleString()} {transaction.currency.toUpperCase()}
         </div>
         {transaction.fee > 0 && (
-          <div className="text-sm text-mediumgray">
+          <div className="text-sm text-gray-500">
             Fee: ${transaction.fee.toFixed(2)}
           </div>
         )}
-        <div className="text-sm font-medium text-darkgray">
+        <div className="text-sm font-medium text-gray-700">
           Net: {sign}${Math.abs(transaction.netAmount).toLocaleString()}
         </div>
       </div>
     );
   };
 
-  const filteredTransactions = mockTransactions.filter(transaction => {
-    const matchesFilter = selectedFilter === 'all' || transaction.type === selectedFilter;
-    const matchesSearch = searchTerm === '' || 
-      transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (transaction.client && transaction.client.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      transaction.reference.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesFilter && matchesSearch;
-  });
-
-  const calculateSummary = (): Summary => {
-    return filteredTransactions.reduce((acc, transaction) => {
-      if (transaction.type === 'payment_received') {
-        acc.totalReceived += transaction.netAmount;
-      } else if (transaction.type === 'withdrawal') {
-        acc.totalWithdrawn += transaction.netAmount;
-      }
-      acc.totalFees += transaction.fee;
-      return acc;
-    }, { totalReceived: 0, totalWithdrawn: 0, totalFees: 0 });
-  };
-
-  const summary = calculateSummary();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deepskyblue mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading transaction history...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-skyblue/5 to-faintskyblue/5">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="min-h-screen">
+      <div className="max-w-6xl mx-auto p-6">
         
-        {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-boldblue mb-3">Transaction History</h1>
+          <h1 className="text-3xl font-bold text-deepskyblue mb-3">Payment History</h1>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl p-6 border border-lightblue/20">
-            <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          
+          <div className="bg-white rounded-xl p-4 border border-deepskyblue/20">
               <div>
-                <p className="text-sm font-medium text-mediumgray mb-1">Total Received</p>
-                <p className="text-2xl font-bold text-aquagreen">${summary.totalReceived.toLocaleString()}</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Received</p>
+                <p className="text-2xl font-bold text-aquagreen">${data.summary.totalReceived.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-aquagreen/10 to-aquagreen/10 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-aquagreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                </svg>
-              </div>
-            </div>
           </div>
           
-          <div className="bg-white rounded-xl p-6 border border-lightblue/20">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-xl p-4 border border-deepskyblue/20">
               <div>
-                <p className="text-sm font-medium text-mediumgray mb-1">Total Withdrawn</p>
-                <p className="text-2xl font-bold text-boldblue">${summary.totalWithdrawn.toLocaleString()}</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Withdrawn</p>
+                <p className="text-2xl font-bold text-deepskyblue">${data.summary.totalWithdrawn.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-boldblue/10 to-boldblue/10 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                </svg>
+          </div>
+
+          {role === "client" &&<div className="bg-white rounded-xl p-4 border border-deepskyblue/20">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Refunds</p>
+                <p className="text-2xl font-bold text-boldblue">${data.summary.totalRefunds.toLocaleString()}</p>
               </div>
-            </div>
+          </div>}
+
+          <div className="bg-white rounded-xl p-4 border border-deepskyblue/20">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Total Disputes</p>
+                <p className="text-2xl font-bold text-red-600">${data.summary.totalDisputes.toLocaleString()}</p>
+              </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 border border-lightblue/20 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-white rounded-xl mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             
-            {/* Search */}
-            <div className="flex-1">
+            <div className="lg:col-span-2">
               <div className="relative">
-                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-mediumgray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search transactions, clients, or references..."
+                  placeholder="Search transactions, jobs, or references..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-lightgray rounded-lg focus:ring-2 focus:ring-boldblue/20 focus:border-boldblue outline-none transition-colors"
+                  className="w-full pl-10 pr-4 py-3 border border-deepskyblue/20 rounded-lg focus:ring-2 focus:ring-deepskyblue focus:border-deepskyblue outline-none transition-colors text-sm"
                 />
               </div>
             </div>
 
-            <div className="min-w-0 md:w-48">
+            <div>
               <select
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
-                className="w-full px-4 py-3 border border-lightgray rounded-lg focus:ring-2 focus:ring-boldblue/20 focus:border-boldblue outline-none transition-colors bg-white"
+                className="text-sm w-full px-4 py-3 border border-deepskyblue/20 rounded-lg focus:ring-2 focus:ring-deepskyblue focus:border-deepskyblue outline-none transition-colors bg-white"
               >
-                {filterOptions.map(option => (
+                {typeOptions.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -355,69 +314,87 @@ const TransactionHistory: React.FC = () => {
               </select>
             </div>
 
-            <div className="min-w-0 md:w-40">
+            <div>
               <select
-                value={dateRange}
-                onChange={(e) => setDateRange(e.target.value)}
-                className="w-full px-4 py-3 border border-lightgray rounded-lg focus:ring-2 focus:ring-boldblue/20 focus:border-boldblue outline-none transition-colors bg-white"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="text-sm w-full px-4 py-3 border border-deepskyblue/20 rounded-lg focus:ring-2 focus:ring-deepskyblue focus:border-deepskyblue outline-none transition-colors bg-white"
               >
-                {dateRangeOptions.map(option => (
+                {statusOptions.map(option => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="text-sm w-full px-4 py-3 border border-deepskyblue/20 rounded-lg focus:ring-2 focus:ring-deepskyblue focus:border-deepskyblue outline-none transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="text-sm w-full px-4 py-3 border border-deepskyblue/20 rounded-lg focus:ring-2 focus:ring-deepskyblue focus:border-deepskyblue outline-none transition-colors"
+              />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-lightblue/20">
-          <div className="p-6 border-b border-lightgray/50">
-            <h2 className="text-xl font-bold text-darkgray">
-              Transactions ({filteredTransactions.length})
-            </h2>
+        <div className="bg-white ">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">
+                Transactions ({filteredTransactions.length})
+              </h2>
+            </div>
           </div>
 
-          <div className="divide-y divide-lightgray/50">
+          <div className="divide-y divide-gray-200">
             {filteredTransactions.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-lightgray rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-mediumgray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-darkgray mb-2">No transactions found</h3>
-                <p className="text-mediumgray">Try adjusting your filters or search terms.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No transactions found</h3>
+                <p className="text-gray-500">Try adjusting your filters or search terms.</p>
               </div>
             ) : (
               filteredTransactions.map((transaction) => (
-                <div key={transaction.id} className="p-6 hover:bg-gradient-to-r hover:from-skyblue/5 hover:to-transparent transition-colors duration-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 flex-1">
+                <div key={transaction.id} className="px-2 py-6 hover:bg-gray-50 transition-colors duration-200 ">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center space-x-4 flex-1 ">
                       {getTransactionIcon(transaction.type)}
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="font-semibold text-darkgray truncate">
-                            {transaction.description}
+                          <h3 className="font-semibold text-gray-900">
+                            {transaction.description || getDefaultDescription(transaction.type)}
                           </h3>
                           {getStatusBadge(transaction.status)}
                         </div>
                         
                         <div className="space-y-1">
-                          {transaction.client && (
-                            <p className="text-sm text-mediumgray">
-                              Client: <span className="font-medium text-darkgray">{transaction.client}</span>
+                          {transaction.jobTitle && (
+                            <p className="text-sm text-gray-600">
+                              Job: <span className="font-medium text-gray-900">{transaction.jobTitle}</span>
                             </p>
                           )}
-                          {transaction.project && (
-                            <p className="text-sm text-mediumgray">
-                              Project: <span className="font-medium text-darkgray">{transaction.project}</span>
-                            </p>
-                          )}
-                          <div className="flex items-center space-x-4 text-sm text-mediumgray">
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <span>
-                              {new Date(transaction.date).toLocaleDateString('en-US', {
+                              {new Date(transaction.createdAt.toString()).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric',
@@ -426,9 +403,15 @@ const TransactionHistory: React.FC = () => {
                               })}
                             </span>
                             <span>•</span>
-                            <span>{transaction.paymentMethod}</span>
-                            <span>•</span>
-                            <span className="font-mono">{transaction.reference}</span>
+                            <span>{getPaymentMethodLabel(transaction.paymentMethod)}</span>
+                            {transaction.stripePaymentIntentId && (
+                              <>
+                                <span>•</span>
+                                <span className="font-mono text-xs">
+                                  {transaction.stripePaymentIntentId.substring(0, 8)}...
+                                </span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -443,27 +426,28 @@ const TransactionHistory: React.FC = () => {
             )}
           </div>
         </div>
-
-        <div className="flex justify-center mt-8">
-          <button className="text-sm cursor-pointer bg-gradient-to-r from-boldblue to-boldblue text-white font-bold py-3 px-8 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export Transaction History
-          </button>
-        </div>
-
-        <div className="text-center mt-8">
-          <p className="text-sm text-mediumgray">
-            Questions about your transactions?{' '}
-            <a href="#" className="text-boldblue hover:text-deepskyblue font-medium transition-colors duration-200">
-              Contact Support
-            </a>
-          </p>
-        </div>
+        
       </div>
     </div>
   );
+};
+
+
+const getDefaultDescription = (type: TransactionType): string => {
+  switch (type) {
+    case 'project_funding':
+      return 'Project funding';
+    case 'payout':
+      return 'Withdrawal';
+    case 'refund':
+      return 'Refund issued';
+    case 'dispute':
+      return 'Dispute';
+    case 'payment_method_added':
+      return 'Payment method added';
+    default:
+      return 'Transaction';
+  }
 };
 
 export default TransactionHistory;

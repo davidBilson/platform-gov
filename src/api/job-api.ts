@@ -1,4 +1,4 @@
-// services/job-api.ts
+// api/job-api.ts
 import axios from 'axios';
 import { Jobs } from '@/types/jobs';
 import { JobApplicationsResponse } from '@/types/proposals';

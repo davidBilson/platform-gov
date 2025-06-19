@@ -57,7 +57,7 @@ const Users = () => {
       },
       {
         label: 'Verified Users',
-        value: stats.verification.verifiedEmails.toLocaleString() ?? 0,
+        value: stats?.verification?.verifiedEmails - 1,
         icon: UserCheck,
         color: 'green-500'
       },

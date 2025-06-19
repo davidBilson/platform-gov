@@ -6,6 +6,7 @@ import useAuthStore from '@/store/useAuth';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import React from 'react';
+import { IoIosCheckmarkCircle } from 'react-icons/io';
 
 const JobList = ({ job }: JobListProps) => {
 
@@ -13,7 +14,7 @@ const JobList = ({ job }: JobListProps) => {
 
   // Calculate time since job was posted
   const postedTime = format(new Date(job.createdAt), 'M/d/yyyy h:mm a');
-  
+
   // Format payment information based on payment type
   const getPaymentInfo = (): string => {
     if (job.paymentType === 'hourly') {
@@ -44,44 +45,44 @@ const JobList = ({ job }: JobListProps) => {
         {
           userId &&
           <div className='text-boldblue'>
-            <Link href={`/job/apply?id=${job._id}`} className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">Apply</Link> | 
+            <Link href={`/job/apply?id=${job._id}`} className="text-sm font-bold mr-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer">Apply</Link> |
             <button className="text-sm font-bold ml-2 transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer">Save</button>
           </div>
         }
       </div>
-      
+
       <h3 className="text-xl font-semibold mb-3.75">{job.jobTitle}</h3>
-      
+
       <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
         <div className="flex items-center gap-1.25">
           <FaRegHourglass size={15} />
           {getPaymentInfo()} | {job.employmentType}
         </div>
-        
+
         <div className="flex items-center gap-1.25">
           <FaLocationDot size={15} />
           {job.location}
         </div>
       </div>
-      
+
       <p className="text-gray-600 mb-4">
         {truncateDescription(job.description)}
       </p>
-      
+
       <div className="flex flex-wrap gap-5.5 mb-3.75">
         {job.requiredSkills.map((skill, index) => (
           <span key={`skill-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-3 py-1">
             {skill}
           </span>
         ))}
-        
+
         {job.requiredCertifications.map((cert, index) => (
           <span key={`cert-${index}`} className="bg-aquagreen text-white text-xs rounded-full px-3 py-1">
             {cert}
           </span>
         ))}
       </div>
-      
+
       <div className="flex items-center gap-5">
         <div className="w-8.75 h-8.75 overflow-hidden rounded-full flex items-center justify-center text-white font-bold">
           {
@@ -90,6 +91,14 @@ const JobList = ({ job }: JobListProps) => {
           }
         </div>
         <Link href="" className="font-semibold text-sm hover:underline">{job.clientName}</Link>
+        <button
+          disabled
+          className={`flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full ${job.isFunded ? 'text-deepskyblue bg-faintskyblue' : 'text-mediumgray bg-white'
+            }`}
+        > 
+          <span className="w-fit h-fit">{job.isFunded ? 'Payment Verified' : 'Payment Unverified'}</span>
+          <span className="w-fit h-fit pb-[2px]">{job.isFunded && <IoIosCheckmarkCircle />}</span>
+        </button>
       </div>
     </section>
   );

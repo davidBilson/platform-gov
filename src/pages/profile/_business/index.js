@@ -5,25 +5,26 @@ import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { fetchProfile } from '@/api/profile-api';
+import ProfilePicture from '@/components/profile/profilePicture';
 
 const BusinessProfile = () => {
-  
+
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   const { userId } = useAuthStore();
-  
+
   useEffect(() => {
     const fetchBusinessProfile = async () => {
       if (!userId) {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
         const data = await fetchProfile(userId, 'client');
-        
+
         if (data.success && data.data) {
           setClient(data.data);
         }
@@ -38,7 +39,7 @@ const BusinessProfile = () => {
   }, [userId]);
 
   useEffect(() => {
-    if(!client && !loading) {
+    if (!client && !loading) {
       toast.info('You are yet to create a profile!')
     }
   }, [client, loading]);
@@ -58,23 +59,19 @@ const BusinessProfile = () => {
   return (
     <section className='p-5 pb-20 md:p-6'>
       <section className='w-full max-w-275 m-auto'>
-        
+
         <div className='mb-6'>
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
                 {client && client.logo ? (
-                  <img 
-                    src={client.logo} 
-                    alt={`${client.name} logo`} 
-                    className="w-full h-full object-cover rounded-full"
-                  />
+                    <ProfilePicture source={client.logo} alt={`${client.name} logo`} dimension={88} />
                 ) : (
                   <IoMdImages size={40} className='text-white/70' />
                 )}
               </div>
             </div>
-            
+
             {/* Company Name */}
             <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
               <h1 className='text-boldblue text-xl font-semibold'>
@@ -82,7 +79,7 @@ const BusinessProfile = () => {
               </h1>
             </div>
           </div>
-          
+
           {/* Company Overview */}
           <div className='mb-8 py-3.5 px-5 rounded-md border border-boldblue'>
             <p className='text-boldblue'>
@@ -90,11 +87,11 @@ const BusinessProfile = () => {
             </p>
           </div>
         </div>
-        
+
         {/* Locations Section */}
         <div className='border-t border-t-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:w-full sm:max-w-[120px]'>Location</h2>
-          
+
           <div className='w-full'>
             {client && client.locations && client.locations.length > 0 ? (
               client.locations.map((location, index) => (
@@ -102,14 +99,14 @@ const BusinessProfile = () => {
                   {index > 0 && (
                     <h3 className="font-medium mb-2">Location {index + 1}</h3>
                   )}
-                  
+
                   {/* Location Details */}
                   <div className='mb-4'>
                     <p className='text-boldblue font-medium'>
                       {location.country || "Country not specified"}
                     </p>
                   </div>
-                  
+
                   {/* Address */}
                   <div className='mb-4'>
                     <p className='text-boldblue'>
@@ -117,7 +114,7 @@ const BusinessProfile = () => {
                       {location.address2}
                     </p>
                   </div>
-                  
+
                   {/* City, State, ZIP */}
                   <div className='mb-4'>
                     <p className='text-boldblue'>
@@ -133,11 +130,11 @@ const BusinessProfile = () => {
             )}
           </div>
         </div>
-        
+
         {/* Information Section */}
         <div className='border-y border-y-boldblue py-6 flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-[60px]'>
           <h2 className='font-semibold text-xl mb-4 sm:mb-0 sm:max-w-[120px]'>Information</h2>
-          
+
           <div className='w-full'>
             {/* Industry */}
             <div className='mb-4'>
@@ -159,7 +156,7 @@ const BusinessProfile = () => {
                 {client?.department || "Not specified"}
               </p>
             </div>
-            
+
             {/* Company Size */}
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Size</h3>
@@ -167,7 +164,7 @@ const BusinessProfile = () => {
                 {client?.size || "Not specified"}
               </p>
             </div>
-            
+
             {/* Specializations */}
             <div className='mb-4'>
               <h3 className='font-medium mb-1'>Specializations</h3>
@@ -185,18 +182,18 @@ const BusinessProfile = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Edit Button at Bottom */}
         <div className='mt-8 flex justify-end'>
-          <Link 
-            href="/profile/edit" 
+          <Link
+            href="/profile/edit"
             className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             {client ? "Edit Profile" : "Create Profile"}
           </Link>
         </div>
       </section>
-      
+
       <OpenJobs />
     </section>
   );

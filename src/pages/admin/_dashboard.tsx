@@ -8,6 +8,8 @@ import {
   Clock, 
   AlertTriangle,
   FileText,
+  Building,
+  Target
 } from 'lucide-react';
 import { getDashboardData } from '@/api/admin-api';
 
@@ -15,44 +17,56 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     overview: {
-      totalFreelancers: 1247,
-      totalClients: 892,
-      activeContracts: 156,
-      totalEarnings: 48750.50
+      totalUsers: 0,
+      totalFreelancers: 0,
+      totalClients: 0,
+      activeContracts: 0,
+      totalJobs: 0,
+      fundedJobs: 0,
+      totalTransactions: 0,
+      totalFees: 0
     },
     revenue: {
-      weeklyFees: 2850.75,
-      monthlyFees: 11420.30,
-      clientSideFees: 6820.15,
-      freelancerSideFees: 4600.15
+      weeklyFees: 0,
+      monthlyFees: 0,
+      clientSideFees: 0,
+      freelancerSideFees: 0
     },
     pending: {
-      withdrawals: 23,
-      disputes: 3,
-      reports: 1
+      withdrawals: 0,
+      disputes: 0,
+      reports: 0
     }
   });
 
-// Replace useEffect with:
-useEffect(() => {
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await getDashboardData();
-      if (response.success) {
-        setDashboardData(response.data);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await getDashboardData();
+        if (response.success) {
+          setDashboardData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    fetchData();
+  }, []);
+
+  type StatCardProps = {
+    title: string;
+    value: number | string;
+    icon: React.ElementType;
+    color?: string;
+    prefix?: string;
+    suffix?: string;
   };
 
-  fetchData();
-}, []);
-
-  const StatCard = ({ title, value, icon: Icon, color = '', prefix = '', suffix = '' }: { title: string; value: number | string; icon: React.ComponentType<{ size: number; className: string }>; color: string; prefix?: string; suffix?: string }) => (
+  const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color = '', prefix = '', suffix = '' }) => (
     <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
@@ -72,37 +86,65 @@ useEffect(() => {
     </div>
   );
 
-
   return (
     <div className="min-h-screen">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-boldblue mb-2">Dashboard</h1>
       </div>
 
-      {/* Overview Cards */}
+      {/* Overview Cards - Updated to match backend response */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
-          title="Total Freelancers"
-          value={dashboardData.overview.totalFreelancers}
+          title="Total Users"
+          value={dashboardData.overview.totalUsers}
           icon={Users}
           color="deepskyblue"
         />
         <StatCard
-          title="Total Clients"
-          value={dashboardData.overview.totalClients}
+          title="Total Freelancers"
+          value={dashboardData.overview.totalFreelancers}
           icon={UserCheck}
           color="skyblue"
+        />
+        <StatCard
+          title="Total Clients"
+          value={dashboardData.overview.totalClients}
+          icon={Users}
+          color="green-500"
         />
         <StatCard
           title="Active Contracts"
           value={dashboardData.overview.activeContracts}
           icon={Briefcase}
+          color="boldblue"
+        />
+      </div>
+
+      {/* Additional Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          title="Total Jobs"
+          value={dashboardData.overview.totalJobs}
+          icon={Building}
+          color="deepskyblue"
+        />
+        <StatCard
+          title="Funded Jobs"
+          value={dashboardData.overview.fundedJobs}
+          icon={Target}
           color="green-500"
         />
         <StatCard
-          title="Total Earnings"
-          value={dashboardData.overview.totalEarnings}
+          title="Total Transactions"
+          value={dashboardData.overview.totalTransactions}
           icon={DollarSign}
+          color="skyblue"
+          prefix="$"
+        />
+        <StatCard
+          title="Total Fees"
+          value={dashboardData.overview.totalFees}
+          icon={TrendingUp}
           color="boldblue"
           prefix="$"
         />
@@ -172,7 +214,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Pending Actions */}
+        {/* Pending Actions - Updated to handle withdrawals as monetary amount */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
           <h3 className="text-lg font-semibold text-boldblue mb-4">Pending Actions</h3>
           <div className="space-y-4">
@@ -183,9 +225,9 @@ useEffect(() => {
               </div>
               <span className="text-lg font-bold text-yellow-600">
                 {loading ? (
-                  <div className="h-5 w-8 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-5 w-12 bg-gray-200 rounded animate-pulse"></div>
                 ) : (
-                  dashboardData.pending.withdrawals
+                  `$${dashboardData.pending.withdrawals.toLocaleString()}`
                 )}
               </span>
             </div>

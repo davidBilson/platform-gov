@@ -96,6 +96,7 @@ export interface JobList {
   retainerAmount?: number;
   retainerFrequency?: string;
   isPaymentVerified?: boolean;
+  isFunded?: boolean;
   clientName: string;
   clientLogo: string;
   clientIndustry: string;

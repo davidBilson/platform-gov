@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IoCloseOutline } from 'react-icons/io5';
 import { FiPaperclip } from 'react-icons/fi';
 import { RiCheckboxBlankCircleLine } from 'react-icons/ri';
@@ -14,6 +13,13 @@ import { ApplicationDraft } from '@/types/jobs';
 interface ApplicationProps {
   job: Jobs;
   onClose: () => void;
+}
+
+interface ValidationIssue {
+  type: 'email' | 'url';
+  text: string;
+  start: number;
+  end: number;
 }
 
 const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
@@ -39,6 +45,42 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   }>>([]);
 
   const [hasSubmittedApplication, setHasSubmittedApplication] = useState(false);
+  const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Validation patterns
+  const EMAIL_PATTERN = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
+  const URL_PATTERN = /https?:\/\/[^\s]+|www\.[^\s]+\.[a-z]{2,}|[a-zA-Z0-9.-]+\.(com|org|net|edu|gov|mil|co|io|ai|app|dev|tech|info|biz|name|pro|me|tv|cc|uk|ca|au|de|fr|jp|cn|in|br|ru|nl|se|no|dk|fi|pl|it|es|pt|mx|ar|cl|pe|ve|co|ec|uy|py|bo|gf|gy|sr|fk|gs|za|ng|ke|tz|ug|rw|gh|sn|ml|bf|ne|td|cf|cm|ga|gq|st|ao|mz|mg|mu|sc|km|dj|so|et|er|sd|ly|dz|ma|tn|eg|il|jo|lb|sy|iq|ir|af|pk|in|np|bt|bd|lk|mv|mm|th|la|kh|vn|my|sg|id|ph|bn|tl|pg|sb|vu|nc|nz|fj|to|ws|ki|nr|pw|fm|mh|tv|tk|nu|ck|pf|as|gu|mp|pr|vi|um)[^\s]*/gi;
+
+  const validateCoverLetter = (text: string): ValidationIssue[] => {
+    const issues: ValidationIssue[] = [];
+    
+    // Check for emails
+    let emailMatch;
+    const emailRegex = new RegExp(EMAIL_PATTERN);
+    while ((emailMatch = emailRegex.exec(text)) !== null) {
+      issues.push({
+        type: 'email',
+        text: emailMatch[0],
+        start: emailMatch.index,
+        end: emailMatch.index + emailMatch[0].length
+      });
+    }
+    
+    // Check for URLs
+    let urlMatch;
+    const urlRegex = new RegExp(URL_PATTERN);
+    while ((urlMatch = urlRegex.exec(text)) !== null) {
+      issues.push({
+        type: 'url',
+        text: urlMatch[0],
+        start: urlMatch.index,
+        end: urlMatch.index + urlMatch[0].length
+      });
+    }
+    
+    return issues;
+  };
 
   useEffect(() => {
 
@@ -83,12 +125,16 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
                 acknowledgment: savedDraft.certificationAcknowledgment || false,
               });
               
+              // Validate the loaded cover letter
+              if (savedDraft.coverLetter) {
+                const issues = validateCoverLetter(savedDraft.coverLetter);
+                setValidationIssues(issues);
+              }
+              
               // Save any attachments for display
               if (savedDraft.attachments && savedDraft.attachments.length > 0) {
                 setSavedAttachments(savedDraft.attachments);
               }
-              
-              toast.info("Loaded your saved draft application.");
             }
           }
         }
@@ -109,6 +155,12 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    if (name === 'coverLetter') {
+      const issues = validateCoverLetter(value);
+      setValidationIssues(issues);
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value,
@@ -150,12 +202,36 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
       toast.error("Failed to remove attachment. Please try again.");
     }
   };
+
+  const getValidationErrorMessage = (): string | null => {
+    if (validationIssues.length === 0) return null;
+    
+    const emailIssues = validationIssues.filter(issue => issue.type === 'email');
+    const urlIssues = validationIssues.filter(issue => issue.type === 'url');
+    
+    if (emailIssues.length > 0 && urlIssues.length > 0) {
+      return "Please remove email addresses and external links from your cover letter for security reasons.";
+    } else if (emailIssues.length > 0) {
+      return "Please remove email addresses from your cover letter for security reasons.";
+    } else if (urlIssues.length > 0) {
+      return "Please remove external links from your cover letter for security reasons.";
+    }
+    
+    return null;
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.coverLetter) {
       toast.error("Please provide a cover letter");
+      return;
+    }
+
+    // Check for validation issues
+    const errorMessage = getValidationErrorMessage();
+    if (errorMessage) {
+      toast.error(errorMessage);
       return;
     }
     
@@ -222,6 +298,13 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
     if (hasSubmittedApplication) {
       return;
     }
+
+    // Check for validation issues
+    const errorMessage = getValidationErrorMessage();
+    if (errorMessage) {
+      toast.error(errorMessage);
+      return;
+    }
     
     try {
       const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
@@ -275,6 +358,7 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           acknowledgment: false,
         });
         setSavedAttachments([]);
+        setValidationIssues([]);
         return;
       }
       
@@ -296,6 +380,7 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
         
         setSavedAttachments([]);
         setDraftId(null);
+        setValidationIssues([]);
         toast.info(response.data.message || "Draft deleted successfully!");
       }
     } catch (error) {
@@ -310,7 +395,6 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
     }
   };
 
-  //  TREASURE ISLOADING
   if (isLoading) {
     return (
       <section className='h-screen w-full fixed top-0 left-0 z-50 bg-red-500 flex items-center justify-end'>
@@ -352,14 +436,24 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
           <h1 className='pb-5 md:pb-7.5 font-semibold text-lg md:text-xl'>Apply To This Job</h1>
           
           <form id="applicationForm" onSubmit={handleSubmit}>
-            <div className='mb-5 md:mb-7.5'>
+            <div className='mb-5 md:mb-7.5 relative'>
               <textarea
+                ref={textareaRef}
                 name="coverLetter"
                 value={formData.coverLetter}
                 onChange={handleInputChange}
                 placeholder="Cover Letter"
                 className='w-full py-3 md:py-3.5 px-4 md:px-5 text-boldblue resize-none bg-white border border-boldblue focus:outline focus:outline-boldblue rounded-md min-h-[100px] md:min-h-[111px]'
               />
+              
+              {/* Validation warning */}
+              {validationIssues.length > 0 && (
+                <div className="bg-crimson/20 p-2 rounded-lg border border-red-600  mt-2">
+                  <p className="text-xs md:text-sm text-red-500 font-medium">
+                    ⚠️ {getValidationErrorMessage()}
+                  </p>
+                </div>
+              )}
             </div>
             
             <div className="mb-5 md:mb-7.5">
@@ -493,8 +587,12 @@ const Application: React.FC<ApplicationProps> = ({ job, onClose }) => {
               <button
                 type="submit" 
                 form="applicationForm"
-                disabled={isSubmitting}
-                className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
+                disabled={isSubmitting || validationIssues.length > 0}
+                className={`cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 text-xs md:text-sm font-semibold rounded-lg border ${
+                  validationIssues.length > 0 
+                    ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed' 
+                    : 'bg-boldblue text-white border-boldblue'
+                }`}
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">

@@ -259,7 +259,6 @@ const CreateJob  = () => {
       try {
           const response = await axios.post(`${baseURL}${createJobEndpoint}`, formData);
           if (response.data.success) {
-            toast.success('Job created successfully');
             setCreatedJobId(response.data.data._id);
             toast.success('Job created successfully');
             

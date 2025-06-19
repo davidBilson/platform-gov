@@ -92,7 +92,8 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
       }));
     } catch (error) {
       console.error('Error fetching completed contracts:', error);
-      throw error;
+      // Return empty array instead of throwing error
+      return [];
     }
   }, []);
   
@@ -123,13 +124,15 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
         setCompletedContracts(completedContractsData.value);
       } else {
         console.error('Failed to fetch completed contracts:', completedContractsData.reason);
-        toast.error('Error fetching contracts');
+        // Don't show error toast for contracts as it's expected they might not exist
+        // toast.error('Error fetching contracts');
       }
 
       if (ratingsData.status === 'fulfilled') {
         setContractorRatings(ratingsData.value);
       } else {
         console.error('Failed to fetch ratings:', ratingsData.reason);
+        // Don't show error toast for ratings as it's expected they might not exist
       }
       
     } catch (error) {
@@ -191,12 +194,11 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     const average = sum / contractorRatings.length;
     
     return { 
-      average: Math.round(average * 10) / 10, // Round to 1 decimal
+      average: Math.round(average * 10) / 10,
       count: contractorRatings.length 
     };
   }, [contractorRatings, profileData?.rating]);
 
-  // Extract profile data with fallbacks
   const {
     profession = "Profession",
     primaryPosition = '',

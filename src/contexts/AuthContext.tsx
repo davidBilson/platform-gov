@@ -33,13 +33,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (!userId) return false;
       return await checkIfUserIsSuspended(userId);
     },
-    enabled: !!userId, // Only run when userId exists
-    refetchInterval: 2 * 60 * 1000, // 2 minutes in milliseconds
-    refetchIntervalInBackground: true, // Continue checking even when tab is not active
+    enabled: !!userId,
+    refetchInterval: 2 * 60 * 1000,
+    refetchIntervalInBackground: true,
     retry: 3, // Retry 3 times on failure
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-    staleTime: 4 * 60 * 1000, // Consider data stale after 4 minutes
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 4 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   useEffect(() => {
@@ -75,32 +75,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [userId]);
   
+  // Fixed: Don't redirect from verification page when userId is missing
   useEffect(() => {
     if (!isLoading && !userId && !isPublicRoute) {
       router.replace('/account/sign-in');
     }
   }, [userId, isPublicRoute, isLoading, router]);
   
+  // Consolidated navigation logic
   useEffect(() => {
-
     if (!isLoading) {
-      if (userId && router.pathname === '/account/sign-up') {
-        if (verificationStep !== 'completed') {
-          router.replace('/account/verification');
-        } else {
+      // Handle verification page access
+      if (isVerificationPage && !userId) {
+        router.replace('/account/sign-up');
+        return;
+      }
+      
+      // Handle authenticated user on auth pages
+      if (userId) {
+        if (router.pathname === '/account/sign-up') {
+          if (verificationStep !== 'completed') {
+            router.replace('/account/verification');
+          } else {
+            router.replace('/');
+          }
+          return;
+        }
+        
+        if (router.pathname === '/account/sign-in') {
           router.replace('/');
+          return;
         }
       }
-
-      else if (isVerificationPage && !userId) {
-        router.replace('/account/sign-up');
-      }
-
-      else if (userId && router.pathname === '/account/sign-in') {
-        router.replace('/');
-      }
     }
-
   }, [userId, router.pathname, isLoading, router, verificationStep, isVerificationPage]);
 
   const contextValue: AuthContextType = {

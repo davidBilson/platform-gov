@@ -4,7 +4,6 @@ import axios, { AxiosError } from 'axios';
 import useAuthStore from '@/store/useAuth';
 import { SignupFormData, SignupApiResponse, ErrorResponse } from '@/types/auth/auth';
 
-
 const Signup = () => {
 
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore();

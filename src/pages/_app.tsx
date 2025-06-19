@@ -1,17 +1,20 @@
-import 'aos/dist/aos.css';
-import "@/styles/globals.css";
-import type { AppProps } from "next/app";
-import { ReactQueryProvider } from "@/providers/ReactQueryProvider"
-import Head from "next/head";
-import Navbar from "@/components/layout/navbar/navbar";
 import { useEffect, useState } from "react";
-import useAuthStore from "@/store/useAuth";
-import { ToastContainer } from 'react-toastify';
+import type { AppProps } from "next/app";
+import Head from "next/head";
 import AOS from 'aos';
-import { useNotification } from '@/store/useNotification';
-import useSocket from '@/store/useSocket';
-import NotificationToast from "@/components/notifications/notificationToast";
+import { ToastContainer } from 'react-toastify';
+
+import "@/styles/globals.css";
+import 'aos/dist/aos.css';
+
+import { ReactQueryProvider } from "@/providers/ReactQueryProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
+import useAuthStore from "@/store/useAuth";
+import useSocket from '@/store/useSocket';
+import { useNotification } from '@/store/useNotification';
+
+import Navbar from "@/components/layout/navbar/navbar";
+import NotificationToast from "@/components/notifications/notificationToast";
 
 export default function App({ Component, pageProps }: AppProps) {
   const socket = useSocket(state => state.socket);
@@ -69,19 +72,16 @@ export default function App({ Component, pageProps }: AppProps) {
         <title>GovLink Global</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         
-        {/* Favicon/Logo Meta Tags */}
         <link rel="icon" href="/favicon.ico" sizes="100" />
         <link rel="icon" type="image/png" href="/images/govlinklogo-nobg.png" />
         <link rel="apple-touch-icon" href="/images/govlinklogo-nobg.png" />
         
-        {/* Open Graph Meta Tags */}
         <meta property="og:title" content="GovLink Global" />
         <meta property="og:description" content="Welcome to GovLink Global" />
         <meta property="og:image" content="/images/govlinklogo-nobg.png" />
         <meta property="og:url" content="https://platform-gov.onrender.com" />
         <meta property="og:type" content="website" />
         
-        {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="GovLink Global" />
         <meta name="twitter:description" content="Welcome to GovLink Global" />

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const WithdrawEarnings = () => {
+const Disburse = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [showAddMethod, setShowAddMethod] = useState(false);
@@ -371,4 +371,4 @@ const WithdrawEarnings = () => {
   );
 };
 
-export default WithdrawEarnings;
+export default Disburse;

@@ -10,7 +10,6 @@ const Navbar: React.FC = () => {
   const { userId, role } = useAuthStore();
   const pathname = usePathname() || '';
   
-  // Function to determine which navbar to render
   const renderNavbar = () => {
     // Special case for admin routes
     if (pathname.startsWith('/admin') && userId && role === 'admin') {

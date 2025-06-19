@@ -8,6 +8,7 @@ import { User } from '@/types/admin';
 
 import { Switch } from '@/components/ui/switch';
 import { toggleUserPriority, toggleUserSuspend } from '@/api/admin-api';
+import { maskEmail, maskPhoneNumber } from '@/utils/maskData';
 
 interface PaginationState {
   currentPage: number;
@@ -86,8 +87,8 @@ const UserRow = React.memo(({
       <td className="px-4 py-3 font-medium text-boldblue transition-colors duration-200">
         {user.name}
       </td>
-      <td className="px-4 py-3 text-gray-700">{user.email}</td>
-      <td className="px-4 py-3 text-gray-700">{user.phoneNumber}</td>
+      <td className="px-4 py-3 text-gray-700">{maskEmail(user.email)}</td>
+      <td className="px-4 py-3 text-gray-700">{maskPhoneNumber(user.phoneNumber || '')}</td>
       <td className="px-4 py-3">
         <span className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
           user.role === 'client' 
