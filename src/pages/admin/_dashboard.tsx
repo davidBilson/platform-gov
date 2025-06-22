@@ -5,13 +5,11 @@ import {
   Briefcase, 
   DollarSign, 
   TrendingUp, 
-  Clock, 
-  AlertTriangle,
-  FileText,
   Building,
   Target
 } from 'lucide-react';
 import { getDashboardData } from '@/api/admin-api';
+import { MdOutlineArrowForwardIos } from 'react-icons/md';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -214,49 +212,20 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Pending Actions - Updated to handle withdrawals as monetary amount */}
         <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h3 className="text-lg font-semibold text-boldblue mb-4">Pending Actions</h3>
+          <h3 className="text-lg font-semibold text-boldblue mb-4">Shortcuts</h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <div className="flex items-center gap-2">
-                <Clock size={16} className="text-yellow-600" />
-                <span className="text-sm font-medium text-boldblue">Pending Withdrawals</span>
-              </div>
-              <span className="text-lg font-bold text-yellow-600">
-                {loading ? (
-                  <div className="h-5 w-12 bg-gray-200 rounded animate-pulse"></div>
-                ) : (
-                  `$${dashboardData.pending.withdrawals.toLocaleString()}`
-                )}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={16} className="text-red-600" />
-                <span className="text-sm font-medium text-boldblue">Disputes</span>
-              </div>
-              <span className="text-lg font-bold text-red-600">
-                {loading ? (
-                  <div className="h-5 w-8 bg-gray-200 rounded animate-pulse"></div>
-                ) : (
-                  dashboardData.pending.disputes
-                )}
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
-              <div className="flex items-center gap-2">
-                <FileText size={16} className="text-orange-600" />
-                <span className="text-sm font-medium text-boldblue">Reports</span>
-              </div>
-              <span className="text-lg font-bold text-orange-600">
-                {loading ? (
-                  <div className="h-5 w-8 bg-gray-200 rounded animate-pulse"></div>
-                ) : (
-                  dashboardData.pending.reports
-                )}
-              </span>
-            </div>
+            <button className="w-full cursor-pointer flex items-center hover:bg-faintskyblue/50 justify-between p-3 bg-white shadow text-sm rounded-lg border border-lightgray text-boldblue">
+                  Escrow <MdOutlineArrowForwardIos />
+            </button>
+            <button className="w-full cursor-pointer flex items-center hover:bg-faintskyblue/50 justify-between p-3 bg-white shadow text-sm rounded-lg border border-lightgray text-boldblue">
+                  Fee Settings <MdOutlineArrowForwardIos />
+            </button>
+            <button className="w-full cursor-pointer flex items-center hover:bg-faintskyblue/50 justify-between p-3 bg-white shadow text-sm rounded-lg border border-lightgray text-boldblue">
+
+                  Users <MdOutlineArrowForwardIos />
+            </button>
+
           </div>
         </div>
       </div>

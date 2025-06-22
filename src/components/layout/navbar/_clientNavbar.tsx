@@ -106,7 +106,8 @@ const ClientNavbar = () => {
       { 
         label: 'Manage Finances',
         dropdown: [
-          { label: 'Billings', action: () => handleNavigation('/payment/billing-method') },
+          { label: 'Finance Overview', action: () => handleNavigation('/payment') },
+          { label: 'Setup Billing', action: () => handleNavigation('/payment/billing-method') },
           { label: 'Transaction History', action: () => handleNavigation('/payment/transaction-history') }
         ]
       },

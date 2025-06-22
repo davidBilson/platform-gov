@@ -7,7 +7,7 @@ import { GetUsersResponse, GetUsersParams, GetJobParams, Job, JobStats, Contract
 import { toast } from 'react-toastify';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const adminId = process.env.NEXT_PUBLIC_AUTHORIZED
+const adminId = process.env.NEXT_PUBLIC_AUTHORIZED;
 
 // # ============ USERS ============ # 
 

@@ -53,7 +53,6 @@ const PaymentMethodSetup = () => {
       try {
         const response = await getUserPaymentMethods(userId);
         if (response.success) {
-          // @ts-expect-error Payment methods from API don't exactly match our interface
           setPaymentMethods(response.paymentMethods || []);
           setDefaultPaymentMethod(response.defaultPaymentMethod || null);
           setHasExistingMethod((response.paymentMethods?.length || 0) > 0);

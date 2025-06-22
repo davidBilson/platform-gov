@@ -9,11 +9,11 @@ interface JobCountFiltersProps {
   onRemoveFilter?: (filterId: string) => void;
 }
 
-const JobCountFilters: React.FC<JobCountFiltersProps> = ({ 
+const JobCountFilters  = ({ 
   jobCount = 0, 
   activeFilters = [],
   onRemoveFilter = () => {}
-}) => {
+}: JobCountFiltersProps) => {
 
   return (
     <section className="flex gap-4 flex-wrap mb-4">

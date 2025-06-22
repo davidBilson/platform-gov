@@ -8,96 +8,364 @@ export const useNotification = create((set, get) => ({
   notifications: [],
   count: 0,
   isInitialized: false,
+  socket: null,
+  listenerCleanup: null,
+  initializationId: null,
+
+  lastNotificationId: null,
+  setLastNotificationId: (id) => set({ lastNotificationId: id }),
   
   init: (socket) => {
-    if (!socket || get().isInitialized) return;
-  
+    if (!socket) {
+      console.error('❌ Cannot initialize notifications - socket is null');
+      return () => {};
+    }
+
+    const state = get();
+    const initId = `init_${Date.now()}`;
+    
+    // Prevent multiple initializations
+    if (state.isInitialized && state.initializationId) {
+      console.log('🔔 Notifications already initialized, skipping...');
+      return state.listenerCleanup || (() => {});
+    }
+
+    console.log(`🔔 Initializing notification system (${initId})...`);
+
+    // Cleanup any existing listeners first
+    if (state.listenerCleanup) {
+      state.listenerCleanup();
+    }
+
+    // Enhanced notification handler with comprehensive logging
     const handleNotification = (notification) => {
-      set(state => ({
-        notifications: [notification, ...state.notifications],
-        count: state.count + 1
-      }));
+      set(state => {
+        // Check if we've already processed this notification
+        if (state.lastNotificationId === notification._id) return state;
+        
+        const updatedNotifications = [notification, ...state.notifications];
+        const newCount = updatedNotifications.filter(n => !n.isRead).length;
+        
+        return {
+          notifications: updatedNotifications,
+          count: newCount,
+          lastNotificationId: notification._id  // Track last shown ID
+        };
+      });
+    };
+
+    // Connection status handler
+    const handleConnectionStatus = (status) => {
+      console.log('🔌 Socket connection status changed:', status);
+    };
+
+    // Error handler for notifications
+    const handleNotificationError = (error) => {
+      console.error('🚫 Notification error:', error);
+    };
+
+    // Remove existing listeners to prevent duplicates
+    socket.off('new-notification');
+    socket.off('notification-error');
+    socket.off('connection-status');
+
+    // Add event listeners - check both possible event names
+    socket.on('new-notification', handleNotification);
+    socket.on('notification', handleNotification); // Fallback event name
+    socket.on('notification-error', handleNotificationError);
+    socket.on('connection-status', handleConnectionStatus);
+
+    // Debug listener to track ALL socket events
+    const debugHandler = (eventName, ...args) => {
+      if (eventName.includes('notification') || eventName === 'new-message') {
+        console.log(`🔍 DEBUG - Socket event '${eventName}' received:`, args);
+        
+        // If it's a different notification event, try to handle it
+        if (eventName !== 'new-notification' && args[0] && typeof args[0] === 'object') {
+          const data = args[0];
+          if (data._id && data.title) {
+            console.log(`🔄 Processing alternate notification event: ${eventName}`);
+            handleNotification(data);
+          }
+        }
+      }
     };
     
-    // Clean up existing listeners
-    socket.off('new-notification');
+    socket.onAny(debugHandler);
+
+    const notificationHandler = (notification) => {
+      console.log("Raw notification received", notification);
+      get().processNotification(notification);
+    };
+  
+    socket.on('new-notification', notificationHandler);
+
+    // Create cleanup function
+    const cleanup = () => {
+      console.log(`🧹 Cleaning up notification listeners (${initId})`);
+      socket.off('new-notification', notificationHandler);
+      socket.off('new-notification', handleNotification);
+      socket.off('notification', handleNotification);
+      socket.off('notification-error', handleNotificationError);
+      socket.off('connection-status', handleConnectionStatus);
+      socket.offAny(debugHandler);
+    };
+
+    // Update state
+    set({ 
+      socket,
+      isInitialized: true,
+      listenerCleanup: cleanup,
+      initializationId: initId
+    });
     
-    // Add the new listener
-    socket.on('new-notification', handleNotification);
-    
-    // Mark as initialized
-    set({ isInitialized: true });
+    console.log(`✅ Notification system initialized (${initId})`);
     
     // Fetch initial notifications
     get().fetchNotifications();
-  
-    return () => {
-      socket.off('new-notification');
-      set({ isInitialized: false });
-    };
+
+    // Return cleanup function
+    return cleanup;
   },
   
   fetchNotifications: async () => {
     try {
       const { userId } = useAuthStore.getState();
       if (!userId) {
-        console.error('User ID is not available for notifications!');
+        console.error('❌ Cannot fetch notifications - User ID not available');
         return;
       }
-      const res = await axios.get(`${API_URL}/api/notifications/get-notifications/${userId}`);
-      set({
-        notifications: res.data,
-        count: res.data.filter(n => !n.isRead).length
+      
+      console.log(`📥 Fetching notifications for user: ${userId}`);
+      
+      const res = await axios.get(`${API_URL}/api/notifications/get-notifications/${userId}`, {
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
+      
+      const notifications = res.data || [];
+      const unreadCount = notifications.filter(n => !n.isRead).length;
+      
+      set({
+        notifications,
+        count: unreadCount
+      });
+      
+      console.log(`✅ Fetched ${notifications.length} notifications (${unreadCount} unread)`);
+      
+      return notifications;
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error('🚫 Failed to fetch notifications:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText
+      });
+      
+      return [];
     }
   },
   
   markAsRead: async (id) => {
+    if (!id) {
+      console.error('❌ Cannot mark as read - ID is required');
+      return;
+    }
+
     try {
-      await axios.put(`${API_URL}/api/notifications/${id}/read`);
+      console.log(`📖 Marking notification as read: ${id}`);
+      
+      await axios.put(`${API_URL}/api/notifications/${id}/read`, {}, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
       set(state => {
         const updated = state.notifications.map(n => 
           n._id === id ? { ...n, isRead: true } : n
         );
+        const newCount = updated.filter(n => !n.isRead).length;
+        
+        console.log(`✅ Notification marked as read. New unread count: ${newCount}`);
+        
         return {
           notifications: updated,
-          count: updated.filter(n => !n.isRead).length
+          count: newCount
         };
       });
     } catch (error) {
-      console.error('Failed to mark as read:', error);
+      console.error('🚫 Failed to mark notification as read:', {
+        id,
+        message: error.message,
+        status: error.response?.status
+      });
+      throw error;
     }
   },
   
   markAllAsRead: async () => {
     try {
       const { userId } = useAuthStore.getState();
-      await axios.put(`${API_URL}/api/notifications/read-all`, { userId });
-      set(state => ({
-        notifications: state.notifications.map(n => ({ ...n, isRead: true })),
-        count: 0
-      }));
+      if (!userId) {
+        console.error('❌ Cannot mark all as read - User ID not available');
+        return;
+      }
+      
+      console.log(`📖 Marking all notifications as read for user: ${userId}`);
+      
+      await axios.put(`${API_URL}/api/notifications/read-all`, 
+        { userId }, 
+        {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      set(state => {
+        const updated = state.notifications.map(n => ({ ...n, isRead: true }));
+        
+        console.log('✅ All notifications marked as read');
+        
+        return {
+          notifications: updated,
+          count: 0
+        };
+      });
     } catch (error) {
-      console.error('Failed to mark all as read:', error);
+      console.error('🚫 Failed to mark all notifications as read:', {
+        message: error.message,
+        status: error.response?.status
+      });
+      throw error;
     }
   },
   
   deleteNotification: async (id) => {
+    if (!id) {
+      console.error('❌ Cannot delete notification - ID is required');
+      return;
+    }
+
     try {
-      await axios.delete(`${API_URL}/api/notifications/delete/${id}`);
+      console.log(`🗑️ Deleting notification: ${id}`);
+      
+      await axios.delete(`${API_URL}/api/notifications/delete/${id}`, {
+        timeout: 5000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
       set(state => {
         const filtered = state.notifications.filter(n => n._id !== id);
+        const newCount = filtered.filter(n => !n.isRead).length;
+        
+        console.log(`✅ Notification deleted. Remaining: ${filtered.length} (${newCount} unread)`);
+        
         return {
           notifications: filtered,
-          count: filtered.filter(n => !n.isRead).length
+          count: newCount
         };
       });
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      console.error('🚫 Failed to delete notification:', {
+        id,
+        message: error.message,
+        status: error.response?.status
+      });
+      throw error;
     }
   },
   
-  reset: () => set({ notifications: [], count: 0, isInitialized: false })
+  // Add a single notification (for testing or manual addition)
+  addNotification: (notification) => {
+    set(state => {
+      const exists = state.notifications.find(n => n._id === notification._id);
+      if (exists) {
+        console.log('⚠️ Notification already exists:', notification._id);
+        return state;
+      }
+      
+      const updated = [notification, ...state.notifications];
+      const newCount = updated.filter(n => !n.isRead).length;
+      
+      console.log(`📝 Notification added manually. Total: ${updated.length}`);
+      
+      return {
+        notifications: updated,
+        count: newCount
+      };
+    });
+  },
+  
+  // Force refresh notifications
+  refresh: async () => {
+    console.log('🔄 Force refreshing notifications...');
+    return await get().fetchNotifications();
+  },
+  
+  // Get notification by ID
+  getNotificationById: (id) => {
+    const { notifications } = get();
+    return notifications.find(n => n._id === id);
+  },
+  
+  // Get unread notifications
+  getUnreadNotifications: () => {
+    const { notifications } = get();
+    return notifications.filter(n => !n.isRead);
+  },
+  
+  reset: () => {
+    const state = get();
+    
+    console.log(`🔄 Resetting notification store (${state.initializationId})`);
+    
+    // Cleanup listeners
+    if (state.listenerCleanup) {
+      state.listenerCleanup();
+    }
+    
+    // Reset state
+    set({ 
+      notifications: [], 
+      count: 0, 
+      isInitialized: false,
+      socket: null,
+      listenerCleanup: null,
+      initializationId: null
+    });
+    
+    console.log('✅ Notification store reset complete');
+  },
+  
+  // Debug function to get current state
+  getDebugInfo: () => {
+    const state = get();
+    return {
+      notificationCount: state.notifications.length,
+      unreadCount: state.count,
+      isInitialized: state.isInitialized,
+      hasSocket: !!state.socket,
+      initializationId: state.initializationId,
+      socketConnected: state.socket?.connected || false,
+      socketId: state.socket?.id || null,
+      latestNotification: state.notifications[0] || null
+    };
+  },
+  processNotification: (notification) => {
+    const state = get();
+    if (state.lastNotificationId === notification._id) return;
+    
+    set({
+      notifications: [notification, ...state.notifications],
+      count: state.count + (notification.isRead ? 0 : 1),
+      lastNotificationId: notification._id
+    });
+  }
 }));

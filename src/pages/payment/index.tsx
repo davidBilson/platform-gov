@@ -18,3 +18,7 @@ const PaymentIndex = () => {
 }
 
 export default PaymentIndex
+
+
+
+

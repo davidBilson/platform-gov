@@ -7,7 +7,7 @@ dayjs.extend(relativeTime);
 
 const NotificationDropdown = ({ notificationsOpen, setNotificationsOpen }) => {
   
-  const { notifications } = useNotification();
+  const notifications = useNotification(state => state.notifications);
   const recentNotifications = notifications.slice(0, 5);
 
   return (

@@ -116,7 +116,7 @@ const FundProjectPage = () => {
       const response = await fundProject(jobId as string, userId);
       if (response.success) {
         toast.success('Project funded successfully!');
-        router.push('/');
+        router.push('/job/manage');
       } else {
         toast.error(response.message || 'Funding failed');
       }

@@ -12,6 +12,7 @@ import useAuthStore from '@/store/useAuth';
 import { useRouter } from 'next/router';
 import LoadingAnimation from '@/components/ui/loading';
 import FeeSettings from './_feeSettings';
+import Escrow from './_escrow';
 
 const AdminHomePage = () => {
 
@@ -57,6 +58,8 @@ const AdminHomePage = () => {
         return <HelpAndSupport />;
       case 'fee-settings':
         return <FeeSettings />;
+      case 'escrow':
+        return <Escrow />;
       default:
         return <Dashboard />;
     }

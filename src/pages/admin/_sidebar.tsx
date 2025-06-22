@@ -14,6 +14,7 @@ import Logo from '@/components/ui/logo';
 import useAuthStore from '@/store/useAuth';
 import useAdminStore from '@/store/useAdmin'; // Import the new admin store
 import { useRouter } from 'next/router';
+import { FaMoneyBill } from 'react-icons/fa';
 
 interface AdminSideBarProps {
   setActiveComponent: (component: string) => void;
@@ -66,6 +67,12 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
       label: 'Fee Settings',
       icon: DollarSign,
       path: '/admin/fee-settings'
+    },
+    {
+      key: 'escrow',
+      label: 'Escrow',
+      icon: FaMoneyBill,
+      path: '/admin/escrow'
     }
   ];
 

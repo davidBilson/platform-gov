@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import useAuthStore from '@/store/useAuth';
@@ -18,14 +18,20 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-
   const router = useRouter();
+  const initAuthCalled = useRef(false);
+  const socketConnected = useRef(false);
+  
   const { userId, isLoading, initAuth, verificationStep, resetAll } = useAuthStore();
   
-  const handleSignOut = () => {
+  const handleSignOut = useCallback(() => {
+    // Disconnect socket first
+    useSocket.getState().disconnect();
+    socketConnected.current = false;
+    
     resetAll();
     router.push('/account/sign-in');
-  }
+  }, [resetAll, router]);
 
   const { data: isSuspended } = useQuery({
     queryKey: ['userSuspensionStatus', userId],
@@ -36,7 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     enabled: !!userId,
     refetchInterval: 2 * 60 * 1000,
     refetchIntervalInBackground: true,
-    retry: 3, // Retry 3 times on failure
+    retry: 3,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 4 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -46,7 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (isSuspended === true && userId) {
       handleSignOut();
     }
-  }, [isSuspended, userId]);
+  }, [isSuspended, userId, handleSignOut]);
   
   const publicRoutes = [
     '/account/sign-up',
@@ -65,47 +71,72 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isVerificationPage = router.pathname === '/account/verification';
   
+  // Initialize auth only once
   useEffect(() => {
-    initAuth();
+    if (!initAuthCalled.current) {
+      initAuthCalled.current = true;
+      initAuth();
+    }
   }, [initAuth]);
 
+  // Handle socket connection with proper cleanup
   useEffect(() => {
-    if (userId) {
-      useSocket.getState().connect();
+    const { connect, disconnect, rejoinRooms } = useSocket.getState();
+    
+    if (userId && !socketConnected.current) {
+      console.log('Connecting socket for authenticated user:', userId);
+      connect();
+      socketConnected.current = true;
+    } else if (userId && socketConnected.current) {
+      rejoinRooms();
+    } else if (!userId && socketConnected.current) {
+      console.log('Disconnecting socket - user not authenticated');
+      disconnect();
+      socketConnected.current = false;
     }
   }, [userId]);
   
-  // Fixed: Don't redirect from verification page when userId is missing
+  useEffect(() => {
+    return () => {
+      if (socketConnected.current) {
+        useSocket.getState().disconnect();
+        socketConnected.current = false;
+      }
+    };
+  }, []);
+  
+  // Route protection
   useEffect(() => {
     if (!isLoading && !userId && !isPublicRoute) {
       router.replace('/account/sign-in');
     }
   }, [userId, isPublicRoute, isLoading, router]);
   
-  // Consolidated navigation logic
+  // Navigation logic with reduced complexity
   useEffect(() => {
-    if (!isLoading) {
-      // Handle verification page access
-      if (isVerificationPage && !userId) {
-        router.replace('/account/sign-up');
+    if (isLoading) return; // Wait for auth to load
+    
+    const currentPath = router.pathname;
+    
+    // Handle verification page access
+    if (isVerificationPage && !userId) {
+      router.replace('/account/sign-up');
+      return;
+    }
+    
+    // Handle authenticated user on auth pages
+    if (userId) {
+      if (currentPath === '/account/sign-up') {
+        const targetPath = verificationStep !== 'completed' 
+          ? '/account/verification' 
+          : '/';
+        router.replace(targetPath);
         return;
       }
       
-      // Handle authenticated user on auth pages
-      if (userId) {
-        if (router.pathname === '/account/sign-up') {
-          if (verificationStep !== 'completed') {
-            router.replace('/account/verification');
-          } else {
-            router.replace('/');
-          }
-          return;
-        }
-        
-        if (router.pathname === '/account/sign-in') {
-          router.replace('/');
-          return;
-        }
+      if (currentPath === '/account/sign-in') {
+        router.replace('/');
+        return;
       }
     }
   }, [userId, router.pathname, isLoading, router, verificationStep, isVerificationPage]);

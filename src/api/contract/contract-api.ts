@@ -2,6 +2,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Contract } from '@/types/contracts';
+import { releaseFunds } from '../payment-api';
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -139,8 +140,9 @@ export const getContracts = async (contractorId: string): Promise<{
 export const endContract = async (contractId: string, userId: string) => {
   try {
     const endpoint = process.env.NEXT_PUBLIC_END_CONTRACT?.replace(':contractId', contractId);
-    
     const response = await axios.put(`${baseURL}${endpoint}`, { userId });
+    await releaseFunds(contractId, userId);
+    toast.success('Contract ended successfully');
     return response.data;
 
   } catch (error) {
