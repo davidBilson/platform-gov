@@ -12,8 +12,16 @@ export const getSpecificCountryStates = async () => {
       'United Kingdom': 'GB'
     };
     
-    const result = [];
+    // Start with general location options
+    const result = [
+      ["US countrywide", "US"],
+      ["Canada countrywide", "CA"],
+      ["UK countrywide", "GB"],
+      ["Remote", "REMOTE"],
+      ["Not location specific", "ANY"]
+    ];
     
+    // Add specific states/provinces
     data.forEach(country => {
       const countryCode = countryMap[country.name];
       if (countryCode && country.states) {
@@ -26,7 +34,14 @@ export const getSpecificCountryStates = async () => {
     return result;
   } catch (error) {
     console.error('Error fetching country states:', error);
-    return [];
+    // Return at least the general options even if API fails
+    return [
+      ["US countrywide"],
+      ["Canada countrywide", "CA"],
+      ["UK countrywide", "GB"],
+      ["Remote", "REMOTE"],
+      ["Not location specific", "ANY"]
+    ];
   }
 };
 

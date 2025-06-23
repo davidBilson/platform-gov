@@ -1,5 +1,3 @@
-
-// payment-api.ts
 import { SavePaymentMethodRequest } from '@/types/payment';
 import axios from 'axios';
 
@@ -125,8 +123,10 @@ export const getPlatformFee = async () => {
 
 export const getPayoutMethods = async (userId: string) => {
   try {
-    const endPoint = process.env?.NEXT_PUBLIC_GET_PAYOUT_METHODS?.replace(':id', userId) || '';
+    const endPoint = (process.env.NEXT_PUBLIC_GET_PAYOUT_METHODS ?? "").replace(':id', userId) || "";
+    console.log(`Fetching payout methods from: ${BASE_URL}${endPoint}`);
     const response = await axios.get(`${BASE_URL}${endPoint}`);
+    console.log(response)
     return response.data.payoutMethods;
   } catch (error) {
     console.error('Error fetching payout methods:', error);
@@ -147,8 +147,10 @@ export const saveBankAccount = async (userId: string, token: string) => {
 
 export const createOnboardingLink = async (userId: string) => {
   try {
-    const endPoint = process.env?.NEXT_PUBLIC_CREATE_ONBOARDING_LINK?.replace(':id', userId) || '';
+    const endPoint = (process.env.NEXT_PUBLIC_CREATE_ONBOARDING_LINK ?? "").replace(':id', userId) || '';
+    console.log(endPoint)
     const response = await axios.post(`${BASE_URL}${endPoint}`);
+    console.log('createOnboardlink response: ', response);
     return response.data;
   } catch (error) {
     console.error('Error creating onboarding link:', error);
@@ -158,7 +160,7 @@ export const createOnboardingLink = async (userId: string) => {
 
 export const getAccountStatus = async (userId: string) => {
   try {
-    const endPoint = process.env?.NEXT_PUBLIC_GET_ACCOUNT_STATUS?.replace(':id', userId);
+    const endPoint = (process.env.NEXT_PUBLIC_GET_ACCOUNT_STATUS ?? "").replace(':id', userId) || "";
     const response = await axios.get(`${BASE_URL}${endPoint}`);
     return response.data;
   } catch (error) {
@@ -212,11 +214,13 @@ export const getPendingPayouts = async () => {
   }
 };
 
-export const approvePayout = async (payoutId: string) => {
-  const endPoint = '/api/payment/approve-payout';
-  const response = await axios.post(`${BASE_URL}${endPoint}`, {
-    payoutId,
-    userId: adminId
-  });
-  return response.data;
+export const approvePayout = async (fundId: string) => {
+  try {
+    const endPoint = (process.env.NEXT_PUBLIC_APPROVE_PAYOUT ?? "").replace(':id', fundId) || "";
+    console.log('api: ', `${BASE_URL}${endPoint}?adminId=${adminId}`)
+    const response = await axios.post(`${BASE_URL}${endPoint}?adminId=${adminId}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 }

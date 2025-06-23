@@ -15,7 +15,8 @@ import {
   Mail,
   Phone
 } from 'lucide-react';
-import { getPendingPayouts } from '@/api/payment-api';
+import { getPendingPayouts, approvePayout } from '@/api/payment-api';
+import { toast } from 'react-toastify';
 
 const EscrowDashboard = () => {
   const [payouts, setPayouts] = useState([]);
@@ -26,11 +27,14 @@ const EscrowDashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    loadPendingPayouts();
+    const fetchData = async () => {
+      await loadPendingPayouts();
+    };
+    fetchData();
   }, []);
 
-  const loadPendingPayouts = async () => {
-    setLoading(true);
+  const loadPendingPayouts = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const result = await getPendingPayouts();
       if (result.success) {
@@ -40,16 +44,34 @@ const EscrowDashboard = () => {
     } catch (error) {
       console.error('Failed to load payouts:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  const handleApprove = async (fundId) => {
-    setApproving(fundId);
-    // TODO: Implement approval logic
-    console.log('Approving payout:', fundId);
-    setTimeout(() => setApproving(null), 2000);
-  };
+ // In EscrowDashboard.jsx
+ const handleApprove = async (fundId) => {
+  if (approving) return;
+  
+  setApproving(fundId);
+  try {
+    const result = await approvePayout(fundId);
+    if (result.success) {
+      // Immediately remove from UI
+      setPayouts(prev => prev.filter(p => p.fundId !== fundId));
+      // Refresh data without remounting
+      loadPendingPayouts(true); // Silent refresh
+
+      toast.success(`Payment approved! $${result.data.netAmount} sent to contractor`);
+      closeModal();
+    }
+  } catch (error) {
+    toast.error(`Approval failed: ${error.message}`);
+    // Refresh on error to ensure consistency
+    loadPendingPayouts(true);
+  } finally {
+    setApproving(null);
+  }
+};
 
   const handleContractClick = (payout) => {
     setSelectedPayout(payout);
@@ -156,6 +178,9 @@ const EscrowDashboard = () => {
                       Job Title
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      STATUS
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Amount
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -182,11 +207,6 @@ const EscrowDashboard = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                            <span className="text-sm font-medium text-gray-600">
-                              {payout.contractor?.name?.charAt(0) || 'C'}
-                            </span>
-                          </div>
                           <span className="text-sm text-gray-900">
                             {payout.contractor?.name || 'Unknown Contractor'}
                           </span>
@@ -195,6 +215,11 @@ const EscrowDashboard = () => {
                       <td className="px-6 py-4">
                         <span className="text-sm text-gray-600 truncate max-w-xs block">
                           {payout.job?.title || payout.job?.jobTitle || 'Job title not available'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {payout.status ?? "unknown"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

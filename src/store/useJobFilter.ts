@@ -59,7 +59,7 @@ export const useJobFilter = create<JobFilterState>((set) => ({
   setGovernmentType: (type) => set({ governmentType: type }),
   setDepartment: (dept) => set({ department: dept }),
   setLocation: (loc) => set({ location: loc }),
-  setDomainFocus: (focus) => set({ domainFocus: focus, domainDetail: '' }), // Reset detail when focus changes
+  setDomainFocus: (focus) => set({ domainFocus: focus, domainDetail: '' }),
   setDomainDetail: (detail) => set({ domainDetail: detail }),
   setActiveFilters: (filters) => set({ activeFilters: filters }),
   

@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe } from '@stripe/react-stripe-js';
@@ -100,7 +101,6 @@ const PayoutSetupContent = () => {
       const onboardingRes = await createOnboardingLink(userId);
       
       if (onboardingRes.success) {
-        // Redirect to Stripe onboarding
         window.location.href = onboardingRes.onboardingUrl;
       } else {
         toast.error(onboardingRes.message || 'Failed to start onboarding');
@@ -120,12 +120,10 @@ const PayoutSetupContent = () => {
       try {
         setLoading(true);
         
-        // Fetch payout methods
         const methodsRes = await getPayoutMethods(userId);
         const transformedMethods = transformMethods(methodsRes);
         setPayoutMethods(transformedMethods);
         
-        // Fetch account status
         await fetchAccountStatus();
         
         console.log('Data fetched successfully');
@@ -138,7 +136,6 @@ const PayoutSetupContent = () => {
     
     fetchData();
 
-    // Check URL params for onboarding status
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('success') === 'true') {
       toast.success('Account setup completed successfully!');
