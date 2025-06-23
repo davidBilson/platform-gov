@@ -123,7 +123,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
   useEffect(() => {
     if (jobs.length > 0) {
       const jobTypes = Array.from(new Set(jobs.map(job => job.employmentType)));
-      setAvailableJobTypes([ ...jobTypes, 'Retainer', 'Hourly', 'Milestone', 'Commission']);
+      setAvailableJobTypes([...jobTypes, 'Retainer', 'Hourly', 'Milestone', 'Commission']);
 
       setAvailableCertifications(Array.from(new Set(certificatesAndEducationList)));
 
@@ -388,8 +388,8 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
 
   return (
     <main>
-      <div className="flex flex-wrap items-center gap-8.25 mb-8">
-        <div className="relative flex-grow">
+      <div className="grid grid-cols-8 items-center gap-6 mb-8">
+        <div className="relative col-span-5">
           <input
             type="text"
             placeholder="Search Jobs"
@@ -402,7 +402,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
           </button>
         </div>
 
-        <div className="relative w-full sm:w-64">
+        <div className="relative w-full col-span-2">
           <input
             ref={locationInputRef}
             type="text"
@@ -476,8 +476,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
           )}
         </div>
 
-        <button
-          className="h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
+        <button className="col-span-1 h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
           onClick={saveSearch}
         >
           Save Search
@@ -486,7 +485,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
 
       <h3 className="text-gray-700 mb-3">Filter by</h3>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         {/* Job Type filter */}
         <div className="relative w-full">
           <select
@@ -722,7 +721,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
         </div>
 
         {/* Domain Focus  */}
-        <div className="relative w-full">
+        <div className="relative w-full h-fit">
           <input
             type="text"
             placeholder="Domain Focus"
@@ -778,7 +777,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
 
         {/* Domain Detail input (appears when Domain Focus is selected) */}
         {domainFocus && domainFocus !== 'US Federal Government' && (
-          <div className="relative w-full">
+          <div className="relative w-full h-fit">
             <input
               ref={domainDetailInputRef}
               type="text"
@@ -817,78 +816,70 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
             )}
           </div>
         )}
+
+        <div className="relative w-full lg:col-span-2 mb-6">
+          <input
+            ref={departmentInputRef}
+            type="text"
+            placeholder="Department/Agency Expertise/Focus"
+            className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
+            value={department}
+            onChange={(e) => {
+              const value = e.target.value;
+              setDepartment(value);
+              const allDepts = [
+                ...GovernmentDepartmentsAndAgenciesByCountry['United States'],
+                ...GovernmentDepartmentsAndAgenciesByCountry['United Kingdom'],
+                ...GovernmentDepartmentsAndAgenciesByCountry['Canada'],
+                ...GovernmentDepartmentsAndAgenciesByCountry['Australia'],
+              ];
+              setFilteredDepartments(
+                allDepts.filter(dept =>
+                  dept.toLowerCase().includes(value.toLowerCase())
+                ));
+            }}
+            onFocus={() => {
+              setShowDepartmentDropdown(true);
+              const allDepts = [
+                ...GovernmentDepartmentsAndAgenciesByCountry['United States'],
+                ...GovernmentDepartmentsAndAgenciesByCountry['United Kingdom'],
+                ...GovernmentDepartmentsAndAgenciesByCountry['Canada'],
+                ...GovernmentDepartmentsAndAgenciesByCountry['Australia'],
+              ];
+              setFilteredDepartments(allDepts);
+            }}
+          />
+          <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
+            <svg className="w-5 h-5 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {showDepartmentDropdown && (
+            <div
+              ref={departmentDropdownRef}
+              className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+            >
+              {filteredDepartments.map((dept, index) => (
+                <div
+                  key={`dept-${index}`}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                  onClick={() => {
+                    setDepartment(dept);
+                    setShowDepartmentDropdown(false);
+                  }}
+                >
+                  {dept}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Department/Agency Expertise/Focus */}
-      <div className="relative w-full md:max-w-2/4 mb-6">
-        <input
-          ref={departmentInputRef}
-          type="text"
-          placeholder="Department/Agency Expertise/Focus"
-          className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
-          value={department}
-          onChange={(e) => {
-            const value = e.target.value;
-            setDepartment(value);
-            const allDepts = [
-              ...GovernmentDepartmentsAndAgenciesByCountry['United States'],
-            ];
-            setFilteredDepartments(
-              allDepts.filter(dept =>
-                dept.toLowerCase().includes(value.toLowerCase())
-              ));
-          }}
-          onFocus={() => {
-            setShowDepartmentDropdown(true);
-            const allDepts = [
-              ...GovernmentDepartmentsAndAgenciesByCountry['United States'],
-              ...GovernmentDepartmentsAndAgenciesByCountry['United Kingdom'],
-              ...GovernmentDepartmentsAndAgenciesByCountry['Canada'],
-              ...GovernmentDepartmentsAndAgenciesByCountry['Australia'],
-            ];
-            setFilteredDepartments(allDepts);
-          }}
-        />
-        <button className="absolute right-4 top-1/2 transform -translate-y-1/2">
-          <svg className="w-5 h-5 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
 
-        {showDepartmentDropdown && (
-          <div
-            ref={departmentDropdownRef}
-            className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-          >
-            {filteredDepartments.map((dept, index) => (
-              <div
-                key={`dept-${index}`}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                onClick={() => {
-                  setDepartment(dept);
-                  setShowDepartmentDropdown(false);
-                }}
-              >
-                {dept}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {(
-        searchTerm ||
-        jobType ||
-        securityClearance ||
-        skillsAndExpertise ||
-        certifications ||
-        governmentType ||
-        department ||
-        location ||
-        domainFocus ||
-        domainDetail ||
-        selectedSavedSearch
-      ) && (
+      {(searchTerm || jobType || securityClearance || skillsAndExpertise || certifications || governmentType || department || location || domainFocus || domainDetail || selectedSavedSearch)
+        && (
           <button
             onClick={resetFilters}
             title="reset"

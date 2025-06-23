@@ -1,3 +1,4 @@
+import React from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { FaCheckCircle } from 'react-icons/fa';
@@ -75,7 +76,7 @@ const CreateJob  = () => {
       const fetchData = async () => {
         try {
           const [ statesData ] = await Promise.all([ getSpecificCountryStates() ]);
-          setStatesWithCountries(statesData);
+          setStatesWithCountries(statesData.map(([state, country]) => [state, country] as StateWithCountry));
         } catch (err) {
           console.error('Error fetching data:', err);
         }

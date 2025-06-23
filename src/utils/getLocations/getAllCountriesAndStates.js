@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { allCountries } from '../feedFilter/allCountries';
 
 export const getSpecificCountryStates = async () => {
   try {
@@ -64,13 +65,5 @@ export const getUSStates = async () => {
 };
 
 export const getAllCountries = async () => {
-  try {
-    const response = await axios.get('https://restcountries.com/v3.1/all');
-    return response.data
-      .map(country => country.name.common)
-      .sort((a, b) => a.localeCompare(b));
-  } catch (error) {
-    console.error('Error fetching countries:', error);
-    return [];
-  }
+    return allCountries .sort((a, b) => a.localeCompare(b));
 };
