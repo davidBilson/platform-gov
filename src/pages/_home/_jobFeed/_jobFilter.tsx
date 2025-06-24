@@ -23,7 +23,7 @@ type USState = string;
 
 interface JobFilterProps { jobs: Jobs[]; onFilterChange: (filteredJobs: Jobs[]) => void; loading: boolean; }
 
-const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) => {
+const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
 
   const {
     addSavedSearch,
@@ -320,7 +320,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       activeFiltersList.push({ id: 'domainFocus', name: domainFilterName });
     }
 
-    // Update active filters and filtered jobs
     setActiveFilters(activeFiltersList);
     onFilterChange(filtered);
   }, [searchTerm, jobType, securityClearance, skillsAndExpertise, certifications, governmentType, department, location, domainFocus, domainDetail, jobs, loading]);
@@ -333,7 +332,6 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
       const savedSearch = jobSavedSearches.find((search: { id: { toString: () => string; }; }) => search.id.toString() === searchId);
 
       if (savedSearch && savedSearch.filters) {
-        // Restore saved search filters
         const filters = JSON.parse(savedSearch.filters);
         setSearchTerm(filters.searchTerm || '');
         setJobType(filters.jobType || '');
@@ -388,8 +386,8 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
 
   return (
     <main>
-      <div className="grid grid-cols-8 items-center gap-6 mb-8">
-        <div className="relative col-span-5">
+      <div className="grid md:grid-cols-8 items-center gap-3 lg:gap-6 mb-8">
+        <div className="md:col-span-4 lg:col-span-5 relative">
           <input
             type="text"
             placeholder="Search Jobs"
@@ -402,7 +400,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
           </button>
         </div>
 
-        <div className="relative w-full col-span-2">
+        <div className="md:col-span-2 lg:col-span-2 relative w-full">
           <input
             ref={locationInputRef}
             type="text"
@@ -476,7 +474,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
           )}
         </div>
 
-        <button className="col-span-1 h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
+        <button className="md:col-span-2 lg:col-span-1 h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
           onClick={saveSearch}
         >
           Save Search
@@ -485,7 +483,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
 
       <h3 className="text-gray-700 mb-3">Filter by</h3>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
         {/* Job Type filter */}
         <div className="relative w-full">
           <select
@@ -817,7 +815,7 @@ const JobFilter: React.FC<JobFilterProps> = ({ jobs, onFilterChange, loading }) 
           </div>
         )}
 
-        <div className="relative w-full lg:col-span-2 mb-6">
+        <div className="relative w-full md:col-span-2 mb-6">
           <input
             ref={departmentInputRef}
             type="text"

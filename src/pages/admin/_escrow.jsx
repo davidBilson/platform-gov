@@ -15,8 +15,7 @@ import {
   Mail,
   Phone
 } from 'lucide-react';
-import { getPendingPayouts, approvePayout } from '@/api/payment-api';
-import { toast } from 'react-toastify';
+import { getPendingPayouts } from '@/api/payment-api';
 
 const EscrowDashboard = () => {
   const [payouts, setPayouts] = useState([]);
@@ -47,31 +46,6 @@ const EscrowDashboard = () => {
       if (!silent) setLoading(false);
     }
   };
-
- // In EscrowDashboard.jsx
- const handleApprove = async (fundId) => {
-  if (approving) return;
-  
-  setApproving(fundId);
-  try {
-    const result = await approvePayout(fundId);
-    if (result.success) {
-      // Immediately remove from UI
-      setPayouts(prev => prev.filter(p => p.fundId !== fundId));
-      // Refresh data without remounting
-      loadPendingPayouts(true); // Silent refresh
-
-      toast.success(`Payment approved! $${result.data.netAmount} sent to contractor`);
-      closeModal();
-    }
-  } catch (error) {
-    toast.error(`Approval failed: ${error.message}`);
-    // Refresh on error to ensure consistency
-    loadPendingPayouts(true);
-  } finally {
-    setApproving(null);
-  }
-};
 
   const handleContractClick = (payout) => {
     setSelectedPayout(payout);
@@ -186,9 +160,9 @@ const EscrowDashboard = () => {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Submitted
                     </th>
-                    <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {/* <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Action
-                    </th>
+                    </th> */}
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -199,7 +173,7 @@ const EscrowDashboard = () => {
                           <Hash className="w-4 h-4 text-gray-400 mr-2" />
                           <button
                             onClick={() => handleContractClick(payout)}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                            className="text-sm cursor-pointer font-medium text-deepskyblue hover:text-deepskyblue hover:underline"
                           >
                             {payout.fundId.slice(-8)}
                           </button>
@@ -231,25 +205,6 @@ const EscrowDashboard = () => {
                         <span className="text-sm text-gray-500">
                           {formatDate(payout.createdAt)}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
-                        <button
-                          onClick={() => handleApprove(payout.fundId)}
-                          disabled={approving === payout.fundId}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          {approving === payout.fundId ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Approving...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="w-4 h-4 mr-2" />
-                              Approve
-                            </>
-                          )}
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -472,14 +427,6 @@ const EscrowDashboard = () => {
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                     >
                       Close
-                    </button>
-                    <button
-                      onClick={() => handleApprove(selectedPayout.fundId)}
-                      disabled={approving === selectedPayout.fundId}
-                      title={`${formatCurrency(selectedPayout.amount * 0.95, selectedPayout.currency)} will be sent to contractor after 5% platform fee`}
-                      className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 disabled:opacity-50"
-                    >
-                      {approving === selectedPayout.fundId ? 'Approving...' : 'Approve Payment'}
                     </button>
                   </div>
                 </div>

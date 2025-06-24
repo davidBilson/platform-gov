@@ -25,7 +25,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const { userId, isLoading, initAuth, verificationStep, resetAll } = useAuthStore();
   
   const handleSignOut = useCallback(() => {
-    // Disconnect socket first
     useSocket.getState().disconnect();
     socketConnected.current = false;
     

@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -106,7 +107,6 @@ export default function App({ Component, pageProps }: AppProps) {
       socket && 
       isConnected && 
       userId && 
-      isAuthenticated && 
       !notificationInitialized.current;
 
     if (shouldInitializeNotifications) {
@@ -129,7 +129,7 @@ export default function App({ Component, pageProps }: AppProps) {
         console.error('❌ Error initializing notification system:', error);
         notificationInitialized.current = false;
       }
-    } else if ((!socket || !isConnected || !userId || !isAuthenticated) && notificationInitialized.current) {
+    } else if ((!socket || !isConnected || !userId) && notificationInitialized.current) {
       console.log('🔔 Conditions not met for notifications, cleaning up...');
       performCleanup();
     }
@@ -143,11 +143,10 @@ export default function App({ Component, pageProps }: AppProps) {
         notificationInitialized.current = false;
       }
     };
-  }, [socket, isConnected, userId, isAuthenticated, init, performCleanup, getDebugInfo]);
+  }, [socket, isConnected, userId, init, performCleanup, getDebugInfo]);
 
   useEffect(() => {
-    if (userId && isAuthenticated && notificationInitialized.current) {
-      console.log('📥 Fetching initial notifications for user:', userId);
+    if (userId) {
       
       fetchNotifications()
         .then((notifications: Array<{ _id: string; title: string; isRead: boolean; createdAt: string }>) => {
@@ -157,7 +156,7 @@ export default function App({ Component, pageProps }: AppProps) {
           console.error('❌ Failed to fetch initial notifications:', error);
         });
     }
-  }, [userId, isAuthenticated, fetchNotifications]);
+  }, [userId, fetchNotifications]);
 
   useEffect(() => {
     console.log('🔍 FULL NOTIFICATION STATE:', {
@@ -196,7 +195,7 @@ export default function App({ Component, pageProps }: AppProps) {
   }, []);
 
   useEffect(() => {
-    if (!socket || !isAuthenticated) return;
+    if (!socket) return;
 
     const healthCheckInterval = setInterval(() => {
       const connectionInfo = {
@@ -209,7 +208,7 @@ export default function App({ Component, pageProps }: AppProps) {
       console.log('💓 Connection Health Check:', connectionInfo);
 
       // If connection is unhealthy, attempt to reconnect
-      if (!isReady() && userId && isAuthenticated) {
+      if (!isReady() && userId) {
         console.log('⚠️ Unhealthy connection detected, attempting to reconnect...');
         socketInitialized.current = false;
         notificationInitialized.current = false;
@@ -217,7 +216,7 @@ export default function App({ Component, pageProps }: AppProps) {
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(healthCheckInterval);
-  }, [socket, isAuthenticated, isReady, isConnected, userId]);
+  }, [socket, isReady, isConnected, userId]);
 
   // Initialize AOS only once
   useEffect(() => {

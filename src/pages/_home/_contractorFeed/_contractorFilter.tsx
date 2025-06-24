@@ -228,8 +228,8 @@ const ContractorFilter = () => {
 
   return (
     <main>
-      <div className="grid grid-cols-8 items-center gap-6 mb-8">
-        <div className="relative col-span-5">
+      <div className="grid md:grid-cols-8 items-center gap-3 lg:gap-6 mb-8">
+        <div className="md:col-span-4 lg:col-span-5 relative">
           <input
             type="text"
             placeholder="Search Contractors"
@@ -242,9 +242,9 @@ const ContractorFilter = () => {
           </button>
         </div>
 
-        <div className="relative w-full col-span-2">
+        <div className="md:col-span-2 lg:col-span-2 relative w-full">
           <input
-            ref={locationInputRef}
+            // ref={locationInputRef}
             type="text"
             placeholder="Saved Searches"
             className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
@@ -313,7 +313,7 @@ const ContractorFilter = () => {
           )}
         </div>
 
-        <button className="col-span-1 h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
+        <button className="md:col-span-2 lg:col-span-1 h-12.5 bg-boldblue text-white px-6 py-3 rounded-lg text-sm font-semibold cursor-pointer"
           onClick={saveSearch}
         >
           Save Search
@@ -322,21 +322,14 @@ const ContractorFilter = () => {
 
       <h3 className="text-gray-700 mb-3">Filter by</h3>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <div className="grid sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
 
         {/* Industry Sector filter */}
         <div className="relative w-full">
           <input
-            // ref={professionInputRef}
             type="text"
             placeholder="Industry Sector"
             className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
-          // value={profession}
-          // onChange={handleProfessionChange}
-          // onFocus={() => {
-          //   setShowProfessionDropdown(true);
-          //   setFilteredProfessions(professions);
-          // }}
           />
           <button
             className="absolute right-4 top-1/2 transform -translate-y-1/2"
@@ -347,27 +340,6 @@ const ContractorFilter = () => {
           >
             <IoMdArrowDropdown size={20} className="text-boldblue" />
           </button>
-
-          {/* {showProfessionDropdown && (
-            <div
-              ref={professionDropdownRef}
-              className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
-            >
-              {filteredProfessions.length > 0 ? (
-                filteredProfessions.map((prof, index) => (
-                  <div
-                    key={`prof-${index}`}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                    onClick={() => selectProfession(prof)}
-                  >
-                    {prof}
-                  </div>
-                ))
-              ) : (
-                <div className="px-4 py-2 text-sm text-gray-500">No professions found</div>
-              )}
-            </div>
-          )} */}
         </div>
 
         {/* Security Clearance filter */}

@@ -1,4 +1,3 @@
-// components/chat/_messages.jsx
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
 import { IoSendSharp } from 'react-icons/io5';

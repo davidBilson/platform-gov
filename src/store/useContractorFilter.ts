@@ -88,7 +88,7 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     get().updateActiveFilters();
   },
   setDomainFocus: (focus) => {
-    set({ domainFocus: focus, domainDetail: '' }); // Reset detail when focus changes
+    set({ domainFocus: focus, domainDetail: '' });
     get().updateActiveFilters();
   },
   setDomainDetail: (detail) => {

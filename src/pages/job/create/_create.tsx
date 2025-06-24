@@ -5,12 +5,13 @@ import { FaCheckCircle } from 'react-icons/fa';
 
 import useAuthStore from '@/store/useAuth';
 import { ReactLib, Icons, UI } from '@/utils/jobs/_imports';
-import type { JobFormData } from '@/utils/jobs/_imports';
 import { getSpecificCountryStates } from '@/utils/getLocations/getAllCountriesAndStates';
-import { skillsList } from '@/utils/skillsExpertiseCertificationList/skillsList';
-import { certificationsList } from '@/utils/skillsExpertiseCertificationList/certificationList';
-import { expertiseList } from '@/utils/skillsExpertiseCertificationList/expertiseList';
 import PaymentModal from '@/components/payment/PaymentModal';
+// utils
+import { ProfessionalFieldsAndAreasOfExpertise152 } from '@/utils/feedFilter/152ProfessionalFieldsAndAreasOfExpertise';
+import { certificatesAndEducationList } from '@/utils/feedFilter/CertificatesAndEducationList';
+
+import type { JobFormData } from '@/utils/jobs/_imports';
 
 const { useState, useEffect, useRef } = ReactLib;
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
@@ -21,9 +22,9 @@ type StateWithCountry = [string, string];
 const CreateJob  = () => {
 
     const { userId } = useAuthStore();
-    const requiredCertificationsList = certificationsList;
-    const jobCategoryList = expertiseList;
-    const requiredSkillsList = skillsList;
+    const requiredCertificationsList = certificatesAndEducationList;
+    const jobCategoryList = ProfessionalFieldsAndAreasOfExpertise152;
+    const requiredSkillsList = ProfessionalFieldsAndAreasOfExpertise152;
 
     const [formData, setFormData] = useState<JobFormData>({
         userId: userId,
@@ -133,7 +134,7 @@ const CreateJob  = () => {
         }));
     };
 
-    const handlePaymentTypeChange = (type: 'hourly' | 'fixed-price' | 'retainer') => {
+    const handlePaymentTypeChange = (type: 'hourly' | 'fixed-price' | 'retainer' | 'commission') => {
         setFormData(prev => ({
         ...prev,
         paymentType: type
@@ -310,7 +311,7 @@ const CreateJob  = () => {
             </div>
 
             {showJobCategoryDropdown && (
-              <div className="absolute z-20 w-full mt-1 bg-white  shadow-lg shadow-gray-400 rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+              <div className="absolute z-20 w-full mt-1 bg-white shadow-gray-400 rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
                 onMouseDown={(e) => e.preventDefault()}
               >
                 {filteredJobCategory.map((category, idx) => (
@@ -584,6 +585,25 @@ const CreateJob  = () => {
                   />
                 )}
                 Retainer
+              </div>
+              
+              <div className='flex items-center gap-1.25 text-mediumgray'>
+                {formData.paymentType === 'commission' ? (
+                  <MdOutlineRadioButtonChecked 
+                    size={21} 
+                    // color='#0B5F94' 
+                    // onClick={() => handlePaymentTypeChange('commission')}
+                    className="cursor-pointer"
+                  />
+                ) : (
+                  <MdOutlineRadioButtonUnchecked 
+                    size={20} 
+                    // color='#0B5F94' 
+                    // onClick={() => handlePaymentTypeChange('commission')}
+                    className="cursor-pointer"
+                  />
+                )}
+                Commission
               </div>
             </div>
           </div>

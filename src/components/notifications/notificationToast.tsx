@@ -93,11 +93,11 @@ const formatTimestamp = (timestamp: string) => {
   return date.toLocaleDateString();
 };
 
-const NotificationToast: React.FC<NotificationToastProps> = ({ 
+const NotificationToast = ({ 
   notification, 
   onClose, 
   duration = 4000 
-}) => {
+}: NotificationToastProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
@@ -146,7 +146,7 @@ const NotificationToast: React.FC<NotificationToastProps> = ({
       >
         <div className="p-2">
           <div className="flex items-start gap-3">
-            {/* Icon */}
+            
             <div className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center ${getTypeColor(notification.type)}`}>
               <NotificationIcon type={notification.type} />
             </div>

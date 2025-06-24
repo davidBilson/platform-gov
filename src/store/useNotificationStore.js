@@ -24,7 +24,6 @@ export const useNotification = create((set, get) => ({
     const state = get();
     const initId = `init_${Date.now()}`;
     
-    // Prevent multiple initializations
     if (state.isInitialized && state.initializationId) {
       console.log('🔔 Notifications already initialized, skipping...');
       return state.listenerCleanup || (() => {});
@@ -32,15 +31,12 @@ export const useNotification = create((set, get) => ({
 
     console.log(`🔔 Initializing notification system (${initId})...`);
 
-    // Cleanup any existing listeners first
     if (state.listenerCleanup) {
       state.listenerCleanup();
     }
 
-    // Enhanced notification handler with comprehensive logging
     const handleNotification = (notification) => {
       set(state => {
-        // Check if we've already processed this notification
         if (state.lastNotificationId === notification._id) return state;
         
         const updatedNotifications = [notification, ...state.notifications];
@@ -49,38 +45,32 @@ export const useNotification = create((set, get) => ({
         return {
           notifications: updatedNotifications,
           count: newCount,
-          lastNotificationId: notification._id  // Track last shown ID
+          lastNotificationId: notification._id
         };
       });
     };
 
-    // Connection status handler
     const handleConnectionStatus = (status) => {
       console.log('🔌 Socket connection status changed:', status);
     };
 
-    // Error handler for notifications
     const handleNotificationError = (error) => {
       console.error('🚫 Notification error:', error);
     };
 
-    // Remove existing listeners to prevent duplicates
     socket.off('new-notification');
     socket.off('notification-error');
     socket.off('connection-status');
 
-    // Add event listeners - check both possible event names
     socket.on('new-notification', handleNotification);
-    socket.on('notification', handleNotification); // Fallback event name
+    socket.on('notification', handleNotification);
     socket.on('notification-error', handleNotificationError);
     socket.on('connection-status', handleConnectionStatus);
 
-    // Debug listener to track ALL socket events
     const debugHandler = (eventName, ...args) => {
       if (eventName.includes('notification') || eventName === 'new-message') {
         console.log(`🔍 DEBUG - Socket event '${eventName}' received:`, args);
         
-        // If it's a different notification event, try to handle it
         if (eventName !== 'new-notification' && args[0] && typeof args[0] === 'object') {
           const data = args[0];
           if (data._id && data.title) {

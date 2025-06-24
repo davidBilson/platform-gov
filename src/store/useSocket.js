@@ -3,211 +3,145 @@ import io from 'socket.io-client';
 import useAuthStore from './useAuth';
 
 const useSocket = create((set, get) => ({
+  // Core state
   socket: null,
   isConnected: false,
-  connectionError: null,
   connecting: false,
+  connectionError: null,
+  
+  // Connection management
   reconnectAttempts: 0,
   maxReconnectAttempts: 5,
+  
+  // Room management
   activeRooms: [],
-  connectionId: null, // Track connection instances
-
-  rejoinRooms: () => {
-    const { socket, isConnected, activeRooms } = get();
-    const { userId } = useAuthStore.getState();
-
-    if (socket && isConnected && userId) {
-      // First join user's personal room
-      socket.emit('join-room', userId);
-      
-      // Then rejoin other active rooms
-      if (activeRooms.length > 0) {
-        socket.emit('rejoin-rooms', activeRooms);
-      }
-      
-      console.log(`Rejoined ${activeRooms.length + 1} rooms for user ${userId}`);
-    }
-  },
-
+  
+  // Connect to socket
   connect: () => {
     const state = get();
     
     // Prevent duplicate connections
     if (state.socket || state.connecting) {
-      console.log('Socket already exists or connecting, skipping...');
+      console.log('🔌 Socket already exists or connecting');
       return state.socket;
     }
 
     const { userId } = useAuthStore.getState();
     if (!userId) {
-      console.log('No userId available, cannot connect socket');
+      console.log('❌ No userId available for socket connection');
       return null;
     }
 
-    console.log('Initializing socket connection for user:', userId);
+    console.log('🔌 Connecting socket for user:', userId);
     set({ connecting: true, connectionError: null });
 
     try {
-      // Create unique connection ID
-      const connectionId = `${userId}_${Date.now()}`;
-      
       const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
-        auth: { 
-          userId,
-          connectionId 
-        },
+        auth: { userId },
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
         timeout: 20000,
-        forceNew: true,
-        // Add query params for better identification
-        query: {
-          userId,
-          timestamp: Date.now()
-        }
+        forceNew: true
       });
 
-      // Set socket immediately to prevent race conditions
+      // Set socket immediately
       set({ 
         socket, 
-        connecting: false, 
-        connectionId,
+        connecting: false,
         reconnectAttempts: 0 
       });
 
-      // Connection success handler
+      // Connection handlers
       socket.on('connect', () => {
-        console.log('✅ Socket connected successfully:', socket.id);
-        set({ 
-          isConnected: true, 
+        console.log('✅ Socket connected:', socket.id);
+        set({
+          isConnected: true,
           connectionError: null,
-          reconnectAttempts: 0 
+          reconnectAttempts: 0
         });
-        
-        // Auto-join user's personal notification room
+
+        // Join user's notification room
         socket.emit('join-room', userId);
-        console.log(`🔔 Joined notification room for user: ${userId}`);
-        
-        // Rejoin previously active rooms
-        get().rejoinRooms();
+        console.log(`🏠 Joined notification room: ${userId}`);
       });
 
-      // Disconnection handler
       socket.on('disconnect', (reason) => {
         console.log('❌ Socket disconnected:', reason);
         set({ isConnected: false });
-        
-        // Handle different disconnect reasons
-        if (reason === 'io server disconnect') {
-          console.log('Server initiated disconnect - will not auto-reconnect');
-        } else if (reason === 'io client disconnect') {
-          console.log('Client initiated disconnect - manual disconnect');
-        } else {
-          console.log('Unexpected disconnect - auto-reconnect will handle');
-        }
       });
 
-      // Connection error handler
       socket.on('connect_error', (error) => {
-        console.error('🚫 Socket connection error:', error.message);
+        console.error('🚫 Connection error:', error.message);
         const attempts = get().reconnectAttempts + 1;
-        set({ 
+        
+        set({
           connectionError: error.message,
           connecting: false,
           isConnected: false,
           reconnectAttempts: attempts
         });
 
-        // If max attempts reached, cleanup
         if (attempts >= get().maxReconnectAttempts) {
-          console.error('Max connection attempts reached, cleaning up...');
+          console.error('❌ Max connection attempts reached');
           get().disconnect();
         }
       });
 
-      // Reconnection success handler
       socket.on('reconnect', (attemptNumber) => {
         console.log('🔄 Socket reconnected after', attemptNumber, 'attempts');
-        set({ 
-          isConnected: true, 
+        set({
+          isConnected: true,
           connectionError: null,
           reconnectAttempts: 0
         });
-        
-        // Critical: Immediately rejoin user's notification room after reconnection
+
+        // Rejoin notification room
         socket.emit('join-room', userId);
-        console.log(`🔔 Rejoined notification room after reconnection: ${userId}`);
-        
-        // Rejoin other active rooms
-        get().rejoinRooms();
+        console.log(`🏠 Rejoined notification room: ${userId}`);
       });
 
-      // Reconnection attempt handler
-      socket.on('reconnect_attempt', (attemptNumber) => {
-        console.log(`🔄 Reconnection attempt ${attemptNumber}...`);
-        set({ reconnectAttempts: attemptNumber });
-      });
-
-      // Reconnection error handler
-      socket.on('reconnect_error', (error) => {
-        console.error('🚫 Socket reconnection error:', error.message);
-        set({ connectionError: error.message });
-      });
-
-      // Reconnection failed handler
-      socket.on('reconnect_failed', () => {
-        console.error('💥 Socket reconnection failed after maximum attempts');
-        set({ 
-          connectionError: 'Connection failed after maximum attempts',
-          isConnected: false,
-          reconnectAttempts: get().maxReconnectAttempts
-        });
-      });
-
-      // Add notification-specific event debugging
+      // Debug: Log raw notification events
       socket.on('new-notification', (data) => {
-        console.log('🔔 Raw notification received:', data);
+        console.log('🔔 [SOCKET] Raw notification received:', data);
       });
 
       return socket;
 
     } catch (error) {
-      console.error('💥 Error creating socket:', error);
-      set({ 
+      console.error('❌ Error creating socket:', error);
+      set({
         connecting: false,
-        connectionError: error.message 
+        connectionError: error.message
       });
       return null;
     }
   },
 
+  // Disconnect socket
   disconnect: () => {
-    const { socket, connectionId } = get();
+    const { socket } = get();
     if (socket) {
-      console.log(`🔌 Disconnecting socket (${connectionId})...`);
-      
-      // Remove all listeners to prevent memory leaks
+      console.log('🔌 Disconnecting socket...');
       socket.removeAllListeners();
       socket.disconnect();
       
-      set({ 
-        socket: null, 
-        isConnected: false, 
+      set({
+        socket: null,
+        isConnected: false,
         connecting: false,
         connectionError: null,
-        connectionId: null,
         reconnectAttempts: 0,
-        activeRooms: [] // Clear active rooms on disconnect
+        activeRooms: []
       });
       
-      console.log('🔌 Socket disconnected and cleaned up');
+      console.log('✅ Socket disconnected and cleaned up');
     }
   },
 
-  // Enhanced room management
+  // Join room
   joinRoom: (room) => {
     const { socket, isConnected } = get();
     
@@ -215,20 +149,14 @@ const useSocket = create((set, get) => ({
       socket.emit('join-room', room);
       console.log(`🏠 Joined room: ${room}`);
       
-      // Add to active rooms if not already present
-      set((state) => ({
-        activeRooms: [...new Set([...state.activeRooms, room])]
-      }));
-    } else {
-      console.warn('⚠️ Cannot join room - socket not connected');
-      
-      // Still track the room for when connection is restored
-      set((state) => ({
+      // Add to active rooms
+      set(state => ({
         activeRooms: [...new Set([...state.activeRooms, room])]
       }));
     }
   },
 
+  // Leave room
   leaveRoom: (room) => {
     const { socket, isConnected } = get();
     
@@ -238,94 +166,56 @@ const useSocket = create((set, get) => ({
     }
     
     // Remove from active rooms
-    set(state => ({ 
-      activeRooms: state.activeRooms.filter(r => r !== room) 
+    set(state => ({
+      activeRooms: state.activeRooms.filter(r => r !== room)
     }));
   },
 
-  // Enhanced subscription with automatic cleanup
+  // Subscribe to event
   subscribe: (event, callback) => {
     const { socket } = get();
     
     if (socket) {
-      console.log(`📡 Subscribing to event: ${event}`);
+      console.log(`📡 Subscribing to: ${event}`);
       socket.on(event, callback);
       
-      // Return cleanup function
       return () => {
-        console.log(`📡 Unsubscribing from event: ${event}`);
         socket.off(event, callback);
+        console.log(`📡 Unsubscribed from: ${event}`);
       };
     }
     
-    console.warn(`⚠️ Cannot subscribe to ${event} - socket not available`);
-    return () => {}; // Return empty cleanup if no socket
+    return () => {};
   },
 
-  unsubscribe: (event, callback) => {
-    const { socket } = get();
-    
-    if (socket) {
-      if (callback) {
-        socket.off(event, callback);
-        console.log(`📡 Unsubscribed specific callback from: ${event}`);
-      } else {
-        socket.removeAllListeners(event);
-        console.log(`📡 Removed all listeners for: ${event}`);
-      }
-    }
-  },
-
-  // Enhanced emit with retry logic
-  emit: (event, data, retries = 3) => {
+  // Emit event
+  emit: (event, data) => {
     const { socket, isConnected } = get();
     
     if (socket && isConnected) {
       socket.emit(event, data);
       console.log(`📤 Emitted ${event}:`, data);
       return true;
-    } else {
-      console.warn(`⚠️ Cannot emit ${event} - socket not connected`);
-      
-      // Retry logic for critical events
-      if (retries > 0) {
-        console.log(`🔄 Retrying emit in 1s... (${retries} attempts left)`);
-        setTimeout(() => {
-          get().emit(event, data, retries - 1);
-        }, 1000);
-      }
-      
-      return false;
     }
+    
+    console.warn(`⚠️ Cannot emit ${event} - socket not connected`);
+    return false;
   },
 
-  // Connection health check
+  // Check if socket is ready
   isReady: () => {
     const { socket, isConnected } = get();
     return !!(socket && isConnected && socket.connected);
   },
 
-  // Force reconnection
-  forceReconnect: () => {
-    const { socket } = get();
-    if (socket) {
-      console.log('🔄 Forcing socket reconnection...');
-      socket.disconnect().connect();
-    } else {
-      console.log('🔄 No socket to reconnect, creating new connection...');
-      get().connect();
-    }
-  },
-
-  // Get connection status info
+  // Get connection info
   getConnectionInfo: () => {
-    const { socket, isConnected, connectionError, reconnectAttempts, connectionId } = get();
+    const { socket, isConnected, connectionError, reconnectAttempts } = get();
     return {
       socketId: socket?.id || null,
       isConnected,
       connectionError,
       reconnectAttempts,
-      connectionId,
       isSocketActive: socket?.connected || false
     };
   }
