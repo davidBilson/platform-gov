@@ -1,5 +1,5 @@
-import { SavePaymentMethodRequest } from '@/types/payment';
 import axios from 'axios';
+import { SavePaymentMethodRequest } from '@/types/payment';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 const adminId = process.env.NEXT_PUBLIC_AUTHORIZED;
@@ -224,3 +224,69 @@ export const approvePayout = async (fundId: string) => {
     console.log(error);
   }
 }
+
+export const getWithdrawableFunds = async (userId: string) => {
+  try {
+    
+    const endPoint = (process.env.NEXT_PUBLIC_GET_WITHDRAWABLE_FUNDS ?? "").replace(':id', userId) || "";
+    const response = await axios.get(`${BASE_URL}${endPoint}`)
+    return response.data;
+  } catch (error) {
+    console.log(error)
+  }
+} 
+ export const withdrawFunds = async (userId: string, fundId: string) => {
+  try {
+    
+    const endPoint = (process.env.NEXT_PUBLIC_WITHDRAW_FUNDS ?? "").replace(':id', userId) || "";
+    const response = await axios.post(`${BASE_URL}${endPoint}?fundId=${fundId}`)
+    return response.data;
+  } catch (error) {
+    console.log(error)
+  }
+ }
+
+ export const fetchContractorFunds = async (userId: string) => {
+  try {
+    const endPoint = (process.env.NEXT_PUBLIC_GET_CONTRACTOR_FUNDS ?? "").replace(':id', userId) || "";
+    const response = await axios.get(
+      `${BASE_URL}${endPoint}`
+    );
+
+    if (!response.data) {
+      throw new Error('No data received from server');
+    }
+
+    if (response.data.success) {
+      return response.data.funds;
+    } else {
+      throw new Error(response.data.message || 'Failed to fetch funds');
+    }
+  } catch (error) {
+    // Handle different types of errors
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error('Contractor not found');
+      } else if (error.response?.status === 500) {
+        throw new Error('Server error occurred');
+      } else if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+    }
+    
+    throw error instanceof Error ? error : new Error('An unexpected error occurred');
+  }
+};
+
+export const fetchClientFunds = async (userId: string) => {
+  const endPoint = (process.env.NEXT_PUBLIC_GET_CLIENT_FUNDS ?? "").replace(':id', userId) || "";
+  const response = await axios.get(
+    `${BASE_URL}${endPoint}`
+  );
+  
+  if (!response.data.success) {
+    throw new Error('Failed to fetch funds data');
+  }
+  
+  return response.data;
+};

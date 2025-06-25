@@ -19,19 +19,16 @@ import NotificationToast from "@/components/notifications/notificationToast";
 
 export default function App({ Component, pageProps }: AppProps) {
   
-  // Socket and auth state
   const { socket, isConnected, connect, disconnect, isReady } = useSocket();
-  const { userId, isAuthenticated } = useAuthStore();
+  const { userId } = useAuthStore();
   const { init, fetchNotifications, reset, getDebugInfo } = useNotification();
 
   const notifications = useNotification(state => state.notifications);
   const lastNotificationId = useNotification(state => state.lastNotificationId);
   const setLastNotificationId = useNotification(state => state.setLastNotificationId);
 
-  // Local state
   const [toastNotification, setToastNotification] = useState(null);
   
-  // Refs to prevent duplicate operations
   const socketInitialized = useRef(false);
   const notificationInitialized = useRef(false);
   const cleanupRef = useRef<(() => void) | null>(null);
@@ -58,7 +55,7 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [reset]);
 
  useEffect(() => {
-    const shouldConnect = userId && isAuthenticated && !socketInitialized.current;
+    const shouldConnect = userId && !socketInitialized.current;
     
     if (shouldConnect) {
       console.log('🔌 Initiating socket connection for user:', userId);
@@ -73,7 +70,6 @@ export default function App({ Component, pageProps }: AppProps) {
         console.error('❌ Failed to initiate socket connection');
         socketInitialized.current = false;
         
-        // Retry connection with exponential backoff
         if (connectionAttempts.current < maxConnectionAttempts) {
           const retryDelay = Math.pow(2, connectionAttempts.current) * 1000;
           console.log(`🔄 Retrying connection in ${retryDelay}ms (attempt ${connectionAttempts.current}/${maxConnectionAttempts})`);
@@ -83,7 +79,7 @@ export default function App({ Component, pageProps }: AppProps) {
           }, retryDelay);
         }
       }
-    } else if (!userId || !isAuthenticated) {
+    } else if (!userId) {
       if (socketInitialized.current) {
         console.log('🔌 User logged out or not authenticated, disconnecting socket');
         disconnect();
@@ -99,7 +95,7 @@ export default function App({ Component, pageProps }: AppProps) {
         performCleanup();
       }
     };
-  }, [userId, isAuthenticated, connect, disconnect, performCleanup, socket]);
+  }, [userId, connect, disconnect, performCleanup, socket]);
 
 
   useEffect(() => {

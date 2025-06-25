@@ -1,276 +1,166 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import useAuthStore from '@/store/useAuth';
+import { fetchClientFunds } from '@/api/payment-api';
 
-// Define interfaces for different payment types
-interface BasePayment {
-  id: number;
-  projectTitle: string;
-  freelancer: string;
+interface Fund {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  contractorName: string;
   amount: number;
-  milestone: string;
-  status: string;
+  createdAt: string;
+  releasedAt?: string;
 }
 
-interface AvailablePayment extends BasePayment {
-  escrowDate: string;
-  daysInEscrow: number;
-  status: 'available';
-}
-
-interface ProgressPayment extends BasePayment {
-  progress: number;
-  estimatedCompletion: string;
-  status: 'in-progress';
-}
-
-interface PendingReviewPayment extends BasePayment {
-  submittedDate: string;
-  reviewDeadline: string;
-  daysToReview: number;
-  status: 'pending-review';
-}
-
-interface ReleasedPayment extends BasePayment {
-  releasedDate: string;
-  releaseMethod: string;
-  status: 'released';
-}
-
-interface DisputePayment extends BasePayment {
-  disputeDate: string;
-  disputeReason: string;
-  daysSinceDispute: number;
-  status: 'in-dispute';
-}
-
-// Union type for all payment types
-type Payment = AvailablePayment | ProgressPayment | PendingReviewPayment | ReleasedPayment | DisputePayment;
-
-// Interface for mock data structure
-interface MockData {
-  available: AvailablePayment[];
-  inProgress: ProgressPayment[];
-  pendingReview: PendingReviewPayment[];
-  released: ReleasedPayment[];
-  inDispute: DisputePayment[];
+interface ClientFundsResponse {
+  success: boolean;
+  funds: {
+    in_escrow: Fund[];
+    released: Fund[];
+  };
 }
 
 interface Tab {
-  id: keyof MockData;
+  id: 'in_escrow' | 'released';
   label: string;
   count: number;
-  actionRequired?: boolean;
 }
 
-type ActiveTab = keyof MockData;
+type ActiveTab = 'in_escrow' | 'released';
 
-// Individual Card Components
-const AvailableCard = ({ payment }: { payment: AvailablePayment }) => (
-  <div className="bg-white rounded-xl border border-lightblue/20 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+const EscrowCard = ({ fund }: { fund: Fund }) => (
+  <div className="bg-white rounded-xl border border-lightblue/20 p-6 hover:shadow-md transition-shadow duration-200">
     <div className="flex items-start justify-between mb-4">
       <div className="flex-1">
-        <h3 className="text-lg font-semibold text-darkgray mb-1">{payment.projectTitle}</h3>
-        <p className="text-sm text-mediumgray mb-2">Freelancer: {payment.freelancer}</p>
-        <p className="text-sm text-mediumgray">Milestone: {payment.milestone}</p>
+        <h3 className="text-lg font-semibold text-darkgray mb-1">{fund.jobTitle}</h3>
+        <p className="text-sm text-mediumgray mb-2">Contractor: {fund.contractorName}</p>
+        <p className="text-sm text-mediumgray">Created: {new Date(fund.createdAt).toLocaleDateString()}</p>
       </div>
       <div className="text-right">
-        <div className="text-2xl font-bold text-boldblue">${payment.amount.toLocaleString()}</div>
-        <span className="inline-block px-3 py-1 bg-skyblue/20 text-boldblue rounded-full text-xs font-medium mt-2">
-          Available
-        </span>
-      </div>
-    </div>
-    
-    <div className="flex items-center justify-between pt-4 border-t border-lightgray/50">
-      <div className="text-sm text-mediumgray">
-        <span className="font-medium">In escrow:</span> {payment.daysInEscrow} days
-      </div>
-      <div className="flex space-x-3">
-        <button className="px-4 py-2 bg-lightgray/20 text-mediumgray rounded-lg hover:bg-lightgray/30 transition-colors text-sm">
-          Reassign
-        </button>
-        <button className="px-4 py-2 bg-boldblue text-white rounded-lg hover:bg-deepskyblue transition-colors text-sm">
-          Release Early
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-const ProgressCard = ({ payment }: { payment: ProgressPayment }) => (
-  <div className="bg-white rounded-xl border border-lightblue/20 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-    <div className="flex items-start justify-between mb-4">
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold text-darkgray mb-1">{payment.projectTitle}</h3>
-        <p className="text-sm text-mediumgray mb-2">Freelancer: {payment.freelancer}</p>
-        <p className="text-sm text-mediumgray">Milestone: {payment.milestone}</p>
-      </div>
-      <div className="text-right">
-        <div className="text-2xl font-bold text-boldblue">${payment.amount.toLocaleString()}</div>
+        <div className="text-2xl font-bold text-boldblue">${fund.amount.toLocaleString()}</div>
         <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium mt-2">
-          In Progress
+          In Escrow
         </span>
       </div>
     </div>
     
-    <div className="mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-darkgray">Progress</span>
-        <span className="text-sm font-medium text-boldblue">{payment.progress}%</span>
-      </div>
-      <div className="w-full bg-lightgray rounded-full h-2">
-        <div 
-          className="bg-gradient-to-r from-boldblue to-deepskyblue h-2 rounded-full transition-all duration-300"
-          style={{ width: `${payment.progress}%` }}
-        />
-      </div>
-    </div>
-    
-    <div className="flex items-center justify-between pt-4 border-t border-lightgray/50">
-      <div className="text-sm text-mediumgray">
-        <span className="font-medium">Est. completion:</span> {new Date(payment.estimatedCompletion).toLocaleDateString()}
-      </div>
-      <button className="px-4 py-2 bg-lightgray/20 text-mediumgray rounded-lg hover:bg-lightgray/30 transition-colors text-sm">
-        View Progress
-      </button>
-    </div>
-  </div>
-);
-
-const PendingReviewCard = ({ payment }: { payment: PendingReviewPayment }) => (
-  <div className="bg-white rounded-xl border border-yellow-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-    <div className="flex items-start justify-between mb-4">
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold text-darkgray mb-1">{payment.projectTitle}</h3>
-        <p className="text-sm text-mediumgray mb-2">Freelancer: {payment.freelancer}</p>
-        <p className="text-sm text-mediumgray">Milestone: {payment.milestone}</p>
-      </div>
-      <div className="text-right">
-        <div className="text-2xl font-bold text-boldblue">${payment.amount.toLocaleString()}</div>
-        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium mt-2">
-          Review Required
-        </span>
-      </div>
-    </div>
-    
-    <div className="bg-yellow-50 rounded-lg p-4 mb-4">
+    <div className="bg-orange-50 rounded-lg p-4 mb-4">
       <div className="flex items-center mb-2">
-        <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0l-8.138 8.5c-.77.833.192 2.5 1.732 2.5z" />
+        <svg className="w-5 h-5 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span className="text-sm font-medium text-yellow-800">Action Required</span>
+        <span className="text-sm font-medium text-orange-800">Awaiting Work Completion</span>
       </div>
-      <p className="text-sm text-yellow-700">Work submitted on {new Date(payment.submittedDate).toLocaleDateString()}</p>
-      <p className="text-sm text-yellow-700">{payment.daysToReview} days remaining to review</p>
+      <p className="text-sm text-orange-700">Funds are secured and will be released upon project completion and approval.</p>
     </div>
     
-    <div className="flex space-x-3">
-      <button className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-        Approve & Release
-      </button>
-      <button className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium">
-        Request Changes
-      </button>
-    </div>
   </div>
 );
 
-const ReleasedCard = ({ payment }: { payment: ReleasedPayment }) => (
-  <div className="bg-white rounded-xl border border-lightblue/20 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+const ReleasedCard = ({ fund }: { fund: Fund }) => (
+  <div className="bg-white rounded-xl border border-lightblue/20 p-6 hover:shadow-md transition-shadow duration-200">
     <div className="flex items-start justify-between mb-4">
       <div className="flex-1">
-        <h3 className="text-lg font-semibold text-darkgray mb-1">{payment.projectTitle}</h3>
-        <p className="text-sm text-mediumgray mb-2">Freelancer: {payment.freelancer}</p>
-        <p className="text-sm text-mediumgray">Milestone: {payment.milestone}</p>
+        <h3 className="text-lg font-semibold text-darkgray mb-1">{fund.jobTitle}</h3>
+        <p className="text-sm text-mediumgray mb-2">Contractor: {fund.contractorName}</p>
+        <p className="text-sm text-mediumgray">Originally Created: {new Date(fund.createdAt).toLocaleDateString()}</p>
       </div>
       <div className="text-right">
-        <div className="text-2xl font-bold text-green-600">${payment.amount.toLocaleString()}</div>
+        <div className="text-2xl font-bold text-green-600">${fund.amount.toLocaleString()}</div>
         <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium mt-2">
           Released
         </span>
       </div>
     </div>
     
-    <div className="flex items-center justify-between pt-4 border-t border-lightgray/50">
-      <div className="text-sm text-mediumgray">
-        <span className="font-medium">Released:</span> {new Date(payment.releasedDate).toLocaleDateString()}
-        <span className="ml-2">via {payment.releaseMethod}</span>
-      </div>
-      <button className="px-4 py-2 bg-lightgray/20 text-mediumgray rounded-lg hover:bg-lightgray/30 transition-colors text-sm">
-        View Receipt
-      </button>
-    </div>
-  </div>
-);
-
-const DisputeCard = ({ payment }: { payment: DisputePayment }) => (
-  <div className="bg-white rounded-xl border border-red-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
-    <div className="flex items-start justify-between mb-4">
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold text-darkgray mb-1">{payment.projectTitle}</h3>
-        <p className="text-sm text-mediumgray mb-2">Freelancer: {payment.freelancer}</p>
-        <p className="text-sm text-mediumgray">Milestone: {payment.milestone}</p>
-      </div>
-      <div className="text-right">
-        <div className="text-2xl font-bold text-red-600">${payment.amount.toLocaleString()}</div>
-        <span className="inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium mt-2">
-          In Dispute
-        </span>
-      </div>
-    </div>
-    
-    <div className="bg-red-50 rounded-lg p-4 mb-4">
+    <div className="bg-green-50 rounded-lg p-4 mb-4">
       <div className="flex items-center mb-2">
-        <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0l-8.138 8.5c-.77.833.192 2.5 1.732 2.5z" />
+        <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span className="text-sm font-medium text-red-800">Under Review</span>
+        <span className="text-sm font-medium text-green-800">Payment Completed</span>
       </div>
-      <p className="text-sm text-red-700">Dispute filed: {new Date(payment.disputeDate).toLocaleDateString()}</p>
-      <p className="text-sm text-red-700">Reason: {payment.disputeReason}</p>
-      <p className="text-sm text-red-700">{payment.daysSinceDispute} days since dispute</p>
-    </div>
-    
-    <div className="flex space-x-3">
-      <button className="flex-1 px-4 py-2 bg-boldblue text-white rounded-lg hover:bg-deepskyblue transition-colors text-sm font-medium">
-        View Details
-      </button>
-      <button className="flex-1 px-4 py-2 bg-lightgray/20 text-mediumgray rounded-lg hover:bg-lightgray/30 transition-colors text-sm">
-        Contact Support
-      </button>
     </div>
   </div>
 );
 
 const ClientOverview = () => {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('pendingReview');
+  const { userId } = useAuthStore()
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<ActiveTab>('in_escrow');
+  const [funds, setFunds] = useState<ClientFundsResponse['funds']>({
+    in_escrow: [],
+    released: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const mockData: MockData = {
-    available: [],
-    inProgress: [],
-    pendingReview: [],
-    released: [],
-    inDispute: []
-  };
+  useEffect(() => {
+    const loadClientFunds = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetchClientFunds(userId);
+        setFunds(response.funds);
+      } catch (err) {
+        console.error('Error fetching client funds:', err);
+        setError('Failed to load funds data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      loadClientFunds();
+    }
+  }, [userId]);
 
   const tabs: Tab[] = [
-    { id: 'pendingReview', label: 'Pending Review', count: mockData.pendingReview.length, actionRequired: true },
-    { id: 'available', label: 'Available', count: mockData.available.length },
-    { id: 'inProgress', label: 'In Progress', count: mockData.inProgress.length },
-    { id: 'released', label: 'Released', count: mockData.released.length },
-    { id: 'inDispute', label: 'In Dispute', count: mockData.inDispute.length }
+    { id: 'in_escrow', label: 'In Escrow', count: funds.in_escrow.length },
+    { id: 'released', label: 'Released', count: funds.released.length }
   ];
 
   const getTotalEscrow = (): number => {
-    return [...mockData.available, ...mockData.inProgress, ...mockData.pendingReview, ...mockData.inDispute]
-      .reduce((total: number, payment: Payment) => total + payment.amount, 0);
+    return funds.in_escrow.reduce((total: number, fund: Fund) => total + fund.amount, 0);
   };
 
   const getTotalReleased = (): number => {
-    return mockData.released.reduce((total: number, payment: ReleasedPayment) => total + payment.amount, 0);
+    return funds.released.reduce((total: number, fund: Fund) => total + fund.amount, 0);
   };
 
   const renderTabContent = () => {
-    const data = mockData[activeTab];
+    if (loading) {
+      return (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-boldblue mb-4"></div>
+          <p className="text-mediumgray">Loading funds data...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0l-8.138 8.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-red-600 mb-2">Error Loading Data</h3>
+          <p className="text-mediumgray mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-boldblue text-white rounded-lg hover:bg-deepskyblue transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    const data = funds[activeTab];
     
     if (!data || data.length === 0) {
       return (
@@ -280,28 +170,24 @@ const ClientOverview = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-darkgray mb-2">No payments found</h3>
-          <p className="text-mediumgray">There are no payments in this category at the moment.</p>
+          <h3 className="text-lg font-semibold text-darkgray mb-2">No {activeTab === 'in_escrow' ? 'escrow' : 'released'} funds</h3>
+          <p className="text-mediumgray">
+            {activeTab === 'in_escrow' 
+              ? 'No funds are currently in escrow.' 
+              : 'No funds have been released yet.'
+            }
+          </p>
         </div>
       );
     }
 
     return (
       <div className="space-y-6">
-        {data.map((payment: Payment) => {
-          switch (activeTab) {
-            case 'available':
-              return <AvailableCard key={payment.id} payment={payment as AvailablePayment} />;
-            case 'inProgress':
-              return <ProgressCard key={payment.id} payment={payment as ProgressPayment} />;
-            case 'pendingReview':
-              return <PendingReviewCard key={payment.id} payment={payment as PendingReviewPayment} />;
-            case 'released':
-              return <ReleasedCard key={payment.id} payment={payment as ReleasedPayment} />;
-            case 'inDispute':
-              return <DisputeCard key={payment.id} payment={payment as DisputePayment} />;
-            default:
-              return null;
+        {data.map((fund: Fund) => {
+          if (activeTab === 'in_escrow') {
+            return <EscrowCard key={fund.id} fund={fund} />;
+          } else {
+            return <ReleasedCard key={fund.id} fund={fund} />;
           }
         })}
       </div>
@@ -318,17 +204,23 @@ const ClientOverview = () => {
         
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-boldblue mb-3">Overview</h1>
-          <p className="text-mediumgray">Manage your project funds and freelancer payments</p>
+          <h1 className="text-3xl font-bold text-boldblue mb-3">Funds Overview</h1>
+          <p className="text-mediumgray">Manage your project funds and contractor payments</p>
         </div>
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-2xl border border-lightblue/20 p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-lightblue/20 p-6">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold text-darkgray mb-2">Total in Escrow</h3>
-                <div className="text-3xl font-bold text-boldblue">${getTotalEscrow().toLocaleString()}</div>
+                <div className="text-3xl font-bold text-boldblue">
+                  {loading ? (
+                    <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
+                  ) : (
+                    `$${getTotalEscrow().toLocaleString()}`
+                  )}
+                </div>
                 <p className="text-mediumgray text-sm mt-1">Secured funds for active projects</p>
               </div>
               <div className="w-16 h-16 bg-boldblue/10 rounded-full flex items-center justify-center">
@@ -339,12 +231,18 @@ const ClientOverview = () => {
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl border border-lightblue/20 p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-lightblue/20 p-6">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold text-darkgray mb-2">Total Released</h3>
-                <div className="text-3xl font-bold text-green-600">${getTotalReleased().toLocaleString()}</div>
-                <p className="text-mediumgray text-sm mt-1">Paid to freelancers</p>
+                <div className="text-3xl font-bold text-green-600">
+                  {loading ? (
+                    <div className="animate-pulse bg-gray-200 h-8 w-32 rounded"></div>
+                  ) : (
+                    `$${getTotalReleased().toLocaleString()}`
+                  )}
+                </div>
+                <p className="text-mediumgray text-sm mt-1">Paid to contractors</p>
               </div>
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,7 +253,7 @@ const ClientOverview = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-lightblue/20 mb-8">
+        <div className="bg-white rounded-2xl border border-lightblue/20 mb-8">
           <div className="flex border-b border-lightgray/50 overflow-x-auto">
             {tabs.map((tab: Tab) => (
               <button
@@ -374,11 +272,8 @@ const ClientOverview = () => {
                       ? 'bg-boldblue text-white'
                       : 'bg-lightgray text-mediumgray'
                   }`}>
-                    {tab.count}
+                    {loading ? '...' : tab.count}
                   </span>
-                  {tab.actionRequired && tab.count > 0 && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                  )}
                 </div>
               </button>
             ))}
@@ -390,20 +285,11 @@ const ClientOverview = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl border border-lightblue/20 p-6 mb-8">
+        <div className="bg-white rounded-2xl mb-8">
           <h3 className="text-lg font-semibold text-darkgray mb-4">Quick Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="p-4 border border-lightblue/20 rounded-xl hover:bg-skyblue/5 transition-colors text-left">
-              <div className="flex items-center mb-2">
-                <svg className="w-6 h-6 text-boldblue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                <span className="font-medium text-darkgray">Add Funds</span>
-              </div>
-              <p className="text-sm text-mediumgray">Deposit money to escrow for new projects</p>
-            </button>
             
-            <button className="p-4 border border-lightblue/20 rounded-xl hover:bg-skyblue/5 transition-colors text-left">
+            <button onClick={() => router.push('/payment/transaction-history')} className="cursor-pointer p-4 border border-lightblue/20 rounded-xl hover:bg-skyblue/5 transition-colors text-left">
               <div className="flex items-center mb-2">
                 <svg className="w-6 h-6 text-boldblue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -413,7 +299,7 @@ const ClientOverview = () => {
               <p className="text-sm text-mediumgray">View all transaction records</p>
             </button>
             
-            <button className="p-4 border border-lightblue/20 rounded-xl hover:bg-skyblue/5 transition-colors text-left">
+            <button onClick={() => router.push('/payment/billing-method')} className="cursor-pointer p-4 border border-lightblue/20 rounded-xl hover:bg-skyblue/5 transition-colors text-left">
               <div className="flex items-center mb-2">
                 <svg className="w-6 h-6 text-boldblue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />

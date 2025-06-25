@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Jobs } from '@/types/jobs';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUserRatings } from '@/api/rating-api';
+import { IoIosCheckmarkCircle } from 'react-icons/io';
 
 interface JobPostProps {
   job: Jobs;
@@ -153,6 +154,14 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
       {/* Description section */}
       <div className="pb-7.5 border-b border-b-gray-300">
         <p className="text-black whitespace-pre-line">{String(job.description)}</p>
+        <button
+          disabled
+          className={`mt-6 flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full ${job.isFunded ? 'text-deepskyblue bg-faintskyblue' : 'text-mediumgray bg-white'
+            }`}
+        > 
+          <span className="w-fit h-fit">{job.isFunded ? 'Payment Verified' : 'Payment Unverified'}</span>
+          <span className="w-fit h-fit pb-[2px]">{job.isFunded && <IoIosCheckmarkCircle />}</span>
+        </button>
       </div>
       
       {/* Skills and Certifications section */}

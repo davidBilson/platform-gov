@@ -141,8 +141,11 @@ export const endContract = async (contractId: string, userId: string) => {
   try {
     const endpoint = process.env.NEXT_PUBLIC_END_CONTRACT?.replace(':contractId', contractId);
     const response = await axios.put(`${baseURL}${endpoint}`, { userId });
-    await releaseFunds(contractId, userId);
     toast.success('Contract ended successfully');
+    const res = await releaseFunds(contractId, userId);
+    if (res.success) {
+      toast.success(res.message ?? "Funds released to contractor. Awaiting Stripe processing.")
+    }
     return response.data;
 
   } catch (error) {

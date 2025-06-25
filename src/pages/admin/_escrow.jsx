@@ -79,8 +79,8 @@ const EscrowDashboard = () => {
       <div className="">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl text-boldblue font-semibold mb-2">Payment Approvals</h1>
-          <p className="text-gray-600">Review and approve pending escrow payments</p>
+          <h1 className="text-2xl text-boldblue font-semibold mb-2">Payment</h1>
+          <p className="text-gray-600">Pending escrow payments</p>
         </div>
 
         {/* Stats */}

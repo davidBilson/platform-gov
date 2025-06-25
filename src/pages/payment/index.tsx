@@ -14,7 +14,6 @@ const PaymentIndex = () => {
   if (userId && role === 'client') {
     return <ClientOverview />
   }
-  
 }
 
 export default PaymentIndex
