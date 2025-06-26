@@ -28,7 +28,6 @@ const JobFeed = () => {
       const response = await axios.get<JobsResponse>(`${baseUrl}${endpoint}`);
       
       if (response.data.success) {
-        console.log('Jobs fetched successfully:', response.data.data);
         setJobs(response.data.data);
         setFilteredJobs(response.data.data);
         setPagination(response.data.pagination);

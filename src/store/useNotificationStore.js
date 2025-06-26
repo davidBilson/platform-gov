@@ -25,11 +25,8 @@ export const useNotification = create((set, get) => ({
     const initId = `init_${Date.now()}`;
     
     if (state.isInitialized && state.initializationId) {
-      console.log('🔔 Notifications already initialized, skipping...');
       return state.listenerCleanup || (() => {});
     }
-
-    console.log(`🔔 Initializing notification system (${initId})...`);
 
     if (state.listenerCleanup) {
       state.listenerCleanup();
@@ -109,8 +106,6 @@ export const useNotification = create((set, get) => ({
       initializationId: initId
     });
     
-    console.log(`✅ Notification system initialized (${initId})`);
-    
     // Fetch initial notifications
     get().fetchNotifications();
 
@@ -126,7 +121,6 @@ export const useNotification = create((set, get) => ({
         return;
       }
       
-      console.log(`📥 Fetching notifications for user: ${userId}`);
       
       const res = await axios.get(`${API_URL}/api/notifications/get-notifications/${userId}`, {
         timeout: 10000,
@@ -142,8 +136,6 @@ export const useNotification = create((set, get) => ({
         notifications,
         count: unreadCount
       });
-      
-      console.log(`✅ Fetched ${notifications.length} notifications (${unreadCount} unread)`);
       
       return notifications;
     } catch (error) {
@@ -277,14 +269,14 @@ export const useNotification = create((set, get) => ({
     set(state => {
       const exists = state.notifications.find(n => n._id === notification._id);
       if (exists) {
-        console.log('⚠️ Notification already exists:', notification._id);
+        // console.log('⚠️ Notification already exists:', notification._id);
         return state;
       }
       
       const updated = [notification, ...state.notifications];
       const newCount = updated.filter(n => !n.isRead).length;
       
-      console.log(`📝 Notification added manually. Total: ${updated.length}`);
+      // console.log(`📝 Notification added manually. Total: ${updated.length}`);
       
       return {
         notifications: updated,
@@ -295,7 +287,7 @@ export const useNotification = create((set, get) => ({
   
   // Force refresh notifications
   refresh: async () => {
-    console.log('🔄 Force refreshing notifications...');
+    // console.log('🔄 Force refreshing notifications...');
     return await get().fetchNotifications();
   },
   
@@ -314,7 +306,7 @@ export const useNotification = create((set, get) => ({
   reset: () => {
     const state = get();
     
-    console.log(`🔄 Resetting notification store (${state.initializationId})`);
+    // console.log(`🔄 Resetting notification store (${state.initializationId})`);
     
     // Cleanup listeners
     if (state.listenerCleanup) {
@@ -331,7 +323,7 @@ export const useNotification = create((set, get) => ({
       initializationId: null
     });
     
-    console.log('✅ Notification store reset complete');
+    // console.log('✅ Notification store reset complete');
   },
   
   // Debug function to get current state

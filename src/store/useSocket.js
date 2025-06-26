@@ -22,7 +22,6 @@ const useSocket = create((set, get) => ({
     
     // Prevent duplicate connections
     if (state.socket || state.connecting) {
-      console.log('🔌 Socket already exists or connecting');
       return state.socket;
     }
 
@@ -32,7 +31,6 @@ const useSocket = create((set, get) => ({
       return null;
     }
 
-    console.log('🔌 Connecting socket for user:', userId);
     set({ connecting: true, connectionError: null });
 
     try {
@@ -56,7 +54,7 @@ const useSocket = create((set, get) => ({
 
       // Connection handlers
       socket.on('connect', () => {
-        console.log('✅ Socket connected:', socket.id);
+        console.log('✅ Socket connected');
         set({
           isConnected: true,
           connectionError: null,
@@ -65,7 +63,6 @@ const useSocket = create((set, get) => ({
 
         // Join user's notification room
         socket.emit('join-room', userId);
-        console.log(`🏠 Joined notification room: ${userId}`);
       });
 
       socket.on('disconnect', (reason) => {
@@ -141,7 +138,6 @@ const useSocket = create((set, get) => ({
     }
   },
 
-  // Join room
   joinRoom: (room) => {
     const { socket, isConnected } = get();
     

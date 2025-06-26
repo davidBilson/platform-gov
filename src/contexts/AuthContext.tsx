@@ -83,7 +83,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { connect, disconnect, rejoinRooms } = useSocket.getState();
     
     if (userId && !socketConnected.current) {
-      console.log('Connecting socket for authenticated user:', userId);
       connect();
       socketConnected.current = true;
     } else if (userId && socketConnected.current) {

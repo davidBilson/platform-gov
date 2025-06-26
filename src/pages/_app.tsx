@@ -58,14 +58,13 @@ export default function App({ Component, pageProps }: AppProps) {
     const shouldConnect = userId && !socketInitialized.current;
     
     if (shouldConnect) {
-      console.log('🔌 Initiating socket connection for user:', userId);
       socketInitialized.current = true;
       connectionAttempts.current += 1;
       
       const socketInstance = connect();
       
       if (socketInstance) {
-        console.log('✅ Socket connection initiated');
+        console.log('Socket initiated');
       } else {
         console.error('❌ Failed to initiate socket connection');
         socketInitialized.current = false;
@@ -106,7 +105,6 @@ export default function App({ Component, pageProps }: AppProps) {
       !notificationInitialized.current;
 
     if (shouldInitializeNotifications) {
-      console.log('🔔 Initializing notification system for user:', userId);
       
       try {
         const cleanup = init(socket);
@@ -114,12 +112,7 @@ export default function App({ Component, pageProps }: AppProps) {
         notificationInitialized.current = true;
         
         console.log('✅ Notification system initialized successfully');
-        
-        // Debug information
-        setTimeout(() => {
-          const debugInfo = getDebugInfo();
-          console.log('📊 Notification Debug Info:', debugInfo);
-        }, 1000);
+       
         
       } catch (error) {
         console.error('❌ Error initializing notification system:', error);
@@ -155,19 +148,6 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [userId, fetchNotifications]);
 
   useEffect(() => {
-    console.log('🔍 FULL NOTIFICATION STATE:', {
-      notifications: notifications?.map((n: { _id: string; title: string; isRead: boolean; createdAt: string }) => ({
-        id: n._id,
-        title: n.title,
-        isRead: n.isRead,
-        createdAt: n.createdAt
-      })),
-      count: notifications?.length,
-      lastId: lastNotificationId
-    });
-  }, [notifications, lastNotificationId]);
-
-  useEffect(() => {
     if (notifications.length > 0) {
       const latest = notifications[0];
       if (!latest.isRead) {
@@ -176,17 +156,8 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }, [notifications]);
 
-  useEffect(() => {
-    console.log("Notification store updated", {
-      count: useNotification.getState().count,
-      lastId: useNotification.getState().lastNotificationId,
-      notifications: useNotification.getState().notifications.map((n: { _id: string }) => n._id)
-    });
-  }, []);
-
   // Toast close handler
   const handleToastClose = useCallback(() => {
-    console.log('🍞 Toast notification closed');
     setToastNotification(null);
   }, []);
 
@@ -198,23 +169,20 @@ export default function App({ Component, pageProps }: AppProps) {
         isReady: isReady(),
         isConnected,
         socketId: socket?.id,
-        userId
       };
       
-      console.log('💓 Connection Health Check:', connectionInfo);
+      console.log('💓 Connection Health Check');
 
-      // If connection is unhealthy, attempt to reconnect
-      if (!isReady() && userId) {
+      if (!isReady()) {
         console.log('⚠️ Unhealthy connection detected, attempting to reconnect...');
         socketInitialized.current = false;
         notificationInitialized.current = false;
       }
-    }, 30000); // Check every 30 seconds
+    }, 30000);
 
     return () => clearInterval(healthCheckInterval);
-  }, [socket, isReady, isConnected, userId]);
+  }, [socket, isReady, isConnected]);
 
-  // Initialize AOS only once
   useEffect(() => {
     if (!aosInitialized.current) {
       AOS.init({
@@ -232,6 +200,24 @@ export default function App({ Component, pageProps }: AppProps) {
       <Head>
         <title>GovLink Global</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        
+        {/* Favicon/Logo Meta Tags */}
+        <link rel="icon" href="/favicon.ico" sizes="100" />
+        <link rel="icon" type="image/png" href="/images/govlinklogo-nobg.png" />
+        <link rel="apple-touch-icon" href="/images/govlinklogo-nobg.png" />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content="GovLink Global" />
+        <meta property="og:description" content="Welcome to GovLink Global" />
+        <meta property="og:image" content="/images/govlinklogo-nobg.png" />
+        <meta property="og:url" content="https://platform-gov.onrender.com" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="GovLink Global" />
+        <meta name="twitter:description" content="Welcome to GovLink Global" />
+        <meta name="twitter:image" content="/images/govlinklogo-nobg.png" />
       </Head>
       <ReactQueryProvider>
         <Navbar />
