@@ -30,7 +30,6 @@ const FundProjectPage = () => {
   const [loading, setLoading] = useState(true);
   const [fundingLoading, setFundingLoading] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [isFundable, setIsFundable] = useState(false);
   const [clientFee, setClientFee] = useState(0);
 
   useEffect(() => {
@@ -46,7 +45,6 @@ const FundProjectPage = () => {
         }
         setJob(jobData);
         setIsAuthorized(jobData?.userId?._id === userId);
-        setIsFundable(jobData.status === 'open' && !jobData.isFunded);
 
       } catch (err) {
         toast.error('Failed to fetch job details');
@@ -117,6 +115,7 @@ const FundProjectPage = () => {
         toast.success('Project funded successfully!');
         router.push('/job/manage');
       } else {
+        console.log(response, response.message)
         toast.error(response.message || 'Funding failed');
       }
     } catch (err) {
@@ -141,26 +140,6 @@ const FundProjectPage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Unauthorized</h2>
           <p className="text-mediumgray mb-4">You are not authorized to fund this project</p>
-          <button 
-            onClick={() => router.back()}
-            className="bg-boldblue text-white py-2 px-4 rounded-lg hover:bg-boldblue/90 transition-colors"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isFundable) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Not Fundable</h2>
-          <p className="text-mediumgray mb-2">This project cannot be funded at this time</p>
-          <p className="text-sm text-mediumgray mb-4">
-            {job?.isFunded ? 'Already funded' : 'Status: ' + job?.status}
-          </p>
           <button 
             onClick={() => router.back()}
             className="bg-boldblue text-white py-2 px-4 rounded-lg hover:bg-boldblue/90 transition-colors"

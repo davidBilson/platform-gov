@@ -19,7 +19,7 @@ const PaymentModal = ({ jobId, onClose }: PaymentModalProps) => {
         </p>
         <div className="flex justify-end gap-3">
           <button
-            onClick={onClose}
+            onClick={() => {onClose; router.push('/job/manage')}}
             className="px-4 py-1 cursor-pointer bg-white hover:bg-lightgray/50 border border-gray-300 rounded"
           >
             Fund Later

@@ -11,6 +11,7 @@ import LoadingAnimation from '@/components/ui/loading';
 import ClientTimesheet from './_timesheet';
 import ClientRetainer from './_retainer';
 import PaymentModal from '@/components/payment/PaymentModal';
+import FundProjectBtn from '@/components/payment/FundProjectBtn';
 
 const ContractClient = ({ jobId, proposalId, tab }) => {
 
@@ -219,7 +220,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     <div className='flex items-center justify-between gap-4'>
                         <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
                         {!jobIsFunded &&
-                            <button onClick={() => setShowPaymentModal(true)} className='cursor-pointer bg-deepskyblue/20 text-deepskyblue text-sm px-2  py-1 rounded shadow-lg/10'>Fund Project</button>
+                            <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
                         }
                     </div>
                     <div className='flex items-center md:gap-10 pt-5.5'>

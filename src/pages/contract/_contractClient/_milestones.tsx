@@ -8,6 +8,7 @@ import { getMilestones, approveMilestone, markMilestonePaid } from '@/api/contra
 import useAuthStore from '@/store/useAuth';
 import { endContract } from '@/api/contract/contract-api';
 import PaymentModal from '@/components/payment/PaymentModal';
+import FundProjectBtn from '@/components/payment/FundProjectBtn';
 
 interface Milestone {
   _id: string;
@@ -165,7 +166,12 @@ const ClientMilestones = ({ jobIsFunded, jobId, mutualContractId, contractStatus
         )}
       </section>
       
-      {!jobIsFunded && <button onClick={() => setShowPaymentModal(true)} className='mt-6 cursor-pointer bg-deepskyblue/20 text-deepskyblue text-sm px-2  py-1 rounded shadow-lg/10'>Fund Project</button>}
+      {!jobIsFunded &&
+      <>
+        <p>Fund project before you can start contract</p>
+        <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
+      </>
+      }
       {contractStatus === 'completed' && <p className="text-aquagreen mt-7">This contract has ended</p>}
       {contractStatus !== 'completed' && jobIsFunded &&
         <button
