@@ -7,6 +7,7 @@ import { getMilestones, approveMilestone, markMilestonePaid } from '@/api/contra
 // import DisputeModal from './_disputeModal';
 import useAuthStore from '@/store/useAuth';
 import { endContract } from '@/api/contract/contract-api';
+import PaymentModal from '@/components/payment/PaymentModal';
 
 interface Milestone {
   _id: string;
@@ -18,11 +19,12 @@ interface Milestone {
   completionDate?: string;
 }
 
-const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContractId?: string; contractStatus: string; }) => {
+const ClientMilestones = ({ jobIsFunded, jobId, mutualContractId, contractStatus }: { jobId: string; jobIsFunded?: boolean; mutualContractId?: string; contractStatus: string; }) => {
   const [showNewMilestoneModal, setShowNewMilestoneModal] = useState(false);
   
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const { role, userId } = useAuthStore()
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const fetchMilestones = async () => {
     try {
@@ -151,7 +153,7 @@ const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContract
             )}
           </section>
 
-        {role === 'client'  &&contractStatus !== 'completed' && (
+        {role === 'client' && jobIsFunded && contractStatus !== 'completed' && (
           <button 
             disabled={contractStatus === 'completed' && true}
             onClick={() => setShowNewMilestoneModal(true)}
@@ -162,17 +164,25 @@ const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContract
           </button>
         )}
       </section>
+      
+      {!jobIsFunded && <button onClick={() => setShowPaymentModal(true)} className='mt-6 cursor-pointer bg-deepskyblue/20 text-deepskyblue text-sm px-2  py-1 rounded shadow-lg/10'>Fund Project</button>}
+      {contractStatus === 'completed' && <p className="text-aquagreen mt-7">This contract has ended</p>}
+      {contractStatus !== 'completed' && jobIsFunded &&
+        <button
+          disabled={!jobIsFunded}
+          onClick={() => endContract(mutualContractId, userId)}
+          className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+        >
+          End Contract
+        </button>
+      }
 
-      {contractStatus === 'completed' ? (
-        <p className="text-aquagreen mt-7">This contract has ended</p>
-      ) :(
-      <button
-        disabled={contractStatus == 'completed' && true}
-        onClick={() => endContract(mutualContractId, userId)}
-        className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-      >
-            End Contract
-          </button>)}
+      {showPaymentModal && (
+        <PaymentModal
+          jobId={jobId}
+          onClose={() => setShowPaymentModal(false)}
+        />
+      )}
 
       {showNewMilestoneModal && (
         <div 

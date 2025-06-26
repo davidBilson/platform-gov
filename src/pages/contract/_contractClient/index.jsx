@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import LoadingAnimation from '@/components/ui/loading';
 import ClientTimesheet from './_timesheet';
 import ClientRetainer from './_retainer';
+import PaymentModal from '@/components/payment/PaymentModal';
 
 const ContractClient = ({ jobId, proposalId, tab }) => {
 
@@ -18,6 +19,8 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     const [applicationDetail, setApplicationDetail] = useState(null);
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState(null);
+    const [jobIsFunded, setJobIsFunded] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [mutualContractId, setMutualContractId] = useState('');
     const [contract, setContract] = useState(null);
     const [contractStatus, setContractStatus] = useState('');
@@ -38,10 +41,9 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
         try {
             setLoading(true);
             const jobData = await fetchJob(jobId);
-
             if (jobData) {
                 setJob(jobData);
-                
+                setJobIsFunded(jobData.isFunded);
                 // Set middleTab based on payment type
                 if (jobData.paymentType === 'hourly') {
                     setMiddleTab('timesheet');
@@ -164,7 +166,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                 return job && 
                 <Details 
                     job={job} 
-                    jobId={jobId} 
+                    jobId={jobId}
                     applicationDetail={applicationDetail}
                     contract={contract}
                 />;
@@ -173,7 +175,9 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
             case 'retainer':
                 return <ClientRetainer contractStatus={contractStatus} job={job} mutualContractId={mutualContractId} />;
             case 'milestone':
-                return <Milestones 
+                return <Milestones
+                    jobId={jobId}
+                    jobIsFunded={jobIsFunded}
                     contractStatus={contractStatus}
                     mutualContractId={mutualContractId}
                     isLoading={contractLoading && !mutualContractId} 
@@ -203,30 +207,43 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     };
 
     return (
-        <main className='w-full'>
-            <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
-                <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
-                <div className='flex items-center md:gap-10 pt-5.5'>
-                    {tabOptions.map((tabOption) => (
-                        <button
-                            key={tabOption}
-                            onClick={() => setActiveTab(tabOption)}
-                            className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                                activeTab === tabOption
+        <>
+        {showPaymentModal && job && (
+          <PaymentModal
+            jobId={jobId}
+            onClose={() => setShowPaymentModal(false)}
+          />
+        )}
+            <main className='w-full'>
+                <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
+                    <div className='flex items-center justify-between gap-4'>
+                        <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
+                        {!jobIsFunded &&
+                            <button onClick={() => setShowPaymentModal(true)} className='cursor-pointer bg-deepskyblue/20 text-deepskyblue text-sm px-2  py-1 rounded shadow-lg/10'>Fund Project</button>
+                        }
+                    </div>
+                    <div className='flex items-center md:gap-10 pt-5.5'>
+                        {tabOptions.map((tabOption) => (
+                            <button
+                                key={tabOption}
+                                onClick={() => setActiveTab(tabOption)}
+                                className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
+                                    activeTab === tabOption
                                     ? 'border-b-boldblue'
-                                    : 'border-b-transparent hover:border-b-skyblue'
-                            }`}
-                        >
-                            {tabOption.charAt(0).toUpperCase() + tabOption.slice(1)}
-                        </button>
-                    ))}
-                </div>
-            </section>
+                                        : 'border-b-transparent hover:border-b-skyblue'
+                                    }`}
+                                    >
+                                {tabOption.charAt(0).toUpperCase() + tabOption.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                </section>
 
-            <section className='w-full'>
-                {renderTabContent()}
-            </section>
-        </main>
+                <section className='w-full'>
+                    {renderTabContent()}
+                </section>
+            </main>
+        </>
     );
 };
 
