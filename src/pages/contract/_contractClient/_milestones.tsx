@@ -90,15 +90,15 @@ const ClientMilestones = ({ mutualContractId, contractStatus }: { mutualContract
             </button> */}
           </div>
         );
-      case 'approved':
-        return (
-          <button 
-            onClick={() => handleMarkPaid(milestone._id)}
-            className="px-3 py-1 bg-purple-500 text-white rounded text-sm mt-2 hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-          >
-            Mark as Paid
-          </button>
-        );
+      // case 'approved':
+      //   return (
+      //     <button 
+      //       onClick={() => handleMarkPaid(milestone._id)}
+      //       className="px-3 py-1 bg-purple-500 text-white rounded text-sm mt-2 hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+      //     >
+      //       Mark as Paid
+      //     </button>
+      //   );
       case 'pending':
         return milestone.completionDate && (
           <p className="text-xs text-gray-500 mt-1">

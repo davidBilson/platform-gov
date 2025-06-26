@@ -66,7 +66,6 @@ export const useNotification = create((set, get) => ({
 
     const debugHandler = (eventName, ...args) => {
       if (eventName.includes('notification') || eventName === 'new-message') {
-        console.log(`🔍 DEBUG - Socket event '${eventName}' received:`, args);
         
         if (eventName !== 'new-notification' && args[0] && typeof args[0] === 'object') {
           const data = args[0];
@@ -81,7 +80,6 @@ export const useNotification = create((set, get) => ({
     socket.onAny(debugHandler);
 
     const notificationHandler = (notification) => {
-      console.log("Raw notification received", notification);
       get().processNotification(notification);
     };
   

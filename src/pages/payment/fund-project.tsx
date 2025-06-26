@@ -39,7 +39,6 @@ const FundProjectPage = () => {
       
       try {
         const jobData = await fetchJob(jobId as string);
-        console.log(jobData)
         if (!jobData) {
           toast.error('Job not found');
           setLoading(false);

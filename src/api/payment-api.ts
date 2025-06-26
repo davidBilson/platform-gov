@@ -114,7 +114,6 @@ export const getPlatformFee = async () => {
   try {
     const endPoint = process.env.NEXT_PUBLIC_GET_PLATFORM_FEE;
     const response = await axios.get(`${BASE_URL}${endPoint}`);
-    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Get platform fee error:', error);
@@ -227,15 +226,15 @@ export const approvePayout = async (fundId: string) => {
 
 export const getWithdrawableFunds = async (userId: string) => {
   try {
-    
     const endPoint = (process.env.NEXT_PUBLIC_GET_WITHDRAWABLE_FUNDS ?? "").replace(':id', userId) || "";
     const response = await axios.get(`${BASE_URL}${endPoint}`)
     return response.data;
   } catch (error) {
     console.log(error)
   }
-} 
- export const withdrawFunds = async (userId: string, fundId: string) => {
+}
+
+export const withdrawFunds = async (userId: string, fundId: string) => {
   try {
     
     const endPoint = (process.env.NEXT_PUBLIC_WITHDRAW_FUNDS ?? "").replace(':id', userId) || "";
@@ -244,9 +243,9 @@ export const getWithdrawableFunds = async (userId: string) => {
   } catch (error) {
     console.log(error)
   }
- }
+}
 
- export const fetchContractorFunds = async (userId: string) => {
+export const fetchContractorFunds = async (userId: string) => {
   try {
     const endPoint = (process.env.NEXT_PUBLIC_GET_CONTRACTOR_FUNDS ?? "").replace(':id', userId) || "";
     const response = await axios.get(
