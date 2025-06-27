@@ -307,19 +307,19 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
           <div className="flex gap-2">
             <button
               onClick={() => setShowManualLogModal(true)}
-              className="px-4 py-2 bg-deepskyblue text-white text-sm rounded-md hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+              className="px-4 py-2 bg-boldblue text-white text-sm rounded-md hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
             >
               Log Hours Manually
             </button>
           </div>
         )}
-        {!activeSession && <button
+        {/* {!activeSession && <button
             onClick={handleStartSession}
             className="px-4 py-2 flex items-center justify-center bg-aquagreen text-white text-sm rounded hover:bg-aquagreen hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
           >
             <LuPlay className="mr-2" />
             Start Work Session
-          </button>}
+          </button>} */}
       </div>
 
       {showManualLogModal && (

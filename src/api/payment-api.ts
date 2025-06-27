@@ -234,11 +234,11 @@ export const getWithdrawableFunds = async (userId: string) => {
   }
 }
 
-export const withdrawFunds = async (userId: string, fundId: string) => {
+export const withdrawFunds = async (userId: string, amount: number) => {
   try {
     
     const endPoint = (process.env.NEXT_PUBLIC_WITHDRAW_FUNDS ?? "").replace(':id', userId) || "";
-    const response = await axios.post(`${BASE_URL}${endPoint}?fundId=${fundId}`)
+    const response = await axios.post(`${BASE_URL}${endPoint}?amount=${amount}`)
     return response.data;
   } catch (error) {
     console.log(error)
@@ -262,7 +262,7 @@ export const fetchContractorFunds = async (userId: string) => {
       throw new Error(response.data.message || 'Failed to fetch funds');
     }
   } catch (error) {
-    // Handle different types of errors
+
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
         throw new Error('Contractor not found');
@@ -288,4 +288,40 @@ export const fetchClientFunds = async (userId: string) => {
   }
   
   return response.data;
+};
+
+export const fetchUserWithdrawals = async (
+  userId: string,
+  options?: {
+    page?: number;
+    limit?: number;
+    status?: 'pending' | 'completed' | 'failed';
+  }
+) => {
+  try {
+    const { page = 1, limit = 10, status } = options || {};
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...(status && { status })
+    });
+
+    const endPoint = (process.env.NEXT_PUBLIC_GET_USER_WITHDRAWALS ?? "").replace(':id', userId) || "";
+
+    const response = await axios.get(
+      `${BASE_URL}${endPoint}?${params.toString()}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user withdrawals:', error);
+    return {
+      success: false,
+      totalWithdrawals: 0,
+      totalPages: 0,
+      currentPage: 1,
+      withdrawals: [],
+      message: (axios.isAxiosError(error) && error.response?.data?.message) || 'Failed to fetch withdrawals'
+    };
+  }
 };

@@ -16,7 +16,7 @@ import FundProjectBtn from '@/components/payment/FundProjectBtn';
 const ContractClient = ({ jobId, proposalId, tab }) => {
 
     const { userId, name } = useAuthStore();
-    
+
     const [applicationDetail, setApplicationDetail] = useState(null);
     const [activeTab, setActiveTab] = useState(tab || 'details');
     const [job, setJob] = useState(null);
@@ -28,7 +28,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [middleTab, setMiddleTab] = useState('milestone');
-    
+
     const tabOptions = useMemo(() => {
         return ['details', middleTab, 'messages'];
     }, [middleTab]);
@@ -72,7 +72,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
         }
         try {
             const application = await fetchApplication(proposalId);
-            
+
             if (application?.data) {
                 setApplicationDetail(application.data);
             } else {
@@ -98,15 +98,15 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
             if (!jobId || !userId || !applicationDetail?.freelancerId) {
                 return null;
             }
-            
+
             const contractQueryParams = {
                 jobId: jobId,
                 clientId: userId,
                 contractorId: applicationDetail.freelancerId
             };
-    
+
             const response = await getSingleContract(contractQueryParams);
-    
+
             if (response.success && response.data) {
                 if (response.data._id) {
                     setMutualContractId(response.data._id);
@@ -146,7 +146,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                 </div>
             );
         }
-        
+
         if (error) {
             return (
                 <div className='flex flex-col items-center justify-center h-[60vh] px-4 text-center'>
@@ -164,15 +164,20 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
 
         switch (activeTab) {
             case 'details':
-                return job && 
-                <Details 
-                    job={job} 
-                    jobId={jobId}
-                    applicationDetail={applicationDetail}
-                    contract={contract}
-                />;
+                return job &&
+                    <Details
+                        job={job}
+                        jobId={jobId}
+                        applicationDetail={applicationDetail}
+                        contract={contract}
+                    />;
             case 'timesheet':
-                return <ClientTimesheet contractStatus={contractStatus} mutualContractId={mutualContractId} />;
+                return <ClientTimesheet
+                    jobId={jobId}
+                    jobIsFunded={jobIsFunded}
+                    contractStatus={contractStatus}
+                    mutualContractId={mutualContractId}
+                />;
             case 'retainer':
                 return <ClientRetainer contractStatus={contractStatus} job={job} mutualContractId={mutualContractId} />;
             case 'milestone':
@@ -181,7 +186,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     jobIsFunded={jobIsFunded}
                     contractStatus={contractStatus}
                     mutualContractId={mutualContractId}
-                    isLoading={contractLoading && !mutualContractId} 
+                    isLoading={contractLoading && !mutualContractId}
                 />;
             case 'messages':
                 return applicationDetail?.freelancerId ? (
@@ -209,12 +214,12 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
 
     return (
         <>
-        {showPaymentModal && job && (
-          <PaymentModal
-            jobId={jobId}
-            onClose={() => setShowPaymentModal(false)}
-          />
-        )}
+            {showPaymentModal && job && (
+                <PaymentModal
+                    jobId={jobId}
+                    onClose={() => setShowPaymentModal(false)}
+                />
+            )}
             <main className='w-full'>
                 <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
                     <div className='flex items-center justify-between gap-4'>
@@ -228,12 +233,11 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                             <button
                                 key={tabOption}
                                 onClick={() => setActiveTab(tabOption)}
-                                className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                                    activeTab === tabOption
+                                className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${activeTab === tabOption
                                     ? 'border-b-boldblue'
-                                        : 'border-b-transparent hover:border-b-skyblue'
+                                    : 'border-b-transparent hover:border-b-skyblue'
                                     }`}
-                                    >
+                            >
                                 {tabOption.charAt(0).toUpperCase() + tabOption.slice(1)}
                             </button>
                         ))}

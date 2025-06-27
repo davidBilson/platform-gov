@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
-import { fetchContractorFunds } from '@/api/payment-api';
+import { fetchContractorFunds, fetchUserWithdrawals } from '@/api/payment-api';
 
 interface FundData {
   id: string;
@@ -12,6 +12,56 @@ interface FundData {
   createdAt: string;
   availableAfter?: string;
   withdrawnAt?: string;
+  availableDate?: string;    // Added for available funds
+  pendingDate?: string;      // Added for pending funds
+  disputedDate?: string;     // Added for disputed funds
+}
+
+// Updated to match backend response structure
+interface BackendFundData {
+  id: string;
+  jobId: string;
+  jobTitle: string;
+  clientName: string;
+  amount: number;
+  createdAt: string;
+  availableDate?: string;    // From backend available funds
+  pendingDate?: string;      // From backend pending funds
+  disputedDate?: string;     // From backend disputed funds
+  availableAfter?: string;   // From backend pending funds
+}
+
+interface BackendCategorizedFunds {
+  available: BackendFundData[];
+  pending: BackendFundData[];
+  disputed: BackendFundData[];  // Backend sends 'disputed', not 'in_review'
+  withdrawn?: BackendFundData[]; // May not exist in backend
+}
+
+// Withdrawal interfaces
+interface WithdrawalData {
+  _id: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'completed' | 'failed';
+  payoutId: string;
+  bankAccount: {
+    id: string;
+    bankName: string;
+    last4: string;
+  };
+  createdAt: string;
+  id: string;
+}
+
+interface WithdrawalResponse {
+  success: boolean;
+  totalWithdrawals: number;
+  totalPages: number;
+  currentPage: number;
+  withdrawals: WithdrawalData[];
+  message?: string;
 }
 
 interface CategorizedFunds {
@@ -81,6 +131,25 @@ const FundCard = ({ fund, status }: { fund: FundData; status: ActiveTab }) => {
     });
   };
 
+  // Helper function to get the appropriate date to display
+  const getRelevantDate = () => {
+    if (status === 'available' && fund.availableDate) {
+      return { label: 'Available since', date: fund.availableDate };
+    }
+    if (status === 'pending' && fund.pendingDate) {
+      return { label: 'Pending since', date: fund.pendingDate };
+    }
+    if (status === 'in_review' && fund.disputedDate) {
+      return { label: 'In review since', date: fund.disputedDate };
+    }
+    if (status === 'withdrawn' && fund.withdrawnAt) {
+      return { label: 'Withdrawn', date: fund.withdrawnAt };
+    }
+    return null;
+  };
+
+  const relevantDate = getRelevantDate();
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 transition-shadow duration-200">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
@@ -89,7 +158,6 @@ const FundCard = ({ fund, status }: { fund: FundData; status: ActiveTab }) => {
             {fund.jobTitle}
           </h3>
           <p className="text-sm text-gray-600 mb-1">Client: {fund.clientName}</p>
-          <p className="text-xs text-gray-500">Job ID: {fund.jobId}</p>
         </div>
         <div className="flex-shrink-0 text-right">
           <div className="text-xl sm:text-2xl font-bold text-boldblue mb-2">
@@ -103,19 +171,86 @@ const FundCard = ({ fund, status }: { fund: FundData; status: ActiveTab }) => {
 
       <div className="pt-3 border-t border-gray-100">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-gray-600">
-          <div>
-            <span className="font-medium">Created:</span> {formatDate(fund.createdAt)}
-          </div>
-          {fund.availableAfter && (
+          {fund.availableAfter && status === 'pending' && (
             <div>
               <span className="font-medium">Available after:</span> {formatDate(fund.availableAfter)}
             </div>
           )}
-          {fund.withdrawnAt && (
+          {relevantDate && (
             <div>
-              <span className="font-medium">Withdrawn:</span> {formatDate(fund.withdrawnAt)}
+              <span className="font-medium">{relevantDate.label}:</span> {formatDate(relevantDate.date)}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Withdrawal Card Component
+const WithdrawalCard = ({ withdrawal }: { withdrawal: WithdrawalData }) => {
+  const getStatusConfig = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return {
+          badgeColor: 'bg-green-100 text-green-700',
+          label: 'Completed'
+        };
+      case 'pending':
+        return {
+          badgeColor: 'bg-yellow-100 text-yellow-700',
+          label: 'Pending'
+        };
+      case 'failed':
+        return {
+          badgeColor: 'bg-red-100 text-red-700',
+          label: 'Failed'
+        };
+      default:
+        return {
+          badgeColor: 'bg-gray-100 text-gray-700',
+          label: 'Unknown'
+        };
+    }
+  };
+
+  const config = getStatusConfig(withdrawal.status);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 transition-shadow duration-200">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1">
+            Withdrawal to {withdrawal.bankAccount.bankName}
+          </h3>
+          <p className="text-sm text-gray-600 mb-1">
+            Account ending in •••• {withdrawal.bankAccount.last4}
+          </p>
+          <p className="text-xs text-gray-500">ID: {withdrawal.payoutId}</p>
+        </div>
+        <div className="flex-shrink-0 text-right">
+          <div className="text-xl font-bold text-aquagreen mb-2">
+            ${withdrawal.amount.toLocaleString()} {withdrawal.currency}
+          </div>
+          <span className={`inline-block px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${config.badgeColor}`}>
+            {config.label}
+          </span>
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-gray-600">
+          <div>
+            <span className="font-medium">Withdrawn on:</span> {formatDate(withdrawal.createdAt)}
+          </div>
         </div>
       </div>
     </div>
@@ -134,6 +269,17 @@ const ContractorFundsOverview = () => {
     withdrawn: []
   });
 
+  // Withdrawal-specific states
+  const [withdrawalData, setWithdrawalData] = useState<WithdrawalResponse>({
+    success: false,
+    totalWithdrawals: 0,
+    totalPages: 0,
+    currentPage: 1,
+    withdrawals: []
+  });
+  const [withdrawalPage, setWithdrawalPage] = useState(1);
+  const [withdrawalLoading, setWithdrawalLoading] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -143,13 +289,34 @@ const ContractorFundsOverview = () => {
     }
   }, [userId]);
 
+  // Load withdrawals when withdrawal tab is active
+  useEffect(() => {
+    if (userId) {
+      loadWithdrawals(withdrawalPage);
+    }
+  }, [userId, activeTab, withdrawalPage]);
+
+  // Transform backend data to match frontend structure
+  const transformBackendData = (backendData: BackendCategorizedFunds): CategorizedFunds => {
+    return {
+      available: backendData.available || [],
+      pending: backendData.pending || [],
+      in_review: backendData.disputed || [], // Map disputed to in_review
+      withdrawn: [] // Always empty since we fetch withdrawals separately
+    };
+  };
+
   const loadContractorFunds = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const fundsData = await fetchContractorFunds(userId);
-      setFunds(fundsData);
+      const backendFundsData: BackendCategorizedFunds = await fetchContractorFunds(userId);
+      
+      // Transform the backend data structure to match frontend expectations
+      const transformedFunds = transformBackendData(backendFundsData);
+      
+      setFunds(transformedFunds);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching funds';
       setError(errorMessage);
@@ -159,11 +326,34 @@ const ContractorFundsOverview = () => {
     }
   };
 
+  const loadWithdrawals = async (page: number = 1) => {
+    try {
+      setWithdrawalLoading(true);
+      const response: WithdrawalResponse = await fetchUserWithdrawals(userId, {
+        page,
+        limit: 10
+      });
+      setWithdrawalData(response);
+    } catch (err) {
+      console.error('Error fetching withdrawals:', err);
+      setWithdrawalData({
+        success: false,
+        totalWithdrawals: 0,
+        totalPages: 0,
+        currentPage: 1,
+        withdrawals: [],
+        message: 'Failed to fetch withdrawals'
+      });
+    } finally {
+      setWithdrawalLoading(false);
+    }
+  };
+
   const tabs: Tab[] = [
     { id: 'available', label: 'Available', count: funds.available.length },
     { id: 'pending', label: 'Pending', count: funds.pending.length },
-    { id: 'in_review', label: 'In Review', count: funds.in_review.length },
-    { id: 'withdrawn', label: 'Withdrawn', count: funds.withdrawn.length }
+    { id: 'in_review', label: 'In Review', count: funds?.in_review?.length ?? 0 },
+    { id: 'withdrawn', label: 'Withdrawn', count: withdrawalData.totalWithdrawals }
   ];
 
   const getTotalAvailable = (): number => {
@@ -171,11 +361,108 @@ const ContractorFundsOverview = () => {
   };
 
   const getTotalEarnings = (): number => {
-    return [...funds.available, ...funds.pending, ...funds.in_review, ...funds.withdrawn]
+    return [...funds.available, ...funds.pending, ...funds.in_review ?? funds.in_review, ...funds.withdrawn]
       .reduce((total, fund) => total + fund.amount, 0);
   };
 
+  const renderWithdrawalPagination = () => {
+    if (withdrawalData.totalPages <= 1) return null;
+
+    const pages = [];
+    for (let i = 1; i <= withdrawalData.totalPages; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div className="flex justify-center items-center space-x-2 mt-6">
+        <button
+          onClick={() => setWithdrawalPage(prev => Math.max(1, prev - 1))}
+          disabled={withdrawalData.currentPage === 1}
+          className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Previous
+        </button>
+        
+        {pages.map(page => (
+          <button
+            key={page}
+            onClick={() => setWithdrawalPage(page)}
+            className={`px-3 py-1 text-sm border rounded-md ${
+              page === withdrawalData.currentPage
+                ? 'bg-boldblue text-white border-boldblue'
+                : 'border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+        
+        <button
+          onClick={() => setWithdrawalPage(prev => Math.min(withdrawalData.totalPages, prev + 1))}
+          disabled={withdrawalData.currentPage === withdrawalData.totalPages}
+          className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
+    if (activeTab === 'withdrawn') {
+      if (withdrawalLoading) {
+        return (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-boldblue"></div>
+          </div>
+        );
+      }
+
+      if (!withdrawalData.success) {
+        return (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0l-8.138 8.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Withdrawals</h3>
+            <p className="text-gray-600 mb-4">{withdrawalData.message || 'Failed to fetch withdrawals'}</p>
+            <button
+              onClick={() => loadWithdrawals(withdrawalPage)}
+              className="px-4 py-2 bg-boldblue text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        );
+      }
+
+      if (withdrawalData.withdrawals.length === 0) {
+        return (
+          <div className="text-center py-8 sm:py-12">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">No withdrawals found</h3>
+            <p className="text-sm sm:text-base text-gray-600 px-4">You haven't made any withdrawals yet.</p>
+          </div>
+        );
+      }
+
+      return (
+        <div className="space-y-4 sm:space-y-6">
+          {withdrawalData.withdrawals.map((withdrawal) => (
+            <WithdrawalCard key={withdrawal._id} withdrawal={withdrawal} />
+          ))}
+          {renderWithdrawalPagination()}
+        </div>
+      );
+    }
+
+    // Original logic for other tabs
     if (loading) {
       return (
         <div className="flex items-center justify-center py-12">
@@ -302,7 +589,7 @@ const ContractorFundsOverview = () => {
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
                 className={`cursor-pointer flex-shrink-0 px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
-                    ? 'text-boldblue border-b-2 border-boldblue bg-gradient-to-t from-blue-50 to-transparent'
+                    ? 'text-boldblue border-b-2 border-boldblue bg-gradient-to-t from-boldblue/5 to-boldblue/5'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 style={{ minWidth: '120px' }}
@@ -326,9 +613,8 @@ const ContractorFundsOverview = () => {
           </div>
         </div>
 
-        {/* Withdrawal Card */}
         {getTotalAvailable() > 0 && (
-          <div className="bg-gradient-to-r from-green-500 to-aquagreen rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 text-white mb-6 sm:mb-8">
+          <div className="bg-gradient-to-r from-aquagreen to-aquagreen rounded-lg sm:rounded-xl p-4 sm:p-5 md:p-6 text-white mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-0">
               <div className="flex-1 min-w-0">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1 sm:mb-2">Ready to Withdraw</h3>

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  getTimesheetLogs, 
-  approveTimesheetEntry, 
-  disputeTimesheetEntry, 
+import {
+  getTimesheetLogs,
+  approveTimesheetEntry,
+  disputeTimesheetEntry,
   setContractMaxHours
 } from '@/api/contract/timesheet-api';
 import { getSingleContract, endContract } from '@/api/contract/contract-api';
@@ -12,6 +12,8 @@ import Image from 'next/image';
 import { LuClock } from 'react-icons/lu';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
+import FundProjectBtn from '@/components/payment/FundProjectBtn';
+import PaymentModal from '@/components/payment/PaymentModal';
 
 interface WorkSession {
   _id: string;
@@ -27,12 +29,16 @@ interface WorkSession {
   status: 'pending' | 'approved' | 'disputed' | 'active';
 }
 
-const ClientTimesheet = ({ 
-  mutualContractId, 
-  contractStatus 
-}: { 
-  mutualContractId?: string; 
-  contractStatus: string; 
+const ClientTimesheet = ({
+  jobIsFunded, 
+  jobId, 
+  mutualContractId,
+  contractStatus
+}: {
+  jobId: string;
+  jobIsFunded?: boolean;
+  mutualContractId?: string;
+  contractStatus: string;
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState('');
@@ -41,7 +47,8 @@ const ClientTimesheet = ({
   const [newMaxHours, setNewMaxHours] = useState('');
   // Add state to track which approve button is loading
   const [approvingSessionId, setApprovingSessionId] = useState<string | null>(null);
-  
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+
   const { userId } = useAuthStore();
   const queryClient = useQueryClient();
 
@@ -79,7 +86,7 @@ const ClientTimesheet = ({
       // Invalidate and refetch both contract and sessions data
       queryClient.invalidateQueries({ queryKey: ['contract', mutualContractId] });
       queryClient.invalidateQueries({ queryKey: ['timesheet-logs', mutualContractId] });
-      
+
       setShowSetHoursModal(false);
       setNewMaxHours('');
       toast.success('Maximum hours set successfully');
@@ -141,7 +148,7 @@ const ClientTimesheet = ({
 
   const handleSetMaxHours = async () => {
     if (!newMaxHours) return;
-    
+
     const hours = parseFloat(newMaxHours);
     if (isNaN(hours) || hours <= 0) {
       toast.error('Please enter a valid number of hours');
@@ -161,31 +168,31 @@ const ClientTimesheet = ({
   };
 
   const handleEndContract = () => {
-      endContractMutation.mutate();
+    endContractMutation.mutate();
   };
 
   const calculateDuration = (start: string, end?: string) => {
     const startTime = new Date(start).getTime();
     const endTime = end ? new Date(end).getTime() : Date.now();
     const diffMs = endTime - startTime;
-    
+
     const seconds = Math.floor(diffMs / 1000);
     return Math.max(seconds, 0);
   };
 
   const normalizeDuration = (session: WorkSession): number => {
     if (session.duration) {
-      const duration = session.duration > 86400 ? 
+      const duration = session.duration > 86400 ?
         Math.floor(session.duration / 1000) :
         session.duration;
-      
+
       return Math.max(duration, 0);
     }
-    
+
     if (session.startTime && session.endTime) {
       return calculateDuration(session.startTime, session.endTime);
     }
-    
+
     return 0;
   };
 
@@ -205,11 +212,23 @@ const ClientTimesheet = ({
 
   return (
     <div className="space-y-6">
-      {contractStatus === 'completed' ? (
-        <p className="text-aquagreen">This contract has ended</p>
-      ) : (
+      {showPaymentModal && (
+        <PaymentModal
+          jobId={jobId}
+          onClose={() => setShowPaymentModal(false)}
+        />
+      )}
+      {!jobIsFunded &&
+        <>
+          <p>Fund project before you can start contract</p>
+          <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
+        </>
+      }
+      {contractStatus === 'completed' && <p className="text-aquagreen mt-7">This contract has ended</p>}
+      {contractStatus !== 'completed' && jobIsFunded &&
+      (
         <div className="flex justify-between items-center">
-            
+
           <button
             onClick={() => setShowSetHoursModal(true)}
             disabled={setMaxHoursMutation.isPending}
@@ -255,11 +274,10 @@ const ClientTimesheet = ({
               <button
                 onClick={handleSetMaxHours}
                 disabled={!newMaxHours || setMaxHoursMutation.isPending}
-                className={`text-sm transition duration-300 ease-in-out px-4 py-2 bg-boldblue text-white rounded ${
-                  !newMaxHours || setMaxHoursMutation.isPending 
-                    ? 'opacity-50 cursor-not-allowed' 
+                className={`text-sm transition duration-300 ease-in-out px-4 py-2 bg-boldblue text-white rounded ${!newMaxHours || setMaxHoursMutation.isPending
+                    ? 'opacity-50 cursor-not-allowed'
                     : 'hover:opacity-70 cursor-pointer'
-                }`}
+                  }`}
               >
                 {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Hours'}
               </button>
@@ -305,11 +323,11 @@ const ClientTimesheet = ({
           </div>
         </div>
       </div>
-      
+
       {/* Work Diary */}
       <div className="bg-white p-4 rounded-lg shadow">
         <h3 className="text-lg font-semibold text-boldblue mb-7.5">Work Diary</h3>
-        
+
         {isLoading ? (
           <div className="flex justify-center py-4">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-boldblue"></div>
@@ -330,25 +348,24 @@ const ClientTimesheet = ({
                       {formatDuration(normalizeDuration(session))}
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-1 font-semibold rounded ${
-                    session.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
-                    session.status === 'disputed' ? 'bg-red-100 text-red-800' :
-                    'bg-blue-100 text-boldblue'
-                  }`}>
+                  <span className={`text-xs px-2 py-1 font-semibold rounded ${session.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
+                        session.status === 'disputed' ? 'bg-red-100 text-red-800' :
+                          'bg-blue-100 text-boldblue'
+                    }`}>
                     {session.status}
                   </span>
                 </div>
-                
+
                 {session.notes && (
                   <p className="mt-2 text-sm">{session.notes}</p>
                 )}
-                
+
                 {session.screenshots && session.screenshots.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {session.screenshots.map((screenshot, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="relative w-16 h-16 border rounded overflow-hidden cursor-pointer"
                         onClick={() => setSelectedImage(screenshot.imagePath)}
                       >
@@ -366,7 +383,7 @@ const ClientTimesheet = ({
                     ))}
                   </div>
                 )}
-                
+
                 {session.status === 'pending' && (
                   <div className="flex gap-2 mt-3">
                     <button
@@ -390,7 +407,7 @@ const ClientTimesheet = ({
           </div>
         )}
       </div>
-      
+
       {/* Dispute Modal */}
       {disputingSessionId && (
         <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -418,11 +435,10 @@ const ClientTimesheet = ({
               <button
                 onClick={handleDispute}
                 disabled={!disputeReason.trim() || disputeMutation.isPending}
-                className={`px-4 py-2 bg-red-500 text-white rounded ${
-                  !disputeReason.trim() || disputeMutation.isPending 
-                    ? 'opacity-50 cursor-not-allowed' 
+                className={`px-4 py-2 bg-red-500 text-white rounded ${!disputeReason.trim() || disputeMutation.isPending
+                    ? 'opacity-50 cursor-not-allowed'
                     : 'hover:opacity-70 cursor-pointer'
-                }`}
+                  }`}
               >
                 {disputeMutation.isPending ? 'Submitting...' : 'Submit Dispute'}
               </button>
@@ -435,7 +451,7 @@ const ClientTimesheet = ({
       {selectedImage && (
         <div className="fixed inset-0 bg-black/30 bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
           <div className="relative max-w-full max-h-full">
-            <button 
+            <button
               className="absolute -top-10 right-0 text-red-500 cursor-pointer text-2xl hover:text-gray-300"
               onClick={(e) => {
                 e.stopPropagation();
