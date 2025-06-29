@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getTimesheetLogs,
@@ -12,8 +12,6 @@ import Image from 'next/image';
 import { LuClock } from 'react-icons/lu';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
-import FundProjectBtn from '@/components/payment/FundProjectBtn';
-import PaymentModal from '@/components/payment/PaymentModal';
 
 interface WorkSession {
   _id: string;
@@ -30,15 +28,15 @@ interface WorkSession {
 }
 
 const ClientTimesheet = ({
-  jobIsFunded, 
-  jobId, 
+  contractStarted,
   mutualContractId,
-  contractStatus
+  contractStatus,
+  refetchContract
 }: {
-  jobId: string;
-  jobIsFunded?: boolean;
+  contractStarted?: boolean
   mutualContractId?: string;
   contractStatus: string;
+  refetchContract: any;
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [disputeReason, setDisputeReason] = useState('');
@@ -47,10 +45,13 @@ const ClientTimesheet = ({
   const [newMaxHours, setNewMaxHours] = useState('');
   // Add state to track which approve button is loading
   const [approvingSessionId, setApprovingSessionId] = useState<string | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const { userId } = useAuthStore();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    refetchContract();
+  }, [])
 
   // Query for contract data (including max hours)
   const { data: contractData, isLoading: contractLoading } = useQuery({
@@ -101,16 +102,17 @@ const ClientTimesheet = ({
   const approveMutation = useMutation({
     mutationFn: async (sessionId: string) => {
       if (!mutualContractId || !userId) throw new Error('Missing required data');
-      setApprovingSessionId(sessionId); // Set which session is being approved
+      setApprovingSessionId(sessionId);
       return await approveTimesheetEntry(mutualContractId, sessionId, userId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['timesheet-logs', mutualContractId] });
-      setApprovingSessionId(null); // Clear the approving state
+      setApprovingSessionId(null);
+      refetchContract();
     },
     onError: (error) => {
       console.error('Error approving session:', error);
-      setApprovingSessionId(null); // Clear the approving state on error
+      setApprovingSessionId(null);
     }
   });
 
@@ -212,41 +214,23 @@ const ClientTimesheet = ({
 
   return (
     <div className="space-y-6">
-      {showPaymentModal && (
-        <PaymentModal
-          jobId={jobId}
-          onClose={() => setShowPaymentModal(false)}
-        />
-      )}
-      {!jobIsFunded &&
-        <>
-          <p>Fund project before you can start contract</p>
-          <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
-        </>
-      }
+
       {contractStatus === 'completed' && <p className="text-aquagreen mt-7">This contract has ended</p>}
-      {contractStatus !== 'completed' && jobIsFunded &&
-      (
-        <div className="flex justify-between items-center">
+      {contractStatus !== 'completed' && contractStarted &&
+        (
+          <div className="flex justify-between items-center">
 
-          <button
-            onClick={() => setShowSetHoursModal(true)}
-            disabled={setMaxHoursMutation.isPending}
-            className="px-3 py-2 bg-boldblue text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
-          >
-            {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Max Hours'}
-          </button>
-          <button
-            onClick={handleEndContract}
-            disabled={endContractMutation.isPending}
-            className="px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
-          >
-            {endContractMutation.isPending ? 'Ending...' : 'End Contract'}
-          </button>
-        </div>
-      )}
+            <button
+              onClick={() => setShowSetHoursModal(true)}
+              disabled={setMaxHoursMutation.isPending}
+              className="px-3 py-2 bg-boldblue text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
+            >
+              {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Max Hours'}
+            </button>
+          </div>
+        )
+      }
 
-      {/* Set Max Hours Modal */}
       {showSetHoursModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -275,8 +259,8 @@ const ClientTimesheet = ({
                 onClick={handleSetMaxHours}
                 disabled={!newMaxHours || setMaxHoursMutation.isPending}
                 className={`text-sm transition duration-300 ease-in-out px-4 py-2 bg-boldblue text-white rounded ${!newMaxHours || setMaxHoursMutation.isPending
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:opacity-70 cursor-pointer'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:opacity-70 cursor-pointer'
                   }`}
               >
                 {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Hours'}
@@ -349,9 +333,9 @@ const ClientTimesheet = ({
                     </p>
                   </div>
                   <span className={`text-xs px-2 py-1 font-semibold rounded ${session.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
-                        session.status === 'disputed' ? 'bg-red-100 text-red-800' :
-                          'bg-blue-100 text-boldblue'
+                    session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
+                      session.status === 'disputed' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-boldblue'
                     }`}>
                     {session.status}
                   </span>
@@ -436,8 +420,8 @@ const ClientTimesheet = ({
                 onClick={handleDispute}
                 disabled={!disputeReason.trim() || disputeMutation.isPending}
                 className={`px-4 py-2 bg-red-500 text-white rounded ${!disputeReason.trim() || disputeMutation.isPending
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:opacity-70 cursor-pointer'
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:opacity-70 cursor-pointer'
                   }`}
               >
                 {disputeMutation.isPending ? 'Submitting...' : 'Submit Dispute'}

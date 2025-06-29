@@ -1,10 +1,9 @@
-// billing-method.tsx
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import PaymentForm from '@/components/payment/PaymentForm';
-import { getUserPaymentMethods, updateDefaultPaymentMethod, deletePaymentMethod } from '@/api/payment-api';
+import { getUserPaymentMethods, updateDefaultPaymentMethod, deletePaymentMethod } from '@/api/payment/payment-api';
 import useAuthStore from '@/store/useAuth';
 import CreditCardIcon from '@/components/payment/CreditCardIcon';
 import { toast } from 'react-toastify';
@@ -14,11 +13,15 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 const PaymentMethodSetup = () => {
   const router = useRouter();
-  const { jobId } = router.query;
+  const { jobId, returnTo } = router.query;
   const { userId, role } = useAuthStore();
   const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
   const [hasExistingMethod, setHasExistingMethod] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // Check if coming from contract page
+  const isFromContract = typeof returnTo === 'string' && returnTo.startsWith('/contract');
+  
   interface PaymentMethod {
     id: string;
     brand: | "Alipay"
@@ -115,6 +118,14 @@ const PaymentMethodSetup = () => {
     }
   };
 
+  const handleReturnToContract = () => {
+    if (returnTo && typeof returnTo === 'string') {
+      router.back();
+    } else {
+      router.back();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -129,7 +140,7 @@ const PaymentMethodSetup = () => {
         <LoadingAnimation />
       </div>
     )
-  }  
+  }
 
   if (paymentMethodSaved) {
     return (
@@ -145,10 +156,35 @@ const PaymentMethodSetup = () => {
               <h2 className="text-xl font-semibold text-darkgray mb-4">Payment Method Saved!</h2>
             </div>
 
-            {jobId && (
+            {/* Show contract return option if coming from contract */}
+            {isFromContract ? (
               <div className="rounded-2xl p-8 border border-lightblue/30 mb-8">
                 <div className="flex items-center justify-center mb-6">
-                  <div className="w-16 h-16rounded-2xl flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center">
+                    <svg className="w-16 h-16 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-darkgray mb-3">Payment Method Ready</h3>
+                <p className="text-mediumgray mb-6">
+                  Your payment method has been saved. You can now continue with your contract payment.
+                </p>
+
+                <button
+                  onClick={handleReturnToContract}
+                  className="cursor-pointer group relative inline-flex items-center justify-center px-6 py-3 bg-deepskyblue text-white text-sm font-bold rounded-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-boldblue/30"
+                >
+                  <span className="mr-2">Continue Contract Payment</span>
+                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+              </div>
+            ) : jobId && (
+              <div className="rounded-2xl p-8 border border-lightblue/30 mb-8">
+                <div className="flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center">
                     <svg className="w-16 h-16 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
@@ -196,6 +232,20 @@ const PaymentMethodSetup = () => {
               : 'Select your preferred payment option to continue'}
           </p>
         </div>
+
+        {isFromContract && (
+          <div className="mb-6 text-center">
+            <button
+              onClick={handleReturnToContract}
+              className="inline-flex items-center text-sm text-boldblue hover:text-deepskyblue font-medium"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back to Contract Payment
+            </button>
+          </div>
+        )}
 
         {hasExistingMethod && (
           <div className="bg-white rounded-2xl p-8 mb-8">

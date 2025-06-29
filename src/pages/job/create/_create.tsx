@@ -12,6 +12,7 @@ import { ProfessionalFieldsAndAreasOfExpertise152 } from '@/utils/feedFilter/152
 import { certificatesAndEducationList } from '@/utils/feedFilter/CertificatesAndEducationList';
 
 import type { JobFormData } from '@/utils/jobs/_imports';
+import { useRouter } from 'next/router';
 
 const { useState, useEffect, useRef } = ReactLib;
 const { IoMdArrowDropdown, IoMdCalendar, IoIosSearch, IoCloseOutline, RiCheckboxBlankCircleLine, MdOutlineRadioButtonUnchecked, MdOutlineRadioButtonChecked } = Icons;
@@ -22,6 +23,8 @@ type StateWithCountry = [string, string];
 const CreateJob  = () => {
 
     const { userId } = useAuthStore();
+    const router = useRouter();
+
     const requiredCertificationsList = certificatesAndEducationList;
     const jobCategoryList = ProfessionalFieldsAndAreasOfExpertise152;
     const requiredSkillsList = ProfessionalFieldsAndAreasOfExpertise152;
@@ -72,6 +75,7 @@ const CreateJob  = () => {
     const datePickerRef = useRef(null);
     
     const retainerFrequencyOptions = ['weekly', 'bi-weekly', 'monthly'];
+
 
     useEffect(() => {
       const fetchData = async () => {
@@ -263,7 +267,8 @@ const CreateJob  = () => {
           if (response.data.success) {
             setCreatedJobId(response.data.data._id);
             toast.success('Job created successfully');
-            setShowPaymentModal(true);
+            formData.paymentType === 'fixed-price' && setShowPaymentModal(true);
+            router.push('/job/manage')
           }
       } catch (error) {
         console.error('Error creating job:', error);
@@ -835,7 +840,7 @@ const CreateJob  = () => {
         </section>
         </section>
 
-        {showPaymentModal && createdJobId && (
+        {showPaymentModal && createdJobId && formData.paymentType === 'fixed-price' && (
           <PaymentModal
             jobId={createdJobId}
             onClose={() => setShowPaymentModal(false)}

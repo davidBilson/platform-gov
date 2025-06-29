@@ -36,11 +36,6 @@ const JobList = ({ job }: JobListProps) => {
   return (
     <section className="border-b border-b-lightblue pt-7.5 pb-10">
       <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-        {job.isPaymentVerified && (
-          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-            Payment Verified
-          </span>
-        )}
         <p className='text-xs font-semibold text-boldblue'>Posted {postedTime}</p>
         {
           userId &&
@@ -91,14 +86,17 @@ const JobList = ({ job }: JobListProps) => {
           }
         </div>
         <Link href="" className="font-semibold text-sm hover:underline">{job.clientName}</Link>
-        <button
-          disabled
-          className={`flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full ${job.isFunded ? 'text-deepskyblue bg-faintskyblue' : 'text-mediumgray bg-white'
-            }`}
-        > 
-          <span className="w-fit h-fit">{job.isFunded ? 'Payment Verified' : 'Payment Unverified'}</span>
-          <span className="w-fit h-fit pb-[2px]">{job.isFunded && <IoIosCheckmarkCircle />}</span>
-        </button>
+        {
+          job.isFunded &&
+          <button
+            disabled
+            className={`flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full text-deepskyblue bg-faintskyblue`}
+          >
+            <span className="w-fit h-fit">Payment Verified</span>
+            <span className="w-fit h-fit pb-[2px]"><IoIosCheckmarkCircle /></span>
+          </button>
+        }
+
       </div>
     </section>
   );

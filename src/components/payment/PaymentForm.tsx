@@ -1,7 +1,7 @@
 // paymentform.tsx
 import React, { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { savePaymentMethod } from '@/api/payment-api';
+import { savePaymentMethod } from '@/api/payment/payment-api';
 import useAuthStore from '@/store/useAuth';
 
 interface PaymentMethodData {
@@ -44,7 +44,7 @@ const PaymentForm = ({ onSuccess, existingPaymentMethods }: PaymentFormProps) =>
 
     try {
       const cardElement = elements.getElement(CardElement);
-      
+
       if (!cardElement) {
         throw new Error('Card element not found');
       }
@@ -62,9 +62,9 @@ const PaymentForm = ({ onSuccess, existingPaymentMethods }: PaymentFormProps) =>
 
       // Check for duplicate card
       const isDuplicate = existingPaymentMethods.some(
-        method => 
-          method.last4 === token.card?.last4 && 
-          method.expMonth === token.card?.exp_month && 
+        method =>
+          method.last4 === token.card?.last4 &&
+          method.expMonth === token.card?.exp_month &&
           method.expYear === token.card?.exp_year
       );
 
@@ -128,7 +128,7 @@ const PaymentForm = ({ onSuccess, existingPaymentMethods }: PaymentFormProps) =>
             Your card will be securely saved but not charged at this time.
           </p>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex">
@@ -143,7 +143,7 @@ const PaymentForm = ({ onSuccess, existingPaymentMethods }: PaymentFormProps) =>
             </div>
           </div>
         )}
-        
+
         <button
           type="submit"
           disabled={loading || !stripe || !elements}

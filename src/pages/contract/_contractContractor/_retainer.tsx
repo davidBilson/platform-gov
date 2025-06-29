@@ -137,9 +137,9 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           <button
             onClick={handleSubmitSummary}
             disabled={!summaryText.trim() || submitting}
-            className={`px-4 py-2 rounded text-sm ${
+            className={`cursor-pointer px-4 py-2 rounded text-sm ${
               summaryText.trim() && !submitting
-                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-boldblue hover:bg-boldblue/70 text-white'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >

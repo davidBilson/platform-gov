@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  startRetainerContract, 
+import {
+  startRetainerContract,
   getRetainerDetails,
   RetainerData,
   RetainerPaymentHistory
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
-import { endContract } from '@/api/contract/contract-api';
 
 interface Job {
   _id: string;
@@ -21,9 +20,10 @@ interface RetainerProps {
   job: Job;
   mutualContractId: string;
   contractStatus: string;
+  initializeContract: any;
 }
 
-const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps) => {
+const ClientRetainer = ({ job, mutualContractId, contractStatus, initializeContract }: RetainerProps) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -56,14 +56,15 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps
   };
 
   const handleStartRetainer = async (): Promise<void> => {
-    
+
     if (!mutualContractId) {
       toast.warn('contractor has not signed contract');
       return;
     };
-    
+
     try {
       setStarting(true);
+      initializeContract;
       await startRetainerContract(mutualContractId, userId);
       await fetchRetainerData();
     } catch (error) {
@@ -103,13 +104,13 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps
   return (
     <section className="w-full">
       <section className="relative mb-4">
-        <button 
+        <button
           onClick={() => setShowDetails(!showDetails)}
           className="bg-skyblue border border-lightblue text-boldblue w-30 px-2 py-1 rounded-sm outline-none hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-xs"
         >
           {showDetails ? 'Hide Job Details' : 'View Job Details'}
         </button>
-        
+
         {showDetails && (
           <article className="border border-boldblue w-fit h-fit text-sm text-boldblue p-3 rounded-sm absolute top-10 z-10 bg-white flex flex-col gap-2">
             <p><span className="font-bold">Payment Type:</span> {job.paymentType}</p>
@@ -123,20 +124,19 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps
       {!retainerData?.startDate && (
         <div className="bg-lightblue/10 border border-lightblue rounded-lg p-4 mb-6">
           <p className="text-sm text-boldblue mb-4">
-            ⚠️ Important: Clicking the {'"Start Job"'} button below will activate this retainer contract. 
-            From that moment, your billing cycle begins based on the agreed frequency — whether weekly, 
+            ⚠️ Important: Clicking the {'"Start Contract"'} button below will activate this retainer contract.
+            From that moment, your billing cycle begins based on the agreed frequency — whether weekly,
             bi-weekly, or monthly — and you will be automatically charged at the end of each billing period.
           </p>
           <button
             onClick={handleStartRetainer}
             disabled={starting}
-            className={`cursor-pointer ${
-              starting 
-                ? 'bg-gray-400 cursor-not-allowed' 
+            className={`cursor-pointer ${starting
+                ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-boldblue hover:opacity-70'
-            } text-white px-4 py-2 rounded text-sm transition duration-300 ease-in-out`}
+              } text-white px-4 py-2 rounded text-sm transition duration-300 ease-in-out`}
           >
-            {starting ? 'Starting...' : 'Start Job'}
+            {starting ? 'Starting...' : 'Start Contract'}
           </button>
         </div>
       )}
@@ -158,11 +158,10 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps
                 </td>
                 <td className="py-2.5 px-4">${payment.amount}</td>
                 <td className="py-2.5 px-4">
-                  <span className={`${
-                    payment.status === 'paid' || payment.status === 'completed'
+                  <span className={`${payment.status === 'paid' || payment.status === 'completed'
                       ? 'text-green-500'
                       : 'text-yellow-500'
-                  }`}>
+                    }`}>
                     {payment.status === 'paid' || payment.status === 'completed' ? '✓ Paid' : 'Pending'}
                   </span>
                 </td>
@@ -177,16 +176,17 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus }: RetainerProps
           )}
         </tbody>
       </table>
-      {contractStatus === 'completed' ? (
+      {contractStatus === 'completed' &&
         <p className="text-aquagreen">This contract has ended</p>
-      ) :(
-      <button
-        disabled={contractStatus == 'completed' && true}
-        onClick={() => endContract(mutualContractId, userId)}
-        className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-      >
-            End Contract
-          </button>)}
+      // ) : (
+      //   <button
+      //     disabled={contractStatus == 'completed' && true}
+      //     onClick={() => endContract(mutualContractId, userId)}
+      //     className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+      //   >
+      //     End Contract
+      //   </button>)
+      }
     </section>
   );
 };

@@ -38,7 +38,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
 
   // Format the date
   const postedDate = job.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
-  
+
   // Format payment information based on payment type
   const getPaymentInfo = () => {
     if (job.paymentType === 'hourly') {
@@ -85,7 +85,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
   // Fetch client ratings on component mount
   useEffect(() => {
     const clientId = job.userId?._id || job.userId;
-    
+
     if (clientId) {
       getClientRatings(String(clientId));
     }
@@ -96,26 +96,26 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
     if (!clientRatings || clientRatings.length === 0) {
       return { average: 0, count: 0 };
     }
-    
+
     const sum = clientRatings.reduce((acc, rating) => acc + rating.rating, 0);
     const average = sum / clientRatings.length;
-    
-    return { 
+
+    return {
       average: Math.round(average * 10) / 10,
-      count: clientRatings.length 
+      count: clientRatings.length
     };
   }, [clientRatings]);
 
   // Helper function to render star ratings
   const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false) => {
     const filledStars = Math.floor(rating);
-    
+
     return (
       <div className="flex items-center gap-1">
         <div className="flex">
           {Array.from({ length: maxRating }).map((_, i) => (
-            i < filledStars ? 
-              <MdStar key={i} className="text-deepskyblue text-lg" /> : 
+            i < filledStars ?
+              <MdStar key={i} className="text-deepskyblue text-lg" /> :
               <MdStarBorder key={i} className="text-deepskyblue text-lg" />
           ))}
         </div>
@@ -135,35 +135,35 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
         <div className="flex justify-between items-center text-sm text-gray-500 mb-3.75">
           <p className='text-xs font-semibold text-boldblue'>Posted {postedDate}</p>
         </div>
-        
+
         <h1 className="text-3xl font-bold mb-3.75">{job.jobTitle}</h1>
-        
+
         <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
           <div className="flex items-center gap-1.25">
             <FaRegHourglass size={15} />
             {getPaymentInfo()} | {job.employmentType}
           </div>
-          
+
           <div className="flex items-center gap-1.25">
             <FaLocationDot size={15} />
             {job.location}
           </div>
         </div>
       </div>
-      
+
       {/* Description section */}
       <div className="pb-7.5 border-b border-b-gray-300">
         <p className="text-black whitespace-pre-line">{String(job.description)}</p>
-        <button
-          disabled
-          className={`mt-6 flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full ${job.isFunded ? 'text-deepskyblue bg-faintskyblue' : 'text-mediumgray bg-white'
-            }`}
-        > 
-          <span className="w-fit h-fit">{job.isFunded ? 'Payment Verified' : 'Payment Unverified'}</span>
-          <span className="w-fit h-fit pb-[2px]">{job.isFunded && <IoIosCheckmarkCircle />}</span>
-        </button>
+        {job.isFunded &&
+          <button
+            disabled
+            className={`mt-6 flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full 'text-deepskyblue bg-faintskyblue`}
+          >
+            <span className="w-fit h-fit">Payment Verified</span>
+            <span className="w-fit h-fit pb-[2px]"><IoIosCheckmarkCircle /></span>
+          </button>}
       </div>
-      
+
       {/* Skills and Certifications section */}
       <div className="py-7.5 border-b border-b-gray-300">
         <div className="mb-3.75">
@@ -176,7 +176,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
             ))}
           </div>
         </div>
-        
+
         {job.requiredCertifications && job.requiredCertifications.length > 0 && (
           <div className="mb-3.75">
             <h3 className="font-semibold mb-3.75">Required Certifications</h3>
@@ -189,7 +189,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
             </div>
           </div>
         )}
-        
+
         {job.requiresRegisteredLobbyist && (
           <div>
             <h3 className="font-semibold mb-3.75">Additional Requirements</h3>
@@ -201,11 +201,11 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
           </div>
         )}
       </div>
-      
+
       {/* Client Information */}
       <div className="py-7.5">
         <h2 className="font-semibold mb-3.75">Client Information</h2>
-        
+
         <div className="flex items-center gap-5 mb-4">
           <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
             {job.clientLogo && (
@@ -231,28 +231,28 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex flex-col gap-4">
           <div>
             <p className="text-gray-500 text-sm">Industry</p>
             <p className="font-medium">{job.clientIndustry}</p>
           </div>
-          
+
           <div>
             <p className="text-gray-500 text-sm">Company Size</p>
             <p className="font-medium">{job.clientCompanySize} employees</p>
           </div>
-          
+
           <div>
             <p className="text-gray-500 text-sm">Location</p>
             <p className="font-medium">{getClientLocation()}</p>
           </div>
-          
+
           <div>
             <p className="text-gray-500 text-sm">Specializations</p>
             <p className="font-medium">{job.clientSpecializations?.join(', ')}</p>
           </div>
-          
+
           {job.jobCategory && (
             <div>
               <p className="text-gray-500 text-sm">Job Category</p>
@@ -261,11 +261,11 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
           )}
         </div>
       </div>
-      
+
       {/* Apply button at bottom */}
       <div>
-        <button 
-          onClick={onApply} 
+        <button
+          onClick={onApply}
           className="bg-boldblue text-white font-semibold py-3 px-10 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer"
         >
           Apply
@@ -281,8 +281,8 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
               <div key={rating._id || index} className='bg-gray-50 p-4 rounded-lg'>
                 <div className='flex items-center justify-between mb-2'>
                   <h4 className='font-semibold'>
-                    {typeof rating.reviewer === 'object' && rating.reviewer !== null && 'name' in rating.reviewer 
-                      ? (rating.reviewer as { name: string }).name 
+                    {typeof rating.reviewer === 'object' && rating.reviewer !== null && 'name' in rating.reviewer
+                      ? (rating.reviewer as { name: string }).name
                       : rating.reviewer}
                   </h4>
                   <span className='text-sm text-gray-500'>
@@ -290,8 +290,8 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
                   </span>
                 </div>
                 <p className='mb-3.75'>
-                  {typeof rating.jobId === 'object' && rating.jobId !== null && 'jobTitle' in rating.jobId 
-                    ? (rating.jobId as { jobTitle: string }).jobTitle 
+                  {typeof rating.jobId === 'object' && rating.jobId !== null && 'jobTitle' in rating.jobId
+                    ? (rating.jobId as { jobTitle: string }).jobTitle
                     : ''}
                 </p>
                 <div className='flex items-center gap-2 mb-2'>
@@ -302,7 +302,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
                 )}
               </div>
             ))}
-            
+
             {clientRatings.length > 3 && (
               <div className='text-center'>
                 <button className='text-boldblue text-sm font-semibold hover:underline'>

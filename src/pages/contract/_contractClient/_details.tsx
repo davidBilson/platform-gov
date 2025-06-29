@@ -112,14 +112,17 @@ const Details = ({applicationDetail, job, contract }: DetailsProps) => {
       {/* Description section */}
       <div className="pb-7.5 border-b border-b-deepskyblue mb-7.5">
         <p className="text-black whitespace-pre-line">{job?.description ?? ""}</p>
-        <button
+        {
+          job.isFunded && 
+          <button
           disabled
           className={`my-3 flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full ${job.isFunded ? 'text-deepskyblue bg-faintskyblue' : 'text-mediumgray bg-white'
             }`}
         > 
-          <span className="w-fit h-fit">{job.isFunded ? 'Payment Verified' : 'Payment Unverified'}</span>
-          <span className="w-fit h-fit pb-[2px]">{job.isFunded && <IoIosCheckmarkCircle />}</span>
+          <span className="w-fit h-fit">Payment Verified</span>
+          <span className="w-fit h-fit pb-[2px]"><IoIosCheckmarkCircle /></span>
         </button>
+        }
         <div className='flex items-center gap-2.5 mt-3.25'>
           <span className='px-2.5 py-1.25 text-xs text-boldblue font-semibold border border-boldblue rounded-full'>{job?.jobCategory ?? ""}</span>
         </div>

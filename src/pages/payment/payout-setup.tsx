@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe } from '@stripe/react-stripe-js';
-import { 
-  getPayoutMethods, 
-  saveBankAccount, 
+import {
+  getPayoutMethods,
+  saveBankAccount,
   deletePaymentMethod,
   createOnboardingLink,
-  getAccountStatus 
-} from '@/api/payment-api';
+  getAccountStatus
+} from '@/api/payment/payment-api';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
 import LoadingAnimation from '@/components/ui/loading';
@@ -55,14 +55,14 @@ const PayoutSetupContent = () => {
   const [loading, setLoading] = useState(true);
   const [accountStatus, setAccountStatus] = useState<AccountStatus | null>(null);
   const [onboardingLoading, setOnboardingLoading] = useState(false);
-  
+
   const [bankForm, setBankForm] = useState({
     routingNumber: '',
     accountNumber: '',
     accountHolderName: '',
     accountType: 'checking'
   });
-  
+
   const stripe = useStripe();
 
   const transformMethods = (methods: ApiPayoutMethod[]): PayoutMethod[] => {
@@ -82,7 +82,7 @@ const PayoutSetupContent = () => {
 
   const fetchAccountStatus = async () => {
     if (!userId) return;
-    
+
     try {
       const statusRes = await getAccountStatus(userId);
       if (statusRes.success) {
@@ -95,11 +95,11 @@ const PayoutSetupContent = () => {
 
   const handleCompleteOnboarding = async () => {
     if (!userId) return;
-    
+
     try {
       setOnboardingLoading(true);
       const onboardingRes = await createOnboardingLink(userId);
-      
+
       if (onboardingRes.success) {
         window.location.href = onboardingRes.onboardingUrl;
       } else {
@@ -116,16 +116,16 @@ const PayoutSetupContent = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!userId) return;
-      
+
       try {
         setLoading(true);
-        
+
         const methodsRes = await getPayoutMethods(userId);
         const transformedMethods = transformMethods(methodsRes);
         setPayoutMethods(transformedMethods);
-        
+
         await fetchAccountStatus();
-        
+
         console.log('Data fetched successfully');
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -133,7 +133,7 @@ const PayoutSetupContent = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -149,32 +149,32 @@ const PayoutSetupContent = () => {
     e.preventDefault();
     setBankFormError('');
     setBankFormLoading(true);
-    
+
     if (!stripe) {
       setBankFormError('Payment system not ready. Please try again.');
       setBankFormLoading(false);
       return;
     }
-    
+
     // Enhanced validation
     if (!bankForm.routingNumber || !/^\d{9}$/.test(bankForm.routingNumber)) {
       setBankFormError('Please enter a valid 9-digit routing number');
       setBankFormLoading(false);
       return;
     }
-    
+
     if (!bankForm.accountNumber || bankForm.accountNumber.length < 4) {
       setBankFormError('Please enter a valid account number');
       setBankFormLoading(false);
       return;
     }
-    
+
     if (!bankForm.accountHolderName || bankForm.accountHolderName.length < 2) {
       setBankFormError('Please enter the account holder name');
       setBankFormLoading(false);
       return;
     }
-    
+
     try {
       // Create bank account token
       const { token, error } = await stripe.createToken('bank_account', {
@@ -187,30 +187,30 @@ const PayoutSetupContent = () => {
       });
 
       console.log('Stripe token:', token);
-      
+
       if (error) {
         throw new Error(error.message || 'Bank account validation failed');
       }
-      
+
       // Save bank account via API
       const result = await saveBankAccount(userId, token.id);
       console.log('API save result:', result);
-      
+
       if (!result.success) {
         throw new Error(result.message || 'Failed to save bank account');
       }
-      
+
       // Reset form and refresh data
       resetForm();
       const methodsRes = await getPayoutMethods(userId);
       console.log('Fetched updated payout methods:', methodsRes);
       setPayoutMethods(transformMethods(methodsRes));
-      
+
       // Refresh account status
       await fetchAccountStatus();
-      
+
       toast.success('Bank account added successfully! Please complete account setup to receive payments.');
-      
+
     } catch (error) {
       setBankFormError(
         'We couldn\'t add your bank account. Please check the details and try again.'
@@ -270,7 +270,7 @@ const PayoutSetupContent = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-2xl mx-auto px-6 py-12">
-        
+
         <div className="mb-8">
           <div className="flex items-center mb-4">
             <div>
@@ -323,18 +323,16 @@ const PayoutSetupContent = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium text-gray-800">Account Status</h3>
               <div className="flex space-x-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  accountStatus.payouts_enabled 
-                    ? 'bg-green-100 text-green-700' 
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${accountStatus.payouts_enabled
+                    ? 'bg-green-100 text-green-700'
                     : 'bg-yellow-100 text-yellow-700'
-                }`}>
+                  }`}>
                   {accountStatus.payouts_enabled ? 'Ready for Payouts' : 'Setup Required'}
                 </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  accountStatus.capabilities.transfers === 'active'
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${accountStatus.capabilities.transfers === 'active'
                     ? 'bg-green-100 text-green-700'
                     : 'bg-gray-100 text-gray-700'
-                }`}>
+                  }`}>
                   Transfers: {accountStatus.capabilities.transfers}
                 </span>
               </div>
@@ -440,7 +438,7 @@ const PayoutSetupContent = () => {
                   </svg>
                 </button>
               </div>
-              
+
               <form onSubmit={handleAddBankAccount} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">
@@ -449,13 +447,13 @@ const PayoutSetupContent = () => {
                   <input
                     type="text"
                     value={bankForm.accountHolderName}
-                    onChange={(e) => setBankForm({...bankForm, accountHolderName: e.target.value})}
+                    onChange={(e) => setBankForm({ ...bankForm, accountHolderName: e.target.value })}
                     placeholder="Full name on account"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepskyblue focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">
                     Routing Number *
@@ -463,14 +461,14 @@ const PayoutSetupContent = () => {
                   <input
                     type="text"
                     value={bankForm.routingNumber}
-                    onChange={(e) => setBankForm({...bankForm, routingNumber: e.target.value})}
+                    onChange={(e) => setBankForm({ ...bankForm, routingNumber: e.target.value })}
                     placeholder="9-digit routing number"
                     maxLength={9}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepskyblue focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">
                     Account Number *
@@ -478,31 +476,31 @@ const PayoutSetupContent = () => {
                   <input
                     type="text"
                     value={bankForm.accountNumber}
-                    onChange={(e) => setBankForm({...bankForm, accountNumber: e.target.value})}
+                    onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
                     placeholder="Account number"
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepskyblue focus:border-transparent"
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-800 mb-2">
                     Account Type
                   </label>
                   <select
                     value={bankForm.accountType}
-                    onChange={(e) => setBankForm({...bankForm, accountType: e.target.value})}
+                    onChange={(e) => setBankForm({ ...bankForm, accountType: e.target.value })}
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-deepskyblue focus:border-transparent"
                   >
                     <option value="checking">Checking</option>
                     <option value="savings">Savings</option>
                   </select>
                 </div>
-                
+
                 {bankFormError && (
                   <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">{bankFormError}</div>
                 )}
-                
+
                 <div className="flex space-x-3 pt-4">
                   <button
                     type="button"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useAuthStore from '@/store/useAuth';
-import { getTransactionHistory } from '@/api/payment-api';
+import { getTransactionHistory } from '@/api/payment/payment-api';
 import { PaymentHistoryData, Transaction, TransactionType, TransactionStatus, FilterOption, PaymentMethod } from '@/types/payment';
 import ClientHistoryCards from '@/components/payment/transactionHistory/clientHistoryCards';
 import ContractorHistoryCards from '@/components/payment/transactionHistory/contractorHistoryCards';
@@ -30,7 +30,7 @@ const TransactionHistory = () => {
     setLoading(true);
     try {
       const response = await getTransactionHistory(userId);
-      
+
       if (response.success) {
         setData({
           transactions: response.data.transactions,
@@ -72,28 +72,28 @@ const TransactionHistory = () => {
     if (selectedFilter !== 'all' && transaction.type !== selectedFilter) {
       return false;
     }
-    
+
     if (selectedStatus !== 'all' && transaction.status !== selectedStatus) {
       return false;
     }
-    
+
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       const matchesDescription = transaction.description?.toLowerCase().includes(searchLower);
       const matchesJobTitle = transaction.jobTitle?.toLowerCase().includes(searchLower);
       const matchesId = transaction.id.toLowerCase().includes(searchLower);
       const matchesPaymentId = transaction.stripePaymentIntentId?.toLowerCase().includes(searchLower);
-      
+
       if (!matchesDescription && !matchesJobTitle && !matchesId && !matchesPaymentId) {
         return false;
       }
     }
-    
+
     if (startDate || endDate) {
       const transactionDate = new Date(transaction.createdAt);
       const start = startDate ? new Date(startDate) : null;
       const end = endDate ? new Date(endDate) : null;
-      
+
       if (start && transactionDate < start) {
         return false;
       }
@@ -101,7 +101,7 @@ const TransactionHistory = () => {
         return false;
       }
     }
-    
+
     return true;
   });
 
@@ -248,16 +248,16 @@ const TransactionHistory = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto p-6">
-        
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-deepskyblue mb-3">Payment History</h1>
-        </div> 
-        
-        {role === 'client' ? ( <ClientHistoryCards data={data} /> ) : ( <ContractorHistoryCards data={data} /> ) }
+        </div>
+
+        {role === 'client' ? (<ClientHistoryCards data={data} />) : (<ContractorHistoryCards data={data} />)}
 
         <div className="bg-white rounded-xl mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            
+
             <div className="lg:col-span-2">
               <div className="relative">
                 <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -350,7 +350,7 @@ const TransactionHistory = () => {
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center space-x-4 flex-1 ">
                       {getTransactionIcon(transaction.type)}
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-3 mb-2">
                           <h3 className="font-semibold text-gray-900">
@@ -358,7 +358,7 @@ const TransactionHistory = () => {
                           </h3>
                           {getStatusBadge(transaction.status)}
                         </div>
-                        
+
                         <div className="space-y-1">
                           {transaction.jobTitle && (
                             <p className="text-sm text-gray-600">
@@ -389,7 +389,7 @@ const TransactionHistory = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="ml-6">
                       {getAmountDisplay(transaction)}
                     </div>
@@ -399,7 +399,7 @@ const TransactionHistory = () => {
             )}
           </div>
         </div>
-        
+
       </div>
     </div>
   );

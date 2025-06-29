@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
-import { getWithdrawableFunds, withdrawFunds, getPayoutMethods, fetchUserWithdrawals } from '@/api/payment-api';
+import { getWithdrawableFunds, withdrawFunds, getPayoutMethods, fetchUserWithdrawals } from '@/api/payment/payment-api';
 import { toast } from 'react-toastify';
 import { Wallet, AlertCircle, Download, CreditCard, ArrowRight, DollarSign, Clock, CheckCircle, XCircle, ChevronLeft, ChevronRight, History } from 'lucide-react';
 import LoadingAnimation from '@/components/ui/loading';

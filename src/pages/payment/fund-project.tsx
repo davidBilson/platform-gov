@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import { fetchJob } from '@/api/job-api';
-import { fundProject, getPlatformFee } from '@/api/payment-api';
+import { fundProject, getPlatformFee } from '@/api/payment/payment-api';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
 
@@ -35,7 +35,7 @@ const FundProjectPage = () => {
   useEffect(() => {
     const fetchJobDetails = async () => {
       if (!jobId || !userId) return;
-      
+
       try {
         const jobData = await fetchJob(jobId as string);
         if (!jobData) {
@@ -64,15 +64,15 @@ const FundProjectPage = () => {
         const response = await getPlatformFee();
 
         if (response && response.success) {
-            setClientFee(response.clientFee / 100 || 0.05);
+          setClientFee(response.clientFee / 100 || 0.05);
         } else {
-            console.error('Failed to fetch platform fee:');
-            setClientFee(0.05);
+          console.error('Failed to fetch platform fee:');
+          setClientFee(0.05);
         }
 
       } catch (err) {
-          console.error('Error fetching platform fee:', err);
-          setClientFee(0.05);
+        console.error('Error fetching platform fee:', err);
+        setClientFee(0.05);
       }
     };
 
@@ -81,7 +81,7 @@ const FundProjectPage = () => {
 
   const calculateFundingAmount = () => {
     if (!job) return 0;
-    
+
     switch (job.paymentType) {
       case 'fixed-price': return job.price;
       case 'retainer': return job.retainerAmount || 0;
@@ -92,7 +92,7 @@ const FundProjectPage = () => {
 
   const getFundingDescription = () => {
     if (!job) return '';
-    
+
     switch (job.paymentType) {
       case 'fixed-price':
         return 'Total project amount will be held in escrow until completion';
@@ -108,7 +108,7 @@ const FundProjectPage = () => {
   const handleFundProject = async () => {
     if (!jobId) return;
     setFundingLoading(true);
-    
+
     try {
       const response = await fundProject(jobId as string, userId);
       if (response.success) {
@@ -140,7 +140,7 @@ const FundProjectPage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Unauthorized</h2>
           <p className="text-mediumgray mb-4">You are not authorized to fund this project</p>
-          <button 
+          <button
             onClick={() => router.back()}
             className="bg-boldblue text-white py-2 px-4 rounded-lg hover:bg-boldblue/90 transition-colors"
           >
@@ -157,7 +157,7 @@ const FundProjectPage = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Job Not Found</h2>
           <p className="text-mediumgray mb-4">The requested project could not be found</p>
-          <button 
+          <button
             onClick={() => router.back()}
             className="bg-boldblue text-white py-2 px-4 rounded-lg hover:bg-boldblue/90 transition-colors"
           >
@@ -175,7 +175,7 @@ const FundProjectPage = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-6 py-12">
-        
+
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-boldblue mb-3">Fund Project</h1>
@@ -186,7 +186,7 @@ const FundProjectPage = () => {
 
         <div className="bg-white rounded-2xl overflow-hidden">
           <div className="p-8">
-            
+
             {/* Project Details */}
             <div className="mb-10">
               <div className="flex items-center mb-6">
@@ -197,7 +197,7 @@ const FundProjectPage = () => {
                 </div>
                 <h2 className="text-xl font-bold text-darkgray">Project Details</h2>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <h3 className="font-bold text-darkgray text-xl mb-3">{job.jobTitle}</h3>
@@ -221,9 +221,9 @@ const FundProjectPage = () => {
                   <div>
                     <span className="text-xs font-medium text-mediumgray uppercase tracking-wide">Start Date</span>
                     <p className="text-darkgray font-semibold">
-                      {job.startDate ? new Date(job.startDate).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric' 
+                      {job.startDate ? new Date(job.startDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
                       }) : 'TBD'}
                     </p>
                   </div>
@@ -252,7 +252,7 @@ const FundProjectPage = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8">
-                
+
                 {/* Payment Type */}
                 <div className="bg-gradient-to-br from-skyblue/5 to-faintskyblue/5 rounded-xl p-6 border border-lightblue/20">
                   <div className="flex items-center justify-between mb-3">
@@ -267,25 +267,25 @@ const FundProjectPage = () => {
                 {/* Funding Breakdown */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-darkgray">Funding Breakdown</h3>
-                  
+
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 px-4 bg-lightgray/30 rounded-lg">
                       <span className="text-mediumgray">
-                        {job.paymentType === 'retainer' 
-                          ? `${job.retainerFrequency} payment` 
-                          : job.paymentType === 'hourly' 
-                          ? 'Initial funding (10 hrs)' 
-                          : 'Project amount'
+                        {job.paymentType === 'retainer'
+                          ? `${job.retainerFrequency} payment`
+                          : job.paymentType === 'hourly'
+                            ? 'Initial funding (10 hrs)'
+                            : 'Project amount'
                         }
                       </span>
                       <span className="font-semibold text-darkgray">${fundingAmount.toLocaleString()}</span>
                     </div>
-                    
+
                     <div className="flex justify-between items-center py-2 px-4 bg-lightgray/30 rounded-lg">
-                      <span className="text-mediumgray">Platform fee ({clientFee*100}%)</span>
+                      <span className="text-mediumgray">Platform fee ({clientFee * 100}%)</span>
                       <span className="font-semibold text-darkgray">${platformFee.toFixed(2)}</span>
                     </div>
-                    
+
                     <div className="flex justify-between items-center py-3 px-4 bg-gradient-to-r from-boldblue to-boldblue rounded-lg">
                       <span className="font-bold text-white">Total Amount</span>
                       <span className="font-bold text-white text-lg">${totalAmount.toLocaleString()}</span>
@@ -298,11 +298,10 @@ const FundProjectPage = () => {
                 <button
                   onClick={handleFundProject}
                   disabled={fundingLoading}
-                  className={`group relative w-full inline-flex items-center justify-center px-8 py-4 font-bold rounded-xl cursor-pointer transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-boldblue/30 ${
-                    fundingLoading 
-                      ? 'bg-mediumgray text-white cursor-not-allowed' 
+                  className={`group relative w-full inline-flex items-center justify-center px-8 py-4 font-bold rounded-xl cursor-pointer transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-boldblue/30 ${fundingLoading
+                      ? 'bg-mediumgray text-white cursor-not-allowed'
                       : 'bg-gradient-to-r from-aquagreen to-aquagreen text-white hover:shadow-xl transform hover:scale-105'
-                  }`}
+                    }`}
                 >
                   {fundingLoading ? (
                     <div className="flex items-center">

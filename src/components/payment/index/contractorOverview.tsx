@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
-import { fetchContractorFunds, fetchUserWithdrawals } from '@/api/payment-api';
+import { fetchContractorFunds, fetchUserWithdrawals } from '@/api/payment/payment-api';
 
 interface FundData {
   id: string;
@@ -261,7 +261,7 @@ const ContractorFundsOverview = () => {
   const router = useRouter();
   const { userId } = useAuthStore();
   const [activeTab, setActiveTab] = useState<ActiveTab>('available');
-  
+
   const [funds, setFunds] = useState<CategorizedFunds>({
     available: [],
     in_review: [],
@@ -310,12 +310,12 @@ const ContractorFundsOverview = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const backendFundsData: BackendCategorizedFunds = await fetchContractorFunds(userId);
-      
+
       // Transform the backend data structure to match frontend expectations
       const transformedFunds = transformBackendData(backendFundsData);
-      
+
       setFunds(transformedFunds);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred while fetching funds';
@@ -382,21 +382,20 @@ const ContractorFundsOverview = () => {
         >
           Previous
         </button>
-        
+
         {pages.map(page => (
           <button
             key={page}
             onClick={() => setWithdrawalPage(page)}
-            className={`px-3 py-1 text-sm border rounded-md ${
-              page === withdrawalData.currentPage
+            className={`px-3 py-1 text-sm border rounded-md ${page === withdrawalData.currentPage
                 ? 'bg-boldblue text-white border-boldblue'
                 : 'border-gray-300 hover:bg-gray-50'
-            }`}
+              }`}
           >
             {page}
           </button>
         ))}
-        
+
         <button
           onClick={() => setWithdrawalPage(prev => Math.min(withdrawalData.totalPages, prev + 1))}
           disabled={withdrawalData.currentPage === withdrawalData.totalPages}
@@ -589,16 +588,16 @@ const ContractorFundsOverview = () => {
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
                 className={`cursor-pointer flex-shrink-0 px-3 sm:px-4 md:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap ${activeTab === tab.id
-                    ? 'text-boldblue border-b-2 border-boldblue bg-gradient-to-t from-boldblue/5 to-boldblue/5'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  ? 'text-boldblue border-b-2 border-boldblue bg-gradient-to-t from-boldblue/5 to-boldblue/5'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 style={{ minWidth: '120px' }}
               >
                 <div className="flex items-center justify-center space-x-1 sm:space-x-2">
                   <span className="truncate">{tab.label}</span>
                   <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-bold flex-shrink-0 ${activeTab === tab.id
-                      ? 'bg-boldblue text-white'
-                      : 'bg-gray-200 text-gray-600'
+                    ? 'bg-boldblue text-white'
+                    : 'bg-gray-200 text-gray-600'
                     }`}>
                     {tab.count}
                   </span>

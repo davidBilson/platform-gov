@@ -15,7 +15,7 @@ import {
   Mail,
   Phone
 } from 'lucide-react';
-import { getPendingPayouts } from '@/api/payment-api';
+import { getPendingPayouts } from '@/api/payment/payment-api';
 
 const EscrowDashboard = () => {
   const [payouts, setPayouts] = useState([]);

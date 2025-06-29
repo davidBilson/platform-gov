@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Contract } from '@/types/contracts';
-import { releaseFunds } from '../payment-api';
+import { releaseFunds } from '../payment/payment-api';
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
 

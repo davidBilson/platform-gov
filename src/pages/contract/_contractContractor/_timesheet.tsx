@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  startWorkSession, 
-  stopWorkSession, 
-  getTimesheetLogs, 
+import {
+  startWorkSession,
+  stopWorkSession,
+  getTimesheetLogs,
   logHoursManually
 } from '@/api/contract/timesheet-api';
 import { AxiosError } from 'axios';
@@ -28,7 +28,7 @@ interface WorkSession {
   status: 'active' | 'pending' | 'approved' | 'disputed';
 }
 
-const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContractId?: string; contractStatus: string; }) => {
+const ContractorTimesheet = ({ mutualContractId, contractStatus, contract, refetchContract }: { mutualContractId?: string; contractStatus: string; contract: any; refetchContract: any; }) => {
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [sessions, setSessions] = useState<WorkSession[]>([]);
@@ -49,27 +49,27 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
 
   const fetchSessions = async () => {
     if (!mutualContractId) return;
-    
+
     try {
 
       setIsLoading(true);
       const response = await getTimesheetLogs(mutualContractId);
       setSessions(response.data || []);
-      
+
       const totalHours = (response.data || []).reduce((total: number, session: WorkSession) => {
         const normalizedDuration = normalizeDuration(session);
         return total + normalizedDuration;
       }, 0) / 3600;
-      
+
       setLoggedHours(totalHours);
 
       const contractResponse = await getSingleContract({ mutualContractId });
       if (contractResponse.success && contractResponse.data) {
         setMaxHours(contractResponse.data.maxHours || null);
       }
-      
+
       const active = response.data.find((s: WorkSession) => s.status === 'active');
-      
+
       if (active) {
         setMaxHours(response.data.maxHours)
         setActiveSession(active);
@@ -87,41 +87,41 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
 
   const handleLogHoursManually = async () => {
     if (!mutualContractId || !userId || !manualHours) return;
-  
-  try {
-    const hours = parseFloat(manualHours);
-    if (isNaN(hours) || hours <= 0) {
-      toast.error('Please enter a valid number of hours (greater than 0)');
-      return;
-    }
 
-    // Check max hours before sending to backend
-    if (maxHours !== null && (loggedHours + hours) > maxHours) {
-      toast.error(`Cannot log ${hours} hours. This would exceed the maximum of ${maxHours} hours. Current logged: ${loggedHours.toFixed(2)} hours.`);
-      return;
-    }
+    try {
+      const hours = parseFloat(manualHours);
+      if (isNaN(hours) || hours <= 0) {
+        toast.error('Please enter a valid number of hours (greater than 0)');
+        return;
+      }
 
-    const formData = new FormData();
-    formData.append('hours', hours.toString());
-    formData.append('description', manualDescription);
-    formData.append('userId', userId);
-      
+      // Check max hours before sending to backend
+      if (maxHours !== null && (loggedHours + hours) > maxHours) {
+        toast.error(`Cannot log ${hours} hours. This would exceed the maximum of ${maxHours} hours. Current logged: ${loggedHours.toFixed(2)} hours.`);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('hours', hours.toString());
+      formData.append('description', manualDescription);
+      formData.append('userId', userId);
+
       manualScreenshots.forEach((file, index) => {
         formData.append('screenshots', file, `manual-screenshot-${index}-${Date.now()}-${file.name}`);
       });
-  
+
       await logHoursManually(mutualContractId, formData);
-      
+
       setShowManualLogModal(false);
       setManualHours('');
       setManualDescription('');
       setManualScreenshots([]);
       await fetchSessions(); // Refresh the sessions
       toast.success(`${hours} hours logged manually!`);
-  
+
     } catch (error) {
       console.error('Error logging hours manually:', error);
-      
+
       // More specific error handling
       if (error instanceof Error && 'response' in error && (error as AxiosError<{ message: string }>).response?.data?.message) {
         if (error instanceof AxiosError && error.response?.data?.message) {
@@ -138,8 +138,9 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
   };
 
   useEffect(() => {
+    refetchContract();
     fetchSessions();
-    
+
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
@@ -149,11 +150,11 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
 
   const startLiveTimer = (startTimeStr: string) => {
     const startTime = new Date(startTimeStr).getTime();
-    
+
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
-    
+
     timerIntervalRef.current = setInterval(() => {
       const currentTime = Date.now();
       const duration = Math.floor((currentTime - startTime) / 1000);
@@ -163,7 +164,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
 
   const handleStartSession = async () => {
     if (!mutualContractId || !userId) return;
-    
+
     try {
       const response = await startWorkSession(mutualContractId, userId);
       setActiveSession(response.data);
@@ -177,12 +178,12 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
 
   const handleStopSession = async () => {
     if (!mutualContractId || !activeSession?._id || !userId) return;
-    
+
     try {
       const formData = new FormData();
       formData.append('notes', notes);
       formData.append('userId', userId);
-      
+
       screenshotFiles.forEach((file, index) => {
         formData.append('screenshots', file, `screenshot-${index}-${Date.now()}-${file.name}`);
       });
@@ -191,12 +192,12 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
       setActiveSession(null);
       setNotes('');
       setScreenshotFiles([]);
-      
+
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
       }
-      
+
       fetchSessions();
     } catch (error) {
       console.error('Error stopping session:', error);
@@ -212,11 +213,11 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
         const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB
         return isValidType && isValidSize;
       });
-      
+
       if (validFiles.length < files.length) {
         console.warn('Some files were skipped due to invalid type or size');
       }
-      
+
       setScreenshotFiles(prev => [...prev, ...validFiles]);
     }
   };
@@ -229,20 +230,20 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
     const startTime = new Date(start).getTime();
     const endTime = end ? new Date(end).getTime() : Date.now();
     const diffMs = endTime - startTime;
-    
+
     const seconds = Math.floor(diffMs / 1000);
     return Math.max(seconds, 0);
-};
+  };
 
   const normalizeDuration = (session: WorkSession): number => {
     if (session.duration) {
       return Math.max(session.duration, 0);
     }
-    
+
     if (session.startTime && session.endTime) {
       return calculateDuration(session.startTime, session.endTime);
     }
-    
+
     return 0;
   };
 
@@ -262,35 +263,35 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
       <div>
         <p className='pb-3.75 text-boldblue font-semibold'>Maximum Hours: {maxHours ?? '0'}</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
+
           <div className="bg-lightblue/50 p-3 rounded">
-              <p className="text-sm text-mediumgray">Total Hours</p>
-              <p className="text-xl font-semibold">
-                {formatDuration(
-                    sessions.reduce((total, session) => total + normalizeDuration(session), 0)
-                )}
-              </p>
+            <p className="text-sm text-mediumgray">Total Hours</p>
+            <p className="text-xl font-semibold">
+              {formatDuration(
+                sessions.reduce((total, session) => total + normalizeDuration(session), 0)
+              )}
+            </p>
           </div>
 
           <div className="bg-aquagreen/20 p-4 rounded">
             <p className="text-sm text-mediumgray">Approved Hours</p>
             <p className="text-xl font-semibold">
-                {formatDuration(
-                    sessions
-                        .filter(s => s.status === 'approved')
-                        .reduce((total, session) => total + normalizeDuration(session), 0)
-                )}
+              {formatDuration(
+                sessions
+                  .filter(s => s.status === 'approved')
+                  .reduce((total, session) => total + normalizeDuration(session), 0)
+              )}
             </p>
           </div>
 
           <div className="bg-yellow-50 p-3 rounded">
             <p className="text-sm text-mediumgray">Pending Hours</p>
             <p className="text-xl font-semibold">
-                {formatDuration(
-                    sessions
-                        .filter(s => s.status === 'pending')
-                        .reduce((total, session) => total + normalizeDuration(session), 0)
-                )}
+              {formatDuration(
+                sessions
+                  .filter(s => s.status === 'pending')
+                  .reduce((total, session) => total + normalizeDuration(session), 0)
+              )}
             </p>
           </div>
 
@@ -304,6 +305,9 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
             <p className="text-red-800">Maximum hours reached</p>
           </div>
         ) : (
+          <></>
+        )}
+        {contract.isStarted &&
           <div className="flex gap-2">
             <button
               onClick={() => setShowManualLogModal(true)}
@@ -312,7 +316,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
               Log Hours Manually
             </button>
           </div>
-        )}
+        }
         {/* {!activeSession && <button
             onClick={handleStartSession}
             className="px-4 py-2 flex items-center justify-center bg-aquagreen text-white text-sm rounded hover:bg-aquagreen hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
@@ -326,7 +330,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
         <div className="fixed inset-0 bg-black/50 h-screen flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text font-semibold mb-4 text-boldblue">Log Hours Manually</h3>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2 text-boldblue">Hours</label>
               <input
@@ -339,7 +343,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                 placeholder="Enter hours worked"
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2 text-boldblue">Description</label>
               <textarea
@@ -350,7 +354,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                 placeholder="What did you work on?"
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2 text-boldblue">Screenshots (Optional)</label>
               <div className="flex flex-wrap gap-2 mb-2">
@@ -372,10 +376,10 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                 ))}
               </div>
               <label className="w-full border-2 border-dashed border-deepskyblue rounded flex items-center justify-center cursor-pointer p-2">
-                <input 
-                  type="file" 
-                  className="hidden" 
-                  accept="image/*" 
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
                   multiple
                   onChange={(e) => {
                     if (e.target.files) {
@@ -386,7 +390,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                 <span className="text-sm text-boldblue">Add Screenshots</span>
               </label>
             </div>
-            
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowManualLogModal(false)}
@@ -397,9 +401,8 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
               <button
                 onClick={handleLogHoursManually}
                 disabled={!manualHours}
-                className={`px-4 py-2 bg-boldblue hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-white rounded ${
-                  !manualHours ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`px-4 py-2 bg-boldblue hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-white rounded ${!manualHours ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
               >
                 Log Hours
               </button>
@@ -419,7 +422,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                 {formatDuration(elapsedTime)}
               </div>
             </div>
-            
+
             <textarea
               className="w-full text-sm p-5 resize-none border border-deepskyblue focus:outline-deepskyblue focus:outline rounded"
               placeholder="What are you working on?"
@@ -427,7 +430,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
               onChange={(e) => setNotes(e.target.value)}
               required
             />
-            
+
             <div className="space-y-2">
               <label className="block text-sm font-bold text-boldblue">Screenshots</label>
               <div className="flex flex-wrap gap-2">
@@ -448,10 +451,10 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                   </div>
                 ))}
                 <label className="w-24 h-24 border-2 border-dashed border-boldblue rounded flex items-center justify-center cursor-pointer">
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*" 
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
                     multiple
                     onChange={handleAddScreenshot}
                   />
@@ -460,13 +463,12 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
               </div>
               <p className="text-xs text-gray-500">Max 5 screenshots (5MB each)</p>
             </div>
-            
+
             <button
               onClick={handleStopSession}
               disabled={!notes.trim()}
-              className={`hover:opacity-70 text-sm font-semibold transition duration-300 ease-in-out cursor-pointer flex items-center justify-center w-full py-2  rounded ${
-                !notes.trim() ? 'border border-deepskyblue cursor-not-allowed text-darkgray' : 'border border-deepskyblue cursor-not-allowed text-red-600'
-              }`}
+              className={`hover:opacity-70 text-sm font-semibold transition duration-300 ease-in-out cursor-pointer flex items-center justify-center w-full py-2  rounded ${!notes.trim() ? 'border border-deepskyblue cursor-not-allowed text-darkgray' : 'border border-deepskyblue cursor-not-allowed text-red-600'
+                }`}
             >
               <FaStopCircle className="mr-2" color='red' />
               Stop Work Session
@@ -476,11 +478,11 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
           <></>
         )}
       </div>
-      
+
       <div className="bg-white p-4 rounded-lg shadow">
-       
+
         <h3 className="text-lg font-semibold text-boldblue mb-7.5">Work Diary</h3>
-        
+
         {isLoading ? (
           <div className="flex justify-center py-4">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-boldblue"></div>
@@ -498,30 +500,29 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
                     </p>
                     {session.endTime && (
                       <p className="text-sm text-mediumgray flex items-center">
-                          <LuClock className="mr-1" size={14} />
-                          {formatDuration(normalizeDuration(session))}
+                        <LuClock className="mr-1" size={14} />
+                        {formatDuration(normalizeDuration(session))}
                       </p>
                     )}
                   </div>
-                  <span className={`text-xs px-2 py-1 font-semibold rounded ${
-                    session.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
-                    session.status === 'disputed' ? 'bg-red-100 text-red-800' :
-                    'bg-blue-100 text-boldblue'
-                  }`}>
+                  <span className={`text-xs px-2 py-1 font-semibold rounded ${session.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
+                        session.status === 'disputed' ? 'bg-red-100 text-red-800' :
+                          'bg-blue-100 text-boldblue'
+                    }`}>
                     {session.status}
                   </span>
                 </div>
-                
+
                 {session.notes && (
                   <p className="mt-2 text-sm">{session.notes}</p>
                 )}
-                
+
                 {session.screenshots && session.screenshots.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {session.screenshots.map((screenshot, index) => (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="relative w-16 h-16 border rounded overflow-hidden cursor-pointer"
                         onClick={() => setSelectedImage(screenshot.imagePath)}
                       >
@@ -548,7 +549,7 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus }: { mutualContr
       {selectedImage && (
         <div className="fixed inset-0 bg-black/30 bg-opacity-75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
           <div className="relative max-w-full max-h-full">
-            <button 
+            <button
               className="absolute -top-10 right-0 text-red-500 cursor-pointer text-2xl hover:text-gray-300"
               onClick={(e) => {
                 e.stopPropagation();

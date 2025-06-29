@@ -10,6 +10,8 @@ import { Jobs } from '@/types/jobs';
 import Details from './_details';
 import ContractorTimesheet from './_timesheet';
 import ContractorRetainer from './_retainer';
+import { FaDollarSign } from 'react-icons/fa';
+import ConfirmPaymentAmount from '@/components/payment/timeBasedPayout/confirmPaymentAmount';
 
 interface ContractContractorProps {
     hiringId?: string;
@@ -21,16 +23,21 @@ interface ContractContractorProps {
 interface Contract {
     _id: string;
     status: string;
+    isPaymentAmountConfirmed: boolean;
+    isStarted: boolean;
     jobId?: {
-      _id: string;
+        _id: string;
     };
     contractorId?: {
-      _id: string;
-      name: string;
+        _id: string;
+        name: string;
     };
     clientId?: {
-      _id: string;
-      name: string;
+        _id: string;
+        name: string;
+    };
+    timeBasedPayment?: {
+        amount: number;
     };
 }
 
@@ -41,7 +48,8 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
     const [contract, setContract] = useState<Contract | null>();
     const [contractStatus, setContractStatus] = useState('');
     const [middleTab, setMiddleTab] = useState('milestone');
-    
+    const [showConfirmPaymentAmount, setShowConfirmPaymentAmount] = useState(false)
+
     const { userId, name } = useAuthStore();
 
     const tabOptions = useMemo(() => {
@@ -53,7 +61,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         try {
             const jobData = await fetchJob(jobId as string);
             setJob(jobData);
-            
+
             if (jobData?.paymentType === 'hourly') {
                 setMiddleTab('timesheet');
             } else if (jobData?.paymentType === 'retainer') {
@@ -78,7 +86,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         }
     }, [activeTab, middleTab]);
 
-    
+
     useEffect(() => {
         if (tab) {
             if (tab === 'details' || tab === 'messages' || tab === middleTab) {
@@ -86,45 +94,48 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             }
         }
     }, [tab, middleTab]);
-    
-    useEffect(() => {
-        const fetchMutualContract = async () => {
-            if (!job?.userId?._id || !userId) return null;
-            
-            const response = await getSingleContract({
-                jobId: jobId,
-                clientId: job.userId._id,
-                contractorId: userId
-            });
-            if (response.success && response.data) {
-                setMutualContractId(response.data._id);
-                setContract(response.data);
-                setContractStatus(response?.data?.status);
-                if (response.data.paymentStructure) {
-                    setMiddleTab(response.data.paymentStructure);
-                }
-                return response.data;
+
+    const fetchMutualContract = async () => {
+        if (!job?.userId?._id || !userId) return null;
+
+        const response = await getSingleContract({
+            jobId: jobId,
+            clientId: job.userId._id,
+            contractorId: userId
+        });
+        if (response.success && response.data) {
+            setMutualContractId(response.data._id);
+            setContract(response.data);
+            setContractStatus(response?.data?.status);
+            if (response.data.paymentStructure) {
+                setMiddleTab(response.data.paymentStructure);
             }
-            return null;
+            return response.data;
         }
+        return null;
+    }
+
+    useEffect(() => {
         fetchMutualContract();
     }, [job, userId, jobId])
 
-    useQuery({
+    const {
+        refetch: refetchContract
+    } = useQuery({
         queryKey: ['mutualContract', jobId, job?.userId?._id, userId],
         queryFn: async () => {
             if (!job?.userId?._id || !userId) return null;
-            
+
             const response = await getSingleContract({
                 jobId: jobId,
                 clientId: job.userId._id,
                 contractorId: userId
             });
-            
+
             // Set contract ID regardless of success/failure
             if (response.success && response.data) {
                 setMutualContractId(response.data._id);
-                
+
                 if (response.data.paymentStructure) {
                     setMiddleTab(response.data.paymentStructure);
                 }
@@ -148,23 +159,28 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         switch (activeTab) {
             case 'details':
                 return job !== null && (
-                    <Details 
+                    <Details
                         job={{
                             ...job,
                             userId: job.userId ? { _id: job.userId._id } : { _id: '' }
-                        }} 
-                        jobId={jobId} 
+                        }}
+                        jobId={jobId}
                         applicationId={proposalId}
                         contract={contract as Contract}
                     />
                 );
             case 'timesheet':
-                return <ContractorTimesheet contractStatus={contractStatus} mutualContractId={mutualContractId} />;
+                return <ContractorTimesheet
+                    refetchContract={fetchMutualContract}
+                    contract={contract}
+                    contractStatus={contractStatus}
+                    mutualContractId={mutualContractId}
+                />;
             case 'milestone':
                 return <Milestones mutualContractId={mutualContractId} />;
             case 'retainer':
                 return <ContractorRetainer job={job} mutualContractId={mutualContractId} />;
-            
+
             case 'messages':
                 return (
                     <Messages
@@ -189,18 +205,36 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
 
     return (
         <main>
+            {
+                showConfirmPaymentAmount &&
+                <ConfirmPaymentAmount
+                    contract={contract}
+                    onClose={() => setShowConfirmPaymentAmount(false)}
+                    fetchMutualContract={() => fetchMutualContract()}
+                />
+            }
+
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
-                <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
+
+                <div className='flex items-center justify-between gap-4'>
+                    <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
+                    {contract && (contract.timeBasedPayment?.amount ?? 0) > 0 && !contract.isPaymentAmountConfirmed && contract.isStarted &&
+                        <button onClick={() => setShowConfirmPaymentAmount(true)} className={`bg-aquagreen hover:bg-aquagreen/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold mt-6`}>
+                            Confirm Payment Amount <FaDollarSign />
+                        </button>
+                    }
+
+                </div>
+
                 <div className='flex items-center md:gap-10 pt-5.5'>
                     {tabOptions.map((tabOption) => (
-                        <button 
+                        <button
                             key={tabOption}
                             onClick={() => setActiveTab(tabOption)}
-                            className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                                activeTab === tabOption 
-                                    ? 'border-b-boldblue' 
-                                    : 'border-b-transparent hover:border-b-skyblue'
-                            }`}
+                            className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${activeTab === tabOption
+                                ? 'border-b-boldblue'
+                                : 'border-b-transparent hover:border-b-skyblue'
+                                }`}
                         >
                             {tabOption.charAt(0).toUpperCase() + tabOption.slice(1)}
                         </button>
