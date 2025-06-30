@@ -1,4 +1,4 @@
-import { clearanceLevels, departmentAgencies } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
+import { clearanceLevels } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
 import { countriesAndStates, countries } from "../../../utils/countryAndStates/_countriesAndStates";
 import React, { useState, useEffect } from 'react';
 import { FaSearch } from "react-icons/fa";
@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
 import { IoCloseOutline } from "react-icons/io5";
 import { IoIosSearch } from "react-icons/io";
+import { GovernmentDepartmentsAndAgenciesByCountry } from "@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry";
 
 const CreateBusinessProfile = () => {
   const [business, setBusiness] = useState({
@@ -388,7 +389,7 @@ const CreateBusinessProfile = () => {
                 <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
                   onMouseDown={(e) => e.preventDefault()}
                 >
-                  {departmentAgencies
+                  {GovernmentDepartmentsAndAgenciesByCountry
                     .filter(dept =>
                       business.department
                         ? dept.toLowerCase().includes(business.department.toLowerCase())

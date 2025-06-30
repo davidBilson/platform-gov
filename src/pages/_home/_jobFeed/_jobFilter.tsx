@@ -826,10 +826,7 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
               const value = e.target.value;
               setDepartment(value);
               const allDepts = [
-                ...GovernmentDepartmentsAndAgenciesByCountry['United States'],
-                ...GovernmentDepartmentsAndAgenciesByCountry['United Kingdom'],
-                ...GovernmentDepartmentsAndAgenciesByCountry['Canada'],
-                ...GovernmentDepartmentsAndAgenciesByCountry['Australia'],
+                ...GovernmentDepartmentsAndAgenciesByCountry
               ];
               setFilteredDepartments(
                 allDepts.filter(dept =>
@@ -839,10 +836,7 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
             onFocus={() => {
               setShowDepartmentDropdown(true);
               const allDepts = [
-                ...GovernmentDepartmentsAndAgenciesByCountry['United States'],
-                ...GovernmentDepartmentsAndAgenciesByCountry['United Kingdom'],
-                ...GovernmentDepartmentsAndAgenciesByCountry['Canada'],
-                ...GovernmentDepartmentsAndAgenciesByCountry['Australia'],
+                ...GovernmentDepartmentsAndAgenciesByCountry
               ];
               setFilteredDepartments(allDepts);
             }}

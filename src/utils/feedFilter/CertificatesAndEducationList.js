@@ -1,45 +1,22 @@
-export const certificatesAndEducationList = [
-    "GCC Gov't Contr/Consult Cert (Top option)",
-    "Bachelors",
-    "Masters",
-    "Doctorate (PhD, ScD, EdD, etc.)",
-    "Juris Doctor (JD)",
-    "Medical Degree (MD, DO)",
-    "Postdoctoral Fellowship",
-    "PMP Project Management Prof.",
-    "CFCM Cert Fed. Contracts Mngr",
-    "CGFM Cert Gov't Financial Mngr",
-    "CPA Cert Public Acct",
-    "Six Sigma (Green/Black Belt)",
-    "Lean Six Sigma Certification",
-    "CSM Certified ScrumMaster",
-    "ITIL Foundation Cert",
-    "DAWIA Cert",
-    "CISSP Cert Infor Sys Sec Prof",
-    "CEH Cert Ethical Hacker",
-    "CISM Cert Infor Sec Mngr (CISM)",
-    "CFE Cert Fraud Exam (CFE)",
-    "FSO Facility Security Officer",
-    "CMMC Registered Practitioner",
-    "ITAR/EAR/DECO Controls",
-    "ITCP Int'l Trade Compliance Prof",
-    "CompTIA Security+ / Network+ / A+",
-    "GIAC GSEC, GCIH Cybersec Cert",
-    "AWS Cert",
-    "Microsoft Azure Cert",
-    "Google Cloud Cert",
-    "CDPSE Cert Data Priv Solutions Eng",
-    "CDP Cert Data Prof",
-    "FedRAMP Readiness Cert",
-    "Blockchain Prof Cert",
-    "CAIP Cert AI Practitioner",
-    "CPH Public Health Cert",
-    "CCRP Cert Clinical Research Prof",
-    "HAZWOPER Cert",
-    "CIH Cert Industrial Hygienist",
-    "Food Safety Cert",
-    "Human Subjects Protection",
-    "ADS 300 Series",
-    "HART Humanitarian Assist Response",
-    "CPLP Cert Prof in Learning and Perf"
-];
+import axios from 'axios';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+export const getContentCategories = async () => {
+  try {
+    const endPoint = process.env.NEXT_PUBLIC_CONTENT_CATEGORIES
+    const response = await axios.get(`${API_BASE_URL}${endPoint}`);
+    const values = response.data.data.certificatesAndEducation.map(item => item.value);
+    return values;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
+export let certificatesAndEducationList = [];
+
+getContentCategories().then(data => {
+    certificatesAndEducationList = data;
+});
+
