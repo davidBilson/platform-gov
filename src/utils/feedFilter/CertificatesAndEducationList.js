@@ -42,4 +42,4 @@ export const certificatesAndEducationList = [
     "ADS 300 Series",
     "HART Humanitarian Assist Response",
     "CPLP Cert Prof in Learning and Perf"
-  ];
+];

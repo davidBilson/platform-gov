@@ -206,22 +206,8 @@ const ContentManagement = () => {
                   >
                     {category.label}
                   </button>
-                  {/* <button
-                    onClick={() => handleDeleteCategory(category._id)}
-                    className="cursor-pointer text-gray-400 hover:text-red-500 px-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label={`Delete ${category.label}`}
-                  >
-                    <Trash2 size={16} />
-                  </button> */}
                 </div>
               ))}
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="cursor-pointer ml-auto mr-4 p-2 text-gray-500 hover:text-deepskyblue"
-                aria-label="Add new category"
-              >
-                <Plus size={20} />
-              </button>
             </nav>
           )}
         </div>
