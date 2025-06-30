@@ -134,7 +134,7 @@ export const getPayoutMethods = async (userId: string) => {
 
 export const saveBankAccount = async (userId: string, token: string) => {
   try {
-    const endPoint = process.env?.NEXT_PUBLIC_SAVE_BANK_ACCOUNT;
+    const endPoint = process.env.NEXT_PUBLIC_SAVE_BANK_ACCOUNT;
     const response = await axios.post(`${BASE_URL}${endPoint}`, { userId, token });
     return response.data;
   } catch (error) {

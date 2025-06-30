@@ -268,7 +268,9 @@ const CreateJob  = () => {
             setCreatedJobId(response.data.data._id);
             toast.success('Job created successfully');
             formData.paymentType === 'fixed-price' && setShowPaymentModal(true);
-            router.push('/job/manage')
+            if (formData.paymentType !== 'fixed-price') {
+              router.push('/job/manage');
+            }
           }
       } catch (error) {
         console.error('Error creating job:', error);

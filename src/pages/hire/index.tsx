@@ -291,8 +291,8 @@ const HireContractor: NextPage = () => {
                             <input 
                                 type="text" 
                                 name="rate"
-                                disabled
                                 value={formData.rate}
+                                onChange={(e) => setFormData({...formData, rate: e.target.value})}
                                 className="outline-none placeholder:font-semibold w-[80%]" 
                                 placeholder="Rate" 
                             />
