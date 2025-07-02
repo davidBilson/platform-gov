@@ -26,7 +26,6 @@ interface FormData {
 const HireContractor: NextPage = () => {
 
     const router = useRouter();
-
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
     
@@ -92,6 +91,38 @@ const HireContractor: NextPage = () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    // const handleContractPriceUpdate = async () => {
+    //     if (!amount || !userId) {
+    //         setError('Amount and user information are required');
+    //         return;
+    //     }
+
+    //     setIsLoading(true);
+    //     setError(null);
+
+    //     try {
+    //         // Prepare the payload based on payment type
+    //         const payload = {
+    //             jobId,
+    //             userId,
+    //             ...(job?.paymentType === 'retainer'
+    //                 ? { retainerAmount: parseFloat(amount) }
+    //                 : { price: parseFloat(amount) }
+    //             )
+    //         };
+
+    //         await editContractPrice(payload);
+    //         fetchJobData()
+    //         onClose();
+    //     } catch (error: any) {
+    //         console.error('Failed to update contract:', error);
+    //         setError(error?.response?.data?.message || 'Failed to update contract');
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
+
 
     const cancelHire = () => {
         clearHireData();
@@ -198,6 +229,7 @@ const HireContractor: NextPage = () => {
                 setAcceptedLegalAgreement={setAcceptedLegalAgreement}
             />
         }
+
         <main className='w-full max-w-300 mx-auto p-6 pb-80'>
             <section>
                 <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>

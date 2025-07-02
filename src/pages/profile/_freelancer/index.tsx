@@ -287,7 +287,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
           </div>
         ) : (
           <>
-            {showBankDetailsPrompt && <BankDetailsPromptModal toggle={() => setShowBankDetailsPrompt(!showBankDetailsPrompt)} />}
+            {showBankDetailsPrompt && !initialProfileId && <BankDetailsPromptModal toggle={() => setShowBankDetailsPrompt(!showBankDetailsPrompt)} />}
             <div className='flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0'>
 
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
@@ -360,9 +360,9 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
 
             {/* Rate */}
             <p className='font-semibold mb-6'>Rate: ${rate}</p>
-            <div className='pb-6'>
+            {!initialProfileId && <div className='pb-6'>
               <BankDetailsLink />
-            </div>
+            </div>}
 
             {/* Work History */}
             <WorkHistory

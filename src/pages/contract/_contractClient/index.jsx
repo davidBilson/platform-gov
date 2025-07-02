@@ -14,8 +14,7 @@ import PaymentModal from '@/components/payment/PaymentModal';
 import FundProjectBtn from '@/components/payment/FundProjectBtn';
 import { FaDollarSign, FaEdit } from 'react-icons/fa';
 import PaymentTransferModal from '@/components/payment/timeBasedPayout/paymentTransferModal';
-// import ConfirmPaymentAmount from '@/components/payment/timeBasedPayout/confirmPaymentAmount';
-import { initPayAmount, startContract } from '@/api/payment/time-based-payment';
+import { startContract } from '@/api/payment/time-based-payment';
 import EditContract from '@/components/contracts/editContract';
 import { toast } from 'react-toastify';
 
@@ -29,7 +28,6 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     const [jobIsFunded, setJobIsFunded] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
-    // const [showConfirmPaymentAmount, setShowConfirmPaymentAmount] = useState(false);
     const [showEditContractModal, setShowEditContractModal] = useState(false);
     const [mutualContractId, setMutualContractId] = useState('');
     const [contract, setContract] = useState(null);
@@ -37,6 +35,8 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [middleTab, setMiddleTab] = useState('milestone');
+    
+    const [retainerRefreshTrigger, setRetainerRefreshTrigger] = useState(0);
 
     const tabOptions = useMemo(() => {
         return ['details', middleTab, 'messages'];
@@ -114,6 +114,11 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
         setShowTransferModal(true)
     };
 
+    // Function to trigger retainer refresh
+    const triggerRetainerRefresh = () => {
+        setRetainerRefreshTrigger(prev => prev + 1);
+    };
+
     useEffect(() => {
         fetchJobData();
         fetchApplicationData();
@@ -164,8 +169,6 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
         retryDelay: 5000
     });
 
-
-
     useEffect(() => {
         if (activeTab !== 'details' && activeTab !== 'messages' && activeTab !== middleTab) {
             setActiveTab(middleTab);
@@ -214,6 +217,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     contractStatus={contractStatus}
                     job={job}
                     mutualContractId={mutualContractId}
+                    refreshTrigger={retainerRefreshTrigger}
                 />;
             case 'milestone':
                 return <Milestones 
@@ -253,6 +257,12 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     contract={contract}
                     mutualContractId={mutualContractId}
                     onClose={() => setShowTransferModal(false)}
+                    // Add callback to trigger retainer refresh for retainer jobs
+                    onPaymentSuccess={() => {
+                        if (job?.paymentType === 'retainer') {
+                            triggerRetainerRefresh();
+                        }
+                    }}
                 />
             }
 

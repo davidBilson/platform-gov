@@ -3,10 +3,10 @@ import {
   startRetainerContract,
   getRetainerDetails,
   RetainerData,
-  RetainerPaymentHistory
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
+import { getRetainerContractPayments } from '@/api/payment/time-based-payment';
 
 interface Job {
   _id: string;
@@ -21,11 +21,31 @@ interface RetainerProps {
   mutualContractId: string;
   contractStatus: string;
   initializeContract: any;
+  // Add new prop for refreshing payments
+  refreshTrigger?: number;
 }
 
-const ClientRetainer = ({ job, mutualContractId, contractStatus, initializeContract }: RetainerProps) => {
+interface PaymentTransaction {
+  id: string;
+  type: string;
+  amount: number;
+  netAmount: number;
+  fee: number;
+  status: string;
+  createdAt: string;
+  description: string;
+}
+
+const ClientRetainer = ({ 
+  job, 
+  mutualContractId, 
+  contractStatus, 
+  initializeContract,
+  refreshTrigger = 0 
+}: RetainerProps) => {
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
+  const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [starting, setStarting] = useState<boolean>(false);
   const { userId } = useAuthStore();
@@ -34,14 +54,48 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus, initializeContr
     console.log(contractStatus);
   }, [contractStatus])
 
-  // Fetch retainer data when component mounts or contract ID changes
-  useEffect(() => {
-    if (mutualContractId) {
-      fetchRetainerData();
-    } else {
-      setLoading(false);
+  const fetchPaymentTransactions = async () => {
+    if (!mutualContractId) return;
+    
+    try {
+      const paymentsData = await getRetainerContractPayments(mutualContractId);
+      setPaymentTransactions(paymentsData.data.transactions || []);
+    } catch (error) {
+      console.error('Error fetching payment transactions:', error);
     }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (mutualContractId) {
+        try {
+          setLoading(true);
+          
+          const [paymentsData, ] = await Promise.all([
+            getRetainerContractPayments(mutualContractId),
+            fetchRetainerData()
+          ]);
+
+          setPaymentTransactions(paymentsData.data.transactions || []);
+          
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
   }, [mutualContractId]);
+
+  useEffect(() => {
+    if (refreshTrigger > 0 && mutualContractId) {
+      fetchPaymentTransactions();
+    }
+  }, [refreshTrigger, mutualContractId]);
 
   const fetchRetainerData = async (): Promise<void> => {
     try {
@@ -89,9 +143,23 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus, initializeContr
     }
   };
 
-  const formatPeriod = (start: string, end: string): string => {
-    return `${formatDate(start)} - ${formatDate(end)}`;
+  const getStatusDisplay = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'Completed';
+      case 'pending':
+        return 'Pending';
+      case 'failed':
+        return 'Failed';
+      default:
+        return status;
+    }
   };
+
+  // Filter to only show completed transactions
+  const completedTransactions = paymentTransactions.filter(
+    transaction => transaction.status.toLowerCase() === 'completed'
+  );
 
   if (loading) {
     return (
@@ -121,71 +189,71 @@ const ClientRetainer = ({ job, mutualContractId, contractStatus, initializeContr
         )}
       </section>
 
-      {!retainerData?.startDate && (
-        <div className="bg-lightblue/10 border border-lightblue rounded-lg p-4 mb-6">
-          <p className="text-sm text-boldblue mb-4">
-            ⚠️ Important: Clicking the {'"Start Contract"'} button below will activate this retainer contract.
-            From that moment, your billing cycle begins based on the agreed frequency — whether weekly,
-            bi-weekly, or monthly — and you will be automatically charged at the end of each billing period.
-          </p>
-          <button
-            onClick={handleStartRetainer}
-            disabled={starting}
-            className={`cursor-pointer ${starting
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-boldblue hover:opacity-70'
-              } text-white px-4 py-2 rounded text-sm transition duration-300 ease-in-out`}
-          >
-            {starting ? 'Starting...' : 'Start Contract'}
-          </button>
-        </div>
-      )}
-
-      <table className="w-full bg-white">
-        <thead>
-          <tr className="border-b border-b-boldblue">
-            <th className="py-2 px-4 text-left">Billing Period</th>
-            <th className="py-2 px-4 text-left">Amount</th>
-            <th className="py-2 px-4 text-left">Status</th>
-          </tr>
-        </thead>
-        <tbody className="text-sm">
-          {retainerData?.paymentHistory && retainerData.paymentHistory.length > 0 ? (
-            retainerData.paymentHistory.map((payment: RetainerPaymentHistory, i: number) => (
-              <tr key={i} className="border-b border-b-lightblue py-2.5 mb-2.5">
-                <td className="py-2.5 px-4">
-                  {formatPeriod(payment.periodStart, payment.periodEnd)}
-                </td>
-                <td className="py-2.5 px-4">${payment.amount}</td>
-                <td className="py-2.5 px-4">
-                  <span className={`${payment.status === 'paid' || payment.status === 'completed'
-                      ? 'text-green-500'
-                      : 'text-yellow-500'
+      <div className="overflow-x-auto w-full">
+        <table className="min-w-full bg-white shadow-sm rounded-lg overflow-hidden">
+          <thead className="border-b border-b-deepskyblue">
+            <tr>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">
+                <span className="block sm:hidden">Desc.</span>
+                <span className="hidden sm:block">Description</span>
+              </th>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">Amount</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">Status</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">
+                <span className="block sm:hidden">Date</span>
+                <span className="hidden sm:block">Date</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="text-sm divide-y divide-gray-100">
+            {completedTransactions && completedTransactions.length > 0 ? (
+              completedTransactions.map((transaction: PaymentTransaction, index: number) => (
+                <tr key={transaction.id} className={`hover:bg-gray-50 transition-colors duration-200 ${
+                  index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+                }`}>
+                  <td className="py-3 px-2 sm:px-4 text-boldblue">
+                    <div className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-none" title={transaction.description}>
+                      {transaction.description}
+                    </div>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 font-semibold text-boldblue">
+                    ${Math.abs(transaction.amount).toFixed(2)}
+                  </td>
+                  <td className="py-3 px-2 sm:px-4">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      transaction.status.toLowerCase() === 'completed' 
+                        ? 'bg-aquagreen/10 text-aquagreen border border-aquagreen/20' 
+                        : transaction.status.toLowerCase() === 'pending'
+                        ? 'bg-faintskyblue text-deepskyblue border border-faintskyblue/20'
+                        : 'bg-red-50 text-red-600 border border-red-200'
                     }`}>
-                    {payment.status === 'paid' || payment.status === 'completed' ? '✓ Paid' : 'Pending'}
-                  </span>
+                      {getStatusDisplay(transaction.status)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 text-boldblue">
+                    <div className="text-xs sm:text-sm">
+                      {formatDate(transaction.createdAt)}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-boldblue/60">
+                  <div className="flex flex-col items-center space-y-2">
+                    <svg className="w-8 h-8 text-boldblue/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm">No completed payment transactions available</span>
+                  </div>
                 </td>
               </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={3} className="py-4 text-center text-gray-500">
-                No payment history available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
+      </div>
       {contractStatus === 'completed' &&
         <p className="text-aquagreen">This contract has ended</p>
-      // ) : (
-      //   <button
-      //     disabled={contractStatus == 'completed' && true}
-      //     onClick={() => endContract(mutualContractId, userId)}
-      //     className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-      //   >
-      //     End Contract
-      //   </button>)
       }
     </section>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IoClose } from 'react-icons/io5';
-import { FaClock, FaDollarSign, FaCreditCard, FaEdit } from 'react-icons/fa';
+import { FaClock, FaDollarSign, FaCreditCard, FaEdit, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { loadStripe } from '@stripe/stripe-js';
 import { initPayAmount } from '@/api/payment/time-based-payment';
@@ -10,37 +10,40 @@ import useAuthStore from '@/store/useAuth';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
-const PaymentTransferModal = (
-  {
-    job,
-    contract,
-    onClose,
-    refetchContract
-  }:
-    {
-      job: any;
-      contract: any;
-      onClose: () => void;
-      refetchContract: any;
-    }
-) => {
-
+const PaymentTransferModal = ({
+  job,
+  contract,
+  onClose,
+  refetchContract,
+  onPaymentSuccess
+}:
+{
+  job: any;
+  contract: any;
+  onClose: () => void;
+  refetchContract: any;
+  onPaymentSuccess?: () => void;
+}) => {
   const { userId } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
   const [checkingPaymentMethods, setCheckingPaymentMethods] = useState(true);
+  
+  // Payment calculation states
   const [paymentCalculation, setPaymentCalculation] = useState({
     baseAmount: 0,
     platformFee: 0,
-    totalAmount: 0
+    totalAmount: 0,
+    totalHours: 0,
+    effectiveHours: 0, // Hours being paid for (can differ from logged hours)
+    isCustomAmount: false
   });
   
-  // New state for editable final amount
   const [finalAmount, setFinalAmount] = useState(0);
   const [isEditingAmount, setIsEditingAmount] = useState(false);
   const [tempAmount, setTempAmount] = useState('');
 
-  // Check if user has payment methods
+  // Check payment methods on mount
   const checkPaymentMethods = async () => {
     if (userId) {
       setCheckingPaymentMethods(true);
@@ -62,48 +65,96 @@ const PaymentTransferModal = (
     checkPaymentMethods();
   }, [userId]);
 
+  // Helper functions
+  interface SafeNumberOptions {
+    value: unknown;
+    fallback?: number;
+  }
+
+  const safeNumber = ({ value, fallback = 0 }: SafeNumberOptions): number => {
+    const num = Number(value);
+    return isNaN(num) || num < 0 ? fallback : num;
+  };
+
+  const toCents = (amount: number): number => Math.round(amount * 100);
+  const fromCents = (cents: number): number => cents / 100;
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
   // Calculate total hours from timesheets
   const calculateTotalHours = () => {
     if (!contract?.timesheets || !Array.isArray(contract.timesheets)) {
       return 0;
     }
 
-    // Sum up all approved timesheet durations and convert from seconds to hours
-    const totalSeconds = contract.timesheets
-      .filter((timesheet: { status: string; duration?: number }) => timesheet.status === 'approved')
-      .reduce((total: number, timesheet: { status: string; duration?: number }) => total + (timesheet.duration || 0), 0);
+    interface Timesheet {
+      status: string;
+      duration?: number;
+    }
 
+    const totalSeconds = (contract.timesheets as Timesheet[])
+      .filter((timesheet) => timesheet.status === 'approved')
+      .reduce((total, timesheet) => total + (timesheet.duration || 0), 0);
     return totalSeconds / 3600; // Convert seconds to hours
   };
 
-  // Calculate payment amount based on payment type
-  const calculatePaymentAmount = () => {
+  // Calculate payment amount based on payment type and custom amount
+  const calculatePaymentAmount = (customBaseAmount: number | null | undefined = null) => {
     const platformFeeRate = 0.05; // 5%
+    const totalLoggedHours = calculateTotalHours();
     let baseAmount = 0;
+    let effectiveHours = totalLoggedHours;
+    let isCustomAmount = false;
 
-    switch (job?.paymentType) {
-      case 'hourly':
-        const totalHours = calculateTotalHours();
-        const hourlyRate = job?.price || 0;
-        baseAmount = totalHours * hourlyRate;
-        break;
-      case 'retainer':
-        baseAmount = job?.retainerAmount || 0;
-        break;
-      case 'fixed-price':
-        baseAmount = job?.price || 0;
-        break;
-      default:
-        baseAmount = 0;
+    if (customBaseAmount !== null && customBaseAmount !== undefined) {
+      // Custom amount provided - reverse calculate
+      baseAmount = customBaseAmount;
+      isCustomAmount = true;
+      
+      if (job?.paymentType === 'hourly') {
+        const hourlyRate = safeNumber({ value: job?.price });
+        effectiveHours = hourlyRate > 0 ? baseAmount / hourlyRate : 0;
+      } else {
+        effectiveHours = totalLoggedHours; // For non-hourly, keep original hours
+      }
+    } else {
+      // Standard calculation
+      switch (job?.paymentType) {
+        case 'hourly':
+          const hourlyRate = safeNumber({ value: job?.price });
+          baseAmount = totalLoggedHours * hourlyRate;
+          effectiveHours = totalLoggedHours;
+          break;
+        case 'retainer':
+          baseAmount = safeNumber({ value: job?.retainerAmount });
+          effectiveHours = totalLoggedHours;
+          break;
+        case 'fixed-price':
+          baseAmount = safeNumber({ value: job?.price });
+          effectiveHours = totalLoggedHours;
+          break;
+        default:
+          baseAmount = 0;
+      }
     }
 
-    const platformFee = baseAmount * platformFeeRate;
-    const totalAmount = baseAmount + platformFee;
+    // Calculate fees using cents to avoid floating point issues
+    const baseAmountCents = toCents(baseAmount);
+    const platformFeeCents = Math.round(baseAmountCents * platformFeeRate);
+    const totalAmountCents = baseAmountCents + platformFeeCents;
 
     return {
-      baseAmount,
-      platformFee,
-      totalAmount
+      baseAmount: fromCents(baseAmountCents),
+      platformFee: fromCents(platformFeeCents),
+      totalAmount: fromCents(totalAmountCents),
+      totalHours: totalLoggedHours,
+      effectiveHours: Math.max(0, effectiveHours),
+      isCustomAmount
     };
   };
 
@@ -111,22 +162,21 @@ const PaymentTransferModal = (
   useEffect(() => {
     const calculation = calculatePaymentAmount();
     setPaymentCalculation(calculation);
-    // Set final amount to calculated total initially
     setFinalAmount(calculation.totalAmount);
   }, [job, contract]);
 
-  const totalHours = calculateTotalHours();
-
+  // Payment processing functions
   const handleAskConfirmation = async () => {
     setIsLoading(true);
     try {
       const res = await initPayAmount(contract._id, Number(finalAmount), userId);
       if (res.success) {
         await refetchContract();
-        toast.success('Sent confirmation request')
+        toast.success('Sent confirmation request');
       }
     } catch (error) {
       console.error('Failed to request confirmation:', error);
+      toast.error('Failed to send confirmation request');
     } finally {
       setIsLoading(false);
     }
@@ -145,21 +195,25 @@ const PaymentTransferModal = (
       onSuccess: () => {
         refetchContract?.();
         onClose();
+        onPaymentSuccess?.();
       },
-      stripe // Pass the resolved Stripe instance
+      stripe
     });
   };
 
   // Handle amount editing
   const handleEditAmount = () => {
     setIsEditingAmount(true);
-    setTempAmount(finalAmount.toString());
+    setTempAmount(paymentCalculation.baseAmount.toString());
   };
 
   const handleSaveAmount = () => {
-    const newAmount = parseFloat(tempAmount);
-    if (!isNaN(newAmount) && newAmount > 0) {
-      setFinalAmount(newAmount);
+    const newBaseAmount = parseFloat(tempAmount);
+    if (!isNaN(newBaseAmount) && newBaseAmount > 0) {
+      // Recalculate everything based on new base amount
+      const newCalculation = calculatePaymentAmount(newBaseAmount);
+      setPaymentCalculation(newCalculation);
+      setFinalAmount(newCalculation.totalAmount);
       setIsEditingAmount(false);
     } else {
       toast.error('Please enter a valid amount');
@@ -171,11 +225,19 @@ const PaymentTransferModal = (
     setTempAmount('');
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+  const handleResetToCalculated = () => {
+    const originalCalculation = calculatePaymentAmount();
+    setPaymentCalculation(originalCalculation);
+    setFinalAmount(originalCalculation.totalAmount);
+  };
+
+  const handleAddPaymentMethod = () => {
+    // Get current URL to determine return path
+    const currentPath = window.location.pathname;
+    const returnPath = currentPath.startsWith('/contract') ? currentPath : '';
+    
+    // Navigate to payment method setup with return path
+    window.location.href = `/payment/billing-method${returnPath ? `?returnTo=${encodeURIComponent(returnPath)}` : ''}`;
   };
 
   const getPaymentTypeLabel = () => {
@@ -191,23 +253,14 @@ const PaymentTransferModal = (
     }
   };
 
-  const handleAddPaymentMethod = () => {
-    // Get current URL to determine return path
-    const currentPath = window.location.pathname;
-    const returnPath = currentPath.startsWith('/contract') ? currentPath : '';
-    
-    // Navigate to payment method setup with return path
-    window.location.href = `/payment/billing-method${returnPath ? `?returnTo=${encodeURIComponent(returnPath)}` : ''}`;
-  };
-
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-lg mx-4">
-        <div className="flex items-center justify-between p-6 border-b border-skyblue">
-          <h2 className="text-xl font-bold text-darkgray">Payment Transfer</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-800">Payment Transfer</h2>
           <button
             onClick={onClose}
-            className="text-darkgray cursor-pointer hover:text-deepskyblue text-xl"
+            className="text-gray-600 hover:text-deepskyblue text-xl"
           >
             <IoClose />
           </button>
@@ -215,119 +268,123 @@ const PaymentTransferModal = (
 
         <div className="p-6">
           <div className="mb-6">
-            <h3 className="font-semibold text-darkgray mb-4">{job?.jobTitle}</h3>
+            <h3 className="font-semibold text-gray-800 mb-4">{job?.jobTitle}</h3>
 
-            <div className="bg-skyblue rounded-lg p-4 mb-4">
-
+            <div className="bg-blue-50 rounded-lg p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-darkgray">Payment Type</span>
-                <span className="text-sm text-darkgray capitalize">{job?.paymentType}</span>
+                <span className="text-sm font-semibold text-gray-700">Payment Type</span>
+                <span className="text-sm text-gray-600 capitalize">{job?.paymentType}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-darkgray">{getPaymentTypeLabel()}</span>
-                <span className="text-sm text-darkgray">
+                <span className="text-sm font-semibold text-gray-700">{getPaymentTypeLabel()}</span>
+                <span className="text-sm text-gray-600">
                   {formatCurrency(job?.paymentType === 'retainer' ? job?.retainerAmount : job?.price)}
                   {job?.paymentType === 'hourly' && '/hr'}
                 </span>
               </div>
-
             </div>
-
-            {job?.paymentType === 'retainer' && (
-              <div className="bg-white border border-skyblue rounded-lg p-4 mb-4">
-                <div className="flex justify-between">
-                  <span>Amount:</span>
-                  <span className="font-semibold">{formatCurrency(paymentCalculation.baseAmount)}</span>
-                </div>
-                <div className="flex justify-between text-boldblue">
-                  <span>Platform Fee:</span>
-                  <span className="font-semibold">{formatCurrency(paymentCalculation.platformFee)} (5%)</span>
-                </div>
-                <div className="border-t border-skyblue pt-2 mt-2 text-gray-600">
-                  <div className="flex justify-between">
-                    <span>Calculated Subtotal:</span>
-                    <span className="font-semibold">{formatCurrency(paymentCalculation.totalAmount)}</span>
-                  </div>
-                </div>
-              </div>
-
-            )}
 
             {/* Hourly Calculation Details */}
             {job?.paymentType === 'hourly' && (
-              <div className="bg-white border border-skyblue rounded-lg p-4 mb-4">
-                
+              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
                 <div className="flex items-center gap-2 mb-3">
                   <FaClock className="text-deepskyblue text-sm" />
-                  <span className="text-sm font-semibold text-darkgray">Time Calculation</span>
+                  <span className="text-sm font-semibold text-gray-700">Time Calculation</span>
+                  {paymentCalculation.isCustomAmount && (
+                    <FaInfoCircle className="text-orange-500 text-xs" title="Custom amount - hours recalculated" />
+                  )}
                 </div>
 
-                <div className="space-y-2 text-sm text-darkgray">
+                <div className="space-y-2 text-sm text-gray-700">
                   <div className="flex justify-between">
                     <span>Hours Logged:</span>
-                    <span className="font-semibold">{totalHours.toFixed(2)} hrs</span>
+                    <span className="font-semibold">{paymentCalculation.totalHours.toFixed(2)} hrs</span>
                   </div>
+                  
                   <div className="flex justify-between">
                     <span>Hourly Rate:</span>
                     <span className="font-semibold">{formatCurrency(job?.price || 0)}/hr</span>
                   </div>
+                  
                   <div className="flex justify-between">
                     <span>Base Amount:</span>
                     <span className="font-semibold">{formatCurrency(paymentCalculation.baseAmount)}</span>
                   </div>
-                  <div className="flex justify-between text-boldblue">
+                  
+                  <div className="flex justify-between text-deepskyblue">
                     <span>Platform Fee:</span>
                     <span className="font-semibold">{formatCurrency(paymentCalculation.platformFee)} (5%)</span>
                   </div>
-                  <div className="border-t border-skyblue pt-2 mt-2 text-gray-600">
-                    <div className="flex justify-between">
-                      <span>Calculated Subtotal:</span>
-                      <span className="font-semibold">{formatCurrency(paymentCalculation.totalAmount)}</span>
+                  
+                  <div className="border-t border-gray-200 pt-2 mt-2">
+                    <div className="flex justify-between font-semibold">
+                      <span>Total to Charge:</span>
+                      <span>{formatCurrency(paymentCalculation.totalAmount)}</span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Fixed Price Calculation */}
+            {/* Retainer Calculation Details */}
+            {job?.paymentType === 'retainer' && (
+              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                <div className="flex justify-between">
+                  <span>Amount:</span>
+                  <span className="font-semibold">{formatCurrency(paymentCalculation.baseAmount)}</span>
+                </div>
+                <div className="flex justify-between text-deepskyblue">
+                  <span>Platform Fee:</span>
+                  <span className="font-semibold">{formatCurrency(paymentCalculation.platformFee)} (5%)</span>
+                </div>
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total to Charge:</span>
+                    <span>{formatCurrency(paymentCalculation.totalAmount)}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Fixed Price Calculation Details */}
             {job?.paymentType === 'fixed-price' && (
-              <div className="bg-white border border-skyblue rounded-lg p-4 mb-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
                 <div className="flex justify-between">
                   <span>Fixed Price:</span>
                   <span className="font-semibold">{formatCurrency(paymentCalculation.baseAmount)}</span>
                 </div>
-                <div className="flex justify-between text-boldblue">
+                <div className="flex justify-between text-deepskyblue">
                   <span>Platform Fee:</span>
                   <span className="font-semibold">{formatCurrency(paymentCalculation.platformFee)} (5%)</span>
                 </div>
-                <div className="border-t border-skyblue pt-2 mt-2 text-gray-600">
-                  <div className="flex justify-between">
-                    <span>Calculated Subtotal:</span>
-                    <span className="font-semibold">{formatCurrency(paymentCalculation.totalAmount)}</span>
+                <div className="border-t border-gray-200 pt-2 mt-2">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total to Charge:</span>
+                    <span>{formatCurrency(paymentCalculation.totalAmount)}</span>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Editable Final Payment Amount */}
+          {/* Editable Base Payment Amount */}
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-darkgray mb-2">
-              Final Payment Amount
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Base Payment Amount {paymentCalculation.isCustomAmount && <span className="text-orange-600">(Custom)</span>}
             </label>
-            <div className="bg-white border-2 border-deepskyblue rounded-lg p-4">
+            <div className="bg-white border-2 border-blue-500 rounded-lg p-4">
               {!isEditingAmount ? (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <FaDollarSign className="text-deepskyblue text-lg" />
-                    <span className="text-2xl font-bold text-darkgray">
-                      {formatCurrency(finalAmount)}
+                    <span className="text-2xl font-bold text-gray-800">
+                      {formatCurrency(paymentCalculation.baseAmount)}
                     </span>
                   </div>
                   <button
                     onClick={handleEditAmount}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer"
+                    className="cursor-pointer flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
                   >
                     <FaEdit className="text-xs" />
                     Edit
@@ -341,7 +398,7 @@ const PaymentTransferModal = (
                       type="number"
                       value={tempAmount}
                       onChange={(e) => setTempAmount(e.target.value)}
-                      className="text-2xl font-bold text-darkgray bg-transparent border-b-2 border-deepskyblue focus:outline-none flex-1"
+                      className="text-2xl font-bold text-gray-800 bg-transparent border-b-2 border-blue-500 focus:outline-none flex-1"
                       placeholder="0.00"
                       step="0.01"
                       min="0"
@@ -350,31 +407,34 @@ const PaymentTransferModal = (
                   <div className="flex gap-2">
                     <button
                       onClick={handleSaveAmount}
-                      className="px-3 py-1.5 text-sm bg-aquagreen hover:bg-aquagreen/80 text-white rounded-lg cursor-pointer"
+                      className="cursor-pointer px-3 py-1.5 text-sm bg-aquagreen hover:bg-aquagreen/70 text-white rounded-lg"
                     >
                       Save
                     </button>
                     <button
                       onClick={handleCancelEdit}
-                      className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer"
+                      className="cursor-pointer px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg"
                     >
                       Cancel
                     </button>
                   </div>
                 </div>
               )}
-              <p className="text-xs text-darkgray mt-2 opacity-75">
-                {finalAmount !== paymentCalculation.totalAmount && (
-                  <span className="text-orange-600 font-medium">
-                    Modified from calculated amount ({formatCurrency(paymentCalculation.totalAmount)}). 
-                  </span>
-                )}
-                {finalAmount === paymentCalculation.totalAmount ? 
-                  'Click "Edit" to adjust the final payment amount' :
-                  'Amount has been customized from the calculated total'
-                }
+              <p className="text-xs text-gray-600 mt-2">
+                This is the base amount before platform fees. Final charge will be {formatCurrency(finalAmount)}
               </p>
             </div>
+          </div>
+
+          {/* Final Amount Display */}
+          <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-semibold text-gray-700">Final Amount to Charge:</span>
+              <span className="text-2xl font-bold text-aquagreen">{formatCurrency(finalAmount)}</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Includes {formatCurrency(paymentCalculation.platformFee)} platform fee (5%)
+            </p>
           </div>
 
           {/* Payment Method Warning */}
@@ -403,28 +463,29 @@ const PaymentTransferModal = (
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 cursor-pointer py-3 px-4 border border-skyblue text-darkgray rounded-lg hover:bg-skyblue text-sm font-semibold"
+              className="cursor-pointer flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-semibold"
             >
               Cancel
             </button>
-            {contract?.isPaymentAmountConfirmed ?
+            {contract?.isPaymentAmountConfirmed ? (
               <button
                 type="button"
                 onClick={handleFundsRelease}
                 disabled={isLoading || finalAmount <= 0 || !hasPaymentMethod || checkingPaymentMethods || isEditingAmount}
-                className="flex-1 cursor-pointer py-3 px-4 bg-aquagreen hover:bg-aquagreen/70 disabled:bg-skyblue disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold"
+                className="cursor-pointer flex-1 py-3 px-4 bg-aquagreen hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold"
               >
                 {checkingPaymentMethods ? 'Checking...' : isLoading ? 'Processing...' : 'Pay Now'}
-              </button> :
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={handleAskConfirmation}
                 disabled={isLoading || finalAmount <= 0 || isEditingAmount}
-                className="flex-1 cursor-pointer py-3 px-4 bg-deepskyblue hover:bg-boldblue disabled:bg-skyblue disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold"
+                className="cursor-pointer flex-1 py-3 px-4 bg-deepskyblue hover:bg-boldblue disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold"
               >
                 {isLoading ? 'Processing...' : 'Ask for Confirmation'}
               </button>
-            }
+            )}
           </div>
         </div>
       </div>

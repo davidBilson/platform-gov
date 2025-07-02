@@ -3,8 +3,6 @@ import { toast } from 'react-toastify';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-
-
 export const initPayAmount = async (contractId: string, amount: number, clientId: string) => {
     try {
         const endPoint = (process.env.NEXT_PUBLIC_INIT_PAY_AMOUNT ?? "").replace(':id', contractId) || "";
@@ -32,7 +30,7 @@ export const editContractPrice = async (params: {
       
       const response = await axios.put(`${BASE_URL}${endPoint}`, {
         userId,
-        price: price || retainerAmount // Use either price or retainerAmount
+        price: price || retainerAmount
       });
   
       return response.data;
@@ -65,7 +63,6 @@ export const confirmPayAmount = async (contractId: string, contractorId: string)
         throw error;
     }
 };
-
 
 export const handleInstantPayment = async ({
   contractId,
@@ -137,5 +134,16 @@ export const handleInstantPayment = async ({
     }
   } finally {
     setIsLoading(false);
+  }
+};
+
+export const getRetainerContractPayments = async (contractId: string) => {
+  try {
+    const endPoint = (process.env.NEXT_PUBLIC_GET_RETAINER_CONTRACT_PAYMENTS ?? "").replace(':id', contractId) || "";
+    const response = await axios.get(`${BASE_URL}${endPoint}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching retainer contract payments:', error);
+    throw error;
   }
 };

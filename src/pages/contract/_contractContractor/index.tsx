@@ -12,6 +12,7 @@ import ContractorTimesheet from './_timesheet';
 import ContractorRetainer from './_retainer';
 import { FaDollarSign } from 'react-icons/fa';
 import ConfirmPaymentAmount from '@/components/payment/timeBasedPayout/confirmPaymentAmount';
+import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
 
 interface ContractContractorProps {
     hiringId?: string;
@@ -31,6 +32,7 @@ interface Contract {
     contractorId?: {
         _id: string;
         name: string;
+        bankAccounts?: any[]; // Add this to the interface
     };
     clientId?: {
         _id: string;
@@ -48,13 +50,18 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
     const [contract, setContract] = useState<Contract | null>();
     const [contractStatus, setContractStatus] = useState('');
     const [middleTab, setMiddleTab] = useState('milestone');
-    const [showConfirmPaymentAmount, setShowConfirmPaymentAmount] = useState(false)
+    const [showConfirmPaymentAmount, setShowConfirmPaymentAmount] = useState(false);
 
     const { userId, name } = useAuthStore();
 
     const tabOptions = useMemo(() => {
         return ['details', middleTab, 'messages'];
     }, [middleTab]);
+
+    // Extract bank accounts from contract data
+    const bankAccounts = useMemo(() => {
+        return contract?.contractorId?.bankAccounts || [];
+    }, [contract?.contractorId?.bankAccounts]);
 
     const fetchJobData = useCallback(async () => {
         if (!jobId) return;
@@ -86,7 +93,6 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
         }
     }, [activeTab, middleTab]);
 
-
     useEffect(() => {
         if (tab) {
             if (tab === 'details' || tab === 'messages' || tab === middleTab) {
@@ -107,6 +113,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             setMutualContractId(response.data._id);
             setContract(response.data);
             setContractStatus(response?.data?.status);
+            console.log("Mutual Contract Data:", response.data.contractorId?.bankAccounts?.length || 0);
             if (response.data.paymentStructure) {
                 setMiddleTab(response.data.paymentStructure);
             }
@@ -212,6 +219,10 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                     onClose={() => setShowConfirmPaymentAmount(false)}
                     fetchMutualContract={() => fetchMutualContract()}
                 />
+            }
+
+            {
+                bankAccounts.length < 1 && <BankDetailsPromptModal />
             }
 
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>

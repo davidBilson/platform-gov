@@ -13,6 +13,7 @@ interface ContractsProps {
 const ActiveContracts = ({ contracts = [] }: ContractsProps) => {
 
   const router = useRouter();
+
   const formatDate = (date: string | Date): string => {
       try {
         return format(typeof date === 'string' ? new Date(date) : date, 'MM/dd/yyyy');
@@ -56,7 +57,6 @@ const ActiveContracts = ({ contracts = [] }: ContractsProps) => {
                       contract.jobId?._id, 
                       contract.hiringId?.applicationId
                     );
-                    router.push(`/contract/${contract._id}`);
                 }}
                 className='flex flex-wrap md:justify-between gap-5 items-start pb-10 border-b border-b-lightblue cursor-pointer'
               >
