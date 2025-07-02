@@ -6,12 +6,15 @@ import Link from 'next/link';
 import { toast } from 'react-toastify';
 import { fetchProfile } from '@/api/profile-api';
 import ProfilePicture from '@/components/profile/profilePicture';
+import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
+import BankDetailsLink from '@/components/ui/finance/bank-details-link';
 
 const BusinessProfile = () => {
 
   const [client, setClient] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const [bankAccountAdded, setBankAccountAdded] = useState(false);
+  const [showBankDetailsPrompt, setShowBankDetailsPrompt] = useState(false);
   const { userId } = useAuthStore();
 
   useEffect(() => {
@@ -27,6 +30,13 @@ const BusinessProfile = () => {
 
         if (data.success && data.data) {
           setClient(data.data);
+          if (data.data.user.bankAccounts && data.data.user.bankAccounts.length > 0) {
+            setBankAccountAdded(true);
+          } else {
+            setTimeout(() => {
+              setShowBankDetailsPrompt(true);
+            }, 3000);
+          }
         }
       } catch (err) {
         console.error('Error fetching client profile:', err);
@@ -58,6 +68,7 @@ const BusinessProfile = () => {
 
   return (
     <section className='p-5 pb-20 md:p-6'>
+      {showBankDetailsPrompt && <BankDetailsPromptModal toggle={() => setShowBankDetailsPrompt(!showBankDetailsPrompt)} />}
       <section className='w-full max-w-275 m-auto'>
 
         <div className='mb-6'>
@@ -65,7 +76,7 @@ const BusinessProfile = () => {
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
               <div className='absolute flex items-center justify-center w-full h-full'>
                 {client && client.logo ? (
-                    <ProfilePicture source={client.logo} alt={`${client.name} logo`} dimension={88} />
+                  <ProfilePicture source={client.logo} alt={`${client.name} logo`} dimension={88} />
                 ) : (
                   <IoMdImages size={40} className='text-white/70' />
                 )}
@@ -183,11 +194,14 @@ const BusinessProfile = () => {
           </div>
         </div>
 
-        {/* Edit Button at Bottom */}
-        <div className='mt-8 flex justify-end'>
+        <div className='py-6'>
+          <BankDetailsLink />
+        </div>
+
+        <div className='flex '>
           <Link
             href="/profile/edit"
-            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-3 px-5 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
+            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 px-4 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
           >
             {client ? "Edit Profile" : "Create Profile"}
           </Link>

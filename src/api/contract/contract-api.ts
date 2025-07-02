@@ -129,6 +129,29 @@ export const getContracts = async (contractorId: string): Promise<{
     return response.data.data;
   } catch (error) {
     console.error('Error fetching contractor contracts:', error);
+    
+    // Handle specific error cases
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        // Data not found - return empty arrays instead of throwing
+        console.log('No contracts found for contractor:', contractorId);
+        return {
+          active: [],
+          inactive: [],
+          completed: []
+        };
+      }
+      
+      // Handle other HTTP errors (500, 403, etc.)
+      if ((error.response?.status ?? 0) >= 500) {
+        console.error('Server error:', error.response?.status ?? 'Unknown status');
+      } else if (error.response?.status === 403) {
+        console.error('Unauthorized access');
+      }
+    }
+    
+    // For network errors or other unexpected errors, return empty data
+    // instead of letting the error propagate
     return {
       active: [],
       inactive: [],

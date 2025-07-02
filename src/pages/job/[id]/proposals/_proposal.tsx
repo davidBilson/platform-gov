@@ -12,9 +12,10 @@ import { trackHiringStatus, updateJobApplicationStatus } from '@/api/status-api'
 interface ProposalProps {
   handleClose: () => void;
   proposalData: ProposalData;
+  jobStatus: string;
 }
 
-const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData }) => {
+const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData, jobStatus }) => {
 
   const router = useRouter();
   const { setHireData, } = useHire();

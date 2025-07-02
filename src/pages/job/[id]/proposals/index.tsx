@@ -1,10 +1,12 @@
 "use client"
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import JobDetails from './_jobDetails';
 import ProposalsList from './_proposalsList';
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
+import { fetchJob } from '@/api/job-api';
+import { Jobs } from '@/types/jobs';
 
 const SingleJobProposals = () => {
 
@@ -12,22 +14,40 @@ const SingleJobProposals = () => {
 
   const { id } = router.query;
   const { role } = useAuthStore();
+  const [job, setJob] = useState<Jobs | null>(null);
+  const [jobStatus, setJobStatus] = useState<string | ''>('');
+
 
   useEffect(() => {
     if (typeof window !== 'undefined' && role === "contractor") {
       const timer = setTimeout(() => {
         router.back();
       }, 100);
-      
       return () => clearTimeout(timer); // Cleanup
     }
   }, [role]);
   
-  return (
+  useEffect(() => {
+    const loadJob = async () => {
+      if (id) {
+        try {
+          const jobData = await fetchJob(id as string);
+          setJob(jobData);
+          setJobStatus(jobData?.status ?? "");
+        } catch (error) {
+          console.error('Error loading job:', error);
+          setJob(null);
+        }
+      }
+    };
+    
+    loadJob();
+  }, [id]);
 
+  return (
     <main className='container mx-auto p-6'>
 
-        <JobDetails jobId={id || ''} />
+        <JobDetails job={job} jobStatus={jobStatus} />
 
         <section className='flex flex-wrap items-start md:items-center gap-7.5 justify-between mb-7.5'>
           <h2 className=' font-semibold text-xl'>Proposals</h2>
@@ -43,7 +63,7 @@ const SingleJobProposals = () => {
           </div>
         </section>
 
-        <ProposalsList jobId={id || ''} />
+        <ProposalsList jobId={Array.isArray(id) ? id[0] : id || ''} jobStatus={jobStatus} />
 
     </main>
 

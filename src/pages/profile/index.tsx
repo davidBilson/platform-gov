@@ -4,25 +4,17 @@ import BusinessProfile from './_business'
 import FreelancerProfile from './_freelancer'
 
 const Index = () => {
+    const { userId, role } = useAuthStore()
 
-    const {userId, role } = useAuthStore()
-  
-    if ( userId && role === 'client') {
-        return (
-            <>
-                <BusinessProfile />
-            </>
-      )
-    }
+    if (!userId) return null
 
-    if ( userId && role === 'contractor') {
-        return (
-            <>
-                <FreelancerProfile />
-            </>
-      )
-    }
-    
+    const ProfileComponent = role === 'client' ? BusinessProfile : FreelancerProfile
+
+    return (
+        <>
+            <ProfileComponent />
+        </>
+    )
 }
 
 export default Index

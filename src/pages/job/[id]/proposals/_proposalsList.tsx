@@ -5,11 +5,10 @@ import useAuthStore from '@/store/useAuth';
 import { fetchJobApplications } from '@/api/job-api';
 import { JobApplicationsResponse } from '@/types/proposals';
 import { truncateDescription } from '@/utils/truncateDescription';
-import { JobDetailsProps, JobApplication, ProposalData } from '@/types/proposalsList';
-// import { trackHiringStatus, updateJobApplicationStatus } from '@/api/status-api';
+import { JobApplication, ProposalData } from '@/types/proposalsList';
 import ProfileCard from '@/components/profile/ProfileCard';
 
-const ProposalsList = ({ jobId }: JobDetailsProps) => {
+const ProposalsList = ({ jobId, jobStatus }: {jobId: string, jobStatus: string}) => {
   
   const [proposals, setProposals] = useState<JobApplicationsResponse | null>(null);
   const [showProposal, setShowProposal] = useState(false);
@@ -107,7 +106,7 @@ const ProposalsList = ({ jobId }: JobDetailsProps) => {
           />
           <div className="relative w-full md:max-w-1/2 h-full bg-white flex flex-col">
             <div className="h-full flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <Proposal handleClose={handleClose} proposalData={selectedProposal} />
+              <Proposal handleClose={handleClose} proposalData={selectedProposal} jobStatus={jobStatus}  />
             </div>
           </div>
         </div>

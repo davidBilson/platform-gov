@@ -13,6 +13,7 @@ const useAuthStore = create(
       userId: '',
       isEmailVerified: false,
       isPhoneVerified: false,
+      
       verificationCode: '',
       verificationStep: 'email',
       error: null,

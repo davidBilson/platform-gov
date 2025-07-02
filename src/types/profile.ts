@@ -65,6 +65,9 @@ export interface ProfileData {
     startDate?: string;
     endDate?: string;
   }>;
+  user: {
+    bankAccounts: Array<{}>;
+  },
   ratePerHour?: number;
   skills?: string[];
   expertise?: string[];
