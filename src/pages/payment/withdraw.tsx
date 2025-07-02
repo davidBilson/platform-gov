@@ -86,7 +86,6 @@ const Withdraw = () => {
         page,
         limit: HISTORY_LIMIT
       });
-      console.log('withdrawalhistory: ', response);
 
       if (response?.success) {
         setWithdrawalHistory(response.withdrawals || []);

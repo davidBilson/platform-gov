@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import useAuthStore from '@/store/useAuth';
 import { getTransactionHistory } from '@/api/payment/payment-api';
 import { PaymentHistoryData, Transaction, TransactionType, TransactionStatus, FilterOption, PaymentMethod } from '@/types/payment';
-import ClientHistoryCards from '@/components/payment/transactionHistory/clientHistoryCards';
-import ContractorHistoryCards from '@/components/payment/transactionHistory/contractorHistoryCards';
+// import ClientHistoryCards from '@/components/payment/transactionHistory/clientHistoryCards';
+// import ContractorHistoryCards from '@/components/payment/transactionHistory/contractorHistoryCards';
 
 const TransactionHistory = () => {
 
@@ -253,7 +253,7 @@ const TransactionHistory = () => {
           <h1 className="text-3xl font-bold text-deepskyblue mb-3">Payment History</h1>
         </div>
 
-        {role === 'client' ? (<ClientHistoryCards data={data} />) : (<ContractorHistoryCards data={data} />)}
+        {/* {role === 'client' ? (<ClientHistoryCards data={data} />) : (<ContractorHistoryCards data={data} />)} */}
 
         <div className="bg-white rounded-xl mb-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

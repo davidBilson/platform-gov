@@ -124,7 +124,6 @@ export const getPayoutMethods = async (userId: string) => {
   try {
     const endPoint = (process.env.NEXT_PUBLIC_GET_PAYOUT_METHODS ?? "").replace(':id', userId) || "";
     const response = await axios.get(`${BASE_URL}${endPoint}`);
-    console.log(response)
     return response.data.payoutMethods;
   } catch (error) {
     console.error('Error fetching payout methods:', error);
