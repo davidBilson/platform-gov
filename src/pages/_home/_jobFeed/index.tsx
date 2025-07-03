@@ -9,27 +9,48 @@ import { useJobFilter } from '@/store/useJobFilter';
 import LoadingAnimation from '@/components/ui/loading';
 
 const JobFeed = () => {
-  const [jobs, setJobs] = useState<Jobs[]>([]);
-  const [filteredJobs, setFilteredJobs] = useState<Jobs[]>([]);
+  const [allJobs, setAllJobs] = useState<Jobs[]>([]); // All fetched jobs from server
+  const [filteredJobs, setFilteredJobs] = useState<Jobs[]>([]); // Jobs after applying filters
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [, setPagination] = useState<PaginationInfo>({ total: 0, page: 1, limit: 10, pages: 0 });
+  const [pagination, setPagination] = useState<PaginationInfo>({ total: 0, page: 1, limit: 20, pages: 0 });
   const [searchPerformed, setSearchPerformed] = useState<boolean>(false);
+  const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
 
   const { activeFilters, removeFilter } = useJobFilter()
   
-  const fetchJobs = async () => {
+  const fetchJobs = async (page: number = 1, reset: boolean = true) => {
     try {
-      setLoading(true);
+      if (reset) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
       const endpoint = process.env.NEXT_PUBLIC_GET_ALL_JOBS || '';
       
-      const response = await axios.get<JobsResponse>(`${baseUrl}${endpoint}`);
+      const response = await axios.get<JobsResponse>(`${baseUrl}${endpoint}?page=${page}&limit=20`);
       
       if (response.data.success) {
-        setJobs(response.data.data);
-        setFilteredJobs(response.data.data);
+        const newJobs = response.data.data;
+        
+        if (reset) {
+          setAllJobs(newJobs);
+          if (!hasActiveFilters) {
+            setFilteredJobs(newJobs);
+          }
+        } else {
+          setAllJobs(prevJobs => {
+            const updatedJobs = [...prevJobs, ...newJobs];
+            // Only update filteredJobs if no active filters
+            if (!hasActiveFilters) {
+              setFilteredJobs(updatedJobs);
+            }
+            return updatedJobs;
+          });
+        }
         setPagination(response.data.pagination);
       } else {
         throw new Error('Failed to fetch jobs');
@@ -39,6 +60,7 @@ const JobFeed = () => {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -49,12 +71,28 @@ const JobFeed = () => {
   const handleFilterChange = (newFilteredJobs: Jobs[]) => {
     setFilteredJobs(newFilteredJobs);
     setSearchPerformed(true);
+    setHasActiveFilters(newFilteredJobs.length !== allJobs.length);
+  };
+
+  const handleLoadMore = async () => {
+    if (pagination.page < pagination.pages) {
+      await fetchJobs(pagination.page + 1, false);
+    }
+  };
+
+  const canLoadMore = () => {
+    return pagination.page < pagination.pages;
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    fetchJobs();
   };
 
   return (
     <main className="container mx-auto p-6">
       <JobFilter 
-        jobs={jobs} 
+        jobs={allJobs} 
         onFilterChange={handleFilterChange}
         loading={loading}
       />
@@ -70,6 +108,25 @@ const JobFeed = () => {
           {filteredJobs.map(job => (
             <JobList key={job._id} job={job} />
           ))}
+          
+          {canLoadMore() && !hasActiveFilters && (
+            <div className="flex justify-center pt-8 pb-40">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="bg-aquagreen cursor-pointer text-white px-6 py-3 rounded-lg font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Loading...
+                  </>
+                ) : (
+                  'Load More Jobs'
+                )}
+              </button>
+            </div>
+          )}
         </div>
       ) : loading ? (
         <div className='flex items-center justify-center h-[60vh]'>
@@ -80,7 +137,7 @@ const JobFeed = () => {
           <p>
             {"Cannot fetch job list at this time. "}
           </p>
-          <button onClick={() => fetchJobs()} className="bg-aquagreen text-white px-4 py-2 flex items-center gap-2 rounded-lg mx-auto text-sm mt-7.5 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out">
+          <button onClick={handleRetry} className="bg-aquagreen text-white px-4 py-2 flex items-center gap-2 rounded-lg mx-auto text-sm mt-7.5 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out">
             Retry <IoReload />
           </button>
         </div>

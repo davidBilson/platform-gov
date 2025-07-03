@@ -19,7 +19,7 @@ const AdminHomePage = () => {
   const [activeComponent, setActiveComponent] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const { role, userId } = useAuthStore();
-  const authorized = process.env.NEXT_PUBLIC_AUTHORIZED;
+  const authorized = userId;
   const router = useRouter();
 
   useEffect(() => {

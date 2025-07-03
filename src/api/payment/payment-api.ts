@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { SavePaymentMethodRequest } from '@/types/payment';
+import useAuthStore from '@/store/useAuth';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const adminId = process.env.NEXT_PUBLIC_AUTHORIZED;
+const { userId } = useAuthStore.getState();
+const adminId = userId ? userId : '';
 
 export const savePaymentMethod = async (data: SavePaymentMethodRequest) => {
   try {

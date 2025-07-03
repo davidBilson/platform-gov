@@ -222,7 +222,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             }
 
             {
-                bankAccounts.length < 1 && <BankDetailsPromptModal />
+                contract && bankAccounts.length < 1 && <BankDetailsPromptModal />
             }
 
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>

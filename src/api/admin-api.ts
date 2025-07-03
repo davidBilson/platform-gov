@@ -5,9 +5,11 @@ import { GetUsersResponse, GetUsersParams, GetJobParams, Job, JobStats, Contract
   FeeSettings,
   FeeSettingsResponse} from '@/types/admin';
 import { toast } from 'react-toastify';
+import useAuthStore from '@/store/useAuth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-const adminId = process.env.NEXT_PUBLIC_AUTHORIZED;
+const { userId } = useAuthStore.getState();
+const adminId = userId ? userId : '';
 
 // # ============ USERS ============ # 
 
