@@ -22,7 +22,7 @@ jobs:
       - name: Deploy Frontend
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ~/frontend
+            cd ~/GovLink-Frontend
             git pull origin main
             npm install
             npm run build
