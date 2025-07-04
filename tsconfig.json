@@ -3,6 +3,8 @@
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "exactOptionalPropertyTypes": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -13,10 +15,19 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/_business-profile/open-jobs.js", "src/pages/_business-profile/business-profile.js"],
+  "include": [
+    "next-env.d.ts", 
+    "src/**/*",
+    "**/*.ts", 
+    "**/*.js", 
+    "**/*.jsx", 
+    "**/*.tsx"
+  ],
   "exclude": ["node_modules"]
 }

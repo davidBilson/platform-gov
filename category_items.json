@@ -1,0 +1,610 @@
+[
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Government Affairs (Lobbying)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Government Affairs (Non-Lobbying)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Business Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Sales and Capture Strategies"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Marketing and Promotion"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Public Relations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Advisory Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Crisis Communications and Reputation Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Trade Show Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Government Contracting, Procurement, and Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Contract Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Financial Contracting"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Procurement and Sourcing"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Military Procurement and Acquisition"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Federal Budgeting and Appropriations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Government Proposal Writing (RFP, RFQ, RFI)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Small Business Set-Asides (8(a), SDVOSB, HUBZone)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "GSA Schedule Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Defense Industrial Base Compliance (CMMC, ITAR, DFARS)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Export Compliance Regulations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "International Trade Regulations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Government Grant and Cooperative Agreement Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Risk Management, Security, and Regulatory Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Risk Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Compliance Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Legal and Regulatory Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Ethics and Anti-Corruption Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Facility Security Clearances (FCL) and Personnel Vetting"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Classified Information Handling and Security Protocols"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Supply Chain Security and Resilience"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Insider Threat Detection and Mitigation"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Fraud Detection and Prevention"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cybersecurity and Information Technology"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cyber Security"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Zero Trust Architecture Implementation"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "SCADA and Industrial Control Systems (ICS) Security"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cyber Forensic Analysis"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cyber Defense Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cyber Threat Intelligence and Analysis"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Supply Chain Cybersecurity Risk Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Penetration Testing and Red Teaming"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cloud Security and FedRAMP Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Mobile Device and Endpoint Security"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cyber Resilience and Incident Response Planning"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Biometric and Identity Management Security"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "IT Support Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Data Science"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Artificial Intelligence"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Machine Learning and Artificial Intelligence"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Blockchain and Distributed Ledger Technologies"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Cloud Computing Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Internet of Things (IoT) Integration"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Quantum Computing Research"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Engineering, Development, and Emerging Technologies"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Engineering"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Systems Architecture"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Development Operations (DevOps)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Software Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Aerospace Defense Systems"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Unmanned Aerial Systems Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Weapon Systems Lifecycle Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "AI and Autonomous Systems Policy and Implementation"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Space Policy and Commercial Space Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Defense, Intelligence, and Security Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Military Intelligence Analysis"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Counterintelligence Measures"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Counterterrorism Strategies"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Signals Intelligence (SIGINT) Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Intelligence Analysis"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Operations Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Joint Operations Planning"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Domestic Security Measures"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Internal Security Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Border Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Maritime Operations and Strategy"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "International Security Operations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Military Logistics Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Special Operations Tactics"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Combat Engineering"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Defense Readiness and Training"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "International Affairs, Diplomacy, and Foreign Relations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Diplomacy and Foreign Service"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "International Partnerships Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Foreign Military Sales Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Deemed Export Compliance and Licensing"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Customs and Trade Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "International Agreements Coordination"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Consular Services Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Public Health, Medical, and Environmental Policy"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Public Health Initiatives"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Healthcare Administration"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Mental Health Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Epidemiology and Disease Control"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Health Policy and Legislation"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Community Health Outreach"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Public Health Emergency Preparedness and Response (HHS, CDC, NIH)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Regenerative Medicine and Advanced Biologics Policy Consulting"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Clinical Trial Management and Regulatory Compliance (NIH, FDA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Biomedical Research and Translational Science Support (NIH, BARDA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Biotechnology Regulations and Compliance (NIH, FDA, USDA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Agriculture, Food Safety, and Energy Policy"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Agricultural Policy and Rural Development Consulting (USDA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Food Safety and Inspection Compliance (USDA, FDA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Nutrition Assistance Program Administration (USDA, SNAP, WIC)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Energy Security and Resilience (Microgrids, Renewables, etc.)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Environmental Policy Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Climate Policy and Analysis"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Research, Development, and Innovation Support"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Research and Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Technology Transfer Processes"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Federal Research Funding Strategies (SBIR, STTR, NIH, NSF, DOE, DOD, NASA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Technology Commercialization and Tech Transfer for SBIR/STTR Projects"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Standards Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Measurement Science"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Quality Assurance Processes"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Training, Workforce Development, and Strategic Planning"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Training and Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Workforce Development and Talent Pipeline Strategies"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Strategic Planning"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Change Management Processes"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Public-Private Partnerships (PPP) Development"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Humanitarian Assistance and Disaster Relief Coordination"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Logistics, Operations, and Administrative Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Logistics Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Protective Service Coordination"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Travel Coordination"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Administrative Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Senior Leadership Strategies"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Protocol Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Emergency Management, Law Enforcement, and Protective Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Emergency Management"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Criminal Investigation Techniques"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Controlled Goods Program Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Defence Procurement and Industrial Benefits"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Cybersecurity and Data Protection (PIPEDA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Export and Trade Compliance (EIPA)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Indigenous Business Procurement Strategy"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Government Contracting and Public Services"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - National Security and Intelligence Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Canada - Energy Policy and Environmental Regulations"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - MOD Procurement and Defense Contracts"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - Cybersecurity and UK GDPR Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - Export Controls and Strategic Goods"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - Intelligence and Security Collaboration"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - Government Contracting and Public Procurement"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - Aerospace and Defense Industry Support"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "UK - Green Energy and Net-Zero Strategy"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Australia - Defence Export and Industry Programs"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Australia - Cybersecurity and Essential Eight Compliance"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Australia - Government Procurement and Contracting (AusTender)"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Australia - Export Controls and Defence Trade Act"
+    },
+    {
+        "categoryId": "6849a7041a9e8efb6342a17b",
+        "value": "Australia - Indigenous Business Procurement Policy (IPP)"
+    }
+]
