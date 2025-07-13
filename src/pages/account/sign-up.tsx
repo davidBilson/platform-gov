@@ -7,9 +7,9 @@ import { SignupFormData, SignupApiResponse, ErrorResponse } from '@/types/auth/a
 const Signup = () => {
 
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore();
-  
+
   const [formData, setLocalFormData] = useState<SignupFormData>({
-    userType: 'contractor',
+    role: 'contractor',
     firstName: '',
     lastName: '',
     email: '',
@@ -20,73 +20,73 @@ const Signup = () => {
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value, type } = e.target;
-    
+
     setLocalFormData(prev => ({
       ...prev,
       [name]: type === 'radio' ? e.target.value : value
     }));
-    
+
     if (errorMessage) setErrorMessage('');
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage('Passwords do not match');
       return;
     }
-    
+
     setIsSubmitting(true);
     setErrorMessage('');
-    
+
     try {
 
       const formDataForStore = {
-        role: formData.userType,
+        role: formData.role,
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
         password: formData.password,
       };
-      
+
       setStoreFormData(formDataForStore);
-      
+
       const apiHost = process.env.NEXT_PUBLIC_BASE_URL;
       const signupEndpoint = process.env.NEXT_PUBLIC_SIGNUP;
-      
+
       const res = await axios.post<SignupApiResponse>(
-        `${apiHost}${signupEndpoint}`, 
+        `${apiHost}${signupEndpoint}`,
         {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           password: formData.password,
-          role: formData.userType,
+          role: formData.role,
         }
       );
-      
+
       const responseData = res.data;
-      
+
       if (responseData.data?.userId) {
-  
+
         setUserId(responseData.data.userId);
-        
+
         setStoreFormData({
           ...formDataForStore,
           userId: responseData.data.userId,
         });
-        
+
         setVerificationStep('email');
-        
+
         window.location.href = '/account/verification';
         return;
       }
-      
+
       if (!responseData.data?.userId) {
         console.warn('Response received but userId is missing:', responseData);
       }
@@ -95,7 +95,7 @@ const Signup = () => {
 
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ErrorResponse>;
-        
+
         if (axiosError.response) {
           const errorResponseData = axiosError.response.data as ErrorResponse;
           setErrorMessage(errorResponseData.message || 'An error occurred during signup');
@@ -129,22 +129,22 @@ const Signup = () => {
     <main className='pt-10 pb-20 md:pt-20 px-5 md:px-6'>
       <section className='w-full max-w-2xl m-auto'>
         <h1 className='font-semibold text-lg md:text-xl text-center mb-6 md:mb-10'>Create Account</h1>
-        
+
         {errorMessage && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <p>{errorMessage}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           {/* User Type Selection */}
           <div className='flex items-center justify-center gap-10 md:gap-20 mb-6 md:mb-10'>
             <label className='flex items-center gap-1.25'>
-              <input 
-                type="radio" 
-                name="userType" 
+              <input
+                type="radio"
+                name="role"
                 value="contractor"
-                checked={formData.userType === 'contractor'}
+                checked={formData.role === 'contractor'}
                 onChange={handleChange}
                 style={radioStyle}
                 className="checked:after:content-[''] checked:after:absolute checked:after:top-[3px] checked:after:left-[3px] checked:after:w-[12px] checked:after:h-[12px] checked:after:rounded-full checked:after:bg-boldblue"
@@ -154,11 +154,11 @@ const Signup = () => {
               </span>
             </label>
             <label className='flex items-center gap-1.25'>
-              <input 
-                type="radio" 
-                name="userType" 
+              <input
+                type="radio"
+                name="role"
                 value="client"
-                checked={formData.userType === 'client'}
+                checked={formData.role === 'client'}
                 onChange={handleChange}
                 style={radioStyle}
                 className="checked:after:content-[''] checked:after:absolute checked:after:top-[3px] checked:after:left-[3px] checked:after:w-[12px] checked:after:h-[12px] checked:after:rounded-full checked:after:bg-boldblue"
@@ -168,40 +168,40 @@ const Signup = () => {
               </span>
             </label>
           </div>
-          
+
           {/* Form Inputs - Responsive Grid */}
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-x-4 md:gap-y-10 mb-6 md:mb-10">
             <div>
-              <input 
-                type="text" 
-                id="firstName" 
-                name="firstName" 
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder='First name' 
+                placeholder='First name'
                 className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
-                required 
+                required
               />
             </div>
 
             <div>
-              <input 
-                type="text" 
-                id="lastName" 
-                name="lastName" 
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                placeholder='Last name' 
+                placeholder='Last name'
                 className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
-                required 
+                required
               />
             </div>
 
             <div>
-              <input 
-                type="email" 
-                id="email" 
-                name="email" 
+              <input
+                type="email"
+                id="email"
+                name="email"
                 value={formData.email}
                 onChange={handleChange}
                 placeholder='Email'
@@ -211,44 +211,44 @@ const Signup = () => {
             </div>
 
             <div>
-              <input 
-                type="tel" 
-                id="phoneNumber" 
-                name="phoneNumber" 
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 placeholder='Phone'
                 className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
-                required 
+                required
               />
             </div>
-            
+
             <div>
-              <input 
-                type="password" 
-                id="password" 
-                name="password" 
+              <input
+                type="password"
+                id="password"
+                name="password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder='Password'
                 className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
-                required 
+                required
               />
             </div>
-            
+
             <div>
-              <input 
-                type="password" 
-                id="confirmPassword" 
-                name="confirmPassword" 
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder='Confirm password'
                 className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
-                required 
+                required
               />
             </div>
-            
+
             <div className='md:col-span-2 w-full h-12.5 flex items-center justify-center'>
               <button
                 type="submit"

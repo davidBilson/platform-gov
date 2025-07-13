@@ -65,7 +65,7 @@ const ContractorFeed: React.FC = () => {
 
   useEffect(() => {
     x(memoizedFilteredContractors);
-  }, [memoizedFilteredContractors]);
+  }, []);
 
   const handleRetry = () => {
     refetch();

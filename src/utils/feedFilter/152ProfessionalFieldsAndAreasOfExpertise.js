@@ -6,7 +6,13 @@ export const getContentCategories = async () => {
   try {
     const endPoint = process.env.NEXT_PUBLIC_CONTENT_CATEGORIES
     const response = await axios.get(`${API_BASE_URL}${endPoint}`);
-    const values = response.data.data.professionalFieldsAndAreasOfExpertise.map(item => item.value);
+
+    const values = response.data.data.professionalFieldsAndAreasOfExpertise
+      .sort((a, b) => {
+        return a.sortOrder - b.sortOrder;
+      })
+      .map(item => item.value);
+      
     return values;
   } catch (error) {
     console.log(error);

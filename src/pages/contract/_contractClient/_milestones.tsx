@@ -20,17 +20,17 @@ interface Milestone {
   completionDate?: string;
 }
 
-const ClientMilestones = ({ 
-  jobIsFunded, 
-  jobId, 
-  mutualContractId, 
-  contractStatus 
-}: { 
-    jobId: string; 
-    jobIsFunded?: boolean; 
-    mutualContractId?: string; 
-    contractStatus: string; 
-  }) => {
+const ClientMilestones = ({
+  jobIsFunded,
+  jobId,
+  mutualContractId,
+  contractStatus
+}: {
+  jobId: string;
+  jobIsFunded?: boolean;
+  mutualContractId?: string;
+  contractStatus: string;
+}) => {
   const [showNewMilestoneModal, setShowNewMilestoneModal] = useState(false);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const { role, userId } = useAuthStore()
@@ -136,10 +136,10 @@ const ClientMilestones = ({
                 <p>${milestone.amount.toFixed(2)}</p>
                 <p className='font-semibold text-sm'>Due {formatDate(milestone.dueDate)}</p>
                 <span className={`text-xs px-2 py-1 rounded ${milestone.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    milestone.status === 'completed' ? 'bg-blue-100 text-boldblue' :
-                      milestone.status === 'approved' ? 'bg-green-100 text-aquagreen' :
-                        milestone.status === 'paid' ? 'bg-purple-100 text-purple-800' :
-                          'bg-red-100 text-red-800'
+                  milestone.status === 'completed' ? 'bg-blue-100 text-boldblue' :
+                    milestone.status === 'approved' ? 'bg-green-100 text-aquagreen' :
+                      milestone.status === 'paid' ? 'bg-purple-100 text-purple-800' :
+                        'bg-red-100 text-red-800'
                   }`}>
                   {milestone.status}
                 </span>

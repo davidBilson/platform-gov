@@ -11,22 +11,22 @@ const JobPostApplication = () => {
   const router = useRouter();
   const { userId, role } = useAuthStore();
   const { id: jobId } = router.query;
-  
+
   const [showApplication, setShowApplication] = useState(false);
   const [job, setJob] = useState<Jobs | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const handleApply = () => {
     if (userId && role === "client") {
       return toast.error('Unauthorized! Sign up as a contractor to apply');
     }
     setShowApplication(true);
   };
-  
+
   const handleClose = () => {
     setShowApplication(false);
   };
-  
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       handleClose();
@@ -48,7 +48,7 @@ const JobPostApplication = () => {
         }
       }
     };
-    
+
     loadJob();
   }, [jobId]);
 
@@ -71,13 +71,13 @@ const JobPostApplication = () => {
   return (
     <main className='p-6 pt-7.5 relative overflow-hidden'>
       <JobPost job={job} onApply={handleApply} />
-      
+
       {showApplication && (
-        <div 
+        <div
           className='fixed inset-0 bg-black/50 z-50 flex items-center justify-end transition-opacity duration-300 ease-in-out'
           onClick={handleOverlayClick}
         >
-          <div 
+          <div
             className="w-full md:max-w-3/6 h-screen bg-skyblue overflow-y-auto"
             style={{
               animation: 'slideIn 0.3s forwards'
@@ -87,7 +87,7 @@ const JobPostApplication = () => {
           </div>
         </div>
       )}
-      
+
       <style jsx global>{`
         @keyframes slideIn {
           from { transform: translateX(100%); }

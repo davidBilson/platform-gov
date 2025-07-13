@@ -5,7 +5,7 @@ import { persist } from 'zustand/middleware';
 const useAuthStore = create(
   persist(
     (set) => ({
-      userType: '',
+      role: '',
       name: '',
       email: '',
       phoneNumber: '',

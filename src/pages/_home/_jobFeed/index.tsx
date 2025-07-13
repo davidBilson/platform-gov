@@ -1,12 +1,24 @@
+// React and Hooks
 import React, { useEffect, useState } from 'react';
+
+// Third-Party Libraries
 import axios from 'axios';
+import { IoReload } from "react-icons/io5";
+
+// Types
+import { Jobs, PaginationInfo, JobsResponse } from '@/types/jobs';
+
+// Store
+import { useJobFilter } from '@/store/useJobFilter';
+
+// UI Components
+import LoadingAnimation from '@/components/ui/loading';
+
+// Internal Components
 import JobList from '../../_home/_jobFeed/_jobList';
 import JobCountFilters from '../../_home/_jobFeed/_jobCountFilters';
 import JobFilter from '../../_home/_jobFeed/_jobFilter';
-import { Jobs, PaginationInfo, JobsResponse } from '@/types/jobs';
-import { IoReload } from "react-icons/io5";
-import { useJobFilter } from '@/store/useJobFilter';
-import LoadingAnimation from '@/components/ui/loading';
+
 
 const JobFeed = () => {
   const [allJobs, setAllJobs] = useState<Jobs[]>([]); // All fetched jobs from server

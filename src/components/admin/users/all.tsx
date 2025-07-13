@@ -157,7 +157,6 @@ const AllUsers = () => {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
       
-      // const response = await getAllUsers({ page, limit: 10, role: 'client' });
       const response = await getAllUsers({ page, limit: 10 });
       
       dispatch({ type: 'SET_USERS', payload: response.data.users });

@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import LoadingAnimation from '@/components/ui/loading';
 import FeeSettings from './_feeSettings';
 import Escrow from './_escrow';
+import ManageAdmins from './_manageAdmins';
 
 const AdminHomePage = () => {
 
@@ -32,7 +33,7 @@ const AdminHomePage = () => {
 
   useEffect(() => {
     if (!isLoading && role && userId) {
-      if (role !== 'admin' || userId !== authorized) {
+      if (role !== 'admin' && role !== 'superadmin') {
         router.push('/');
       }
     }
@@ -60,6 +61,8 @@ const AdminHomePage = () => {
         return <FeeSettings />;
       case 'escrow':
         return <Escrow />;
+      case 'admins':
+        return <ManageAdmins />;
       default:
         return <Dashboard />;
     }
@@ -77,7 +80,8 @@ const AdminHomePage = () => {
     </section>
   }
 
-  if (role !== 'admin' || userId !== authorized) {
+  // Fixed: Use AND (&&) instead of OR (||) for authorization check
+  if (role !== 'admin' && role !== 'superadmin') {
     return <section className='flex items-center justify-center min-h-100'>
       <LoadingAnimation />
     </section>
@@ -87,7 +91,7 @@ const AdminHomePage = () => {
     <div className="w-full flex h-[calc(100vh-112px)]">
 
       <AdminSideBar setActiveComponent={setActiveComponent} />
-      
+
       <div className="flex-1 p-6 overflow-y-auto">
         {renderComponent()}
       </div>

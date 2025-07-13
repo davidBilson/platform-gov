@@ -6,7 +6,21 @@ export const getContentCategories = async () => {
   try {
     const endPoint = process.env.NEXT_PUBLIC_CONTENT_CATEGORIES
     const response = await axios.get(`${API_BASE_URL}${endPoint}`);
-    const values = response.data.data.governmentDepartmentsAndAgencies.map(item => item.value);
+
+    const values = response.data.data.governmentDepartmentsAndAgencies
+      .sort((a, b) => {
+        const aIsUS = a.value.startsWith('US –') ? 0 : 1;
+        const bIsUS = b.value.startsWith('US –') ? 0 : 1;
+
+        if (aIsUS !== bIsUS) {
+          return aIsUS - bIsUS;
+        }
+
+
+        return a.sortOrder - b.sortOrder;
+      })
+      .map(item => item.value);
+
     return values;
   } catch (error) {
     console.log(error);

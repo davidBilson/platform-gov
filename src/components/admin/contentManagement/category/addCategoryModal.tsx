@@ -17,7 +17,6 @@ const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
   const [label, setLabel] = useState('');
   const [error, setError] = useState('');
 
-  // Function to convert string to camelCase
   const toCamelCase = (str: string) => {
     return str
       .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {

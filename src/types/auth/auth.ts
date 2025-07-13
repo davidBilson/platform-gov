@@ -1,9 +1,9 @@
 
-export type UserType = 'contractor' | 'client' | 'admin';
+export type role = 'contractor' | 'client' | 'admin' | 'superadmin';
 
 // ************* SIGN UP *************
 export interface SignupFormData {
-  userType: UserType;
+  role: role;
   firstName: string;
   lastName: string;
   email: string;
@@ -45,7 +45,7 @@ export interface SignInApiResponse {
       name: string;
       email: string;
       phoneNumber: string;
-      role: UserType;
+      role: role;
       isEmailVerified: boolean;
       isPhoneVerified: boolean;
       isSuspended?: boolean;
@@ -60,7 +60,7 @@ export interface SignInResponse {
     user: {
       _id: string;
       name: string;
-      role: UserType;
+      role: role;
       email: string;
       phoneNumber: string;
       isEmailVerified: boolean;

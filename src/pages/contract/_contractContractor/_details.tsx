@@ -302,7 +302,7 @@ const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
         {/* Description section */}
         <div className="pb-7.5 border-b border-b-deepskyblue pb-">
           <p className="text-black whitespace-pre-line">{job?.description ?? ""}</p>
-          { job.isFunded &&
+          {job.isFunded &&
             <button
               disabled
               className={`my-3 flex items-center gap-1 text-xs px-2 py-1 pt-1.5 font-semibold rounded-full text-deepskyblue bg-faintskyblue`}
