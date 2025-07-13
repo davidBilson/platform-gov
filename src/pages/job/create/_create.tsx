@@ -39,7 +39,7 @@ const CreateJob  = () => {
         requiredCertifications: [],
         requiresRegisteredLobbyist: false,
         employmentType: 'Part-time',
-        paymentType: '',
+        paymentType: 'hourly',
         price: 0,
         startDate: null,
         retainerAmount: 0,
@@ -75,7 +75,6 @@ const CreateJob  = () => {
     const datePickerRef = useRef(null);
     
     const retainerFrequencyOptions = ['weekly', 'bi-weekly', 'monthly'];
-
 
     useEffect(() => {
       const fetchData = async () => {
@@ -594,20 +593,22 @@ const CreateJob  = () => {
                 Retainer
               </div>
               
-              <div className='flex items-center gap-1.25 text-mediumgray'>
+              <div className='flex items-center gap-1.25 text-gray-500'>
                 {formData.paymentType === 'commission' ? (
                   <MdOutlineRadioButtonChecked 
                     size={21} 
+                    color='#AAAAAA' 
                     // color='#0B5F94' 
                     // onClick={() => handlePaymentTypeChange('commission')}
-                    className="cursor-pointer"
+                    className="cursor-not-allowed"
                   />
                 ) : (
                   <MdOutlineRadioButtonUnchecked 
                     size={20} 
+                    color='#AAAAAA' 
                     // color='#0B5F94' 
                     // onClick={() => handlePaymentTypeChange('commission')}
-                    className="cursor-pointer"
+                    className="cursor-not-allowed"
                   />
                 )}
                 Commission
@@ -724,7 +725,7 @@ const CreateJob  = () => {
         type="text"
         value={formData.price || ''}
         onChange={handlePriceChange}
-        placeholder={formData.paymentType === 'hourly' ? "Enter Hourly Rate" : "Enter Fixed Price"}
+        placeholder={formData.paymentType === 'hourly' ? "Enter Hourly Rate" : formData.paymentType === 'fixed-price' ? "Enter Fixed Price" : 'Enter Commission Price'}
         className="outline-none placeholder:font-semibold w-[80%]" 
       />
       <button 

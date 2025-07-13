@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { getAllJobs } from '@/api/admin-api';
 import Pagination from '@/components/pagination/pagination';
-import { formatDate } from '@/utils/formatDate';
+import { formatDate } from '@/utils/format';
 import TableSkeletonLoader from '@/components/skeleton/tableSkeletonLoader';
 
 const AllJobs = () => {

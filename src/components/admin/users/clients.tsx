@@ -8,7 +8,7 @@ import { User } from '@/types/admin';
 
 import { Switch } from '@/components/ui/switch';
 import { toggleUserPriority, toggleUserSuspend } from '@/api/admin-api';
-import { maskEmail, maskPhoneNumber } from '@/utils/maskData';
+import { maskEmail, maskPhoneNumber } from '@/utils/format';
 
 interface PaginationState {
   currentPage: number;

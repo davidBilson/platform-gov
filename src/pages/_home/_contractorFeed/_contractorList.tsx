@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { IoLocationOutline } from 'react-icons/io5';
 import Link from 'next/link';
 import { getUserRatings } from '@/api/rating-api';
-import { formatName } from '@/utils/formatName';
+import { formatName } from '@/utils/format';
 
 
 interface ContractorWithRating {

@@ -13,6 +13,7 @@ import { getHiringOffer, acceptHiringOffer, getContractorSignature } from '@/api
 import { createContract } from '@/api/contract/contract-api';
 import RateUserBtn from '@/components/rating/rateUserBtn';
 import { IoIosCheckmarkCircle } from 'react-icons/io';
+import { formatPaymentInfo } from '@/utils/format';
 
 interface Job {
   createdAt?: string;
@@ -223,17 +224,6 @@ const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
   const isJobAlreadyAccepted = jobAcceptanceStatus === "accepted";
   const canAcceptJob = contractSigned && jobAcceptanceStatus === "offered";
 
-  const getPaymentInfo = (): string => {
-    if (job.paymentType === 'hourly') {
-      return `Hourly | $${job.price}`;
-    } else if (job.paymentType === 'fixed-price') {
-      return `Fixed Price | $${job.price}`;
-    } else if (job.paymentType === 'retainer' && job.retainerAmount && job.retainerFrequency) {
-      return `Retainer | $${job.retainerAmount}/${job.retainerFrequency.toLowerCase()}`;
-    }
-    return '';
-  };
-
   if (loading) {
     return (
       <div className='flex items-center justify-center h-[60vh]'>
@@ -288,7 +278,7 @@ const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
           <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
             <div className="flex items-center gap-1.25">
               <FaRegHourglass size={15} />
-              {getPaymentInfo()} | {job.employmentType}
+              {formatPaymentInfo(job)} | {job.employmentType}
             </div>
 
             <div className="flex items-center gap-1.25">

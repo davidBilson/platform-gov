@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import useAuthStore from '@/store/useAuth';
 import { fetchJobApplications } from '@/api/job-api';
 import { JobApplicationsResponse } from '@/types/proposals';
-import { truncateDescription } from '@/utils/truncateDescription';
+import { truncateDescription } from '@/utils/format';
 import { JobApplication, ProposalData } from '@/types/proposalsList';
 import ProfileCard from '@/components/profile/ProfileCard';
 

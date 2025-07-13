@@ -14,7 +14,7 @@ import PaymentModal from '@/components/payment/PaymentModal';
 import FundProjectBtn from '@/components/payment/FundProjectBtn';
 import { FaDollarSign, FaEdit } from 'react-icons/fa';
 import PaymentTransferModal from '@/components/payment/timeBasedPayout/paymentTransferModal';
-import { startContract } from '@/api/payment/time-based-payment';
+import { startContract } from '@/api/payment/time-and-commission-based-payment';
 import EditContract from '@/components/contracts/editContract';
 import { toast } from 'react-toastify';
 

@@ -142,7 +142,7 @@ export interface Contract {
   totalValue: number;
   amount: string;
   status: 'active' | 'completed' | 'disputed' | 'cancelled';
-  paymentStructure: 'milestone' | 'timesheet' | 'retainer';
+  paymentStructure: 'milestone' | 'timesheet' | 'retainer' | 'commission';
   milestones?: Milestone[];
   timesheets?: Timesheet[];
   retainer: {

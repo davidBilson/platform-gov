@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import {
-  submitWorkSummary,
+  startRetainerContract,
   getRetainerDetails,
   RetainerData,
-  RetainerPaymentHistory
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
-import { Jobs } from '@/types/jobs';
+import { toast } from 'react-toastify';
 import { getRetainerContractPayments } from '@/api/payment/time-and-commission-based-payment';
 
+interface Job {
+  _id: string;
+  paymentType: string;
+  retainerAmount: number;
+  retainerFrequency: 'weekly' | 'bi-weekly' | 'monthly';
+  retainerDuration: string;
+}
+
 interface RetainerProps {
-  job: Jobs | null;
+  job: Job;
   mutualContractId: string;
+  contractStatus: string;
+  initializeContract: any;
+  refreshTrigger?: number;
 }
 
 interface PaymentTransaction {
@@ -25,16 +35,34 @@ interface PaymentTransaction {
   description: string;
 }
 
-const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
-  const [showDetails, setShowDetails] = useState(false);
+const ClientCommission = ({
+  job,
+  mutualContractId,
+  contractStatus,
+  initializeContract,
+  refreshTrigger = 0
+}: RetainerProps) => {
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
   const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
-
-  const [summaryText, setSummaryText] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [starting, setStarting] = useState<boolean>(false);
   const { userId } = useAuthStore();
+
+  useEffect(() => {
+    console.log(contractStatus);
+  }, [contractStatus])
+
+  const fetchPaymentTransactions = async () => {
+    if (!mutualContractId) return;
+
+    try {
+      const paymentsData = await getRetainerContractPayments(mutualContractId);
+      setPaymentTransactions(paymentsData.data.transactions || []);
+    } catch (error) {
+      console.error('Error fetching payment transactions:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,6 +76,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           ]);
 
           setPaymentTransactions(paymentsData.data.transactions || []);
+
         } catch (error) {
           console.error('Error fetching data:', error);
         } finally {
@@ -62,17 +91,12 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   }, [mutualContractId]);
 
   useEffect(() => {
-    if (retainerData?.nextPaymentDate) {
-      const now = new Date();
-      const paymentDate = new Date(retainerData.nextPaymentDate);
-      const diffInHours = (paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-      setCanSubmit(diffInHours <= 48);
-    } else {
-      setCanSubmit(false);
+    if (refreshTrigger > 0 && mutualContractId) {
+      fetchPaymentTransactions();
     }
-  }, [retainerData]);
+  }, [refreshTrigger, mutualContractId]);
 
-  const fetchRetainerData = async () => {
+  const fetchRetainerData = async (): Promise<void> => {
     try {
       setLoading(true);
       const data = await getRetainerDetails(mutualContractId, userId);
@@ -84,7 +108,26 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const handleStartRetainer = async (): Promise<void> => {
+
+    if (!mutualContractId) {
+      toast.warn('contractor has not signed contract');
+      return;
+    };
+
+    try {
+      setStarting(true);
+      initializeContract;
+      await startRetainerContract(mutualContractId, userId);
+      await fetchRetainerData();
+    } catch (error) {
+      console.error('Error starting retainer:', error);
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const formatDate = (dateString: string): string => {
     if (!dateString) return 'N/A';
     try {
       const date = new Date(dateString);
@@ -114,7 +157,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
 
   // Filter to only show completed transactions
   const completedTransactions = paymentTransactions.filter(
-    transaction => transaction.status.toLowerCase() !== 'completed'
+    transaction => transaction.status.toLowerCase() === 'completed'
   );
 
   if (loading) {
@@ -135,7 +178,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           {showDetails ? 'Hide Job Details' : 'View Job Details'}
         </button>
 
-        {showDetails && job && (
+        {showDetails && (
           <article className="border border-boldblue w-fit h-fit text-sm text-boldblue p-3 rounded-sm absolute top-10 z-10 bg-white flex flex-col gap-2">
             <p><span className="font-bold">Payment Type:</span> {job.paymentType}</p>
             <p><span className="font-bold">Amount:</span> ${job.retainerAmount}</p>
@@ -172,14 +215,14 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
                     </div>
                   </td>
                   <td className="py-3 px-2 sm:px-4 font-semibold text-boldblue">
-                    ${(Math.abs(transaction.amount).toFixed(2))}
+                    ${Math.abs(transaction.amount).toFixed(2)}
                   </td>
                   <td className="py-3 px-2 sm:px-4">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.status.toLowerCase() === 'completed'
                       ? 'bg-aquagreen/10 text-aquagreen border border-aquagreen/20'
                       : transaction.status.toLowerCase() === 'pending'
                         ? 'bg-faintskyblue text-deepskyblue border border-faintskyblue/20'
-                        : 'bg-lightgray text-mediumgray border border-mediumgray'
+                        : 'bg-red-50 text-red-600 border border-red-200'
                       }`}>
                       {getStatusDisplay(transaction.status)}
                     </span>
@@ -206,8 +249,11 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           </tbody>
         </table>
       </div>
+      {contractStatus === 'completed' &&
+        <p className="text-aquagreen">This contract has ended</p>
+      }
     </section>
   );
 };
 
-export default ContractorRetainer;
+export default ClientCommission;

@@ -48,15 +48,6 @@ export const getMilestones = async (contractId) => {
 };
 
 
-
-
-
-
-
-
-
-
-
 /**
  * Get a single milestone
  */

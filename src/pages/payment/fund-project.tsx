@@ -17,7 +17,7 @@ const FundProjectPage = () => {
     location: string;
     startDate?: string | null;
     requiredSkills?: string[];
-    paymentType: 'fixed-price' | 'retainer' | 'hourly';
+    paymentType: 'fixed-price' | 'retainer' | 'hourly' | 'commission';
     price: number;
     retainerAmount?: number;
     retainerFrequency?: string;

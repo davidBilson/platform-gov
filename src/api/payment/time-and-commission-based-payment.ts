@@ -147,3 +147,14 @@ export const getRetainerContractPayments = async (contractId: string) => {
     throw error;
   }
 };
+
+export const getCommissionContractPayments = async (contractId: string) => {
+  try {
+    const endPoint = (process.env.NEXT_PUBLIC_GET_COMMISSION_CONTRACT_PAYMENTS ?? "").replace(':id', contractId) || "";
+    const response = await axios.get(`${BASE_URL}${endPoint}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching retainer contract payments:', error);
+    throw error;
+  }
+};

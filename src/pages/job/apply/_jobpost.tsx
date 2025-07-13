@@ -7,13 +7,13 @@ import { Jobs } from '@/types/jobs';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUserRatings } from '@/api/rating-api';
 import { IoIosCheckmarkCircle } from 'react-icons/io';
+import { formatPaymentInfo } from '@/utils/format';
 
 interface JobPostProps {
   job: Jobs;
   onApply: () => void;
 }
 
-// Define a type for location object
 interface LocationObject {
   city?: string;
   state?: string;
@@ -32,26 +32,12 @@ interface Rating {
   updatedAt: string;
 }
 
-const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
+const JobPost = ({ job, onApply }: JobPostProps) => {
   const [clientRatings, setClientRatings] = useState<Rating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(false);
 
-  // Format the date
   const postedDate = job.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
 
-  // Format payment information based on payment type
-  const getPaymentInfo = () => {
-    if (job.paymentType === 'hourly') {
-      return `Hourly | $${job.price}`;
-    } else if (job.paymentType === 'fixed-price') {
-      return `Fixed Price | $${job.price}`;
-    } else if (job.paymentType === 'retainer' && job.retainerAmount && job.retainerFrequency) {
-      return `Retainer | $${job.retainerAmount}/${job.retainerFrequency.toLowerCase()}`;
-    }
-    return '';
-  };
-
-  // Helper function to safely get client location
   const getClientLocation = (): string => {
     if (Array.isArray(job.clientLocation) && job.clientLocation.length > 0) {
       const locationObj = job.clientLocation[0] as unknown as LocationObject;
@@ -141,7 +127,7 @@ const JobPost: React.FC<JobPostProps> = ({ job, onApply }) => {
         <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
           <div className="flex items-center gap-1.25">
             <FaRegHourglass size={15} />
-            {getPaymentInfo()} | {job.employmentType}
+            {formatPaymentInfo(job)} | {job.employmentType}
           </div>
 
           <div className="flex items-center gap-1.25">

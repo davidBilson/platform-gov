@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  submitWorkSummary,
-  getRetainerDetails,
-  RetainerData,
-  RetainerPaymentHistory
-} from '@/api/contract/retainer-api';
+import { getCommissionDetails, CommissionData } from '@/api/contract/commission-api';
 import useAuthStore from '@/store/useAuth';
 import { Jobs } from '@/types/jobs';
-import { getRetainerContractPayments } from '@/api/payment/time-and-commission-based-payment';
+import { getCommissionContractPayments } from '@/api/payment/time-and-commission-based-payment';
 
-interface RetainerProps {
+interface CommissionProps {
   job: Jobs | null;
   mutualContractId: string;
 }
@@ -25,14 +20,11 @@ interface PaymentTransaction {
   description: string;
 }
 
-const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
-  const [showDetails, setShowDetails] = useState(false);
-  const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
+const ContractorCommission = ({ job, mutualContractId }: CommissionProps) => {
+  
+  const [commissionData, setCommissionData] = useState<CommissionData | null>(null);
   const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
-
-  const [summaryText, setSummaryText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
   const { userId } = useAuthStore();
 
@@ -43,8 +35,8 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           setLoading(true);
 
           const [paymentsData,] = await Promise.all([
-            getRetainerContractPayments(mutualContractId),
-            fetchRetainerData()
+            getCommissionContractPayments(mutualContractId),
+            fetchCommissionData()
           ]);
 
           setPaymentTransactions(paymentsData.data.transactions || []);
@@ -62,21 +54,21 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   }, [mutualContractId]);
 
   useEffect(() => {
-    if (retainerData?.nextPaymentDate) {
+    if (commissionData?.nextPaymentDate) {
       const now = new Date();
-      const paymentDate = new Date(retainerData.nextPaymentDate);
+      const paymentDate = new Date(commissionData.nextPaymentDate);
       const diffInHours = (paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
       setCanSubmit(diffInHours <= 48);
     } else {
       setCanSubmit(false);
     }
-  }, [retainerData]);
+  }, [commissionData]);
 
-  const fetchRetainerData = async () => {
+  const fetchCommissionData = async () => {
     try {
       setLoading(true);
-      const data = await getRetainerDetails(mutualContractId, userId);
-      setRetainerData(data);
+      const data = await getCommissionDetails(mutualContractId, userId);
+      setCommissionData(data);
     } catch (error) {
       console.error('Error fetching retainer data:', error);
     } finally {
@@ -127,23 +119,6 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
 
   return (
     <section className="w-full">
-      <section className="relative mb-4">
-        <button
-          onClick={() => setShowDetails(!showDetails)}
-          className="bg-skyblue border border-lightblue text-boldblue w-30 px-2 py-1 rounded-sm outline-none hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-xs"
-        >
-          {showDetails ? 'Hide Job Details' : 'View Job Details'}
-        </button>
-
-        {showDetails && job && (
-          <article className="border border-boldblue w-fit h-fit text-sm text-boldblue p-3 rounded-sm absolute top-10 z-10 bg-white flex flex-col gap-2">
-            <p><span className="font-bold">Payment Type:</span> {job.paymentType}</p>
-            <p><span className="font-bold">Amount:</span> ${job.retainerAmount}</p>
-            <p><span className="font-bold">Frequency:</span> {job.retainerFrequency}</p>
-            <p><span className="font-bold">Duration:</span> {job.retainerDuration}</p>
-          </article>
-        )}
-      </section>
 
       <div className="overflow-x-auto w-full">
         <table className="min-w-full bg-white shadow-sm rounded-lg overflow-hidden">
@@ -210,4 +185,4 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   );
 };
 
-export default ContractorRetainer;
+export default ContractorCommission;
