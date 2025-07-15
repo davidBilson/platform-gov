@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { getUserRatings } from '@/api/rating-api';
 import { formatName } from '@/utils/format';
 
-
 interface ContractorWithRating {
   contractor: {
     _id?: string;
@@ -36,7 +35,6 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
   const [contractorsWithRatings, setContractorsWithRatings] = useState<ContractorWithRating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(true);
 
-  // Function to get contractor ratings
   const getContractorRatings = useCallback(async (contractorId: string): Promise<{ average: number; count: number }> => {
     try {
       const ratings = await getUserRatings(contractorId, 'contractor');

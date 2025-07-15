@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ContractorList from '../../_home/_contractorFeed/_contractorList';
 import ContractorFilter from '../../_home/_contractorFeed/_contractorFilter';
@@ -9,9 +9,7 @@ import { useContractorFilter } from '@/store/useContractorFilter';
 import LoadingAnimation from '@/components/ui/loading';
 import { fetchContractors } from '@/api/feed-api';
 
-const ContractorFeed: React.FC = () => {
-  const [filteredContractors, x] = useState<ContractorProfile[]>([]);
-
+const ContractorFeed = () => {
   const { 
     applyFilters,
     searchTerm,
@@ -35,14 +33,14 @@ const ContractorFeed: React.FC = () => {
   } = useQuery({
     queryKey: ['contractors'],
     queryFn: fetchContractors,
-    staleTime: 5000, // 2 seconds
+    staleTime: 5000, // 5 seconds
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  const memoizedFilteredContractors = useMemo(() => {
+  const filteredContractors = useMemo(() => {
     if (contractors.length > 0) {
       return applyFilters(contractors);
     }
@@ -62,10 +60,6 @@ const ContractorFeed: React.FC = () => {
     domainFocus,
     domainDetail
   ]);
-
-  useEffect(() => {
-    x(memoizedFilteredContractors);
-  }, []);
 
   const handleRetry = () => {
     refetch();
