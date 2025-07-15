@@ -105,7 +105,7 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
             setActiveComponent(item.key); // Keep the original prop function for backward compatibility
           }}
           className={`
-            w-full flex items-center justify-center p-2.5 pr-2.5 rounded-lg text-left transition-all duration-200
+            w-full flex items-center p-2.5 pr-2.5 rounded-lg text-left transition-all duration-200
             ${isActive 
               ? 'bg-deepskyblue text-white shadow-md shadow-darkgray' 
               : 'text-skyblue cursor-pointer hover:bg-deepskyblue/50 hover:text-white'
