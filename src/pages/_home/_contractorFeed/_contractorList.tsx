@@ -206,7 +206,7 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
               </div>
               <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 w-1/2 h-full'>
                 <Link href={`/profile/${contractor.user._id}`} className="text-lg md:text-xl font-semibold cursor-pointer hover:underline">
-                  {formatName(contractor.user.name)}.
+                  {formatName(contractor.user.name)}
                 </Link>
                 <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
                 <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
