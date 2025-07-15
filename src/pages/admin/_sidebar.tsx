@@ -10,7 +10,7 @@ import {
   Package,
   DollarSign,
   User2Icon,
-  Users2Icon
+  ShieldUser
 } from 'lucide-react';
 import Logo from '@/components/ui/logo';
 import useAuthStore from '@/store/useAuth';
@@ -79,7 +79,7 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
     {
       key: 'admins',
       label: 'Manage Admins',
-      icon: Users2Icon,
+      icon: ShieldUser,
       path: '/admin/manage-admins'
     }
   ];
