@@ -351,7 +351,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
 
             {/* Description */}
             <div className='py-5'>
-              <p className="text-sm sm:text-base">
+              <p className="text-sm sm:text-base whitespace-pre-wrap">
                 {bio}
               </p>
             </div>
