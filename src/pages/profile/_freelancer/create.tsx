@@ -507,7 +507,7 @@ const CreateFreelancerProfile = () => {
                       onFocus={() => setShowFirmDropdown(true)}
                       onBlur={() => setTimeout(() => setShowFirmDropdown(false), 200)}
                       className="outline-none placeholder:font-semibold w-[80%]"
-                      placeholder="Select firm name"
+                      placeholder="Firm name"
                     />
                     <IoIosSearch />
                   </div>
