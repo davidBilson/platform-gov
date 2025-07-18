@@ -150,7 +150,7 @@ const Signup = () => {
                 className="checked:after:content-[''] checked:after:absolute checked:after:top-[3px] checked:after:left-[3px] checked:after:w-[12px] checked:after:h-[12px] checked:after:rounded-full checked:after:bg-boldblue"
               />
               <span className='text-sm'>
-                Contractor
+                Consultant
               </span>
             </label>
             <label className='flex items-center gap-1.25'>

@@ -97,18 +97,18 @@ const CreateFreelancerProfile = () => {
 
     // Check work history requirements
     formData.workHistory.forEach((work, index) => {
-      if (!work.department.trim()) {
-        errors.push(`Work Experience ${index + 1}: Department/Agency is required`);
-      }
-      if (!work.departmentType) {
-        errors.push(`Work Experience ${index + 1}: Please select State or Federal`);
-      }
-      if (!work.fromDate.trim()) {
-        errors.push(`Work Experience ${index + 1}: From date is required`);
-      }
-      if (!work.toDate.trim()) {
-        errors.push(`Work Experience ${index + 1}: To date is required`);
-      }
+      // if (!work.department.trim()) {
+      //   errors.push(`Work Experience ${index + 1}: Department/Agency is required`);
+      // }
+      // if (!work.departmentType) {
+      //   errors.push(`Work Experience ${index + 1}: Please select State or Federal`);
+      // }
+      // if (!work.fromDate.trim()) {
+      //   errors.push(`Work Experience ${index + 1}: From date is required`);
+      // }
+      // if (!work.toDate.trim()) {
+      //   errors.push(`Work Experience ${index + 1}: To date is required`);
+      // }
     });
 
     return errors;
@@ -1165,6 +1165,7 @@ const CreateFreelancerProfile = () => {
                   onChange={(e) => updateDegreeWrapper(degree.id, 'degree', e.target.value)}
                   className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
                   placeholder="Degree"
+                  required
                 />
                 <input
                   type="text"
@@ -1180,6 +1181,7 @@ const CreateFreelancerProfile = () => {
                   className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
                   placeholder="Year Completed"
                   maxLength={4}
+                  required
                 />
                 <input
                   type="text"
