@@ -8,12 +8,20 @@ export const generateId = () => {
 };
 
 // to handle auto-resize of textarea
+// export const handleTextAreaInput = (textareaRef) => {
+//   if (textareaRef?.current) {
+//     textareaRef.current.style.height = 'auto';
+//     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+//   }
+// }
+
 export const handleTextAreaInput = (textareaRef) => {
-  if (textareaRef?.current) {
-    textareaRef.current.style.height = 'auto';
-    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  const textarea = textareaRef.current;
+  if (textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }
-}
+};
 
 export const handleInputChange = (e, setFormData) => {
   const { name, value } = e.target;

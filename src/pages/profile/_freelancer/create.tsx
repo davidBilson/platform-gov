@@ -94,23 +94,9 @@ const CreateFreelancerProfile = () => {
 
   const validateForm = () => {
     const errors: string[] = [];
-
     // Check work history requirements
     formData.workHistory.forEach((work, index) => {
-      // if (!work.department.trim()) {
-      //   errors.push(`Work Experience ${index + 1}: Department/Agency is required`);
-      // }
-      // if (!work.departmentType) {
-      //   errors.push(`Work Experience ${index + 1}: Please select State or Federal`);
-      // }
-      // if (!work.fromDate.trim()) {
-      //   errors.push(`Work Experience ${index + 1}: From date is required`);
-      // }
-      // if (!work.toDate.trim()) {
-      //   errors.push(`Work Experience ${index + 1}: To date is required`);
-      // }
     });
-
     return errors;
   };
 
@@ -389,10 +375,16 @@ const CreateFreelancerProfile = () => {
   };
 
   useEffect(() => {
-    if (formData.bio && textareaRef.current) {
-      handleTextAreaInput();
+    if (textareaRef.current) {
+      handleTextAreaInput(textareaRef);
     }
   }, [formData.bio]);
+
+  // useEffect(() => {
+  //   if (formData.bio && textareaRef.current) {
+  //     handleTextAreaInput();
+  //   }
+  // }, [formData.bio]);
 
   return (
     <>
@@ -440,7 +432,7 @@ const CreateFreelancerProfile = () => {
               onInput={handleTextAreaInputWrapper}
               maxLength={1500}
               rows={1}
-              className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden scrollbar-hide"
+              className="block text-sm text-boldblue border border-boldblue rounded-lg min-h-fit w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden scrollbar-hide"
               placeholder="About Me/Bio"
             ></textarea>
             <div className="text-right text-xs text-gray-500 mt-1">
@@ -605,10 +597,6 @@ const CreateFreelancerProfile = () => {
                 </div>
               )}
             </div>
-
-
-
-
 
             {/* Previously held clearances */}
             <div className="relative w-full max-w-75 mb-7.5">
@@ -979,7 +967,7 @@ const CreateFreelancerProfile = () => {
                         onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
                         className="outline-none placeholder:font-semibold w-[80%]"
                         placeholder="Department/Agency"
-                        // required
+                      // required
                       />
                       <IoIosSearch />
                       {/* <span className="text-crimson font-bold absolute -right-4">*</span> */}
@@ -1023,7 +1011,7 @@ const CreateFreelancerProfile = () => {
                           checked={work.departmentType === "state"}
                           onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', "state")}
                           className="form-radio h-4 w-4 text-boldblue transition duration-150 ease-in-out"
-                          // required
+                        // required
                         />
                         <label htmlFor={`state-${work.id}`}>State</label>
                       </div>
@@ -1036,7 +1024,7 @@ const CreateFreelancerProfile = () => {
                           checked={work.departmentType === "federal"}
                           onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', "federal")}
                           className="form-radio h-4 w-4 text-boldblue transition duration-150 ease-in-out"
-                          // required/
+                        // required/
                         />
                         <label htmlFor={`federal-${work.id}`}>Federal</label>
                       </div>
@@ -1134,7 +1122,7 @@ const CreateFreelancerProfile = () => {
                       placeholder="To (Year or Present)"
                       maxLength={7}
                       disabled={work.toDate === 'Present'}
-                      // required
+                    // required
                     />
                     {/* <span className="text-crimson font-bold absolute top-4 -right-4">*</span> */}
                   </div>
