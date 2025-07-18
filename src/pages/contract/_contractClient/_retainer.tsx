@@ -6,7 +6,7 @@ import {
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
-import { getRetainerContractPayments } from '@/api/payment/time-based-payment';
+import { getRetainerContractPayments } from '@/api/payment/time-and-commission-based-payment';
 
 interface Job {
   _id: string;

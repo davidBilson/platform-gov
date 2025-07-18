@@ -3,9 +3,9 @@ import { IoClose } from 'react-icons/io5';
 import { FaClock, FaDollarSign, FaCreditCard, FaEdit, FaInfoCircle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { loadStripe } from '@stripe/stripe-js';
-import { initPayAmount } from '@/api/payment/time-based-payment';
+import { initPayAmount } from '@/api/payment/time-and-commission-based-payment';
 import { getUserPaymentMethods } from '@/api/payment/payment-api';
-import { handleInstantPayment } from '@/api/payment/time-based-payment';
+import { handleInstantPayment } from '@/api/payment/time-and-commission-based-payment';
 import useAuthStore from '@/store/useAuth';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
@@ -17,18 +17,18 @@ const PaymentTransferModal = ({
   refetchContract,
   onPaymentSuccess
 }:
-{
-  job: any;
-  contract: any;
-  onClose: () => void;
-  refetchContract: any;
-  onPaymentSuccess?: () => void;
-}) => {
+  {
+    job: any;
+    contract: any;
+    onClose: () => void;
+    refetchContract: any;
+    onPaymentSuccess?: () => void;
+  }) => {
   const { userId } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
   const [checkingPaymentMethods, setCheckingPaymentMethods] = useState(true);
-  
+
   // Payment calculation states
   const [paymentCalculation, setPaymentCalculation] = useState({
     baseAmount: 0,
@@ -38,7 +38,7 @@ const PaymentTransferModal = ({
     effectiveHours: 0, // Hours being paid for (can differ from logged hours)
     isCustomAmount: false
   });
-  
+
   const [finalAmount, setFinalAmount] = useState(0);
   const [isEditingAmount, setIsEditingAmount] = useState(false);
   const [tempAmount, setTempAmount] = useState('');
@@ -115,7 +115,7 @@ const PaymentTransferModal = ({
       // Custom amount provided - reverse calculate
       baseAmount = customBaseAmount;
       isCustomAmount = true;
-      
+
       if (job?.paymentType === 'hourly') {
         const hourlyRate = safeNumber({ value: job?.price });
         effectiveHours = hourlyRate > 0 ? baseAmount / hourlyRate : 0;
@@ -185,7 +185,7 @@ const PaymentTransferModal = ({
   // Clean payment handler using the utility function
   const handleFundsRelease = async () => {
     const stripe = await stripePromise; // Get the actual Stripe instance
-    
+
     await handleInstantPayment({
       contractId: contract._id,
       userId,
@@ -235,7 +235,7 @@ const PaymentTransferModal = ({
     // Get current URL to determine return path
     const currentPath = window.location.pathname;
     const returnPath = currentPath.startsWith('/contract') ? currentPath : '';
-    
+
     // Navigate to payment method setup with return path
     window.location.href = `/payment/billing-method${returnPath ? `?returnTo=${encodeURIComponent(returnPath)}` : ''}`;
   };
@@ -301,22 +301,22 @@ const PaymentTransferModal = ({
                     <span>Hours Logged:</span>
                     <span className="font-semibold">{paymentCalculation.totalHours.toFixed(2)} hrs</span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span>Hourly Rate:</span>
                     <span className="font-semibold">{formatCurrency(job?.price || 0)}/hr</span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span>Base Amount:</span>
                     <span className="font-semibold">{formatCurrency(paymentCalculation.baseAmount)}</span>
                   </div>
-                  
+
                   <div className="flex justify-between text-deepskyblue">
                     <span>Platform Fee:</span>
                     <span className="font-semibold">{formatCurrency(paymentCalculation.platformFee)} (5%)</span>
                   </div>
-                  
+
                   <div className="border-t border-gray-200 pt-2 mt-2">
                     <div className="flex justify-between font-semibold">
                       <span>Total to Charge:</span>

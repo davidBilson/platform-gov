@@ -11,10 +11,10 @@ import { useJobFilter } from '@/store/useJobFilter';
 // utils
 import { ProfessionalFieldsAndAreasOfExpertise152 } from '@/utils/feedFilter/152ProfessionalFieldsAndAreasOfExpertise';
 import { certificatesAndEducationList } from '@/utils/feedFilter/CertificatesAndEducationList';
-import { securityClearances } from '@/utils/feedFilter/SecurityClearances';
 import { GovernmentDepartmentsAndAgenciesByCountry } from '@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry';
+import { securityClearances } from '@/utils/feedFilter/SecurityClearances';
 
-import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates'
+import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
 import { MdDeleteForever } from "react-icons/md";
 
 type Country = string;
@@ -59,6 +59,9 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
   const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
   const [filteredSkills, setFilteredSkills] = useState<string[]>(ProfessionalFieldsAndAreasOfExpertise152);
   const [skillsClickTime, setSkillsClickTime] = useState<number>(0);
+
+  const [filteredCertifications, setFilteredCertifications] = useState<string[]>(certificatesAndEducationList);
+
 
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [locationClickTime, setLocationClickTime] = useState<number>(0);
@@ -222,6 +225,22 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
     );
     setFilteredSkills(filtered);
     setShowSkillsDropdown(true);
+  };
+
+  const handleCertificationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCertifications(value);
+    
+    const filtered = certificatesAndEducationList.filter(cert =>
+      cert.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredCertifications(filtered);
+  };
+
+  // Add this function to select a certification
+  const selectCertification = (cert: string) => {
+    setCertifications(cert);
+    setShowCertificationsDropdown(false);
   };
 
   const selectSkill = (skill: string) => {
@@ -614,14 +633,13 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
             placeholder="Cert & Ed."
             className="border border-boldblue text-boldblue placeholder:text-boldblue rounded-lg py-3 px-4 w-full text-sm focus:outline-none focus:border-boldblue"
             value={certifications}
-            onChange={(e) => {
-              setCertifications(e.target.value);
-            }}
+            onChange={handleCertificationsChange}
             onClick={(e) => {
               e.stopPropagation();
               const now = Date.now();
               if (now - certificationsClickTime > 100) {
-                setShowCertificationsDropdown(!showCertificationsDropdown);
+                setShowCertificationsDropdown(true);
+                setFilteredCertifications(certificatesAndEducationList);
                 setCertificationsClickTime(now);
               }
             }}
@@ -631,6 +649,9 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
             onClick={(e) => {
               e.stopPropagation();
               setShowCertificationsDropdown(!showCertificationsDropdown);
+              if (!showCertificationsDropdown) {
+                setFilteredCertifications(certificatesAndEducationList); // Reset list when opening
+              }
             }}
           >
             <IoMdArrowDropdown size={20} className="text-boldblue" />
@@ -641,18 +662,19 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
               ref={certificationsDropdownRef}
               className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto"
             >
-              {availableCertifications.map((cert, index) => (
-                <div
-                  key={`cert-${index}`}
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                  onClick={() => {
-                    setCertifications(cert);
-                    setShowCertificationsDropdown(false);
-                  }}
-                >
-                  {cert}
-                </div>
-              ))}
+              {filteredCertifications.length > 0 ? (
+                filteredCertifications.map((cert, index) => (
+                  <div
+                    key={`cert-${index}`}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onClick={() => selectCertification(cert)}
+                  >
+                    {cert}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-sm text-gray-500">No certifications found</div>
+              )}
             </div>
           )}
         </div>

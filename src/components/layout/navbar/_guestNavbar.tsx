@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import Logo from '@/components/ui/logo';
 
 // Define types for state and refs
-type ContractorOption = "Jobs" | "Contractors";
+type ContractorOption = "Jobs" | "Consultants";
 
 const GuestNavbar: React.FC = () => {
 
@@ -21,7 +21,7 @@ const GuestNavbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   
-  const contractorOptions: ContractorOption[] = ["Jobs", "Contractors"];
+  const contractorOptions: ContractorOption[] = ["Jobs", "Consultants"];
   const [selectedOption, setSelectedOption] = useState<ContractorOption>("Jobs");
 
   const pathname = usePathname();

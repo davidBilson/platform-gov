@@ -14,11 +14,13 @@ export interface WorkHistory {
     degree: string;
     institution: string;
     yearCompleted: string;
+    gpa?: string;
   }
   
   export interface ProfileFormData {
     bio: string;
     ratePerHour: string;
+    secondRate?: string;
     primaryPosition?: string;
     profession?: string;
     clearance?: string;
@@ -69,6 +71,7 @@ export interface ProfileData {
     bankAccounts: Array<{}>;
   },
   ratePerHour?: number;
+  secondRate?: number;
   skills?: string[];
   expertise?: string[];
   certifications?: string[];

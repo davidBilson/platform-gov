@@ -1,38 +1,40 @@
 import axios from 'axios';
-import { GetUsersResponse, GetUsersParams, GetJobParams, Job, JobStats, ContractStats, 
-  Contract, 
-  GetContractsParams,  
+import {
+  GetUsersResponse, GetUsersParams, GetJobParams, Job, JobStats, ContractStats,
+  Contract,
+  GetContractsParams,
   FeeSettings,
-  FeeSettingsResponse} from '@/types/admin';
+  FeeSettingsResponse
+} from '@/types/admin';
 import { toast } from 'react-toastify';
 import useAuthStore from '@/store/useAuth';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 const { userId } = useAuthStore.getState();
-const adminId = userId ? userId : '';
+const adminId = userId;
 
 // # ============ USERS ============ # 
 
 export const getAllUsers = async (params: GetUsersParams = {}): Promise<GetUsersResponse> => {
   try {
     const queryParams = new URLSearchParams();
-    
+
     if (adminId) {
       queryParams.append('adminId', adminId);
     }
-    
+
     if (params.page !== undefined) {
       queryParams.append('page', params.page.toString());
     }
-    
+
     if (params.limit !== undefined) {
       queryParams.append('limit', params.limit.toString());
     }
-    
+
     if (params.role) {
       queryParams.append('role', params.role);
     }
-    
+
     if (params.search) {
       queryParams.append('search', params.search);
     }
@@ -45,14 +47,15 @@ export const getAllUsers = async (params: GetUsersParams = {}): Promise<GetUsers
         'Content-Type': 'application/json',
       },
     });
+
     return response.data as GetUsersResponse;
   } catch (error) {
     console.error('Error fetching users:', error);
-    
+
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Failed to fetch users');
     }
-    
+
     throw error;
   }
 };
@@ -87,11 +90,11 @@ export const getUserStats = async (): Promise<{
     return response.data;
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    
+
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Failed to fetch admin stats');
     }
-    
+
     throw error;
   }
 };
@@ -105,7 +108,7 @@ export const toggleUserPriority = async (userId: string, isHighPriority: boolean
     return response.data;
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    
+
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Failed to fetch admin stats');
     }
@@ -121,7 +124,7 @@ export const toggleUserSuspend = async (userId: string, isSuspended: boolean) =>
     return response.data;
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    
+
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Failed to fetch admin stats');
     }
@@ -138,7 +141,7 @@ export const deleteUser = async (userId: string) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    
+
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Failed to fetch admin stats');
     }
@@ -154,7 +157,7 @@ export const getUserProfile = async (userId: string) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching admin stats:', error);
-    
+
     if (axios.isAxiosError(error)) {
       throw new Error(error.response?.data?.message || 'Failed to fetch admin stats');
     }
@@ -173,7 +176,7 @@ export const getJobStats = async (): Promise<{
     const url = `${API_BASE_URL}${endpoint}?adminId=${adminId}`;
 
     const response = await axios.get(url, {
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
     });
 
     return response.data;
@@ -196,7 +199,7 @@ export const getAllJobs = async (params: GetJobParams = {}): Promise<{
     if (params.page !== undefined) {
       queryParams.append('page', params.page.toString());
     }
-    
+
     if (params.limit !== undefined) {
       queryParams.append('limit', params.limit.toString());
     }
@@ -205,9 +208,8 @@ export const getAllJobs = async (params: GetJobParams = {}): Promise<{
     const url = `${API_BASE_URL}${endpoint}?${queryParams.toString()}`;
 
     const response = await axios.get(url, {
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
     });
-    console.log(response)
     return response.data;
   } catch (error) {
     console.error('Error fetching jobs:', error);
@@ -296,6 +298,21 @@ export const getItemsByCategory = async (categoryId: string) => {
   }
 };
 
+// Update items order
+export const updateItemOrder = async (items: { id: string; sortOrder: number }[]) => {
+  try {
+    const endPoint = process.env.NEXT_PUBLIC_UPDATE_ITEMS_ORDER;
+    const response = await axios.put(`${API_BASE_URL}${endPoint}?adminId=${adminId}`, { items });
+    toast.success('Items order updated successfully');
+    return response.data;
+
+  } catch (error) {
+    console.error('Error updating items order:', error);
+    toast.error('Failed to update items order')
+    throw error;
+  }
+};
+
 // Content Stats
 export const getContentStats = async () => {
   try {
@@ -320,7 +337,7 @@ export const getContractStats = async (): Promise<{
     const url = `${API_BASE_URL}${endpoint}?adminId=${adminId}`;
 
     const response = await axios.get(url, {
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
     });
 
     return response.data;
@@ -363,7 +380,7 @@ export const getAllContracts = async (params: GetContractsParams = {}): Promise<
     const url = `${API_BASE_URL}${endpoint}?${queryParams.toString()}`;
 
     const response = await axios.get(url, {
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
     });
     return response.data;
   } catch (error) {
@@ -395,11 +412,11 @@ export const updateFeeSettings = async (settings: FeeSettings): Promise<FeeSetti
     const response = await axios.put(url, settings, {
       headers: { 'Content-Type': 'application/json' }
     });
-    
+
     if (response.status === 200) {
       toast.success('Saved successfully');
     }
-    
+
     return response.data;
   } catch (error) {
     toast.error('Failed to save settings');

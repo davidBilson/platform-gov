@@ -74,7 +74,7 @@ const ContractorNavbar = () => {
     currentSetSearchTerm(e.target.value);
   };
 
-  const jobAndContractorOptions = ["Jobs", "Contractors"];
+  const jobAndContractorOptions = ["Jobs", "Consultants"];
 
   // Contractor Navigation Items
   const contractorNavItems = {

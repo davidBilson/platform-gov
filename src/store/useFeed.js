@@ -4,11 +4,11 @@ import { persist } from 'zustand/middleware'
 
 // Create the base store
 const createBaseStore = (set, get) => ({
-  feedType: 'Jobs', // default feed type (not persisted)
+  feedType: 'Consultants', // default feed type (not persisted)
   savedSearches: [], // Array to store saved searches (persisted)
 
   setFeedType: (type) => {
-    if (type === 'Contractors' || type === 'Jobs') {
+    if (type === 'Consultants' || type === 'Jobs') {
       set({ feedType: type })
     }
   },

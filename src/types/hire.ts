@@ -29,7 +29,7 @@ export interface HiringDocument {
     status: 'offered' | 'accepted' | 'declined' | 'withdrawn';
     offerDetails: {
       rate: number;
-      paymentType: 'hourly' | 'fixed-price' | 'retainer';
+      paymentType: 'hourly' | 'fixed-price' | 'retainer' | 'commission';
       employmentType: 'Full-time' | 'Part-time';
       startDate: string;
       estimatedEndDate?: string;

@@ -81,7 +81,7 @@ const ClientNavbar = () => {
     currentSetSearchTerm(e.target.value);
   };
 
-  const jobAndContractorOptions = ["Jobs", "Contractors"];
+  const jobAndContractorOptions = ["Jobs", "Consultants"];
 
   const clientNavItems = {
     main: [
@@ -94,7 +94,7 @@ const ClientNavbar = () => {
         ]
       },
       { 
-        label: 'Manage Contractors',
+        label: 'Manage Consultants',
         dropdown: []
       },
       { 

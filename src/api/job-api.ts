@@ -1,6 +1,6 @@
 // api/job-api.ts
 import axios from 'axios';
-import { Jobs } from '@/types/jobs';
+import { JobFormData, Jobs } from '@/types/jobs';
 import { JobApplicationsResponse } from '@/types/proposals';
 
 interface JobApiResponse {
@@ -118,5 +118,30 @@ export const updateJobStatus = async (userId:string, jobId:string | null, status
     return response.data;
   } catch (error) {
     console.error('Error updating job status:', error);
+  }
+};
+
+export const createJob = async (formData: JobFormData): Promise<{ success: boolean; data?: Jobs; message?: string }> => {
+  try {
+    const baseURL = process.env.NEXT_PUBLIC_BASE_URL || '';
+    const createJobEndpoint = process.env.NEXT_PUBLIC_CREATE_JOBS || '';
+    
+    const response = await axios.post(`${baseURL}${createJobEndpoint}`, formData);
+    
+    if (response.data.success) {
+      return {
+        success: true,
+        data: response.data.data
+      };
+    }
+    throw new Error(response.data.message || 'Failed to create job');
+  } catch (error) {
+    console.error('Error creating job:', error);
+    return {
+      success: false,
+      message: axios.isAxiosError(error) 
+        ? error.response?.data?.message || error.message
+        : 'Error creating job'
+    };
   }
 };

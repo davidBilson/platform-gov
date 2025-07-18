@@ -4,14 +4,14 @@ import { ProfileFormData } from "@/types/profile";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-export const fetchProfile = async (userId: string, userType: 'contractor' | 'client') => {
+export const fetchProfile = async (userId: string, role: 'contractor' | 'client') => {
   try {
-    const apiEndpoint = userType === 'contractor' ? process.env.NEXT_PUBLIC_FETCH_CONTRACTOR_PROFILE?.replace(':id', userId) : process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
+    const apiEndpoint = role === 'contractor' ? process.env.NEXT_PUBLIC_FETCH_CONTRACTOR_PROFILE?.replace(':id', userId) : process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
     const response = await axios.get(`${API_BASE_URL}${apiEndpoint}`);
-    
+
     return response.data;
   } catch (error) {
-    console.error(`Error fetching ${userType} profile:`, error);
+    console.error(`Error fetching ${role} profile:`, error);
     throw error;
   }
 };
@@ -25,6 +25,7 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       profileImage: formData.profileImageUrl,
       clearance: formData.clearance || '',
       ratePerHour: formData.ratePerHour,
+      secondRate: formData.secondRate,
       profession: formData.profession,
       primaryPosition: formData.primaryPosition,
       skills: formData.skills,
@@ -35,9 +36,9 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       firmAffiliation: formData.firmAffiliation || '',
       location: formData.location || { country: '', state: '' },
     };
-    
+
     let response;
-    
+
 
     if (profileId) {
       // Update existing profile
@@ -48,7 +49,7 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       const createEndpoint = process.env.NEXT_PUBLIC_CREATE_CONTRACTOR_PROFILE;
       response = await axios.post(`${API_BASE_URL}${createEndpoint}`, profileData);
     }
-    
+
     return response;
   } catch (error) {
     console.error('Error saving profile:', error);
@@ -67,13 +68,13 @@ export const fetchProfilePicture = async (id: string): Promise<string> => {
     }
 
     const endpoint = process.env.NEXT_PUBLIC_GET_PROFILE_PIC?.replace(':id', id);
-    
+
     // Validate endpoint before making request
     if (!endpoint) {
       console.warn('Missing NEXT_PUBLIC_GET_PROFILE_PIC environment variable');
       return '';
     }
-    
+
     const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
       // Adding timeout to prevent hanging requests
       timeout: 5000,
@@ -92,7 +93,7 @@ export const fetchProfilePicture = async (id: string): Promise<string> => {
     if (response?.data?.success) {
       return response?.data?.data || '';
     }
-   
+
     return '';
   } catch (error) {
     // Log error but don't rethrow

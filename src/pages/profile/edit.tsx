@@ -5,24 +5,24 @@ import CreateFreelancerProfile from './_freelancer/create';
 
 const Edit = () => {
 
-    const {userId, role } = useAuthStore()
-  
-    if ( userId && role === 'client') {
+    const { userId, role } = useAuthStore()
+
+    if (userId && role === 'client') {
         return (
             <>
                 <CreateBusinessProfile />
             </>
-      )
+        )
     }
 
-    if ( userId && role === 'contractor') {
+    if (userId && role === 'contractor') {
         return (
             <>
                 <CreateFreelancerProfile />
             </>
-      )
+        )
     }
-    
+
 }
 
 export default Edit;

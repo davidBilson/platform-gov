@@ -4,12 +4,12 @@ import { toast } from 'react-toastify';
 import useAuthStore from '@/store/useAuth';
 import { fetchJobApplications } from '@/api/job-api';
 import { JobApplicationsResponse } from '@/types/proposals';
-import { truncateDescription } from '@/utils/truncateDescription';
+import { truncateDescription } from '@/utils/format';
 import { JobApplication, ProposalData } from '@/types/proposalsList';
 import ProfileCard from '@/components/profile/ProfileCard';
 
-const ProposalsList = ({ jobId, jobStatus }: {jobId: string, jobStatus: string}) => {
-  
+const ProposalsList = ({ jobId, jobStatus }: { jobId: string, jobStatus: string }) => {
+
   const [proposals, setProposals] = useState<JobApplicationsResponse | null>(null);
   const [showProposal, setShowProposal] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<ProposalData | null>(null);
@@ -61,11 +61,11 @@ const ProposalsList = ({ jobId, jobStatus }: {jobId: string, jobStatus: string})
 
     loadProposals();
   }, [jobId]);
-  
+
   const handleClose = () => {
     setShowProposal(false);
   };
-  
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       handleClose();
@@ -82,13 +82,13 @@ const ProposalsList = ({ jobId, jobStatus }: {jobId: string, jobStatus: string})
   }
 
   return (
-    <section className='flex flex-col items-start gap-12 pb-20'>    
+    <section className='flex flex-col items-start gap-12 pb-20'>
       {(proposals?.data as JobApplication[]).map((proposal: JobApplication) => {
         const truncatedCoverLetter = truncateDescription(proposal?.coverLetter || '');
         return (
-          <section 
-            key={proposal._id} 
-            onClick={() => handleViewProposal(proposal)} 
+          <section
+            key={proposal._id}
+            onClick={() => handleViewProposal(proposal)}
             className='cursor-pointer w-full'
           >
 
@@ -100,13 +100,13 @@ const ProposalsList = ({ jobId, jobStatus }: {jobId: string, jobStatus: string})
 
       {showProposal && selectedProposal && (
         <div className="fixed inset-0 bg-black/50 z-50 h-screen flex items-center justify-end">
-          <div 
-            className="absolute inset-0 h-full" 
+          <div
+            className="absolute inset-0 h-full"
             onClick={handleOverlayClick}
           />
           <div className="relative w-full md:max-w-1/2 h-full bg-white flex flex-col">
             <div className="h-full flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <Proposal handleClose={handleClose} proposalData={selectedProposal} jobStatus={jobStatus}  />
+              <Proposal handleClose={handleClose} proposalData={selectedProposal} jobStatus={jobStatus} />
             </div>
           </div>
         </div>

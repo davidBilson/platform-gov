@@ -6,7 +6,7 @@ import useAuthStore from '@/store/useAuth';
 import Link from 'next/link';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { truncateDescription } from '@/utils/truncateDescription';
+import { truncateDescription } from '@/utils/format';
 
 const OpenJobs = () => {
 

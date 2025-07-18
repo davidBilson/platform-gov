@@ -1,4 +1,4 @@
-import { confirmPayAmount } from '@/api/payment/time-based-payment';
+import { confirmPayAmount } from '@/api/payment/time-and-commission-based-payment';
 import useAuthStore from '@/store/useAuth';
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -6,11 +6,11 @@ import { IoClose, IoCheckmarkCircle } from 'react-icons/io5';
 import { FaDollarSign, FaHandshake } from 'react-icons/fa';
 
 const ConfirmPaymentAmount = (
-  { 
-    onClose, 
+  {
+    onClose,
     contract,
-    fetchMutualContract 
-  } : {
+    fetchMutualContract
+  }: {
     onClose: () => void;
     contract: any;
     fetchMutualContract: () => void;
@@ -18,7 +18,7 @@ const ConfirmPaymentAmount = (
 ) => {
   const { userId } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

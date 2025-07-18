@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  submitWorkSummary, 
-  getRetainerDetails, 
-  RetainerData, 
-  RetainerPaymentHistory 
+import {
+  submitWorkSummary,
+  getRetainerDetails,
+  RetainerData,
+  RetainerPaymentHistory
 } from '@/api/contract/retainer-api';
 import useAuthStore from '@/store/useAuth';
 import { Jobs } from '@/types/jobs';
-import { getRetainerContractPayments } from '@/api/payment/time-based-payment';
+import { getRetainerContractPayments } from '@/api/payment/time-and-commission-based-payment';
 
 interface RetainerProps {
   job: Jobs | null;
@@ -29,7 +29,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const [retainerData, setRetainerData] = useState<RetainerData | null>(null);
   const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
-  
+
   const [summaryText, setSummaryText] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -41,8 +41,8 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
       if (mutualContractId) {
         try {
           setLoading(true);
-          
-          const [paymentsData, ] = await Promise.all([
+
+          const [paymentsData,] = await Promise.all([
             getRetainerContractPayments(mutualContractId),
             fetchRetainerData()
           ]);
@@ -57,7 +57,7 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [mutualContractId]);
 
@@ -128,13 +128,13 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
   return (
     <section className="w-full">
       <section className="relative mb-4">
-        <button 
+        <button
           onClick={() => setShowDetails(!showDetails)}
           className="bg-skyblue border border-lightblue text-boldblue w-30 px-2 py-1 rounded-sm outline-none hover:opacity-70 transition duration-300 ease-in-out cursor-pointer text-xs"
         >
           {showDetails ? 'Hide Job Details' : 'View Job Details'}
         </button>
-        
+
         {showDetails && job && (
           <article className="border border-boldblue w-fit h-fit text-sm text-boldblue p-3 rounded-sm absolute top-10 z-10 bg-white flex flex-col gap-2">
             <p><span className="font-bold">Payment Type:</span> {job.paymentType}</p>
@@ -164,25 +164,23 @@ const ContractorRetainer = ({ job, mutualContractId }: RetainerProps) => {
           <tbody className="text-sm divide-y divide-gray-100">
             {completedTransactions && completedTransactions.length > 0 ? (
               completedTransactions.map((transaction: PaymentTransaction, index: number) => (
-                <tr key={transaction.id} className={`hover:bg-gray-50 transition-colors duration-200 ${
-                  index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
-                }`}>
+                <tr key={transaction.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+                  }`}>
                   <td className="py-3 px-2 sm:px-4 text-boldblue">
                     <div className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-none" title={transaction.description}>
                       {transaction.description}
                     </div>
                   </td>
                   <td className="py-3 px-2 sm:px-4 font-semibold text-boldblue">
-                  ${(Math.abs(transaction.amount).toFixed(2))}
+                    ${(Math.abs(transaction.amount).toFixed(2))}
                   </td>
                   <td className="py-3 px-2 sm:px-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      transaction.status.toLowerCase() === 'completed' 
-                        ? 'bg-aquagreen/10 text-aquagreen border border-aquagreen/20' 
-                        : transaction.status.toLowerCase() === 'pending'
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.status.toLowerCase() === 'completed'
+                      ? 'bg-aquagreen/10 text-aquagreen border border-aquagreen/20'
+                      : transaction.status.toLowerCase() === 'pending'
                         ? 'bg-faintskyblue text-deepskyblue border border-faintskyblue/20'
                         : 'bg-lightgray text-mediumgray border border-mediumgray'
-                    }`}>
+                      }`}>
                       {getStatusDisplay(transaction.status)}
                     </span>
                   </td>

@@ -86,7 +86,7 @@ export interface JobList {
   jobTitle: string;
   description: string;
   location: string;
-  paymentType: 'hourly' | 'fixed-price' | 'retainer';
+  paymentType: 'hourly' | 'fixed-price' | 'retainer' | 'commission';
   price: number;
   employmentType: string;
   requiredSkills: string[];
@@ -123,7 +123,7 @@ export interface Jobs {
   jobCategory: string;
   description: string;
   location: string;
-  paymentType: 'hourly' | 'fixed-price' | 'retainer';
+  paymentType: 'hourly' | 'fixed-price' | 'retainer' | 'commission';
   price: number;
   employmentType: string;
   requiredSkills: string[];

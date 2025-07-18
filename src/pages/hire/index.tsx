@@ -15,6 +15,7 @@ import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import Legalagreement from '@/components/ui/legal-agreement';
 import LoadingAnimation from '@/components/ui/loading';
 import { toast } from 'react-toastify';
+import { formatPaymentInfo } from '@/utils/format';
 
 interface FormData {
     startDate: Date | null;
@@ -28,23 +29,23 @@ const HireContractor: NextPage = () => {
     const router = useRouter();
     const { userId } = useAuthStore();
     const { jobId, contractorId, applicationId, contractorName, contractorProfilePicture, clearHireData } = useHire();
-    
+
     const [showEmploymentDropdown, setShowEmploymentDropdown] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [datePickerOpen, setDatePickerOpen] = useState(false);
     const [job, setJob] = useState<Jobs | null>(null);
     const [loading, setIsLoading] = useState(false);
-    
+
     const [showLegalAgreement, setShowLegalAgreement] = useState<boolean>(false);
     const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
-    
+
     const [formData, setFormData] = useState<FormData>({
         startDate: null,
         rate: '',
         employmentType: '',
         paymentType: '',
     });
-    
+
     const employmentOptions = [
         'Full-time',
         'Part-time'
@@ -92,52 +93,9 @@ const HireContractor: NextPage = () => {
         };
     }, []);
 
-    // const handleContractPriceUpdate = async () => {
-    //     if (!amount || !userId) {
-    //         setError('Amount and user information are required');
-    //         return;
-    //     }
-
-    //     setIsLoading(true);
-    //     setError(null);
-
-    //     try {
-    //         // Prepare the payload based on payment type
-    //         const payload = {
-    //             jobId,
-    //             userId,
-    //             ...(job?.paymentType === 'retainer'
-    //                 ? { retainerAmount: parseFloat(amount) }
-    //                 : { price: parseFloat(amount) }
-    //             )
-    //         };
-
-    //         await editContractPrice(payload);
-    //         fetchJobData()
-    //         onClose();
-    //     } catch (error: any) {
-    //         console.error('Failed to update contract:', error);
-    //         setError(error?.response?.data?.message || 'Failed to update contract');
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
-
     const cancelHire = () => {
         clearHireData();
         router.back();
-    };
-
-    const getPaymentInfo = () => {
-        if (job?.paymentType === 'hourly') {
-          return `Hourly | $${job?.price}`;
-        } else if (job?.paymentType === 'fixed-price') {
-          return `Fixed Price | $${job?.price}`;
-        } else if (job?.paymentType === 'retainer' && job?.retainerAmount && job?.retainerFrequency) {
-          return `Retainer | $${job?.retainerAmount}/${job?.retainerFrequency.toLowerCase()}`;
-        }
-        return '';
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,48 +114,48 @@ const HireContractor: NextPage = () => {
     }, [acceptedLegalAgreement, showLegalAgreement])
 
     const handleSubmit = async () => {
-        
-        if  (!formData.rate || !formData.paymentType || !formData.employmentType || !formData.startDate) {
+
+        if (!formData.rate || !formData.paymentType || !formData.employmentType || !formData.startDate) {
             toast.error('Incomplete credentials!')
             return;
         }
 
         setIsLoading(true);
-        
+
         try {
-          const success = await submitHireContract({
-            jobId,
-            userId,
-            contractorId,
-            applicationId,
-            rate: formData.rate,
-            paymentType: formData.paymentType,
-            employmentType: formData.employmentType,
-            startDate: formData.startDate,
-            selectedFiles
-          });
+            const success = await submitHireContract({
+                jobId,
+                userId,
+                contractorId,
+                applicationId,
+                rate: formData.rate,
+                paymentType: formData.paymentType,
+                employmentType: formData.employmentType,
+                startDate: formData.startDate,
+                selectedFiles
+            });
 
-          if (success) {
-            await Promise.all([
-              updateJobApplicationStatus({applicationId: applicationId, status: "active"}),
-              updateJobStatus(userId, jobId, "active")
-            ]);
-            
-            clearHireData();
-            router.push('/job/manage');
+            if (success) {
+                await Promise.all([
+                    updateJobApplicationStatus({ applicationId: applicationId, status: "active" }),
+                    updateJobStatus(userId, jobId, "active")
+                ]);
 
-          } else {
-            toast.error("Contract submission not successful");
-          }
+                clearHireData();
+                router.push('/job/manage');
+
+            } else {
+                toast.error("Contract submission not successful");
+            }
         } catch (error) {
             console.log(error);
             toast.error("Error during submission:");
         } finally {
             setIsLoading(false);
         }
-      };
+    };
 
-      const handleEmploymentTypeSelect = (option: string) => {
+    const handleEmploymentTypeSelect = (option: string) => {
         setFormData({
             ...formData,
             employmentType: option // Just use the option directly
@@ -220,192 +178,192 @@ const HireContractor: NextPage = () => {
     }
 
     return (
-    <>
-        { 
-            showLegalAgreement &&
-            <Legalagreement
-                setShowLegalAgreement={setShowLegalAgreement}
-                acceptedLegalAgreement={acceptedLegalAgreement}
-                setAcceptedLegalAgreement={setAcceptedLegalAgreement}
-            />
-        }
+        <>
+            {
+                showLegalAgreement &&
+                <Legalagreement
+                    setShowLegalAgreement={setShowLegalAgreement}
+                    acceptedLegalAgreement={acceptedLegalAgreement}
+                    setAcceptedLegalAgreement={setAcceptedLegalAgreement}
+                />
+            }
 
-        <main className='w-full max-w-300 mx-auto p-6 pb-80'>
-            <section>
-                <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>
-                {/* skeleten loader */}
-                {!job ? (
-                <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
-                    <article className='flex flex-col gap-5'>
-                    <div className='h-6 bg-lightblue/70 rounded-md w-3/4 animate-pulse'></div>
-                    <div className="flex flex-wrap items-center gap-10">
-                        <div className="flex items-center gap-1.25">
-                        <div className='w-4 h-4 bg-lightblue/60 rounded animate-pulse'></div>
-                        <div className='h-4 bg-lightblue/40 rounded w-32 animate-pulse'></div>
-                        </div>
-                        
-                        <div className="flex items-center gap-1.25">
-                        <div className='w-4 h-4 bg-lightblue/30 rounded animate-pulse'></div>
-                        <div className='h-4 bg-lightblue/20 rounded w-24 animate-pulse'></div>
-                        </div>
+            <main className='w-full max-w-300 mx-auto p-6 pb-80'>
+                <section>
+                    <h1 className='font-bold text-xl mb-5'>Hire Contractor</h1>
+                    {/* skeleten loader */}
+                    {!job ? (
+                        <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
+                            <article className='flex flex-col gap-5'>
+                                <div className='h-6 bg-lightblue/70 rounded-md w-3/4 animate-pulse'></div>
+                                <div className="flex flex-wrap items-center gap-10">
+                                    <div className="flex items-center gap-1.25">
+                                        <div className='w-4 h-4 bg-lightblue/60 rounded animate-pulse'></div>
+                                        <div className='h-4 bg-lightblue/40 rounded w-32 animate-pulse'></div>
+                                    </div>
+
+                                    <div className="flex items-center gap-1.25">
+                                        <div className='w-4 h-4 bg-lightblue/30 rounded animate-pulse'></div>
+                                        <div className='h-4 bg-lightblue/20 rounded w-24 animate-pulse'></div>
+                                    </div>
+                                </div>
+                                <div className='h-6 bg-lightblue/10 rounded-full w-24 animate-pulse'></div>
+                            </article>
+                        </section>
+                    ) : (
+                        // Actual job content
+                        <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
+                            <article className='flex flex-col gap-5'>
+                                <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
+                                <div className="flex flex-wrap items-center gap-10 text-sm font-semibold">
+                                    <div className="flex items-center gap-1.25">
+                                        <FaRegHourglass size={15} />
+                                        {formatPaymentInfo(job)} | {job?.employmentType}
+                                    </div>
+
+                                    <div className="flex items-center gap-1.25">
+                                        <FaLocationDot size={15} />
+                                        {job?.location}
+                                    </div>
+                                </div>
+                                <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
+                            </article>
+                        </section>
+                    )}
+
+                    <h3 className='font-semibold text-sm mb-5'>Contractor</h3>
+
+                    <div className='flex items-center gap-5 pb-7.5 mb-5 border-b border-b-deepskyblue'>
+                        <ProfilePicture source={contractorProfilePicture || ""} alt={""} dimension={50} />
+                        <p className='font-semibold text-xl'>{contractorName}</p>
                     </div>
-                    <div className='h-6 bg-lightblue/10 rounded-full w-24 animate-pulse'></div>
-                    </article>
-                </section>
-                ) : (
-                // Actual job content
-                <section className='w-full mx-auto bg-skyblue rounded-lg p-7.5 mb-7.5'>
-                    <article className='flex flex-col gap-5'>
-                    <h1 className='font-bold text-xl'>{job?.jobTitle ?? ""}</h1>
-                    <div className="flex flex-wrap items-center gap-10 text-sm font-semibold">
-                        <div className="flex items-center gap-1.25">
-                        <FaRegHourglass size={15} />
-                        {getPaymentInfo()} | {job?.employmentType}
-                        </div>
-                        
-                        <div className="flex items-center gap-1.25">
-                        <FaLocationDot size={15} />
-                        {job?.location}
-                        </div>
-                    </div>
-                    <p className='bg-deepskyblue text-sm text-white w-fit h-fit rounded-full py-1.25 px-2.5'>{job?.jobCategory ?? ""}</p>
-                    </article>
-                </section>
-                )}
 
-                <h3 className='font-semibold text-sm mb-5'>Contractor</h3>
+                    <div className='pb-7.5 mb-5 border-b border-b-deepskyblue'>
+                        <p className='font-semibold text-sm mb-5'>Terms</p>
 
-                <div className='flex items-center gap-5 pb-7.5 mb-5 border-b border-b-deepskyblue'>
-                    <ProfilePicture source={contractorProfilePicture || ""} alt={""} dimension={50} />
-                    <p className='font-semibold text-xl'>{contractorName}</p>
-                </div>
+                        <div className='flex flex-col lg:grid lg:grid-rows-1  lg:grid-cols-3 gap-4'>
 
-                <div className='pb-7.5 mb-5 border-b border-b-deepskyblue'>
-                    <p className='font-semibold text-sm mb-5'>Terms</p>
+                            <div className="relative w-full max-w-75 lg:max-w-full lg:col-span-1 ">
+                                <div
+                                    className="flex items-center justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue cursor-pointer"
+                                    onClick={() => setShowEmploymentDropdown(!showEmploymentDropdown)}
+                                >
+                                    <input
+                                        type="text"
+                                        ref={employmentInputRef}
+                                        placeholder="Select employment type"
+                                        className="outline-none w-full placeholder:font-semibold bg-transparent cursor-pointer"
+                                        readOnly
+                                        value={formData.employmentType}
+                                    />
+                                    <IoMdArrowDropdown size={20} className="text-boldblue" />
+                                </div>
 
-                    <div className='flex flex-col lg:grid lg:grid-rows-1  lg:grid-cols-3 gap-4'>
-                        
-                        <div className="relative w-full max-w-75 lg:max-w-full lg:col-span-1 ">
-                            <div 
-                                className="flex items-center justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue cursor-pointer"
-                                onClick={() => setShowEmploymentDropdown(!showEmploymentDropdown)}
-                            >
-                                <input
-                                    type="text"
-                                    ref={employmentInputRef}
-                                    placeholder="Select employment type"
-                                    className="outline-none w-full placeholder:font-semibold bg-transparent cursor-pointer"
-                                    readOnly
-                                    value={formData.employmentType}
-                                />
-                                <IoMdArrowDropdown size={20} className="text-boldblue" />
+                                {showEmploymentDropdown && (
+                                    <div
+                                        ref={employmentDropdownRef}
+                                        className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto border border-gray-200"
+                                    >
+                                        {employmentOptions.map((option, index) => (
+                                            <div
+                                                key={`emp-${index}`}
+                                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                onClick={() => handleEmploymentTypeSelect(option)}
+                                            >
+                                                {option}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
-                            {showEmploymentDropdown && (
-                                <div 
-                                    ref={employmentDropdownRef}
-                                    className="dropdown-scrollbar absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-auto border border-gray-200"
-                                >
-                                    {employmentOptions.map((option, index) => (
-                                        <div
-                                            key={`emp-${index}`}
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                                            onClick={() => handleEmploymentTypeSelect(option)}
-                                        >
-                                            {option}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                            <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 lg:max-w-full lg:col-span-1  px-5 py-4 text-sm text-boldblue">
+                                <input
+                                    type="text"
+                                    name="rate"
+                                    value={formData.rate}
+                                    onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
+                                    className="outline-none placeholder:font-semibold w-[80%]"
+                                    placeholder="Rate"
+                                />
+                                <span>$</span>
+                            </div>
 
-                        <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 lg:max-w-full lg:col-span-1  px-5 py-4 text-sm text-boldblue">
-                            <input 
-                                type="text" 
-                                name="rate"
-                                value={formData.rate}
-                                onChange={(e) => setFormData({...formData, rate: e.target.value})}
-                                className="outline-none placeholder:font-semibold w-[80%]" 
-                                placeholder="Rate" 
-                            />
-                            <span>$</span>
-                        </div>
-                        
-                        <div className="w-full max-w-75 lg:max-w-full lg:col-span-1  flex items-center justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
-                            <DatePicker
-                                selected={formData.startDate}
-                                onChange={(date: Date | null) => setFormData({...formData, startDate: date})}
-                                placeholderText="Start Date"
-                                dateFormat="yyyy-MM-dd"
-                                className="outline-none w-full placeholder:font-semibold bg-transparent"
-                                ref={datePickerRef}
-                                open={datePickerOpen}
-                                onCalendarOpen={() => setDatePickerOpen(true)}
-                                onCalendarClose={() => setDatePickerOpen(false)}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setDatePickerOpen(!datePickerOpen)}
-                                className="-ml-6 text-boldblue focus:outline-none"
-                            >
-                                <IoMdCalendar size={20} />
-                            </button>
+                            <div className="w-full max-w-75 lg:max-w-full lg:col-span-1  flex items-center justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue">
+                                <DatePicker
+                                    selected={formData.startDate}
+                                    onChange={(date: Date | null) => setFormData({ ...formData, startDate: date })}
+                                    placeholderText="Start Date"
+                                    dateFormat="yyyy-MM-dd"
+                                    className="outline-none w-full placeholder:font-semibold bg-transparent"
+                                    ref={datePickerRef}
+                                    open={datePickerOpen}
+                                    onCalendarOpen={() => setDatePickerOpen(true)}
+                                    onCalendarClose={() => setDatePickerOpen(false)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setDatePickerOpen(!datePickerOpen)}
+                                    className="-ml-6 text-boldblue focus:outline-none"
+                                >
+                                    <IoMdCalendar size={20} />
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div>
-                    <p className='font-semibold text-sm mb-5'>Documents</p>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
-                        className="hidden"
-                    />
-                    <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className='flex items-center justify-center gap-2 p-2 rounded-lg border border-boldblue transition transform active:scale-95 hover:shadow-lg duration-300 ease-in-out cursor-pointer'
-                    > 
-                        <img src="/assets/documents_logo.svg" alt="document_logo" />
-                        <span className='h-fit w-fit'>Attach Documents</span>
+                    <div>
+                        <p className='font-semibold text-sm mb-5'>Documents</p>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                            className="hidden"
+                        />
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className='flex items-center justify-center gap-2 p-2 rounded-lg border border-boldblue transition transform active:scale-95 hover:shadow-lg duration-300 ease-in-out cursor-pointer'
+                        >
+                            <img src="/assets/documents_logo.svg" alt="document_logo" />
+                            <span className='h-fit w-fit'>Attach Documents</span>
+                        </button>
+
+                        {selectedFiles.length > 0 && (
+                            <div className="mt-3">
+                                <p className="text-sm font-medium mb-2">Selected files:</p>
+                                <ul className="space-y-1">
+                                    {selectedFiles.map((file, index) => (
+                                        <li key={index} className="text-sm text-gray-600">
+                                            {file.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
+                    <button
+                        onClick={cancelHire}
+                        type="button"
+                        className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 border bg-white border-boldblue text-boldblue text-xs md:text-sm font-semibold rounded-lg"
+                    >
+                        Cancel
                     </button>
 
-                    {selectedFiles.length > 0 && (
-                        <div className="mt-3">
-                            <p className="text-sm font-medium mb-2">Selected files:</p>
-                            <ul className="space-y-1">
-                                {selectedFiles.map((file, index) => (
-                                    <li key={index} className="text-sm text-gray-600">
-                                        {file.name}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                    <button
+                        onClick={() => setShowLegalAgreement(true)}
+                        className="disabled:opacity-70 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
+                        disabled={showLegalAgreement}
+                    >
+                        {loading ? "Processing..." : "Send Contract"}
+                    </button>
+
                 </div>
-            </section>
-
-            <div className="flex items-center justify-center gap-2.5 md:gap-7.5 py-7.5 px-6 fixed bottom-0 right-0 bg-skyblue w-full border-t border-t-boldblue">
-              <button
-                onClick={cancelHire}
-                type="button"
-                className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 border bg-white border-boldblue text-boldblue text-xs md:text-sm font-semibold rounded-lg"
-              >
-                Cancel
-              </button>
-              
-              <button
-                onClick={() => setShowLegalAgreement(true)}
-                className="disabled:opacity-70 cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 md:py-2.75 px-3 md:px-5 bg-boldblue text-white text-xs md:text-sm font-semibold rounded-lg border border-boldblue"
-                disabled={showLegalAgreement}
-              >
-                {loading ? "Processing..." : "Send Contract"}
-              </button>
-
-            </div>
-        </main>
-    </>
+            </main>
+        </>
     );
 };
 

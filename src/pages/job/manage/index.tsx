@@ -9,4 +9,4 @@ const ManageJobs = () => {
   )
 }
 
-export default ManageJobs
+export default ManageJobs;

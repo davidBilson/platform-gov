@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { IoClose } from 'react-icons/io5';
-import { editContractPrice } from '@/api/payment/time-based-payment';
+import { editContractPrice } from '@/api/payment/time-and-commission-based-payment';
 import useAuthStore from '@/store/useAuth';
 
 const EditContract = (
@@ -22,8 +22,8 @@ const EditContract = (
 ) => {
     const [amount, setAmount] = useState(
         job?.paymentType === 'retainer'
-        ? job?.retainerAmount || ''
-        : job?.price || ''
+            ? job?.retainerAmount || ''
+            : job?.price || ''
     );
     const { userId } = useAuthStore()
     const [isLoading, setIsLoading] = useState(false);

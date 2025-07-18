@@ -1,0 +1,188 @@
+import React, { useState, useEffect } from 'react';
+import { getCommissionDetails, CommissionData } from '@/api/contract/commission-api';
+import useAuthStore from '@/store/useAuth';
+import { Jobs } from '@/types/jobs';
+import { getCommissionContractPayments } from '@/api/payment/time-and-commission-based-payment';
+
+interface CommissionProps {
+  job: Jobs | null;
+  mutualContractId: string;
+}
+
+interface PaymentTransaction {
+  id: string;
+  type: string;
+  amount: number;
+  netAmount: number;
+  fee: number;
+  status: string;
+  createdAt: string;
+  description: string;
+}
+
+const ContractorCommission = ({ job, mutualContractId }: CommissionProps) => {
+  
+  const [commissionData, setCommissionData] = useState<CommissionData | null>(null);
+  const [paymentTransactions, setPaymentTransactions] = useState<PaymentTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [canSubmit, setCanSubmit] = useState(false);
+  const { userId } = useAuthStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (mutualContractId) {
+        try {
+          setLoading(true);
+
+          const [paymentsData,] = await Promise.all([
+            getCommissionContractPayments(mutualContractId),
+            fetchCommissionData()
+          ]);
+
+          setPaymentTransactions(paymentsData.data.transactions || []);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [mutualContractId]);
+
+  useEffect(() => {
+    if (commissionData?.nextPaymentDate) {
+      const now = new Date();
+      const paymentDate = new Date(commissionData.nextPaymentDate);
+      const diffInHours = (paymentDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      setCanSubmit(diffInHours <= 48);
+    } else {
+      setCanSubmit(false);
+    }
+  }, [commissionData]);
+
+  const fetchCommissionData = async () => {
+    try {
+      setLoading(true);
+      const data = await getCommissionDetails(mutualContractId, userId);
+      setCommissionData(data);
+    } catch (error) {
+      console.error('Error fetching retainer data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (e) {
+      console.log(e)
+      return 'Invalid date';
+    }
+  };
+
+  const getStatusDisplay = (status: string): string => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return 'Completed';
+      case 'pending':
+        return 'Pending';
+      case 'failed':
+        return 'Failed';
+      default:
+        return status;
+    }
+  };
+
+  // Filter to only show completed transactions
+  const completedTransactions = paymentTransactions.filter(
+    transaction => transaction.status.toLowerCase() !== 'completed'
+  );
+
+  if (loading) {
+    return (
+      <section className="w-full p-6 flex items-center justify-center">
+        <div className="animate-pulse">Loading...</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="w-full">
+
+      <div className="overflow-x-auto w-full">
+        <table className="min-w-full bg-white shadow-sm rounded-lg overflow-hidden">
+          <thead className="border-b border-b-deepskyblue">
+            <tr>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">
+                <span className="block sm:hidden">Desc.</span>
+                <span className="hidden sm:block">Description</span>
+              </th>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">Amount</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">Status</th>
+              <th className="py-3 px-2 sm:px-4 text-left text-boldblue font-semibold text-sm">
+                <span className="block sm:hidden">Date</span>
+                <span className="hidden sm:block">Date</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="text-sm divide-y divide-gray-100">
+            {completedTransactions && completedTransactions.length > 0 ? (
+              completedTransactions.map((transaction: PaymentTransaction, index: number) => (
+                <tr key={transaction.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+                  }`}>
+                  <td className="py-3 px-2 sm:px-4 text-boldblue">
+                    <div className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-none" title={transaction.description}>
+                      {transaction.description}
+                    </div>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 font-semibold text-boldblue">
+                    ${(Math.abs(transaction.amount).toFixed(2))}
+                  </td>
+                  <td className="py-3 px-2 sm:px-4">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${transaction.status.toLowerCase() === 'completed'
+                      ? 'bg-aquagreen/10 text-aquagreen border border-aquagreen/20'
+                      : transaction.status.toLowerCase() === 'pending'
+                        ? 'bg-faintskyblue text-deepskyblue border border-faintskyblue/20'
+                        : 'bg-lightgray text-mediumgray border border-mediumgray'
+                      }`}>
+                      {getStatusDisplay(transaction.status)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-2 sm:px-4 text-boldblue">
+                    <div className="text-xs sm:text-sm">
+                      {formatDate(transaction.createdAt)}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-boldblue/60">
+                  <div className="flex flex-col items-center space-y-2">
+                    <svg className="w-8 h-8 text-boldblue/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm">No completed payment transactions available</span>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+};
+
+export default ContractorCommission;

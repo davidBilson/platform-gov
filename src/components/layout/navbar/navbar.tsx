@@ -9,18 +9,28 @@ import { usePathname } from 'next/navigation';
 const Navbar: React.FC = () => {
   const { userId, role } = useAuthStore();
   const pathname = usePathname() || '';
-  
+
   const renderNavbar = () => {
-    // Special case for admin routes
-    if (pathname.startsWith('/admin') && userId && role === 'admin') {
+    // Special case for admin routes - Fixed: Use OR instead of AND
+    if (pathname.startsWith('/admin') && userId && (role === 'admin' || role === 'superadmin')) {
       return <AdminNavbar />;
-    } 
-    
-    if (pathname === '/privacy-policy') {
-      return userId && (role === 'client' || role === 'contractor') ?  <UserNavbar /> : userId && role === 'admin' ? <AdminNavbar /> : <GuestNavbar />;
     }
-    
-    return userId && (role === 'client' || role === 'contractor') ? <UserNavbar /> : userId && role === 'admin' ? <AdminNavbar /> : <GuestNavbar />;
+
+    // For privacy policy page
+    if (pathname === '/privacy-policy') {
+      return userId && (role === 'client' || role === 'contractor') ? 
+        <UserNavbar /> : 
+        userId && (role === 'admin' || role === 'superadmin') ? 
+          <AdminNavbar /> : 
+          <GuestNavbar />;
+    }
+
+    // Default logic - Fixed: Added parentheses for proper grouping
+    return userId && (role === 'client' || role === 'contractor') ? 
+      <UserNavbar /> : 
+      userId && (role === 'admin' || role === 'superadmin') ? 
+        <AdminNavbar /> : 
+        <GuestNavbar />;
   };
 
   return renderNavbar();

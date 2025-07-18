@@ -7,27 +7,13 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import React from 'react';
 import { IoIosCheckmarkCircle } from 'react-icons/io';
+import { formatPaymentInfo } from '@/utils/format';
 
 const JobList = ({ job }: JobListProps) => {
-
   const { userId } = useAuthStore()
 
-  // Calculate time since job was posted
   const postedTime = format(new Date(job.createdAt), 'M/d/yyyy h:mm a');
 
-  // Format payment information based on payment type
-  const getPaymentInfo = (): string => {
-    if (job.paymentType === 'hourly') {
-      return `Hourly | $${job.price}`;
-    } else if (job.paymentType === 'fixed-price') {
-      return `Fixed Price | $${job.price}`;
-    } else if (job.paymentType === 'retainer' && job.retainerAmount && job.retainerFrequency) {
-      return `Retainer | $${job.retainerAmount}/${job.retainerFrequency.toLowerCase()}`;
-    }
-    return '';
-  };
-
-  // Truncate description if it's too long
   const truncateDescription = (text: string, maxLength = 200): string => {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
@@ -51,7 +37,7 @@ const JobList = ({ job }: JobListProps) => {
       <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
         <div className="flex items-center gap-1.25">
           <FaRegHourglass size={15} />
-          {getPaymentInfo()} | {job.employmentType}
+          {formatPaymentInfo(job)} | {job.employmentType}
         </div>
 
         <div className="flex items-center gap-1.25">

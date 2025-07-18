@@ -52,16 +52,16 @@ interface Rating {
   };
 }
 
-const RateUserBtn: React.FC<RateUserBtnProps> = ({ 
-  contract, 
-  onRatingSubmitted 
+const RateUserBtn: React.FC<RateUserBtnProps> = ({
+  contract,
+  onRatingSubmitted
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [givenRating, setGivenRating] = useState<ExistingRating | null>(null); // Rating I gave
   const [receivedRating, setReceivedRating] = useState<ExistingRating | null>(null); // Rating I received
   const [loading, setLoading] = useState(true);
-  
+
   const { userId, role } = useAuthStore();
 
   // Determine who the current user should rate
@@ -125,23 +125,23 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
       try {
         setLoading(true);
         const ratings: Rating[] = await getContractRatings(contract._id);
-        
+
         // Find rating GIVEN by current user (where I am the reviewer)
         const userGivenRating = ratings.find((rating: Rating) => {
-          const reviewerId = typeof rating.reviewer === 'string' 
-            ? rating.reviewer 
+          const reviewerId = typeof rating.reviewer === 'string'
+            ? rating.reviewer
             : rating.reviewer._id;
           return reviewerId === userId;
         });
-        
+
         // Find rating RECEIVED by current user (where I am the reviewee)
         const userReceivedRating = ratings.find((rating: Rating) => {
-          const revieweeId = typeof rating.reviewee === 'string' 
-            ? rating.reviewee 
+          const revieweeId = typeof rating.reviewee === 'string'
+            ? rating.reviewee
             : rating.reviewee._id;
           return revieweeId === userId;
         });
-        
+
         if (userGivenRating) {
           const convertedGivenRating = convertRatingToExistingRating(userGivenRating);
           if (convertedGivenRating) {

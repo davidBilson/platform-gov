@@ -324,14 +324,14 @@ const PayoutSetupContent = () => {
               <h3 className="text-sm font-medium text-gray-800">Account Status</h3>
               <div className="flex space-x-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${accountStatus.payouts_enabled
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-yellow-100 text-yellow-700'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-yellow-100 text-yellow-700'
                   }`}>
                   {accountStatus.payouts_enabled ? 'Ready for Payouts' : 'Setup Required'}
                 </span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${accountStatus.capabilities.transfers === 'active'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-700'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-700'
                   }`}>
                   Transfers: {accountStatus.capabilities.transfers}
                 </span>

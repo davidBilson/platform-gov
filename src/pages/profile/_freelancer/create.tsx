@@ -13,6 +13,7 @@ import { clearanceLevels } from "@/utils/govtAgencyAndClearanceIndex/departmentA
 
 import { ProfessionalFieldsAndAreasOfExpertise152 } from "@/utils/feedFilter/152ProfessionalFieldsAndAreasOfExpertise";
 import { certificatesAndEducationList } from "@/utils/feedFilter/CertificatesAndEducationList";
+import { GovernmentDepartmentsAndAgenciesByCountry } from "@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry";
 // UI Components
 import Legalagreement from "@/components/ui/legal-agreement";
 import { toast } from "react-toastify";
@@ -20,7 +21,6 @@ import { toast } from "react-toastify";
 import { IoMdImages, IoIosSearch } from "react-icons/io";
 import { IoCloseOutline } from "react-icons/io5";
 import { MdEdit } from "react-icons/md";
-import { GovernmentDepartmentsAndAgenciesByCountry } from "@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry";
 
 const statesByCountry = { USA: usaStates, UK: ukStates, Canada: canadaStates, Australia: australiaStates };
 const firmOptions = ["Janus Global Advisors"];
@@ -33,6 +33,7 @@ const CreateFreelancerProfile = () => {
   const [formData, setFormData] = useState<ProfileFormData>({
     bio: "",
     ratePerHour: "",
+    secondRate: "",
     profession: "",
     primaryPosition: "",
     skills: [],
@@ -61,7 +62,8 @@ const CreateFreelancerProfile = () => {
         id: generateId(),
         degree: "",
         institution: "",
-        yearCompleted: ""
+        yearCompleted: "",
+        gpa: "" // optional
       }
     ],
     profileImage: null,
@@ -76,7 +78,6 @@ const CreateFreelancerProfile = () => {
   const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
-  const [showProfessionalFieldsDropdown, setShowProfessionalFieldsDropdown] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
   const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
@@ -90,6 +91,90 @@ const CreateFreelancerProfile = () => {
   const [acceptedLegalAgreement, setAcceptedLegalAgreement] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    // Check work history requirements
+    formData.workHistory.forEach((work, index) => {
+      if (!work.department.trim()) {
+        errors.push(`Work Experience ${index + 1}: Department/Agency is required`);
+      }
+      if (!work.departmentType) {
+        errors.push(`Work Experience ${index + 1}: Please select State or Federal`);
+      }
+      if (!work.fromDate.trim()) {
+        errors.push(`Work Experience ${index + 1}: From date is required`);
+      }
+      if (!work.toDate.trim()) {
+        errors.push(`Work Experience ${index + 1}: To date is required`);
+      }
+    });
+
+    return errors;
+  };
+
+  const validateYear = (year: string) => {
+    const currentYear = new Date().getFullYear();
+    const numYear = parseInt(year);
+
+    if (isNaN(numYear) || numYear < 1925 || numYear > currentYear) {
+      return false;
+    }
+    return true;
+  };
+
+  const handleYearInput = (e: ChangeEvent<HTMLInputElement>, workId: string, field: keyof WorkHistory) => {
+    const value = e.target.value;
+
+    // Only allow numbers and "present" for toDate
+    if (field === 'toDate' && value.toLowerCase() === 'present') {
+      updateWorkHistoryWrapper(workId, field, 'Present');
+      return;
+    }
+
+    // Only allow numbers for year fields
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    // For year fields, validate range
+    if (value && value.length === 4) {
+      if (!validateYear(value)) {
+        toast.error(`Invalid year input!`);
+        return;
+      }
+    }
+
+    updateWorkHistoryWrapper(workId, field, value);
+  };
+
+  const handleDegreeYearInput = (e: any, degreeId: string) => {
+    const value = e.target.value;
+
+    // Only allow numbers
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    // Validate year range
+    if (value && value.length === 4) {
+      if (!validateYear(value)) {
+        toast.error(`Invalid year input!`);
+        return;
+      }
+    }
+
+    updateDegreeWrapper(degreeId, 'yearCompleted', value);
+  };
+
+  const handleCurrentRoleChange = (workId: string, isChecked: boolean) => {
+    if (isChecked) {
+      updateWorkHistoryWrapper(workId, 'toDate', 'Present');
+    } else {
+      updateWorkHistoryWrapper(workId, 'toDate', '');
+    }
+  };
 
   useEffect(() => {
     if (showSkillsDropdown) {
@@ -147,6 +232,7 @@ const CreateFreelancerProfile = () => {
         setFormData({
           bio: profileData.bio || "",
           ratePerHour: profileData.ratePerHour?.toString() || "",
+          secondRate: profileData.secondRate?.toString() || "",
           primaryPosition: profileData.primaryPosition || "",
           profession: profileData.profession || "",
           clearance: profileData.clearance || "",
@@ -172,7 +258,8 @@ const CreateFreelancerProfile = () => {
             id: generateId(),
             degree: "",
             institution: "",
-            yearCompleted: ""
+            yearCompleted: "",
+            gpa: ""
           }],
           profileImageUrl: profileData.profileImage?.startsWith('/uploads')
             ? `${process.env.NEXT_PUBLIC_BASE_URL}${profileData.profileImage}`
@@ -206,10 +293,10 @@ const CreateFreelancerProfile = () => {
 
   const handleInputChangeWrapper = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.target.name === 'bio') {
-      const words = e.target.value.split(/\s+/).filter(Boolean);
-      if (words.length > 300) {
-
-        const truncatedText = words.slice(0, 300).join(' ');
+      // Change from word count to character count
+      if (e.target.value.length > 1500) {
+        // Truncate to 1500 characters instead of words
+        const truncatedText = e.target.value.substring(0, 1500);
         setFormData({
           ...formData,
           bio: truncatedText
@@ -271,6 +358,13 @@ const CreateFreelancerProfile = () => {
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
+
+    const validationErrors = validateForm();
+    if (validationErrors.length > 0) {
+      validationErrors.forEach(error => toast.error(error));
+      return;
+    }
+
     if (acceptedLegalAgreement) {
       submitProfileDataWrapper();
       return;
@@ -344,17 +438,17 @@ const CreateFreelancerProfile = () => {
               value={formData.bio}
               onChange={handleInputChangeWrapper}
               onInput={handleTextAreaInputWrapper}
-              maxLength={300}
+              maxLength={1500}
               rows={1}
               className="block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-275 px-5 py-4 focus:outline focus:outline-boldblue resize-none overflow-hidden scrollbar-hide"
               placeholder="About Me/Bio"
             ></textarea>
             <div className="text-right text-xs text-gray-500 mt-1">
-              {formData.bio.split(/\s+/).filter(Boolean).length}/300
+              {formData.bio.length}/1500
             </div>
           </div>
 
-          <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue">
+          <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-wrap items-center gap-4">
             <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
               <input
                 type="text"
@@ -363,6 +457,17 @@ const CreateFreelancerProfile = () => {
                 onChange={handleInputChangeWrapper}
                 className="outline-none placeholder:font-semibold w-[80%]"
                 placeholder="Rate per hour"
+              />
+              <span>Rate</span>
+            </div>
+            <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
+              <input
+                type="text"
+                name="secondRate"
+                value={formData.secondRate}
+                onChange={handleInputChangeWrapper}
+                className="outline-none placeholder:font-semibold w-[80%]"
+                placeholder="Second Rate (optional)"
               />
               <span>Rate</span>
             </div>
@@ -375,10 +480,10 @@ const CreateFreelancerProfile = () => {
               value={formData.primaryPosition}
               onChange={handleInputChangeWrapper}
               className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
-              placeholder="Primary position/Title"
+              placeholder="Consultant Focus Area"
             />
 
-            <div className="relative w-full max-w-75 mb-7.5">
+            {/* <div className="relative w-full max-w-75 mb-7.5">
 
               <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
                 <input
@@ -422,7 +527,7 @@ const CreateFreelancerProfile = () => {
                   }
                 </div>
               )}
-            </div>
+            </div> */}
 
 
             {/* Firm Affiliation */}
@@ -446,7 +551,7 @@ const CreateFreelancerProfile = () => {
                     id="firm"
                     name="firmAffiliation"
                     value="firm"
-                    checked={formData.firmAffiliation !== "" && formData.firmAffiliation !== "independent"}
+                    checked={formData.firmAffiliation !== "independent"}
                     onChange={() => setFormData({ ...formData, firmAffiliation: "" })}
                   />
                   <label htmlFor="firm">Firm Affiliation</label>
@@ -622,8 +727,6 @@ const CreateFreelancerProfile = () => {
               </div>
             </div>
 
-
-
             <div className="my-7.5 pt-7.5  border-t border-t-deepskyblue">
               <div className="flex flex-wrap items-center gap-2.5">
                 <div className="relative w-full max-w-75">
@@ -694,8 +797,6 @@ const CreateFreelancerProfile = () => {
                 ))}
               </div>
             </div>
-
-
 
             {/* Skills */}
             <div className="flex flex-wrap items-center mb-7.5 gap-2.5">
@@ -827,7 +928,7 @@ const CreateFreelancerProfile = () => {
                   {item}
                   <button
                     type="button"
-                    onClick={() => removeTag('expertise', index)}
+                    onClick={() => removeTagWrapper('expertise', index)}
                     className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform active:scale-95 hover:text-red-500"
                   >
                     <IoCloseOutline size={16} />
@@ -837,14 +938,12 @@ const CreateFreelancerProfile = () => {
             </div>
           </div>
 
-
-
-
-
-
-
+          {/* Work History */}
           <div className="mb-7.5">
-            <h3 className="mb-7.5 font-semibold text-black">Work History</h3>
+            <h3 className="mb-7.5 font-semibold text-black flex items-center gap-1">
+              <span>Work History</span>
+              <span className="text-crimson font-bold h-fit pt-1">*</span>
+            </h3>
 
             {formData.workHistory.map((work, index) => (
               <div key={work.id} className="mb-10">
@@ -871,7 +970,7 @@ const CreateFreelancerProfile = () => {
 
                 <div className="flex items-start gap-7.5 mb-7.5">
                   <div className="relative w-full max-w-[242px]">
-                    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+                    <div className="relative flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
                       <input
                         type="text"
                         value={work.department}
@@ -880,8 +979,10 @@ const CreateFreelancerProfile = () => {
                         onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
                         className="outline-none placeholder:font-semibold w-[80%]"
                         placeholder="Department/Agency"
+                        // required
                       />
                       <IoIosSearch />
+                      {/* <span className="text-crimson font-bold absolute -right-4">*</span> */}
                     </div>
 
                     {showDepartmentDropdown && (
@@ -912,28 +1013,35 @@ const CreateFreelancerProfile = () => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="checkbox"
-                        id={`state-${work.id}`}
-                        checked={work.departmentType === "state"}
-                        onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', work.departmentType === "state" ? "" : "state")}
-                        className="form-checkbox h-4 w-4 text-boldblue transition duration-150 ease-in-out"
-                      />
-                      <label htmlFor={`state-${work.id}`}>State</label>
-                    </div>
+                  <div className="flex flex-col gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="radio"
+                          id={`state-${work.id}`}
+                          name={`departmentType-${work.id}`}
+                          checked={work.departmentType === "state"}
+                          onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', "state")}
+                          className="form-radio h-4 w-4 text-boldblue transition duration-150 ease-in-out"
+                          // required
+                        />
+                        <label htmlFor={`state-${work.id}`}>State</label>
+                      </div>
 
-                    <div className="flex items-center gap-1">
-                      <input
-                        type="checkbox"
-                        id={`federal-${work.id}`}
-                        checked={work.departmentType === "federal"}
-                        onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', work.departmentType === "federal" ? "" : "federal")}
-                        className="form-checkbox h-4 w-4 text-boldblue transition duration-150 ease-in-out"
-                      />
-                      <label htmlFor={`federal-${work.id}`}>Federal</label>
+                      <div className="flex items-center gap-1">
+                        <input
+                          type="radio"
+                          id={`federal-${work.id}`}
+                          name={`departmentType-${work.id}`}
+                          checked={work.departmentType === "federal"}
+                          onChange={() => updateWorkHistoryWrapper(work.id, 'departmentType', "federal")}
+                          className="form-radio h-4 w-4 text-boldblue transition duration-150 ease-in-out"
+                          // required/
+                        />
+                        <label htmlFor={`federal-${work.id}`}>Federal</label>
+                      </div>
                     </div>
+                    {/* <span className="text-crimson font-bold">*</span> */}
                   </div>
 
                   <div className="relative w-full max-w-[242px]">
@@ -989,21 +1097,47 @@ const CreateFreelancerProfile = () => {
                   />
                 </div>
 
+                <div className="mb-2.5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`currentRole-${work.id}`}
+                      checked={work.toDate === 'Present'}
+                      onChange={(e) => handleCurrentRoleChange(work.id, e.target.checked)}
+                      className="form-checkbox h-4 w-4 text-boldblue transition duration-150 ease-in-out"
+                    />
+                    <label htmlFor={`currentRole-${work.id}`} className="text-sm text-boldblue">
+                      I am currently working in this role
+                    </label>
+                  </div>
+                </div>
+
                 <div className="flex items-center gap-7.5 mb-7.5">
-                  <input
-                    type="text"
-                    value={work.fromDate}
-                    onChange={(e) => updateWorkHistoryWrapper(work.id, 'fromDate', e.target.value)}
-                    className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
-                    placeholder="From"
-                  />
-                  <input
-                    type="text"
-                    value={work.toDate}
-                    onChange={(e) => updateWorkHistoryWrapper(work.id, 'toDate', e.target.value)}
-                    className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
-                    placeholder="To"
-                  />
+                  <div className="relative w-full max-w-75">
+                    <input
+                      type="text"
+                      value={work.fromDate}
+                      onChange={(e) => handleYearInput(e, work.id, 'fromDate')}
+                      className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full px-5 py-4 focus:outline focus:outline-boldblue"
+                      placeholder="From (Year)"
+                      maxLength={4}
+                      required
+                    />
+                    <span className="text-crimson font-bold absolute top-4 -right-4">*</span>
+                  </div>
+                  <div className="relative w-full max-w-75">
+                    <input
+                      type="text"
+                      value={work.toDate}
+                      onChange={(e) => handleYearInput(e, work.id, 'toDate')}
+                      className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full px-5 py-4 focus:outline focus:outline-boldblue"
+                      placeholder="To (Year or Present)"
+                      maxLength={7}
+                      disabled={work.toDate === 'Present'}
+                      // required
+                    />
+                    {/* <span className="text-crimson font-bold absolute top-4 -right-4">*</span> */}
+                  </div>
                 </div>
               </div>
             ))}
@@ -1012,7 +1146,7 @@ const CreateFreelancerProfile = () => {
               <button
                 type="button"
                 onClick={addWorkHistoryWrapper}
-                className="text-sm px-4 py-[11px]  bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 cursor-pointer"
+                className="text-sm px-4 py-[11px] bg-boldblue rounded-lg text-white font-semibold transition transform active:scale-95 hover:opacity-70 cursor-pointer"
               >
                 Add More
               </button>
@@ -1042,9 +1176,18 @@ const CreateFreelancerProfile = () => {
                 <input
                   type="text"
                   value={degree.yearCompleted}
-                  onChange={(e) => updateDegreeWrapper(degree.id, 'yearCompleted', e.target.value)}
+                  onChange={(e) => handleDegreeYearInput(e, degree.id)}
                   className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
                   placeholder="Year Completed"
+                  maxLength={4}
+                />
+                <input
+                  type="text"
+                  value={degree.gpa || ""}
+                  onChange={(e) => updateDegreeWrapper(degree.id, 'gpa', e.target.value)}
+                  className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
+                  placeholder="GPA (Optional)"
+                  maxLength={4}
                 />
                 {formData.degrees.length > 1 && (
                   <button

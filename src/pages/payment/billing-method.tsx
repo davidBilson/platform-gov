@@ -18,10 +18,10 @@ const PaymentMethodSetup = () => {
   const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
   const [hasExistingMethod, setHasExistingMethod] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   // Check if coming from contract page
   const isFromContract = typeof returnTo === 'string' && returnTo.startsWith('/contract');
-  
+
   interface PaymentMethod {
     id: string;
     brand: | "Alipay"
