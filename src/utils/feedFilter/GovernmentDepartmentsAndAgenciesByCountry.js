@@ -9,13 +9,12 @@ export const getContentCategories = async () => {
 
     const values = response.data.data.governmentDepartmentsAndAgencies
       .sort((a, b) => {
-        const aIsUS = a.value.startsWith('US –') ? 0 : 1;
-        const bIsUS = b.value.startsWith('US –') ? 0 : 1;
+        const aIsUS = a.value.startsWith('US –') ? 0 : a.value.startsWith('Canada') ? 1 : 2;
+        const bIsUS = b.value.startsWith('US –') ? 0 : b.value.startsWith('Canada') ? 1 : 2;
 
         if (aIsUS !== bIsUS) {
           return aIsUS - bIsUS;
         }
-
 
         return a.sortOrder - b.sortOrder;
       })

@@ -3,11 +3,17 @@ import ConsentToSignaturesCommunications from './consentToSignaturesCommunicatio
 import LiabilityDisclaimer from './liabilityDisclaimer';
 import NonCircumventionPolicy from './nonCircumventionPolicy';
 import TermsOfUse from './termsOfUse';
+import LegalAgreement from './LegalAgreement';
 
 const LegalContent = () => {
-    const [activeTab, setActiveTab] = useState('terms-of-use');
+    const [activeTab, setActiveTab] = useState('legal-agreement');
 
     const tabs = [
+        { 
+            id: 'legal-agreement', 
+            label: 'Legal Agreement', 
+            component: <LegalAgreement /> 
+        },
         { 
             id: 'terms-of-use', 
             label: 'Terms of Use', 

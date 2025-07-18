@@ -14,7 +14,7 @@ import { certificatesAndEducationList } from '@/utils/feedFilter/CertificatesAnd
 import { GovernmentDepartmentsAndAgenciesByCountry } from '@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry';
 import { securityClearances } from '@/utils/feedFilter/SecurityClearances';
 
-import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates'
+import { getAllCountries, getSpecificCountryStates, getUSStates } from '@/utils/getLocations/getAllCountriesAndStates';
 import { MdDeleteForever } from "react-icons/md";
 
 type Country = string;

@@ -9,7 +9,7 @@ const adminId = userId;
 export const getLegalContentByDocumentType = async (documentType: string) => {
     try {
         const endPoint = process.env.NEXT_PUBLIC_GET_LEGAL_CONTENT_BY_TYPE?.replace(':documentType', documentType);
-        const response = await axios.get(`${apiBaseUrl}${endPoint}?adminId=${adminId}`);
+        const response = await axios.get(`${apiBaseUrl}${endPoint}`);
         if (response.status === 200) {
             return response.data;
         }

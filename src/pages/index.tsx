@@ -9,6 +9,6 @@ export default function Home() {
 
   useEffect(() => {}, [feedType])
 
-  return <>{feedType === "Contractors" ? <ContractorFeed /> : <JobFeed />}</>
+  return <>{feedType === "Consultants" ? <ContractorFeed /> : <JobFeed />}</>
   
 }

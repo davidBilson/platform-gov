@@ -5,9 +5,10 @@ import ContractorFilter from '../../_home/_contractorFeed/_contractorFilter';
 import ContractorCountFilters from '../../_home/_contractorFeed/_contractorCountFilters';
 import { ContractorProfile } from '@/types/contractors';
 import { IoReload } from 'react-icons/io5';
-import { useContractorFilter } from '@/store/useContractorFilter';
 import LoadingAnimation from '@/components/ui/loading';
 import { fetchContractors } from '@/api/feed-api';
+
+import { useContractorFilter } from '@/store/useContractorFilter';
 
 const ContractorFeed = () => {
   const { 

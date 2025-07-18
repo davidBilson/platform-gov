@@ -17,7 +17,7 @@ const ContractorCountFilters: React.FC<ContractorCountFiltersProps> = ({
   return (
     <section className="flex gap-4 flex-wrap mb-4">
       <h2 className="font-bold text-lg">
-        {filteredCount === 0 ? "0 Contractors" : `${filteredCount} Contractors`}
+        {filteredCount === 0 ? "0 Consultants" : `${filteredCount} Consultants`}
       </h2>
       
       {activeFilters.length > 0 && (
