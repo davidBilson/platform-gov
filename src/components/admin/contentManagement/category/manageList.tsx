@@ -55,7 +55,22 @@ const ManageList = ({ categoryId }: ManageListProps) => {
       try {
         setLoading(true);
         const response = await getItemsByCategory(categoryId);
-        setItems(response.data || []);
+        console.log('manageList category items: ', response);
+        console.log('manageList category items: ', response.data[0].value);
+
+        // @ts-ignore
+        const sortedItems = (response.data || []).sort((a, b) => {
+          const aIsUS = a.value.startsWith('US –') || a.value.startsWith('United States') || a.value.startsWith('USA') ? 0 : a.value.startsWith('Canada') ? 1 : 2;
+          const bIsUS = b.value.startsWith('US –') || b.value.startsWith('United States') || b.value.startsWith('USA') ? 0 : b.value.startsWith('Canada') ? 1 : 2;
+
+          if (aIsUS !== bIsUS) {
+            return aIsUS - bIsUS;
+          }
+
+          return a.sortOrder - b.sortOrder;
+        });
+
+        setItems(sortedItems);
       } catch (err) {
         console.log(err);
         toast.error('Failed to load items');
@@ -69,7 +84,7 @@ const ManageList = ({ categoryId }: ManageListProps) => {
 
   const handleAddItem = async () => {
     if (!newItem.trim()) return;
-    
+
     try {
       const response = await createItem(categoryId, newItem.trim());
       setItems([...items, response.data]);
@@ -95,7 +110,7 @@ const ManageList = ({ categoryId }: ManageListProps) => {
   const updateItemsOrder = async (reorderedItems: Item[]) => {
     try {
       setIsUpdatingOrder(true);
-      
+
       // Create the items array with new sort orders
       const itemsWithNewOrder = reorderedItems.map((item, index) => ({
         id: item._id,
@@ -109,7 +124,7 @@ const ManageList = ({ categoryId }: ManageListProps) => {
         ...item,
         sortOrder: index + 1
       }));
-      
+
       setItems(updatedItems);
       toast.success('Items order updated successfully');
     } catch (err) {
@@ -149,11 +164,11 @@ const ManageList = ({ categoryId }: ManageListProps) => {
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    
+
     if (!draggedItem) return;
-    
+
     const draggedIndex = items.findIndex(item => item._id === draggedItem._id);
-    
+
     if (draggedIndex === dropIndex) {
       setDraggedItem(null);
       setDraggedOverIndex(null);
@@ -164,10 +179,10 @@ const ManageList = ({ categoryId }: ManageListProps) => {
     const newItems = [...items];
     const [removed] = newItems.splice(draggedIndex, 1);
     newItems.splice(dropIndex, 0, removed);
-    
+
     setItems(newItems);
     updateItemsOrder(newItems);
-    
+
     setDraggedItem(null);
     setDraggedOverIndex(null);
     dragCounter.current = 0;
@@ -219,7 +234,7 @@ const ManageList = ({ categoryId }: ManageListProps) => {
               💡 Drag items to reorder them
             </div>
           )}
-          
+
           <ul className="divide-y divide-gray-200 h-[calc(40vh)] overflow-y-auto">
             {items.map((item, index) => (
               <li
@@ -231,24 +246,20 @@ const ManageList = ({ categoryId }: ManageListProps) => {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, index)}
                 onDragEnd={handleDragEnd}
-                className={`py-3 flex justify-between items-center text-xs transition-all duration-200 ${
-                  draggedItem?._id === item._id 
-                    ? 'opacity-50 scale-95' 
+                className={`py-3 flex justify-between items-center text-xs transition-all duration-200 ${draggedItem?._id === item._id
+                    ? 'opacity-50 scale-95'
                     : ''
-                } ${
-                  draggedOverIndex === index && draggedItem?._id !== item._id
-                    ? 'border-t-2 border-deepskyblue' 
+                  } ${draggedOverIndex === index && draggedItem?._id !== item._id
+                    ? 'border-t-2 border-deepskyblue'
                     : ''
-                } ${
-                  isUpdatingOrder ? 'pointer-events-none opacity-75' : 'cursor-move'
-                }`}
+                  } ${isUpdatingOrder ? 'pointer-events-none opacity-75' : 'cursor-move'
+                  }`}
               >
                 <div className="flex items-center space-x-2 flex-1">
-                  <GripVertical 
-                    size={16} 
-                    className={`text-gray-400 ${
-                      draggedItem?._id === item._id ? 'text-deepskyblue' : ''
-                    }`} 
+                  <GripVertical
+                    size={16}
+                    className={`text-gray-400 ${draggedItem?._id === item._id ? 'text-deepskyblue' : ''
+                      }`}
                   />
                   <span className="text-gray-800 select-none">{item.value}</span>
                 </div>
@@ -263,7 +274,7 @@ const ManageList = ({ categoryId }: ManageListProps) => {
               </li>
             ))}
           </ul>
-          
+
           {isUpdatingOrder && (
             <div className="text-xs text-blue-600 text-center py-2">
               Updating order...
