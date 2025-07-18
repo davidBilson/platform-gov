@@ -7,14 +7,6 @@ export const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 };
 
-// to handle auto-resize of textarea
-// export const handleTextAreaInput = (textareaRef) => {
-//   if (textareaRef?.current) {
-//     textareaRef.current.style.height = 'auto';
-//     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-//   }
-// }
-
 export const handleTextAreaInput = (textareaRef) => {
   const textarea = textareaRef.current;
   if (textarea) {

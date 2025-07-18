@@ -380,12 +380,6 @@ const CreateFreelancerProfile = () => {
     }
   }, [formData.bio]);
 
-  // useEffect(() => {
-  //   if (formData.bio && textareaRef.current) {
-  //     handleTextAreaInput();
-  //   }
-  // }, [formData.bio]);
-
   return (
     <>
       {showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} />}
@@ -474,53 +468,6 @@ const CreateFreelancerProfile = () => {
               className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
               placeholder="Consultant Focus Area"
             />
-
-            {/* <div className="relative w-full max-w-75 mb-7.5">
-
-              <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
-                <input
-                  type="text"
-                  value={formData.profession}
-                  onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-                  onFocus={() => setShowProfessionalFieldsDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowProfessionalFieldsDropdown(false), 200)}
-                  className="outline-none placeholder:font-semibold w-[80%]"
-                  placeholder="Professional Field"
-                />
-                <IoIosSearch />
-              </div>
-
-              {showProfessionalFieldsDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-                  onMouseDown={(e) => e.preventDefault()}
-                >
-                  {ProfessionalFieldsAndAreasOfExpertise152
-                    .filter(field =>
-                      formData.profession
-                        ? field.toLowerCase().includes(formData.profession.toLowerCase())
-                        : true
-                    )
-                    .map((field, idx) => (
-                      <div
-                        key={`professional-field-${idx}`}
-                        className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          setFormData({
-                            ...formData,
-                            profession: field
-                          });
-                          setShowProfessionalFieldsDropdown(false);
-                        }}
-                      >
-                        {field}
-                      </div>
-                    ))
-                  }
-                </div>
-              )}
-            </div> */}
-
 
             {/* Firm Affiliation */}
             <div className="mb-7.5">
