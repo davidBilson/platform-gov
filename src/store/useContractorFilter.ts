@@ -351,9 +351,8 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
   }
 }));
 
-// Selector hooks for optimized component updates
+
 export const useContractorSearchTerm = () => useContractorFilter(state => state.searchTerm);
 export const useSetContractorSearchTerm = () => useContractorFilter(state => state.setSearchTerm);
 export const useContractorActiveFilters = () => useContractorFilter(state => state.activeFilters);
 export const useContractorRemoveFilter = () => useContractorFilter(state => state.removeFilter);
-// Add more selectors as needed for other state pieces
