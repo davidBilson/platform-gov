@@ -126,7 +126,7 @@ const JobFeed = () => {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="bg-aquagreen cursor-pointer text-white px-6 py-3 rounded-lg font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="bg-aquagreen cursor-pointer text-white px-4 py-2 rounded-lg font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loadingMore ? (
                   <>
