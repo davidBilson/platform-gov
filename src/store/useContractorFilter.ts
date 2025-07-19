@@ -248,10 +248,10 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     if (state.searchTerm) {
       const searchLower = state.searchTerm.toLowerCase();
       filtered = filtered.filter((contractor) =>
-        contractor.user.name.toLowerCase().includes(searchLower) ||
+        contractor.user?.name?.toLowerCase().includes(searchLower) ||
         contractor.primaryPosition?.toLowerCase().includes(searchLower) ||
         contractor.profession?.toLowerCase().includes(searchLower) || // Added profession to search
-        contractor.bio.toLowerCase().includes(searchLower)
+        contractor.bio?.toLowerCase().includes(searchLower)
       );
     }
   
