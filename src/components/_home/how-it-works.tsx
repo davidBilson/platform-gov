@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserPlus, UserCheck, Briefcase } from 'lucide-react';
 
 const HowItWorks = () => {
-  const [hoveredStep, setHoveredStep] = useState(null);
+  const [hoveredStep, setHoveredStep] = useState< null | number>(null);
 
   const steps = [
     {

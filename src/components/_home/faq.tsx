@@ -31,7 +31,7 @@ const FAQ = () => {
     }
   ];
 
-  const toggleItem = (index) => {
+  const toggleItem = (index: number) => {
     const newOpenItems = new Set(openItems);
     if (newOpenItems.has(index)) {
       newOpenItems.delete(index);

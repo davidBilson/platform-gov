@@ -15,9 +15,9 @@ import { useJobFilter } from '@/store/useJobFilter';
 import LoadingAnimation from '@/components/ui/loading';
 
 // Internal Components
-import JobList from '../../_home/_jobFeed/_jobList';
-import JobCountFilters from '../../_home/_jobFeed/_jobCountFilters';
-import JobFilter from '../../_home/_jobFeed/_jobFilter';
+import JobList from './_jobList';
+import JobCountFilters from './_jobCountFilters';
+import JobFilter from './_jobFilter';
 
 
 const JobFeed = () => {
