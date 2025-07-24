@@ -343,6 +343,7 @@ const ClientNavbar = () => {
                   onClick={() => {
                     setFeedType(option);
                     setActiveDropdown(null);
+                    router.pathname !== '/feed' && router.push('/feed');
                   }}
                 >
                   {option}
@@ -427,6 +428,7 @@ const ClientNavbar = () => {
                   onClick={() => {
                     setFeedType(option);
                     setActiveDropdown(null);
+                    router.pathname !== '/feed' && router.push('/feed');
                   }}
                 >
                   {option}

@@ -254,6 +254,7 @@ const ContractorNavbar = () => {
                   onClick={() => {
                     setFeedType(option);
                     setActiveDropdown(null);
+                    router.pathname !== '/feed' && router.push('/feed');
                   }}
                 >
                   {option}
@@ -338,6 +339,7 @@ const ContractorNavbar = () => {
                   onClick={() => {
                     setFeedType(option);
                     setActiveDropdown(null);
+                    router.pathname !== '/feed' && router.push('/feed');
                   }}
                 >
                   {option}
