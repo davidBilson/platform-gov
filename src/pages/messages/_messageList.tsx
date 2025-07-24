@@ -108,7 +108,7 @@ export default function MessageList({ conversations, loading, onSelect, selected
   }
 
   return (
-    <div className="w-full bg-white h-full rounded-xl overflow-hidden shadow-sm flex flex-col">
+    <div className="w-full bg-white h-full rounded-xl overflow-y-auto messagesList-scrollbar shadow-sm flex flex-col">
       {conversations.map((conversation) => {
         const isSelected = conversation.threadId === selectedId;
         const userId = conversation.otherUser.id;
@@ -176,7 +176,7 @@ export default function MessageList({ conversations, loading, onSelect, selected
               
               {conversation.unreadCount > 0 && (
                 <div className="ml-1 flex-shrink-0">
-                  <div className="h-5 w-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className="h-5 w-5 bg-aquagreen rounded-full flex items-center justify-center">
                     <span className="text-xs text-white font-medium">
                       {conversation.unreadCount}
                     </span>

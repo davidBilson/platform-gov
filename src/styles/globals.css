@@ -24,7 +24,8 @@
   --toastify-container-width: fit-content;
   --toastify-toast-width: 290px;
 }
-
+/* *** SCROLLBAR STYLES *** */
+/* DROPDOWN */
 .dropdown-scrollbar::-webkit-scrollbar {
   width: 4px;
   border-radius: 100px;
@@ -36,7 +37,21 @@
 
 .dropdown-scrollbar::-webkit-scrollbar-thumb {
   background-color: #00A871;
-  border-radius: 8px;
+  border-radius: 100px;
+}
+
+/* MESSAGES */
+.messagesList-scrollbar::-webkit-scrollbar {
+  width: 2px;
+  border-radius: 100px;
+}
+
+.messagesList-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messagesList-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-lightgray);
   border-radius: 100px;
 }
 

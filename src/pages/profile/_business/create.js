@@ -380,7 +380,7 @@ const CreateBusinessProfile = () => {
                   onFocus={() => setShowDepartmentDropdown(true)}
                   onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
                   className="outline-none placeholder:font-semibold w-[80%]"
-                  placeholder="Department/Agency"
+                  placeholder="Department/Agency Focus"
                 />
                 <IoIosSearch />
               </div>

@@ -46,6 +46,7 @@ export default function ChatIndex() {
         userId
       }
     });
+
     setSocket(newSocket);
 
     return () => {
@@ -100,7 +101,7 @@ export default function ChatIndex() {
   
         return prevConversations;
       });
-  
+
       setDisplayedConversations(prev => {
         const existingConvIndex = prev.findIndex(
           conv => conv.threadId === data.threadId
@@ -146,8 +147,6 @@ export default function ChatIndex() {
     };
   }, [socket, userId, selectedConversation]);
 
-
-  
   useEffect(() => {
     const fetchConversations = async () => {
       try {
