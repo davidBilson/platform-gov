@@ -11,7 +11,7 @@ import Logo from '@/components/ui/logo';
 // Define types for state and refs
 type ContractorOption = "Jobs" | "Consultants";
 
-const GuestNavbar: React.FC = () => {
+const GuestNavbar = () => {
 
   const router = useRouter();
 
@@ -88,48 +88,7 @@ const GuestNavbar: React.FC = () => {
 
           <div className="flex items-center">
             {/* Desktop search */}
-            <div className="hidden lg:flex w-full max-w-[250px] h-12 items-center py-1 pl-5 pr-1 border border-skyblue rounded-sm text-sm mr-7">
-              <input 
-                type='text' 
-                placeholder="search" 
-                className="outline-none w-1/2" 
-                aria-label="Search input"
-              />
-              <div className="relative w-1/2" ref={dropdownRef}>
-                <button 
-                  className="w-full bg-skyblue border-none flex items-center justify-center p-2 rounded-full"
-                  onClick={() => setContractorsDropdown(!contractorsDropdown)}
-                  type="button"
-                  aria-expanded={contractorsDropdown}
-                  aria-haspopup="listbox"
-                >
-                  <span>{selectedOption}</span>
-                  <span><IoMdArrowDropdown size={15} /></span>
-                </button>
-                
-                {contractorsDropdown && (
-                  <div 
-                    className="absolute top-full left-0 right-0 mt-1 bg-white border border-skyblue rounded shadow-md z-10"
-                    role="listbox"
-                  >
-                    {contractorOptions.map((option) => (
-                      <div 
-                        key={option} 
-                        className="px-4 py-2 hover:bg-skyblue cursor-pointer"
-                        onClick={() => {
-                          handleOptionSelect(option);
-                          setFeedType(option);
-                        }}
-                        role="option"
-                        aria-selected={selectedOption === option}
-                      >
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+           
 
             {/* Mobile search and hamburger icons */}
             <div className="lg:hidden flex items-center gap-4 mr-4">

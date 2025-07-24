@@ -1,19 +1,24 @@
-import ContractorFeed from "./_home/_contractorFeed";
-import JobFeed from "./_home/_jobFeed";
+import React from 'react'
+import Hero from '../components/_home/hero'
+import HowItWorks from '@/components/_home/how-it-works'
+import Reviews from '@/components/_home/reviews'
+import Footer from '@/components/_home/footer'
+import FAQ from '@/components/_home/faq'
+import CTA from '@/components/_home/CTA'
+import Explore from '@/components/_home/explore'
 
-import { useFeedStore } from "@/store/useFeed";
-
-export default function Home() {
-  const { feedType } = useFeedStore();
-
-  return (
-    <>
-      <div className={feedType === "Consultants" ? "block" : "hidden"}>
-        <ContractorFeed />
-      </div>
-      <div className={feedType === "Jobs" ? "block" : "hidden"}>
-        <JobFeed />
-      </div>
-    </>
-  );
+const LandingPage = () => {
+    return (
+        <main>
+            <Hero />
+            <Explore />
+            <HowItWorks />
+            <Reviews />
+            <FAQ />
+            <CTA />
+            <Footer />
+        </main>
+    )
 }
+
+export default LandingPage
