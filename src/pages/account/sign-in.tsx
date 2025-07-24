@@ -4,10 +4,12 @@ import Link from 'next/link';
 import useAuthStore from '@/store/useAuth';
 import { SignInFormData } from '@/types/auth/auth';
 import { signInUser } from '@/api/auth-api';
+import { useFeedStore } from '@/store/useFeed';
 
 const SignIn = () => {
 
   const router = useRouter();
+  const { setFeedType } = useFeedStore();
   const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore();
 
   const [formData, setLocalFormData] = useState<SignInFormData>({
@@ -77,8 +79,15 @@ const SignIn = () => {
 
       if (userData.role === 'admin' || userData.role === 'superadmin') {
         router.push('/admin');
-      } else if (userData.isEmailVerified) {
+        return;
+      } else if (userData.role === 'contractor' && userData.isEmailVerified ) {
         router.push('/feed');
+        setFeedType('Jobs');
+        return;
+      } else if (userData.role === 'client' && userData.isEmailVerified) {
+        router.push('/feed');
+        setFeedType('Consultants');
+        return;
       } else if (!userData.isEmailVerified) {
         router.push('/account/verification');
       }
