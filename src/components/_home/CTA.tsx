@@ -1,6 +1,27 @@
+import useAuthStore from '@/store/useAuth';
+import { useRouter } from 'next/router';
 import React from 'react'
 
 const CTA = () => {
+
+    const { userId, role } = useAuthStore();
+    const router = useRouter();
+
+
+    const goToFeed = () => {
+        if (!userId) {
+            router.push(`/account/sign-up?type=client`)
+            return;
+        }
+
+        if (userId && role === 'client') {
+            router.push(`/feed?type=consultants`)
+        } else {
+            router.push('/feed?type=jobs')
+        }
+
+    }
+
     return (
         <section className='flex items-center justify-center pt-12 pb-24 px-4'>
             <div className="w-full max-w-6xl bg-gradient-to-t from-boldblue to-deepskyblue p-6 md:p-12 rounded-4xl mx-auto text-center">
@@ -14,7 +35,7 @@ const CTA = () => {
                 </p>
 
                 {/* CTA Button */}
-                <button className="group cursor-pointer relative inline-flex items-center px-6 py-4 bg-white text-boldblue font-semibold md:text-lg rounded-full hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/30 overflow-hidden">
+                <button onClick={goToFeed} className="group cursor-pointer relative inline-flex items-center px-6 py-4 bg-white text-boldblue font-semibold md:text-lg rounded-full hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-white/30 overflow-hidden">
                     {/* Shimmer effect */}
                     <div className="absolute inset-0 bg-boldblue/0 group-hover:bg-boldblue/10 transition-colors duration-300"></div>
                     <span className="relative">Hire a Consultant</span>

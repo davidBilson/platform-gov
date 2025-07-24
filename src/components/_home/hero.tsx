@@ -1,13 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Zap, Users, Globe, Star, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/router';
+import useAuthStore from '@/store/useAuth';
 
 const Hero = () => {
+    const { userId, role } = useAuthStore();
+    const router = useRouter();
+
     const [isVisible, setIsVisible] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
+    const goToFeed = (type: string) => {
+        if (!userId) {
+            if (type == 'join') {
+                router.push(`/account/sign-up?type=contractor`)
+            }
+            if (type == 'hire') {
+                router.push(`/account/sign-up?type=client`)
+            }
+            return;
+        }
+
+        if (userId) {
+            if (type == 'join') {
+                router.push(`/account/sign-up?type=contractor`)
+            }
+            if (type == 'hire') {
+                router.push(`/feed?type=consultants`)
+            }
+        }
+
+    }
+
     useEffect(() => {
         setIsVisible(true);
-
         const handleMouseMove = (e: MouseEvent) => {
             setMousePosition({ x: e.clientX, y: e.clientY });
         };
@@ -88,12 +114,12 @@ const Hero = () => {
                             <button
                                 className="cursor-pointer group relative px-8 py-4 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 overflow-hidden"
                                 style={{
-                                    background: 'linear-gradient(135deg, #0B5F94 0%, #0B5F94 100%)',
-                                    // boxShadow: '0 10px 30px rgba(11, 95, 148, 0.3)'
+                                    background: 'linear-gradient(135deg, #0B5F94 0%, #0B5F94 100%)'
                                 }}
+                                onClick={() => goToFeed('hire')}
                             >
                                 <span className="flex items-center justify-center gap-2 relative z-10">
-                                    Hire Elite Consultants
+                                    Find Consultants
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </span>
                             </button>
@@ -105,6 +131,7 @@ const Hero = () => {
                                     borderColor: 'rgba(160, 217, 246, 0.6)',
                                     backgroundColor: 'rgba(225, 245, 253, 0.3)'
                                 }}
+                                onClick={() => goToFeed('join')}
                                 onMouseEnter={(e) => {
                                     // @ts-ignore
                                     e.target.style.backgroundColor = 'rgba(225, 245, 253, 0.6)';
@@ -118,7 +145,7 @@ const Hero = () => {
                                     e.target.style.borderColor = 'rgba(160, 217, 246, 0.6)';
                                 }}
                             >
-                                Explore Opportunities
+                                Join as Expert
                             </button>
                         </div>
                     </div>

@@ -1,11 +1,16 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
 import useAuthStore from '@/store/useAuth';
 import { SignupFormData, SignupApiResponse, ErrorResponse } from '@/types/auth/auth';
+import { useRouter } from 'next/router';
 
 const Signup = () => {
 
+  const router = useRouter();
+  
+  const { type } = router.query;
+ 
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore();
 
   const [formData, setLocalFormData] = useState<SignupFormData>({
@@ -17,6 +22,15 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    if (type === 'client') {
+      setLocalFormData((prev) => ({
+        ...prev,
+        role: type
+      }))
+    }
+  }, [type])
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
