@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { IoCloseOutline } from "react-icons/io5";
 import { IoIosSearch } from "react-icons/io";
 import { GovernmentDepartmentsAndAgenciesByCountry } from "@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry";
+import { BusinessIndustries } from "@/utils/feedFilter/BusinessIndustries";
 
 const CreateBusinessProfile = () => {
   const [business, setBusiness] = useState({
@@ -18,7 +19,7 @@ const CreateBusinessProfile = () => {
     logo: "",
     industry: "",
     size: "",
-    department: "",
+    department: [],
     clearance: "",
     specializations: [],
     locations: [
@@ -35,7 +36,8 @@ const CreateBusinessProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [newSpecialization, setNewSpecialization] = useState("");
-
+  const [departmentSearchTerm, setDepartmentSearchTerm] = useState(""); // Added for department search
+  const [showIndustryDropdown, setShowIndustryDropdown] = useState(false);
   const [showClearancesDropdown, setShowClearancesDropdown] = useState(false);
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState({});
@@ -135,6 +137,25 @@ const CreateBusinessProfile = () => {
     setBusiness(prev => ({
       ...prev,
       specializations: prev.specializations.filter(spec => spec !== specialization)
+    }));
+  };
+
+  // Add department functions
+  const handleAddDepartment = (department) => {
+    if (!business.department.includes(department)) {
+      setBusiness(prev => ({
+        ...prev,
+        department: [...prev.department, department]
+      }));
+    }
+    setDepartmentSearchTerm("");
+    // setShowDepartmentDropdown(false);
+  };
+
+  const handleRemoveDepartment = (department) => {
+    setBusiness(prev => ({
+      ...prev,
+      department: prev.department.filter(dept => dept !== department)
     }));
   };
 
@@ -370,13 +391,14 @@ const CreateBusinessProfile = () => {
             </div>
           </div>
 
+          {/* Department/Agency Focus */}
           <div className='mb-8 w-full max-w-105'>
             <div className='relative'>
               <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-3 text-sm text-boldblue">
                 <input
                   type="text"
-                  value={business.department || ""}
-                  onChange={(e) => setBusiness({ ...business, department: e.target.value })}
+                  value={departmentSearchTerm}
+                  onChange={(e) => setDepartmentSearchTerm(e.target.value)}
                   onFocus={() => setShowDepartmentDropdown(true)}
                   onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
                   className="outline-none placeholder:font-semibold w-[80%]"
@@ -390,22 +412,21 @@ const CreateBusinessProfile = () => {
                   onMouseDown={(e) => e.preventDefault()}
                 >
                   {GovernmentDepartmentsAndAgenciesByCountry
-                    .filter(dept =>
-                      business.department
-                        ? dept.toLowerCase().includes(business.department.toLowerCase())
-                        : true
-                    )
+                    .filter(dept => {
+                      // Filter out already selected departments and apply search filter
+                      const isNotSelected = !business.department.includes(dept);
+                      const matchesSearch = departmentSearchTerm
+                        ? dept.toLowerCase().includes(departmentSearchTerm.toLowerCase())
+                        : true;
+                      return isNotSelected && matchesSearch;
+                    })
                     .map((dept, idx) => (
                       <div
                         key={`dept-option-${idx}`}
                         className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
                         onMouseDown={(e) => {
                           e.preventDefault();
-                          setBusiness({
-                            ...business,
-                            department: dept
-                          });
-                          setShowDepartmentDropdown(false);
+                          handleAddDepartment(dept);
                         }}
                       >
                         {dept}
@@ -414,6 +435,21 @@ const CreateBusinessProfile = () => {
                   }
                 </div>
               )}
+            </div>
+
+            {/* Department Tags */}
+            <div className='flex flex-wrap gap-2.5 mt-4'>
+              {business.department && business.department.map((dept, index) => (
+                <div key={index} className='bg-deepskyblue text-white font-bold py-1 px-4 rounded-full flex items-center gap-1 w-fit'>
+                  {dept}
+                  <button
+                    onClick={() => handleRemoveDepartment(dept)}
+                    className="font-semibold text-sm ml-1 focus:outline-none cursor-pointer transition transform active:scale-95 hover:text-red-500"
+                  >
+                    <IoCloseOutline size={16} />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -620,25 +656,65 @@ const CreateBusinessProfile = () => {
           <div className='w-full'>
             {/* Industry */}
             <div className='mb-4 w-full max-w-105'>
-              <div className='relative'>
-                <select
-                  name="industry"
-                  className='w-full border border-boldblue text-boldblue rounded p-3 appearance-none focus:outline-none focus:border-boldblue'
-                  value={business.industry || ""}
-                  onChange={handleChange}
-                >
-                  <option value="">Industry</option>
-                  <option value="Technology">Technology</option>
-                  <option value="Healthcare">Healthcare</option>
-                  <option value="Finance">Finance</option>
-                </select>
-                <div className='absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none'>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1L6 6L11 1" stroke="#666" strokeWidth="2" />
-                  </svg>
-                </div>
-              </div>
+  <div className='relative'>
+    <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-3 text-sm text-boldblue">
+      <input
+        type="text"
+        value={business.industry || ""}
+        onChange={(e) => setBusiness({ ...business, industry: e.target.value })}
+        onFocus={() => setShowIndustryDropdown(true)}
+        onBlur={() => setTimeout(() => setShowIndustryDropdown(false), 200)}
+        className="outline-none placeholder:font-semibold w-[80%]"
+        placeholder="Industry"
+      />
+      <IoIosSearch />
+    </div>
+
+    {showIndustryDropdown && (
+      <div className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        {BusinessIndustries
+          .filter(industry =>
+            business.industry
+              ? industry.toLowerCase().includes(business.industry.toLowerCase())
+              : true
+          )
+          .map((industry, idx) => (
+            <div
+              key={`industry-option-${idx}`}
+              className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setBusiness({
+                  ...business,
+                  industry: industry
+                });
+                setShowIndustryDropdown(false);
+              }}
+            >
+              {industry}
             </div>
+          ))
+        }
+        {/* Add "Other" option */}
+        <div
+          className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm border-t border-gray-200"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setBusiness({
+              ...business,
+              industry: "Other"
+            });
+            setShowIndustryDropdown(false);
+          }}
+        >
+          Other
+        </div>
+      </div>
+    )}
+  </div>
+</div>
 
             {/* Company Size */}
             <div className='mb-4 w-full max-w-105'>
