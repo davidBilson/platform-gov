@@ -78,7 +78,7 @@ const SignIn = () => {
       if (userData.role === 'admin' || userData.role === 'superadmin') {
         router.push('/admin');
       } else if (userData.isEmailVerified) {
-        router.push('/');
+        router.push('/feed');
       } else if (!userData.isEmailVerified) {
         router.push('/account/verification');
       }

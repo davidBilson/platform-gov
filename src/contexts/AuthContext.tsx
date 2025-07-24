@@ -61,7 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     '/account/verification',
     '/privacy-policy',
     '/',
-    '/admin'
   ];
 
   const isPublicRoute =
@@ -115,6 +114,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (isLoading) return; // Wait for auth to load
     
     const currentPath = router.pathname;
+
     
     // Handle verification page access
     if (isVerificationPage && !userId) {
@@ -124,16 +124,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     // Handle authenticated user on auth pages
     if (userId) {
+      if (currentPath === '/') {
+        router.replace('/feed')
+        return;
+      }
+
       if (currentPath === '/account/sign-up') {
         const targetPath = verificationStep !== 'completed' 
           ? '/account/verification' 
-          : '/';
+          : '/feed';
         router.replace(targetPath);
         return;
       }
       
       if (currentPath === '/account/sign-in') {
-        router.replace('/');
+        router.replace('/feed');
         return;
       }
     }

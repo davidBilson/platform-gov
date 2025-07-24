@@ -29,7 +29,6 @@ const Hero = () => {
                 router.push(`/feed?type=consultants`)
             }
         }
-
     }
 
     useEffect(() => {
