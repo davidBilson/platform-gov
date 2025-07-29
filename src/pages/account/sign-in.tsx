@@ -43,21 +43,19 @@ const SignIn = () => {
 
       if (!result.success) {
         setErrorMessage(result.error || 'Sign in failed');
+        setIsSubmitting(false); // Set loading to false on error
         return;
       }
 
       if (result.data?.user.isSuspended) {
         setErrorMessage('Your account is suspended. Please contact support.');
+        setIsSubmitting(false); // Set loading to false on error
         return;
       }
 
       if (!result.data?.user) {
         setErrorMessage('Invalid response from server');
-        return;
-      }
-
-      if (!result.data?.user) {
-        setErrorMessage('Invalid response from server');
+        setIsSubmitting(false); // Set loading to false on error
         return;
       }
 
@@ -76,28 +74,29 @@ const SignIn = () => {
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
 
-
+      // Keep loading state active during navigation
       if (userData.role === 'admin' || userData.role === 'superadmin') {
-        router.push('/admin');
+        await router.push('/admin');
         return;
       } else if (userData.role === 'contractor' && userData.isEmailVerified ) {
-        router.push('/feed');
         setFeedType('Jobs');
+        await router.push('/feed');
         return;
       } else if (userData.role === 'client' && userData.isEmailVerified) {
-        router.push('/feed');
         setFeedType('Consultants');
+        await router.push('/feed');
         return;
       } else if (!userData.isEmailVerified) {
-        router.push('/account/verification');
+        await router.push('/account/verification');
+        return;
       }
 
     } catch (error) {
       const err = error as Error;
       setErrorMessage(err.message || 'An unexpected error occurred');
-    } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Set loading to false on error
     }
+    // Remove the finally block - let the navigation complete before removing loading state
   };
 
   return (
