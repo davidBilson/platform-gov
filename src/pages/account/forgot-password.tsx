@@ -31,11 +31,8 @@ const ForgotPassword: React.FC = () => {
       
       if (response.data.success) {
         setIsCodeSent(true);
-        setSuccessMessage('Reset code sent to your email');
       } else {
-        // Even if email doesn't exist, we show the same message for security
         setIsCodeSent(true);
-        setSuccessMessage('Reset code sent to your email if it exists in our system');
       }
     } catch (err) {
       console.error('Error requesting password reset:', err);
