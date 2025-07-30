@@ -92,7 +92,7 @@ const ManageList = ({ categoryId }: ManageListProps) => {
       toast.success('Item added successfully');
     } catch (err) {
       console.log(err);
-      toast.error('Item already exists or failed to add');
+      toast.error('Failed to add item!');
     }
   };
 

@@ -14,11 +14,11 @@ export const fetchProfile = async (userId: string, role: 'contractor' | 'client'
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return null; // User has no profile yet
+      return null;
     }
     
     console.error(`Error fetching ${role} profile:`, error);
-    throw error; // Re-throw for other errors
+    throw error;
   }
 };
 
