@@ -52,9 +52,10 @@ const ClientNavbar = () => {
   const currentSetSearchTerm = feedType === "Jobs" ? setJobSearchTerm : setContractorSearchTerm;
 
   const handleSignOut = () => {
+    router.replace('/account/sign-in');
     resetAll();
-    router.push('/account/sign-in');
-  }
+  };
+  
 
   const handleNavigation = (path: string, feedTypeValue?: string) => {
     if (feedTypeValue) setFeedType(feedTypeValue);

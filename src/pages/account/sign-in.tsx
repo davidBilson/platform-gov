@@ -55,7 +55,7 @@ const SignIn = () => {
 
       if (!result.data?.user) {
         setErrorMessage('Invalid response from server');
-        setIsSubmitting(false); // Set loading to false on error
+        setIsSubmitting(false);
         return;
       }
 
@@ -74,17 +74,16 @@ const SignIn = () => {
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
 
-      // Keep loading state active during navigation
       if (userData.role === 'admin' || userData.role === 'superadmin') {
-        await router.push('/admin');
+        await router.replace('/admin');
         return;
       } else if (userData.role === 'contractor' && userData.isEmailVerified ) {
         setFeedType('Jobs');
-        await router.push('/feed');
+        await router.replace('/feed');
         return;
       } else if (userData.role === 'client' && userData.isEmailVerified) {
         setFeedType('Consultants');
-        await router.push('/feed');
+        await router.replace('/feed');
         return;
       } else if (!userData.isEmailVerified) {
         await router.push('/account/verification');
@@ -94,9 +93,8 @@ const SignIn = () => {
     } catch (error) {
       const err = error as Error;
       setErrorMessage(err.message || 'An unexpected error occurred');
-      setIsSubmitting(false); // Set loading to false on error
+      setIsSubmitting(false);
     }
-    // Remove the finally block - let the navigation complete before removing loading state
   };
 
   return (
