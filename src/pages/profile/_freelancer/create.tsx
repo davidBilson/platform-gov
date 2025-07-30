@@ -8,19 +8,13 @@ import { fetchProfile } from "../../../api/profile-api";
 // Utils
 import { generateId } from "@/utils/profiles/profile.contractor";
 import { handleTextAreaInput, handleInputChange, handleProfileImageChange, addTag, removeTag, addWorkHistory, updateWorkHistory, removeWorkHistory, addDegree, updateDegree, removeDegree, submitProfileData } from "@/utils/profiles/profile.contractor";
-import { usaStates, canadaStates, ukStates, australiaStates } from '@/utils/countryAndStates/index';
-import { clearanceLevels } from "@/utils/govtAgencyAndClearanceIndex/departmentAgenciesClearances";
 
 import { ProfessionalFieldsAndAreasOfExpertise152 } from "@/utils/feedFilter/152ProfessionalFieldsAndAreasOfExpertise";
 import { certificatesAndEducationList } from "@/utils/feedFilter/CertificatesAndEducationList";
-import { GovernmentDepartmentsAndAgenciesByCountry } from "@/utils/feedFilter/GovernmentDepartmentsAndAgenciesByCountry";
 // UI Components
 import Legalagreement from "@/components/ui/legal-agreement";
 import { toast } from "react-toastify";
-// Icons
-import { IoMdImages, IoIosSearch } from "react-icons/io";
-import { IoCloseOutline } from "react-icons/io5";
-import { MdEdit } from "react-icons/md";
+
 import {
   ProfileImageUpload,
   BioSection,
@@ -34,13 +28,10 @@ import {
   ActionButtons
 } from '@/components/profile/editProfile/contractor';
 
-const statesByCountry = { USA: usaStates, UK: ukStates, Canada: canadaStates, Australia: australiaStates };
-const firmOptions = ["Janus Global Advisors"];
-
 const CreateFreelancerProfile = () => {
 
   const router = useRouter();
-  const { userId, name } = useAuthStore();
+  const { userId, name, email } = useAuthStore();
 
   const [formData, setFormData] = useState<ProfileFormData>({
     bio: "",
@@ -223,7 +214,7 @@ const CreateFreelancerProfile = () => {
     try {
       const response = await fetchProfile(userId, 'contractor');
 
-      if (response.success && response.data) {
+      if (response?.success && response?.data) {
         setIsProfileExists(true);
         const profileData = response.data;
 
@@ -372,17 +363,11 @@ const CreateFreelancerProfile = () => {
   };
 
   const handlePreview = async () => {
-    if (isProfileExists) {
-      router.push('/profile');
-      return;
-    }
 
-    const profileResult = await fetchUserProfile();
-
-    if (profileResult.success) {
+    if (formData.bio !== "" && formData.profileImageUrl !== "") {
       router.push('/profile');
     } else {
-      toast.error("Please save your profile before previewing public view");
+      toast.error("Please complete, and save your profile");
     }
   };
 
@@ -404,7 +389,11 @@ const CreateFreelancerProfile = () => {
               handleProfileImageChange={handleProfileImageChangeWrapper}
               fileInputRef={fileInputRef}
             />
-            <p className="text-black font-semibold text-base md:text-xl text-center md:text-left">{name}</p>
+            <div>
+
+              <p className="text-black font-semibold text-base md:text-xl text-center md:text-left">{name}</p>
+              <p className="text-gray-500 text-xs text-center md:text-left pt-2">{email ?? ''}</p>
+            </div>
           </div>
 
           <BioSection

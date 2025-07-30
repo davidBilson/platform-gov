@@ -258,14 +258,11 @@ const CreateBusinessProfile = () => {
   };
 
   const handlePreview = async () => {
-    const profileData = await fetchBusinessProfile();
-
-    if (!profileData || !profileData._id) {
-      toast.error('Please save your profile before previewing');
-      return;
+    if (business.overview !== "" && business.logo !== "") {
+      router.push('/profile');
+    } else {
+      toast.error("Please complete, and save your profile");
     }
-
-    router.push('/profile');
   };
 
   // Handle specialization input with enter key

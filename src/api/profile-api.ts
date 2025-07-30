@@ -6,13 +6,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const fetchProfile = async (userId: string, role: 'contractor' | 'client') => {
   try {
-    const apiEndpoint = role === 'contractor' ? process.env.NEXT_PUBLIC_FETCH_CONTRACTOR_PROFILE?.replace(':id', userId) : process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
+    const apiEndpoint = role === 'contractor' 
+      ? process.env.NEXT_PUBLIC_FETCH_CONTRACTOR_PROFILE?.replace(':id', userId) 
+      : process.env.NEXT_PUBLIC_FETCH_CLIENT_PROFILE?.replace(':id', userId);
+    
     const response = await axios.get(`${API_BASE_URL}${apiEndpoint}`);
-
     return response.data;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null; // User has no profile yet
+    }
+    
     console.error(`Error fetching ${role} profile:`, error);
-    throw error;
+    throw error; // Re-throw for other errors
   }
 };
 
