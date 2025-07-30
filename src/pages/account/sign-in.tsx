@@ -43,13 +43,13 @@ const SignIn = () => {
 
       if (!result.success) {
         setErrorMessage(result.error || 'Sign in failed');
-        setIsSubmitting(false); // Set loading to false on error
+        setIsSubmitting(false);
         return;
       }
 
       if (result.data?.user.isSuspended) {
         setErrorMessage('Your account is suspended. Please contact support.');
-        setIsSubmitting(false); // Set loading to false on error
+        setIsSubmitting(false);
         return;
       }
 

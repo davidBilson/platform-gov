@@ -12,7 +12,7 @@ export const RateSection = ({
   handleInputChange,
 }: RateSectionProps) => (
   <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-wrap items-center gap-4">
-    <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
+    <div className="flex justify-between border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 text-sm text-boldblue">
       <input
         type="text"
         name="ratePerHour"
@@ -23,7 +23,7 @@ export const RateSection = ({
       />
       <span>Rate</span>
     </div>
-    <div className="flex justify-between border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 text-sm text-boldblue">
+    <div className="flex justify-between border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 text-sm text-boldblue">
       <input
         type="text"
         name="secondRate"

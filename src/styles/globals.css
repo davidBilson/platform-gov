@@ -55,6 +55,23 @@
   border-radius: 100px;
 }
 
+/* AGREEMENT PROMPTS */
+.agreementPrompts-scrollbar::-webkit-scrollbar {
+  width: 2px;
+  border-radius: 100px;
+}
+
+.agreementPrompts-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  width: 2px;
+}
+
+.agreementPrompts-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(11, 95, 148, .2);
+  border-radius: 100px;
+  width: 2px;
+}
+
 @layer base {
   *, *::before, *::after {
     box-sizing : border-box;

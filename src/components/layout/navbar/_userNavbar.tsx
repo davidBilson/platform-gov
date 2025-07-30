@@ -80,7 +80,7 @@ const UserNavbar = () => {
             Create Public Profile
           </div>
 
-          <div className="font-semibold text-lg lg:hidden">
+          <div className="font-semibold text-sm lg:hidden">
             Create Public Profile
           </div>
 

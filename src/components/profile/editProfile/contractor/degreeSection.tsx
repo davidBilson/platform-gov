@@ -19,15 +19,15 @@ export const DegreeSection = ({
   handleDegreeYearInput,
 }: DegreeSectionProps) => (
   <div className="mb-7.5">
-    <h3 className="mb-7.5 font-semibold text-black">Degrees</h3>
+    <h3 className="mb-7.5 font-semibold text-black text-lg">Degrees</h3>
 
     {degrees.map((degree) => (
-      <div key={degree.id} className="flex items-start justify-start gap-7.5 mb-5">
+      <div key={degree.id} className="flex flex-wrap items-start justify-start gap-7.5 mb-5">
         <input
           type="text"
           value={degree.degree}
           onChange={(e) => updateDegree(degree.id, 'degree', e.target.value)}
-          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
+          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
           placeholder="Degree"
           required
         />
@@ -35,14 +35,14 @@ export const DegreeSection = ({
           type="text"
           value={degree.institution}
           onChange={(e) => updateDegree(degree.id, 'institution', e.target.value)}
-          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
+          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
           placeholder="Institution"
         />
         <input
           type="text"
           value={degree.yearCompleted}
           onChange={(e) => handleDegreeYearInput(e, degree.id)}
-          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
+          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
           placeholder="Year Completed"
           maxLength={4}
           required
@@ -51,7 +51,7 @@ export const DegreeSection = ({
           type="text"
           value={degree.gpa || ""}
           onChange={(e) => updateDegree(degree.id, 'gpa', e.target.value)}
-          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
+          className="placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
           placeholder="GPA (Optional)"
           maxLength={4}
         />

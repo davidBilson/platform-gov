@@ -29,7 +29,7 @@ export const WorkHistorySection = ({
   setShowExperienceDropdown,
 }: WorkHistorySectionProps) => (
   <div className="mb-7.5">
-    <h3 className="mb-7.5 font-semibold text-black flex items-center gap-1">
+    <h3 className="my-7.5 font-semibold text-black text-lg flex items-center gap-1">
       <span>Work History</span>
       <span className="text-crimson font-bold h-fit pt-1">*</span>
     </h3>
@@ -37,7 +37,7 @@ export const WorkHistorySection = ({
     {workHistory.map((work, index) => (
       <div key={work.id} className="mb-10">
         <div className="flex justify-between mb-5">
-          <h4 className="font-semibold">Work Experience {index + 1}</h4>
+          <h4 className="text-gray-700">Work Experience {index + 1}</h4>
           {workHistory.length > 1 && (
             <button
               type="button"
@@ -57,8 +57,8 @@ export const WorkHistorySection = ({
           placeholder="Title"
         />
 
-        <div className="flex items-start gap-7.5 mb-7.5">
-          <div className="relative w-full max-w-[242px]">
+        <div className="flex flex-wrap items-start gap-7.5 mb-7.5">
+          <div className="relative w-full md:max-w-[242px]">
             <div className="relative flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
               <input
                 type="text"
@@ -128,7 +128,7 @@ export const WorkHistorySection = ({
             </div>
           </div>
 
-          <div className="relative w-full max-w-[242px]">
+          <div className="relative w-full md:max-w-[242px]">
             <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
               <input
                 type="text"
@@ -176,7 +176,7 @@ export const WorkHistorySection = ({
             type="text"
             value={work.location}
             onChange={(e) => updateWorkHistory(work.id, 'location', e.target.value)}
-            className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
+            className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
             placeholder="Location"
           />
         </div>

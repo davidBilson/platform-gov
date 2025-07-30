@@ -46,7 +46,7 @@ export const FirmAffiliationSection = ({
     </div>
 
     {firmAffiliation !== "independent" && (
-      <div className="relative w-full max-w-75">
+      <div className="relative w-full md:max-w-75">
         <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
           <input
             type="text"
