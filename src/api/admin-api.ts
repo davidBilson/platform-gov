@@ -265,7 +265,7 @@ export const getAllCategories = async () => {
 export const createItem = async (categoryId: string, value: string) => {
   try {
     const response = await axios.post(
-      `${API_BASE_URL}${process.env.NEXT_PUBLIC_CREATE_ITEM}`,
+      `${API_BASE_URL}${process.env.NEXT_PUBLIC_CREATE_ITEM}?adminId=${adminId}`,
       withAdminId({ categoryId, value })
     );
     return response.data;

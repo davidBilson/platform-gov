@@ -88,22 +88,30 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     }
   }, []);
 
+
   const getCompletedContracts = useCallback(async (contractorId: string): Promise<Contract[]> => {
     try {
-      const contracts = await getContracts(contractorId);
-      if (!contracts) {
-        console.warn('No contracts data received');
+      // Add validation
+      if (!contractorId || contractorId.trim() === '') {
+        console.warn('Invalid contractorId provided to getCompletedContracts');
         return [];
       }
-      return contracts.completed.map(contract => ({
+  
+      const contracts = await getContracts(contractorId);
+      
+      // Since getContracts now always returns an object (never null), we can safely access completed
+      const completedContracts = contracts?.completed || [];
+      
+      return completedContracts.map(contract => ({
         ...contract,
         id: contract.id || contract._id || '', // Ensure 'id' is populated
         startDate: contract.startDate ? new Date(contract.startDate).toISOString() : '',
         endDate: contract.endDate ? new Date(contract.endDate).toISOString() : '',
       }));
+      
     } catch (error) {
-      console.error('Error fetching completed contracts:', error);
-      // Return empty array instead of throwing error
+      // This catch block should rarely execute now since getContracts handles all errors
+      console.error('Unexpected error in getCompletedContracts:', error);
       return [];
     }
   }, []);
@@ -126,36 +134,55 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      toast.error('Error fetching profile');
+      // toast.error('Error fetching profile');
     }
   }, []);
 
   const fetchAllData = useCallback(async (profileId: string): Promise<void> => {
     try {
       setLoading(true);
-      const [, completedContractsData, ratingsData] = await Promise.allSettled([
+      
+      // Validate profileId
+      if (!profileId || profileId.trim() === '') {
+        console.warn('Invalid profileId provided to fetchAllData');
+        return;
+      }
+  
+      const results = await Promise.allSettled([
         getProfileData(profileId),
         getCompletedContracts(profileId),
         getContractorRatings(profileId)
       ]);
-
-      if (completedContractsData.status === 'fulfilled') {
-        setCompletedContracts(completedContractsData.value);
-      } else {
-        console.error('Failed to fetch completed contracts:', completedContractsData.reason);
-        // Don't show error toast for contracts as it's expected they might not exist
-        // toast.error('Error fetching contracts');
+  
+      // Handle profile data
+      const profileResult = results[0];
+      if (profileResult.status === 'rejected') {
+        console.error('Failed to fetch profile data:', profileResult.reason);
+        // You might want to show an error to the user for profile data since it's critical
       }
-
-      if (ratingsData.status === 'fulfilled') {
-        setContractorRatings(ratingsData.value);
+  
+      // Handle contracts data
+      const contractsResult = results[1];
+      if (contractsResult.status === 'fulfilled') {
+        setCompletedContracts(contractsResult.value);
       } else {
-        console.error('Failed to fetch ratings:', ratingsData.reason);
-        // Don't show error toast for ratings as it's expected they might not exist
+        console.error('Failed to fetch completed contracts:', contractsResult.reason);
+        // Set empty array as fallback
+        setCompletedContracts([]);
       }
-
+  
+      // Handle ratings data
+      const ratingsResult = results[2];
+      if (ratingsResult.status === 'fulfilled') {
+        setContractorRatings(ratingsResult.value);
+      } else {
+        console.error('Failed to fetch ratings:', ratingsResult.reason);
+        // Set empty array as fallback
+        setContractorRatings([]);
+      }
+  
     } catch (error) {
-      console.error('Error in fetchAllData:', error);
+      console.error('Unexpected error in fetchAllData:', error);
     } finally {
       setLoading(false);
     }

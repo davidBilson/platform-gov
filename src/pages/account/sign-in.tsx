@@ -4,10 +4,12 @@ import Link from 'next/link';
 import useAuthStore from '@/store/useAuth';
 import { SignInFormData } from '@/types/auth/auth';
 import { signInUser } from '@/api/auth-api';
+import { useFeedStore } from '@/store/useFeed';
 
 const SignIn = () => {
 
   const router = useRouter();
+  const { setFeedType } = useFeedStore();
   const { setUserId, setFormData, setEmailVerified, setPhoneVerified } = useAuthStore();
 
   const [formData, setLocalFormData] = useState<SignInFormData>({
@@ -41,21 +43,19 @@ const SignIn = () => {
 
       if (!result.success) {
         setErrorMessage(result.error || 'Sign in failed');
+        setIsSubmitting(false);
         return;
       }
 
       if (result.data?.user.isSuspended) {
         setErrorMessage('Your account is suspended. Please contact support.');
+        setIsSubmitting(false);
         return;
       }
 
       if (!result.data?.user) {
         setErrorMessage('Invalid response from server');
-        return;
-      }
-
-      if (!result.data?.user) {
-        setErrorMessage('Invalid response from server');
+        setIsSubmitting(false);
         return;
       }
 
@@ -74,19 +74,25 @@ const SignIn = () => {
       setEmailVerified(userData.isEmailVerified);
       setPhoneVerified(userData.isPhoneVerified);
 
-
       if (userData.role === 'admin' || userData.role === 'superadmin') {
-        router.push('/admin');
-      } else if (userData.isEmailVerified) {
-        router.push('/');
+        await router.replace('/admin');
+        return;
+      } else if (userData.role === 'contractor' && userData.isEmailVerified ) {
+        setFeedType('Jobs');
+        await router.replace('/feed');
+        return;
+      } else if (userData.role === 'client' && userData.isEmailVerified) {
+        setFeedType('Consultants');
+        await router.replace('/feed');
+        return;
       } else if (!userData.isEmailVerified) {
-        router.push('/account/verification');
+        await router.push('/account/verification');
+        return;
       }
 
     } catch (error) {
       const err = error as Error;
       setErrorMessage(err.message || 'An unexpected error occurred');
-    } finally {
       setIsSubmitting(false);
     }
   };

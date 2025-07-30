@@ -1,7 +1,7 @@
 import React from 'react';
 import useAuthStore from '@/store/useAuth';
-import CreateBusinessProfile from './_business/create';
 import CreateFreelancerProfile from './_freelancer/create';
+import CreateBusinessProfile from './_business/create';
 
 const Edit = () => {
 

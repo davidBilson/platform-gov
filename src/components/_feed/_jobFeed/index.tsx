@@ -15,9 +15,10 @@ import { useJobFilter } from '@/store/useJobFilter';
 import LoadingAnimation from '@/components/ui/loading';
 
 // Internal Components
-import JobList from '../../_home/_jobFeed/_jobList';
-import JobCountFilters from '../../_home/_jobFeed/_jobCountFilters';
-import JobFilter from '../../_home/_jobFeed/_jobFilter';
+import JobList from './_jobList';
+import JobCountFilters from './_jobCountFilters';
+import JobFilter from './_jobFilter';
+import DotLoader from '@/components/ui/dotloader';
 
 
 const JobFeed = () => {
@@ -31,7 +32,7 @@ const JobFeed = () => {
   const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
 
   const { activeFilters, removeFilter } = useJobFilter()
-  
+
   const fetchJobs = async (page: number = 1, reset: boolean = true) => {
     try {
       if (reset) {
@@ -42,12 +43,12 @@ const JobFeed = () => {
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
       const endpoint = process.env.NEXT_PUBLIC_GET_ALL_JOBS || '';
-      
+
       const response = await axios.get<JobsResponse>(`${baseUrl}${endpoint}?page=${page}&limit=20`);
-      
+
       if (response.data.success) {
         const newJobs = response.data.data;
-        
+
         if (reset) {
           setAllJobs(newJobs);
           if (!hasActiveFilters) {
@@ -103,46 +104,42 @@ const JobFeed = () => {
 
   return (
     <main className="container mx-auto p-6">
-      <JobFilter 
-        jobs={allJobs} 
+      <JobFilter
+        jobs={allJobs}
         onFilterChange={handleFilterChange}
         loading={loading}
       />
-      
-      <JobCountFilters 
-        jobCount={filteredJobs.length} 
+
+      <JobCountFilters
+        jobCount={filteredJobs.length}
         activeFilters={activeFilters}
         onRemoveFilter={removeFilter}
       />
-      
+
       {filteredJobs.length > 0 ? (
         <div className="space-y-6">
           {filteredJobs.map(job => (
             <JobList key={job._id} job={job} />
           ))}
-          
+
           {canLoadMore() && !hasActiveFilters && (
             <div className="flex justify-center pt-8 pb-40">
-              <button
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="bg-aquagreen cursor-pointer text-white px-6 py-3 rounded-lg font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {loadingMore ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Loading...
-                  </>
-                ) : (
-                  'Load More Jobs'
-                )}
-              </button>
+              {loadingMore ?
+                <DotLoader />
+                : <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="bg-aquagreen cursor-pointer text-white px-4 py-2 rounded-lg font-semibold transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  Load More Jobs
+                </button>
+              }
             </div>
           )}
         </div>
       ) : loading ? (
         <div className='flex items-center justify-center h-[60vh]'>
-          <LoadingAnimation />
+          <DotLoader />
         </div>
       ) : error ? (
         <div className="text-boldblue text-center py-8">

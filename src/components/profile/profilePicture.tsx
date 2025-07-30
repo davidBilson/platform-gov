@@ -18,7 +18,7 @@ const size = dimension || 88;
       style={{ width: `${size}px`, height: `${size}px` }}
     >
       {
-        source === "" || source === undefined ?
+        source === "" || source === undefined || source.startsWith('blob') ?
         <FaUser size={32} className="text-white" />
         :
         <img 

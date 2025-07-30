@@ -21,13 +21,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const initAuthCalled = useRef(false);
   const socketConnected = useRef(false);
+  const redirectInProgress = useRef(false);
   
   const { userId, isLoading, initAuth, verificationStep, resetAll } = useAuthStore();
   
   const handleSignOut = useCallback(() => {
     useSocket.getState().disconnect();
     socketConnected.current = false;
-    
     resetAll();
     router.push('/account/sign-in');
   }, [resetAll, router]);
@@ -61,7 +61,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     '/account/verification',
     '/privacy-policy',
     '/',
-    '/admin'
   ];
 
   const isPublicRoute =
@@ -69,6 +68,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     publicRoutes.some(route => router.pathname.startsWith(route + '/'));
 
   const isVerificationPage = router.pathname === '/account/verification';
+  const isAdminRoute = router.pathname.startsWith('/admin');
   
   // Initialize auth only once
   useEffect(() => {
@@ -103,41 +103,65 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
   
-  // Route protection
+  // Route protection - separated from navigation logic
   useEffect(() => {
-    if (!isLoading && !userId && !isPublicRoute) {
-      router.replace('/account/sign-in');
+    if (!isLoading && !userId && !isPublicRoute && !redirectInProgress.current) {
+      redirectInProgress.current = true;
+      router.replace('/account/sign-in').finally(() => {
+        redirectInProgress.current = false;
+      });
     }
   }, [userId, isPublicRoute, isLoading, router]);
   
-  // Navigation logic with reduced complexity
+  // Navigation logic with admin route optimization
   useEffect(() => {
-    if (isLoading) return; // Wait for auth to load
+    if (isLoading || redirectInProgress.current) return; // Wait for auth to load and no concurrent redirects
     
     const currentPath = router.pathname;
-    
+
     // Handle verification page access
     if (isVerificationPage && !userId) {
-      router.replace('/account/sign-up');
+      redirectInProgress.current = true;
+      router.replace('/account/sign-up').finally(() => {
+        redirectInProgress.current = false;
+      });
       return;
     }
     
-    // Handle authenticated user on auth pages
     if (userId) {
+      // Skip navigation logic for admin routes to prevent interference
+      if (isAdminRoute) {
+        return;
+      }
+
+      if (currentPath === '/') {
+        redirectInProgress.current = true;
+        router.replace('/feed').finally(() => {
+          redirectInProgress.current = false;
+        });
+        return;
+      }
+
       if (currentPath === '/account/sign-up') {
         const targetPath = verificationStep !== 'completed' 
           ? '/account/verification' 
-          : '/';
-        router.replace(targetPath);
+          : '/feed';
+        redirectInProgress.current = true;
+        router.replace(targetPath).finally(() => {
+          redirectInProgress.current = false;
+        });
         return;
       }
       
       if (currentPath === '/account/sign-in') {
-        router.replace('/');
+        redirectInProgress.current = true;
+        router.replace('/feed').finally(() => {
+          redirectInProgress.current = false;
+        });
         return;
       }
     }
-  }, [userId, router.pathname, isLoading, router, verificationStep, isVerificationPage]);
+  }, [userId, router.pathname, isLoading, router, verificationStep, isVerificationPage, isAdminRoute]);
 
   const contextValue: AuthContextType = {
     userId,
@@ -145,9 +169,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     verificationStep
   };
 
+  // Always render children for admin routes when user exists, regardless of loading state
+  const shouldRenderChildren = isPublicRoute || userId || (isAdminRoute && !isLoading);
+
   return (
     <AuthContext.Provider value={contextValue}>
-      {isPublicRoute || userId ? children : null}
+      {shouldRenderChildren ? children : null}
     </AuthContext.Provider>
   );
 }

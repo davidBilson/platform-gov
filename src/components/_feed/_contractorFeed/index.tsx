@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import ContractorList from '../../_home/_contractorFeed/_contractorList';
-import ContractorFilter from '../../_home/_contractorFeed/_contractorFilter';
-import ContractorCountFilters from '../../_home/_contractorFeed/_contractorCountFilters';
-import { ContractorProfile } from '@/types/contractors';
+import ContractorList from './_contractorList';
+import ContractorFilter from './_contractorFilter';
+import ContractorCountFilters from './_contractorCountFilters';
 import { IoReload } from 'react-icons/io5';
 import LoadingAnimation from '@/components/ui/loading';
 import { fetchContractors } from '@/api/feed-api';
 
 import { useContractorFilter } from '@/store/useContractorFilter';
+import DotLoader from '@/components/ui/dotloader';
 
 const ContractorFeed = () => {
   const { 
@@ -75,7 +75,7 @@ const ContractorFeed = () => {
       />
       {loading ? (
         <div className='flex items-center justify-center h-[60vh]'>
-          <LoadingAnimation />
+          <DotLoader />
         </div>
       ) : error ? (
         <div className="text-boldblue text-center py-8">

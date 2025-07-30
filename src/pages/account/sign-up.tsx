@@ -1,11 +1,17 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
 import useAuthStore from '@/store/useAuth';
 import { SignupFormData, SignupApiResponse, ErrorResponse } from '@/types/auth/auth';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
 
 const Signup = () => {
 
+  const router = useRouter();
+  
+  const { type } = router.query;
+ 
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore();
 
   const [formData, setLocalFormData] = useState<SignupFormData>({
@@ -17,6 +23,15 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    if (type === 'client') {
+      setLocalFormData((prev) => ({
+        ...prev,
+        role: type
+      }))
+    }
+  }, [type])
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -32,11 +47,29 @@ const Signup = () => {
     if (errorMessage) setErrorMessage('');
   };
 
+  const validateForm = (): boolean => {
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage('Passwords do not match');
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long');
+      return false;
+    }
+
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setErrorMessage('Please fill in all required fields');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage('Passwords do not match');
+    if (!validateForm()) {
       return;
     }
 
@@ -80,15 +113,17 @@ const Signup = () => {
           ...formDataForStore,
           userId: responseData.data.userId,
         });
-
         setVerificationStep('email');
 
-        window.location.href = '/account/verification';
+        await router.push('/account/verification');
+
         return;
       }
 
       if (!responseData.data?.userId) {
         console.warn('Response received but userId is missing:', responseData);
+        setErrorMessage('Account creation failed. Please try again.');
+        setIsSubmitting(false);
       }
 
     } catch (error) {
@@ -98,19 +133,32 @@ const Signup = () => {
 
         if (axiosError.response) {
           const errorResponseData = axiosError.response.data as ErrorResponse;
-          setErrorMessage(errorResponseData.message || 'An error occurred during signup');
+          const errorMsg = errorResponseData.message || 'An error occurred during signup';
+          setErrorMessage(errorMsg);
+          
+          // Show toast for server errors
+          if (axiosError.response.status >= 500) {
+            toast.error('Server error. Please try again later.');
+          }
         } else if (axiosError.request) {
-          setErrorMessage('No response from server. Please check your connection.');
+          const errorMsg = 'No response from server. Please check your connection.';
+          setErrorMessage(errorMsg);
+          toast.error('Connection error. Please check your internet connection.');
         } else {
-          setErrorMessage('Failed to process your request. Please try again.');
+          const errorMsg = 'Failed to process your request. Please try again.';
+          setErrorMessage(errorMsg);
+          toast.error('Request failed. Please try again.');
         }
       } else {
         const err = error as Error;
-        setErrorMessage(err.message || 'An unexpected error occurred');
+        const errorMsg = err.message || 'An unexpected error occurred';
+        setErrorMessage(errorMsg);
+        toast.error('An unexpected error occurred. Please try again.');
       }
-    } finally {
+      
       setIsSubmitting(false);
     }
+    // Removed finally block - let navigation complete before removing loading state
   };
 
   const radioStyle: React.CSSProperties = {
@@ -132,7 +180,7 @@ const Signup = () => {
 
         {errorMessage && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p>{errorMessage}</p>
+            <p className="text-sm">{errorMessage}</p>
           </div>
         )}
 
@@ -230,9 +278,10 @@ const Signup = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder='Password'
+                placeholder='Password (min 6 characters)'
                 className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required
+                minLength={6}
               />
             </div>
 
@@ -253,9 +302,9 @@ const Signup = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className='cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold'
+                className='cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out px-5 py-[11px] min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold disabled:opacity-70'
               >
-                {isSubmitting ? 'Verifying...' : 'Verify Email'}
+                {isSubmitting ? 'Creating Account...' : 'Create Account'}
               </button>
             </div>
           </div>

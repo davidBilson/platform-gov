@@ -61,8 +61,9 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
 
   return (
     <section className='fixed top-0 left-0 w-full min-h-screen z-50 bg-black/50 flex items-center justify-center p-6'>
-      <div className='w-full max-w-158 p-7.5 bg-white rounded-sm'>
-        <h2 className='mb-7.5 font-bold'>
+      <div className='w-full max-w-158 h-fit overflow-hidden p-6 md:p-7.5 bg-white rounded-sm'>
+
+        <h2 className='h-[5%] pb-7.5 font-bold'>
           {loading ? (
             <div className="h-3 bg-gray-200 rounded animate-pulse w-48"></div>
           ) : (
@@ -70,7 +71,7 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
           )}
         </h2>
 
-        <div className='mb-7.5 p-7.5 border border-boldblue rounded-lg'>
+        <div className='h-[60vh] p-4 md:p-7.5 agreementPrompts-scrollbar overflow-y-auto border border-boldblue rounded-lg'>
           {loading ? (
             <div className="space-y-3">
               <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
@@ -82,7 +83,7 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
           )}
         </div>
 
-        <div className='mb-7.5 text-sm flex items-center gap-12.5'>
+        <div className='py-7.5  text-sm flex items-center gap-12.5'>
           {/* I accept terms */}
           <label className='flex items-center gap-1 cursor-pointer'>
             <input

@@ -16,28 +16,25 @@ import Escrow from './_escrow';
 import ManageAdmins from './_manageAdmins';
 
 const AdminHomePage = () => {
-
   const [activeComponent, setActiveComponent] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const { role, userId } = useAuthStore();
-  const authorized = userId;
   const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
+      
+      // Check authorization after loading is complete
+      if (userId && role) {
+        if (role !== 'admin' && role !== 'superadmin') {
+          router.push('/feed');
+        }
+      }
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && role && userId) {
-      if (role !== 'admin' && role !== 'superadmin') {
-        router.push('/');
-      }
-    }
-  }, [role, userId, authorized, router, isLoading]);
+  }, [role, userId, router]);
 
   const renderComponent = () => {
     switch (activeComponent) {
@@ -68,30 +65,27 @@ const AdminHomePage = () => {
     }
   };
 
-  if (isLoading) {
-    return <section className='flex items-center justify-center min-h-100'>
-      <LoadingAnimation />
-    </section>
+  // Show loading while checking auth or if no user data
+  if (isLoading || !role || !userId) {
+    return (
+      <section className='flex items-center justify-center min-h-100'>
+        <LoadingAnimation />
+      </section>
+    );
   }
 
-  if (!role || !userId) {
-    return <section className='flex items-center justify-center min-h-100'>
-      <LoadingAnimation />
-    </section>
-  }
-
-  // Fixed: Use AND (&&) instead of OR (||) for authorization check
+  // Show loading if user is not authorized (prevents flash before redirect)
   if (role !== 'admin' && role !== 'superadmin') {
-    return <section className='flex items-center justify-center min-h-100'>
-      <LoadingAnimation />
-    </section>
+    return (
+      <section className='flex items-center justify-center min-h-100'>
+        <LoadingAnimation />
+      </section>
+    );
   }
 
   return (
     <div className="w-full flex h-[calc(100vh-112px)]">
-
       <AdminSideBar setActiveComponent={setActiveComponent} />
-
       <div className="flex-1 p-6 overflow-y-auto">
         {renderComponent()}
       </div>

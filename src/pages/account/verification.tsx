@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent, MouseEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, MouseEvent } from 'react';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
 import axios from 'axios';
@@ -47,7 +47,6 @@ const Verification: React.FC = () => {
   const [verificationCode, setVerificationCode] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
   const [phoneCodeSent, setPhoneCodeSent] = useState<boolean>(false);
   
   useEffect(() => {
@@ -57,9 +56,11 @@ const Verification: React.FC = () => {
   }, [userId, router]);
   
   const handleCodeChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setVerificationCode(e.target.value);
-    setError('');
-    setSuccess('');
+    const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+    if (value.length <= 6) { // Limit to 6 digits
+      setVerificationCode(value);
+      setError('');
+    }
   };
   
   // APIs for verification
@@ -70,31 +71,42 @@ const Verification: React.FC = () => {
   const verifyPhoneEndpoint = process.env.NEXT_PUBLIC_VERIFY_PHONE;
   const resendVerificationPhoneEndpoint = process.env.NEXT_PUBLIC_RESEND_VERIFICATION_PHONE;
 
+  // Validation helper
+  const validateVerificationCode = (): boolean => {
+    if (!verificationCode) {
+      setError('Please enter the verification code');
+      return false;
+    }
+    if (verificationCode.length < 4) {
+      setError('Verification code must be at least 4 digits');
+      return false;
+    }
+    return true;
+  };
+
   // Handle email verification
-  const verifyEmail = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const verifyEmail = async (e: MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     
-    if (!verificationCode) {
-      toast.error('Please enter the verification code');
-      setError('Please enter the verification code');
+    if (!validateVerificationCode()) {
+      return;
+    }
+    
+    if (!userId) {
+      setError('User ID is missing');
       return;
     }
     
     setIsLoading(true);
+    setError('');
     
     try {
-      if (!userId) {
-        toast.error('User ID is missing');
-        return;
-      }
-        
       await axios.post<ApiResponse>(`${apiHost}${verifyEmailEndpoint}`, {
         userId,
         code: verificationCode
       });
       
       setEmailVerified(true);
-      setSuccess('Email verified successfully!');
       toast.success('Email verified successfully!');
       setVerificationCode('');
       setVerificationStep('completed'); //change to phone when twilio is ready
@@ -104,35 +116,39 @@ const Verification: React.FC = () => {
       if (axios.isAxiosError(err) && err.response) {
         const errorMessage = err.response.data.message || 'Email verification failed. Please try again.';
         setError(errorMessage);
-        toast.error(errorMessage);
+        // Only toast for network/server errors, not validation errors
+        if (err.response.status >= 500) {
+          toast.error('Server error. Please try again later.');
+        }
       } else {
         const error = err as Error;
         setError(error.message || 'Email verification failed. Please try again.');
-        toast.error(error.message || 'Email verification failed. Please try again.');
+        toast.error('Network error. Please check your connection.');
       }
     } finally {
       setIsLoading(false);
     }
   };
   
-  const sendPhoneVerification = async (e?: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const sendPhoneVerification = async (e?: MouseEvent<HTMLButtonElement>): Promise<void> => {
     if (e) {
       e.preventDefault();
     }
     
+    if (!userId) {
+      setError('User ID is missing');
+      return;
+    }
+    
     setIsLoading(true);
+    setError('');
     
     try {
-      if (!userId) {
-        throw new Error('User ID is missing');
-      }
-
       await axios.post<ApiResponse>(`${apiHost}${sendPhoneVerificationEndpoint}`, {
         userId
       });
       
       setPhoneCodeSent(true);
-      setSuccess('Verification code sent to your phone');
       toast.success('Verification code sent to your phone');
       
     } catch (err) {
@@ -140,11 +156,13 @@ const Verification: React.FC = () => {
       if (axios.isAxiosError(err) && err.response) {
         const errorMessage = err.response.data.message || 'Failed to send verification code. Please try again.';
         setError(errorMessage);
-        toast.error(errorMessage);
+        if (err.response.status >= 500) {
+          toast.error('Server error. Please try again later.');
+        }
       } else {
         const error = err as Error;
         setError(error.message || 'Failed to send verification code. Please try again.');
-        toast.error(error.message || 'Failed to send verification code. Please try again.');
+        toast.error('Network error. Please check your connection.');
       }
     } finally {
       setIsLoading(false);
@@ -158,30 +176,28 @@ const Verification: React.FC = () => {
     }
   }, [verificationStep, phoneCodeSent]);
   
-  const verifyPhone = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): Promise<void> => {
+  const verifyPhone = async (e: MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
     
-    if (!verificationCode) {
-      toast.error('Please enter the verification code');
-      setError('Please enter the verification code');
+    if (!validateVerificationCode()) {
+      return;
+    }
+    
+    if (!userId) {
+      setError('User ID is missing');
       return;
     }
     
     setIsLoading(true);
+    setError('');
     
     try {
-      if (!userId) {
-        toast.error('User ID is missing');
-        return;
-      }
-
       await axios.post<ApiResponse>(`${apiHost}${verifyPhoneEndpoint}`, {
         userId,
         code: verificationCode
       });
       
       toast.success('Phone verified successfully!');
-      setSuccess('Phone verified successfully!');
       setVerificationStep('completed');
       setVerificationCode('');
       setPhoneVerified(true);
@@ -191,31 +207,42 @@ const Verification: React.FC = () => {
       if (axios.isAxiosError(err) && err.response) {
         const errorMessage = err.response.data.message || 'Phone verification failed. Please try again.';
         setError(errorMessage);
-        toast.error(errorMessage);
+        if (err.response.status >= 500) {
+          toast.error('Server error. Please try again later.');
+        }
       } else {
         const error = err as Error;
         setError(error.message || 'Phone verification failed. Please try again.');
-        toast.error(error.message || 'Phone verification failed. Please try again.');
+        toast.error('Network error. Please check your connection.');
       }
     } finally {
       setIsLoading(false);
     }
   };
   
-  const continueToAccountCreation = (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>): void => {
+  const continueToAccountCreation = async (e: MouseEvent<HTMLButtonElement>): Promise<void> => {
     e.preventDefault();
-      router.push('/profile/edit');
-  };
-  
-  const resendVerificationCode = async (): Promise<void> => {
     setIsLoading(true);
     
     try {
-      if (!userId) {
-        toast.error('User ID is missing');
-        return;
-      }
-      
+      await router.push('/profile/edit');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      toast.error('Navigation failed. Please try again.');
+      setIsLoading(false);
+    }
+  };
+  
+  const resendVerificationCode = async (): Promise<void> => {
+    if (!userId) {
+      setError('User ID is missing');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+    
+    try {
       // Determine which endpoint to use based on the current verification step
       const endpoint = verificationStep === 'email' 
         ? resendVerificationEmailEndpoint 
@@ -229,7 +256,6 @@ const Verification: React.FC = () => {
         ? 'Verification code resent to your email'
         : 'Verification code resent to your phone';
       
-      setSuccess(successMessage);
       toast.success(successMessage);
       
       if (verificationStep === 'phone') {
@@ -241,11 +267,13 @@ const Verification: React.FC = () => {
       if (axios.isAxiosError(err) && err.response) {
         const errorMessage = err.response.data.message || 'Failed to resend verification code. Please try again.';
         setError(errorMessage);
-        toast.error(errorMessage);
+        if (err.response.status >= 500) {
+          toast.error('Server error. Please try again later.');
+        }
       } else {
         const error = err as Error;
         setError(error.message || 'Failed to resend verification code. Please try again.');
-        toast.error(error.message || 'Failed to resend verification code. Please try again.');
+        toast.error('Network error. Please check your connection.');
       }
     } finally {
       setIsLoading(false);
@@ -294,15 +322,12 @@ const Verification: React.FC = () => {
         
         {/* Error message */}
         {error && (
-          <p className="text-red-500 text-center mb-4">{error}</p>
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 max-w-75 m-auto">
+            <p className="text-sm">{error}</p>
+          </div>
         )}
         
-        {/* Success message */}
-        {success && (
-          <p className="text-green-500 text-center mb-4">{success}</p>
-        )}
-        
-        <form className="flex flex-col gap-4 md:gap-6">
+        <div className="flex flex-col gap-4 md:gap-6">
           {/* Verification code input field - shown for email and phone verification */}
           {(verificationStep === 'email' || (verificationStep === 'phone' && phoneCodeSent)) && (
             <div className="mb-4">
@@ -312,8 +337,11 @@ const Verification: React.FC = () => {
                 name="code"
                 value={verificationCode}
                 onChange={handleCodeChange}
-                placeholder='Verification Code'
-                className="w-full max-w-75 block m-auto h-12.5 bg-white border rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium"
+                placeholder='Enter 6 digit code'
+                className="w-full max-w-75 block m-auto h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium text-center tracking-widest"
+                maxLength={6}
+                inputMode="numeric"
+                pattern="[0-9]*"
                 required
               />
             </div>
@@ -322,12 +350,14 @@ const Verification: React.FC = () => {
           {/* Resend code option - available for both email and phone */}
           {(verificationStep === 'email' || (verificationStep === 'phone' && phoneCodeSent)) && (
             <p className="text-center mt-2">
-              <span 
-                className="text-sm cursor-pointer hover:underline text-boldblue"
+              <button
+                type="button"
+                className="text-sm cursor-pointer hover:underline text-boldblue disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={resendVerificationCode}
+                disabled={isLoading}
               >
                 {"Didn't"} get a code? Resend
-              </span>
+              </button>
             </p>
           )}
           
@@ -349,10 +379,10 @@ const Verification: React.FC = () => {
             <button
               type="button"
               onClick={sendPhoneVerification}
-              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:opacity-70 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
-              {isLoading ? 'Sending...' : `Send Verification Code to ${formatPhoneNumber(phoneNumber) || "your phone"}`}
+              {isLoading ? 'Sending...' : `Send Code to ${formatPhoneNumber(phoneNumber) || "Phone"}`}
             </button>
           )}
           
@@ -361,7 +391,7 @@ const Verification: React.FC = () => {
             <button
               type="button"
               onClick={verifyPhone}
-              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer hover:opacity-70 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading || !verificationCode}
             >
               {isLoading ? 'Verifying...' : 'Verify Phone'}
@@ -373,12 +403,13 @@ const Verification: React.FC = () => {
             <button
               type="button"
               onClick={continueToAccountCreation}
-              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out"
+              className="px-5 py-[11px] w-fit block m-auto min-w-[120px] bg-boldblue rounded-lg text-white text-sm font-semibold cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
             >
-              Continue to account creation
+              {isLoading ? 'Loading...' : 'Continue to account creation'}
             </button>
           )}
-        </form>
+        </div>
       </section>
     </main>
   );

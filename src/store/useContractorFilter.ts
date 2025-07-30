@@ -248,10 +248,10 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     if (state.searchTerm) {
       const searchLower = state.searchTerm.toLowerCase();
       filtered = filtered.filter((contractor) =>
-        contractor.user.name.toLowerCase().includes(searchLower) ||
+        contractor.user?.name?.toLowerCase().includes(searchLower) ||
         contractor.primaryPosition?.toLowerCase().includes(searchLower) ||
         contractor.profession?.toLowerCase().includes(searchLower) || // Added profession to search
-        contractor.bio.toLowerCase().includes(searchLower)
+        contractor.bio?.toLowerCase().includes(searchLower)
       );
     }
   
@@ -351,9 +351,8 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
   }
 }));
 
-// Selector hooks for optimized component updates
+
 export const useContractorSearchTerm = () => useContractorFilter(state => state.searchTerm);
 export const useSetContractorSearchTerm = () => useContractorFilter(state => state.setSearchTerm);
 export const useContractorActiveFilters = () => useContractorFilter(state => state.activeFilters);
 export const useContractorRemoveFilter = () => useContractorFilter(state => state.removeFilter);
-// Add more selectors as needed for other state pieces

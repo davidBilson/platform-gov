@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 // icons
@@ -907,5 +908,3 @@ const JobFilter = ({ jobs, onFilterChange, loading }: JobFilterProps) => {
 };
 
 export default JobFilter;
-
-
