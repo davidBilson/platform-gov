@@ -8,6 +8,7 @@ import LoadingAnimation from '@/components/ui/loading';
 import { fetchContractors } from '@/api/feed-api';
 
 import { useContractorFilter } from '@/store/useContractorFilter';
+import DotLoader from '@/components/ui/dotloader';
 
 const ContractorFeed = () => {
   const { 
@@ -74,7 +75,7 @@ const ContractorFeed = () => {
       />
       {loading ? (
         <div className='flex items-center justify-center h-[60vh]'>
-          <LoadingAnimation />
+          <DotLoader />
         </div>
       ) : error ? (
         <div className="text-boldblue text-center py-8">

@@ -7,6 +7,7 @@ import { IoLocationOutline } from 'react-icons/io5';
 import Link from 'next/link';
 import { getUserRatings } from '@/api/rating-api';
 import { formatName } from '@/utils/format';
+import ProfilePicture from '@/components/profile/profilePicture';
 
 interface ContractorWithRating {
   contractor: {
@@ -188,16 +189,15 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
               <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center overflow-hidden'>
                 {contractor.profileImage ? (
                   <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center'>
-                    <Image
-                      src={contractor.profileImage}
-                      alt={`${contractor.primaryPosition} profile`}
+                    <ProfilePicture
+                      source={contractor?.profileImage ?? ""}
+                      alt={contractor?.user?.name ?? ""}
                       width={76}
                       height={76}
-                      className='h-19 w-19 overflow-hidden rounded-full object-cover flex items-center justify-center'
                     />
                   </div>
                 ) :
-                  <div className='text-white flex items-center justify-center w-16 h-16 md:w-[87px] md:h-[87px] rounded-full bg-boldblue border border-boldblue'>
+                <div className='text-white flex items-center justify-center w-16 h-16 md:w-[87px] md:h-[87px] rounded-full bg-boldblue border border-boldblue'>
                     <FaUser size={24} className="md:text-4xl" />
                   </div>
                 }
