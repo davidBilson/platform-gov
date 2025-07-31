@@ -172,78 +172,81 @@ const ContractorList: React.FC<ContractorListProps> = ({ contractors }) => {
   return (
     <section className="pt-7.5 pb-10 flex flex-col gap-7.5">
       {sortedContractorsWithRatings.map(({ contractor, rating }, index) => (
-        <div
-          key={contractor._id || contractor.user._id || index} // Better key handling
-        >
-          {/* Add a visual indicator for Janus Global Advisors contractors */}
+        <div className='border-b border-b-lightblue pb-7.5'>
+          {/* Visual indicator for Janus Global Advisors contractors */}
           {contractor.firmAffiliation === 'Janus Global Advisors' && (
-            <div className="mb-2 text-[8px] font-bold text-boldblue px-2 py-1 bg-blue-50 rounded-md inline-block">
+            <div className="mb-2 text-[8px] font-bold text-boldblue w-fit px-2 py-1 bg-blue-50 rounded-md inline-block">
               Janus Global Advisors
             </div>
           )}
+          <div
+            key={contractor._id || contractor.user._id || index}
+          >
 
-          <div className='flex flex-col md:flex-row items-start gap-4 md:gap-18.25 mb-6 md:mb-10.25'>
 
-            <div className='flex items-center  gap-4.25 w-full md:max-w-[20%] h-26  '>
+            <div className='flex flex-col md:flex-row items-start gap-4 md:gap-18.25 mb-6 md:mb-10.25'>
 
-              <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center overflow-hidden'>
-                {contractor.profileImage ? (
-                  <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center'>
-                    <ProfilePicture
-                      source={contractor?.profileImage ?? ""}
-                      alt={contractor?.user?.name ?? ""}
-                      width={76}
-                      height={76}
-                    />
-                  </div>
-                ) :
-                <div className='text-white flex items-center justify-center w-16 h-16 md:w-[87px] md:h-[87px] rounded-full bg-boldblue border border-boldblue'>
-                    <FaUser size={24} className="md:text-4xl" />
-                  </div>
-                }
+              <div className='flex items-center  gap-4.25 w-full md:max-w-[20%] h-26  '>
+
+                <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center overflow-hidden'>
+                  {contractor.profileImage ? (
+                    <div className='rounded-full h-19 w-19 flex items-center justify-center'>
+                      <ProfilePicture
+                        source={contractor?.profileImage ?? ""}
+                        alt={contractor?.user?.name ?? ""}
+                        width={76}
+                        height={76}
+                      />
+                    </div>
+                  ) :
+                    <div className='text-white flex items-center justify-center w-16 h-16 md:w-[87px] md:h-[87px] rounded-full bg-boldblue border border-boldblue'>
+                      <FaUser size={24} className="md:text-4xl" />
+                    </div>
+                  }
+                </div>
+                <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 w-1/2 h-full'>
+                  <Link href={`/profile/${contractor.user._id}`} className="text-lg md:text-xl font-semibold cursor-pointer hover:underline">
+                    {formatName(contractor.user.name)}
+                  </Link>
+                  <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
+                  <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
+                </div>
+
               </div>
-              <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 w-1/2 h-full'>
-                <Link href={`/profile/${contractor.user._id}`} className="text-lg md:text-xl font-semibold cursor-pointer hover:underline">
-                  {formatName(contractor.user.name)}
-                </Link>
-                <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
-                <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
-              </div>
 
+              <div className='w-full md:max-w-[80%] mt-4 md:mt-0'>
+                <div className='mb-3 md:mb-6.25 flex items-center justify-between flex-wrap'>
+                  <h3 className='font-bold text-sm text-boldblue'>{contractor.primaryPosition}</h3>
+                  {ratingsLoading ? (
+                    <span className="text-sm text-gray-500">Loading...</span>
+                  ) : (
+                    renderRating(rating.average, 5, true, rating.count)
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2 md:gap-2.5 mb-3 md:mb-3.75">
+                  {contractor.skills.slice(0, 3).map((skill, index) => (
+                    <span key={`skill-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
+                      {skill}
+                    </span>
+                  ))}
+
+                  {contractor.expertise.slice(0, 2).map((exp, index) => (
+                    <span key={`expertise-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
+                      {exp}
+                    </span>
+                  ))}
+
+                  {contractor.certifications.slice(0, 2).map((cert, index) => (
+                    <span key={`cert-${index}`} className="bg-aquagreen text-white text-xs rounded-full px-2 md:px-3 py-1">
+                      {cert}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
-
-            <div className='w-full md:max-w-[80%] mt-4 md:mt-0'>
-              <div className='mb-3 md:mb-6.25 flex items-center justify-between flex-wrap'>
-                <h3 className='font-bold text-sm text-boldblue'>{contractor.primaryPosition}</h3>
-                {ratingsLoading ? (
-                  <span className="text-sm text-gray-500">Loading...</span>
-                ) : (
-                  renderRating(rating.average, 5, true, rating.count)
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2 md:gap-2.5 mb-3 md:mb-3.75">
-                {contractor.skills.slice(0, 3).map((skill, index) => (
-                  <span key={`skill-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
-                    {skill}
-                  </span>
-                ))}
-
-                {contractor.expertise.slice(0, 2).map((exp, index) => (
-                  <span key={`expertise-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
-                    {exp}
-                  </span>
-                ))}
-
-                {contractor.certifications.slice(0, 2).map((cert, index) => (
-                  <span key={`cert-${index}`} className="bg-aquagreen text-white text-xs rounded-full px-2 md:px-3 py-1">
-                    {cert}
-                  </span>
-                ))}
-              </div>
-            </div>
+            {/* *********** 2 *********** */}
+            <p className="text-sm md:text-base">{truncateBio(contractor.bio)}</p>
           </div>
-          {/* *********** 2 *********** */}
-          <p className="text-sm md:text-base">{truncateBio(contractor.bio)}</p>
         </div>
       ))}
     </section>
