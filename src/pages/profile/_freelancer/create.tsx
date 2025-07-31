@@ -41,7 +41,7 @@ const CreateFreelancerProfile = () => {
     primaryPosition: "",
     skills: [],
     certifications: [],
-    expertise: [],
+    // expertise: [],
     firmAffiliation: "",
     clearance: "",
     location: {
@@ -180,20 +180,20 @@ const CreateFreelancerProfile = () => {
     }
   }, [skillInput, formData.skills, showSkillsDropdown]);
 
-  useEffect(() => {
-    if (showExpertiseDropdown) {
-      const availableExpertise = ProfessionalFieldsAndAreasOfExpertise152.filter(exp => !formData.expertise.includes(exp));
+  // useEffect(() => {
+  //   if (showExpertiseDropdown) {
+  //     const availableExpertise = ProfessionalFieldsAndAreasOfExpertise152.filter(exp => !formData.expertise.includes(exp));
 
-      if (expertiseInput.trim()) {
-        const filtered = availableExpertise.filter(exp => exp.toLowerCase().includes(expertiseInput.toLowerCase()));
-        setFilteredExpertise(filtered);
-      } else {
-        setFilteredExpertise(availableExpertise);
-      }
-    } else {
-      setFilteredExpertise(ProfessionalFieldsAndAreasOfExpertise152.filter(exp => !formData.expertise.includes(exp)));
-    }
-  }, [expertiseInput, formData.expertise, showExpertiseDropdown]);
+  //     if (expertiseInput.trim()) {
+  //       const filtered = availableExpertise.filter(exp => exp.toLowerCase().includes(expertiseInput.toLowerCase()));
+  //       setFilteredExpertise(filtered);
+  //     } else {
+  //       setFilteredExpertise(availableExpertise);
+  //     }
+  //   } else {
+  //     setFilteredExpertise(ProfessionalFieldsAndAreasOfExpertise152.filter(exp => !formData.expertise.includes(exp)));
+  //   }
+  // }, [expertiseInput, formData.expertise, showExpertiseDropdown]);
 
   useEffect(() => {
     if (showCertificationsDropdown) {
@@ -226,7 +226,7 @@ const CreateFreelancerProfile = () => {
           profession: profileData.profession || "",
           clearance: profileData.clearance || "",
           skills: profileData.skills || [],
-          expertise: profileData.expertise || [],
+          // expertise: profileData.expertise || [],
           certifications: profileData.certifications || [],
           firmAffiliation: profileData.firmAffiliation || "",
           location: {
@@ -466,12 +466,12 @@ const CreateFreelancerProfile = () => {
               showDropdown={showSkillsDropdown}
               setShowDropdown={setShowSkillsDropdown}
               filteredOptions={filteredSkills}
-              placeholder="Skills"
+              placeholder="Skills & Expertise"
               bgColor="bg-deepskyblue"
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          {/* <div className="flex flex-wrap items-center gap-2.5">
             <TagsSection
               type="expertise"
               inputValue={expertiseInput}
@@ -485,7 +485,7 @@ const CreateFreelancerProfile = () => {
               placeholder="Expertise"
               bgColor="bg-deepskyblue"
             />
-          </div>
+          </div> */}
 
           <WorkHistorySection
             workHistory={formData.workHistory}
