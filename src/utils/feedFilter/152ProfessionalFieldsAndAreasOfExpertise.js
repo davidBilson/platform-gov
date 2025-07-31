@@ -11,7 +11,8 @@ export const getContentCategories = async () => {
       .sort((a, b) => {
         return a.sortOrder - b.sortOrder;
       })
-      .map(item => item.value);
+      .map(item => item.value)
+      .filter((value, index, array) => array.indexOf(value) === index);
       
     return values;
   } catch (error) {

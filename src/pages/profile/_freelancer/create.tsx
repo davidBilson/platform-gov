@@ -379,7 +379,14 @@ const CreateFreelancerProfile = () => {
 
   return (
     <>
-      {showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} />}
+      {
+        showLegalAgreement &&
+        <Legalagreement
+          setShowLegalAgreement={setShowLegalAgreement}
+          acceptedLegalAgreement={acceptedLegalAgreement}
+          setAcceptedLegalAgreement={setAcceptedLegalAgreement}
+        />
+      }
       <main className="p-6">
         <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
           <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-col sm:flex-row sm:items-start  gap-5">
