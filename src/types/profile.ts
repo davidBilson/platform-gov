@@ -25,7 +25,7 @@ export interface WorkHistory {
     profession?: string;
     clearance?: string;
     skills: string[];
-    expertise: string[];
+    // expertise: string[];
     certifications: string[];
     workHistory: WorkHistory[];
     degrees: Degree[];

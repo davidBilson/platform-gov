@@ -274,8 +274,8 @@ export const useContractorFilter = create<ContractorFilterState>((set, get) => (
     if (state.skillsAndExpertise) {
       const searchLower = state.skillsAndExpertise.toLowerCase();
       filtered = filtered.filter(contractor => 
-        contractor.skills.some(skill => skill.toLowerCase().includes(searchLower)) ||
-        contractor.expertise.some(exp => exp.toLowerCase().includes(searchLower))
+        contractor.skills.some(skill => skill.toLowerCase().includes(searchLower))
+        //  || contractor.expertise.some(exp => exp.toLowerCase().includes(searchLower))
       );
     }
   
