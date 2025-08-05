@@ -30,7 +30,7 @@ const Users = () => {
       try {
         setLoading(true);
         const response = await getUserStats();
-        
+
         if (response.success) {
           setUserStats(response.data);
         }
@@ -102,7 +102,7 @@ const Users = () => {
 
   return (
     <div className="min-h-screen">
-      
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-boldblue mb-2">User Management</h1>
       </div>

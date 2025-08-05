@@ -19,7 +19,7 @@
 :root {
   --width-maxWidth:1440px;
 }
-
+  
 :root {
   --toastify-container-width: fit-content;
   --toastify-toast-width: 290px;

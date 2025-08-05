@@ -117,6 +117,11 @@ const ClientNavbar = () => {
         label: 'Messages',
         dropdown: null,
         action: () => handleNavigation('/messages')
+      },
+      { 
+        label: 'Contract Wizard',
+        dropdown: null,
+        action: () => handleNavigation('/contract-wizard')
       }
     ]
   };
@@ -128,7 +133,7 @@ const ClientNavbar = () => {
       <li key={index} className="flex items-center gap-1.25 cursor-pointer relative">
         <div 
           onClick={() => item.dropdown ? toggleDropdown(dropdownId) : item.action?.()}
-          className="flex items-center gap-1.25"
+          className="flex items-center gap-1.25 hover:text-deepskyblue"
         >
           <span>{item.label}</span>
           {item.dropdown && (
@@ -275,7 +280,7 @@ const ClientNavbar = () => {
   }
 
   return (
-    <div className='fixed top-0 left-0 w-full h-28 overflow-visible flex items-center justify-center border-b-2 border-b-boldblue bg-white z-50'>
+    <div className='fixed top-0 left-0 w-full h-28 overflow-visible flex items-center justify-center border-b-2 border-b-boldblue bg-white z-100'>
       <nav className='w-full max-w-maxWidth m-auto flex items-center justify-between px-6 lg:px-[45px] relative'>
         <Logo />
         

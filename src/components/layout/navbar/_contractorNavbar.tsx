@@ -107,6 +107,11 @@ const ContractorNavbar = () => {
         label: 'Messages',
         dropdown: null,
         action: () => handleNavigation('/messages')
+      },
+      { 
+        label: 'Contract Wizard',
+        dropdown: null,
+        action: () => handleNavigation('/contract-wizard')
       }
     ]
   };
@@ -124,7 +129,7 @@ const ContractorNavbar = () => {
       <li key={index} className="flex items-center gap-1.25 cursor-pointer relative">
         <div 
           onClick={() => item.dropdown ? toggleDropdown(dropdownId) : item.action?.()}
-          className="flex items-center gap-1.25"
+          className="flex items-center gap-1.25 hover:text-deepskyblue"
         >
           <span>{item.label}</span>
           {item.dropdown && (

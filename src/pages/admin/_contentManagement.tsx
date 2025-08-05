@@ -15,6 +15,8 @@ const ContentManagement = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-boldblue mb-2">Content Management</h1>
       </div>
+
+      {/* Stats Here */}
       
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 mb-6">

@@ -65,6 +65,12 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
       path: '/admin/contents'
     },
     {
+      key: 'subscription-settings',
+      label: 'Subscriptions',
+      icon: DollarSign,
+      path: '/admin/subscription-settings'
+    },
+    {
       key: 'fee-settings',
       label: 'Fee Settings',
       icon: DollarSign,
