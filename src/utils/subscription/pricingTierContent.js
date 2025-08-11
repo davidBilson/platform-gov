@@ -39,7 +39,7 @@ export const clientPricingContent = {
         annual: 240
       },
       description: "Full access to hire top consultants",
-      savings: "Save $60 annually!",
+      savings: "Save 20%",
       savingsPercentage: "20%",
       features: [
         {
@@ -113,7 +113,7 @@ export const clientPricingContent = {
         annual: 99
       },
       description: "Everything you need to succeed",
-      savings: "Save $45 annually!",
+      savings: "Save 31%",
       savingsPercentage: "31%",
       features: [
         {

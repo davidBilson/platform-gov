@@ -9,26 +9,13 @@ import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Socket } from 'socket.io-client';
 import LockedOverlay from '@/components/subscription/LockedOverlay';
-
-interface Conversation {
-  threadId: string;
-  jobId?: string;
-  jobTitle?: string;
-  otherUser: {
-    id: string;
-    name: string;
-  };
-  lastMessage: {
-    content: string;
-    isCurrentUser: boolean;
-    createdAt: string;
-  };
-  unreadCount: number;
-}
+import { Conversation } from '@/types/messages';
 
 export default function ChatIndex() {
-  const { userId, name } = useAuthStore();
-  const [isPremium, setIsPremium] = useState(false);
+  
+  const { userId, name, isSubscribed } = useAuthStore();
+
+
   const [allConversations, setAllConversations] = useState<Conversation[]>([]);
   const [displayedConversations, setDisplayedConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -37,6 +24,8 @@ export default function ChatIndex() {
   const [showSidebar, setShowSidebar] = useState(true);
 
   const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => console.log('isSubscribed: ', isSubscribed), [isSubscribed])
 
   useEffect(() => {
     if (!userId) return;
@@ -234,7 +223,7 @@ export default function ChatIndex() {
 
   return (
     <main className="relative container mx-auto p-4 md:p-6 h-[calc(100vh-112px)] flex flex-col">
-      {!isPremium && <LockedOverlay descriptionText='Subscribe to access advanced chat functionalities.' />}
+      {!isSubscribed && <LockedOverlay descriptionText='Subscribe to access advanced chat functionalities.' />}
       <section className="mb-4 md:mb-5 w-full relative">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl md:text-2xl text-deepskyblue font-bold">Messages</h1>

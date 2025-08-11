@@ -1,31 +1,81 @@
-import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
+import useSubscriptionPrices from '@/hooks/useSubscriptionPrices';
+import { createSubscription } from '@/api/subscription-api';
 import useAuthStore from '@/store/useAuth';
+import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
+import PaymentMethodModal from '@/components/payment/PaymentMethodModal';
+
+// Success Modal Component
+const SuccessModal = ({ isOpen, onClose, onContinue, planType }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 relative">
+        <div className="text-center">
+          {/* Success Icon */}
+          <div className="w-16 h-16 bg-aquagreen/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-aquagreen" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          
+          {/* Success Message */}
+          <h2 className="text-2xl font-bold text-darkgray mb-2">Subscription Successful!</h2>
+          <p className="text-mediumgray mb-6">
+            Welcome to Premium! You've successfully subscribed to the {planType} plan. 
+            You now have access to all premium features.
+          </p>
+          
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={onContinue}
+              className="cursor-pointer flex-1 bg-gradient-to-r from-aquagreen to-aquagreen text-white font-bold py-3 px-6 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SubscriptionCheckoutPage = () => {
   const router = useRouter();
-  const { userId } = useAuthStore();
+  const { query } = router;
+  const { plan } = query;
+  const { userId, role, setFormData } = useAuthStore();
+
+  const { subscriptionPrices } = useSubscriptionPrices();
 
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
   const [loading, setLoading] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [autoRenew, setAutoRenew] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Subscription pricing
   const subscriptionPlans = {
     monthly: {
-      price: 29.99,
+      price: subscriptionPrices.monthly,
       period: 'month',
       savings: 0,
       description: 'Billed monthly, cancel anytime'
     },
     annual: {
-      price: 299.99,
+      price: subscriptionPrices.annual,
       period: 'year',
-      savings: 59.89, // (29.99 * 12) - 299.99
+      savings: ((subscriptionPrices.monthly * 12 - subscriptionPrices.annual)),
       description: 'Billed annually, save 2 months'
     }
   };
+
+  useEffect(() => {
+    plan && setSelectedPlan(plan === 'annual' ? 'annual' : 'monthly');
+  }, [query, plan]);
 
   const platformFeeRate = 0.03; // 3% processing fee
   const currentPlan = subscriptionPlans[selectedPlan];
@@ -38,23 +88,67 @@ const SubscriptionCheckoutPage = () => {
       return;
     }
 
+    if (!role) {
+      toast.error('User role not found. Please try logging in again.');
+      return;
+    }
+
     setProcessingPayment(true);
 
     try {
-      // TODO: Implement subscription API call
-      // const response = await subscribeUser(userId, selectedPlan);
-      
-      // Simulate API call for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success(`Successfully subscribed to ${selectedPlan} plan!`);
-      router.push('/dashboard');
+      const subscriptionData = {
+        planName: 'premium',
+        userType: role,
+        billingInterval: selectedPlan,
+        subscriptionAmount: currentPlan.price,
+        currency: 'USD',
+        autoRenew: autoRenew
+      };
+
+      const response = await createSubscription(userId, subscriptionData);
+
+      if (response.success) {
+        setFormData({
+          isSubscribed: true
+        });
+        // Show success modal instead of toast and redirect
+        setShowSuccessModal(true);
+      } else {
+        // Check if the error is due to payment method not being set up
+        if (response.data?.reason === 'payment_method_not_set_up') {
+          setShowPaymentModal(true);
+        } else if (response.data?.requires_action) {
+          // Handle authentication required case
+          toast.error('Payment requires additional authentication. Please try again.');
+        } else {
+          // Handle other errors
+          toast.error(response.message || 'Error processing subscription');
+        }
+      }
     } catch (err) {
-      toast.error('Error processing subscription');
       console.error('Error subscribing:', err);
+      toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setProcessingPayment(false);
     }
+  };
+
+  const handleSetupPayment = () => {
+    setShowPaymentModal(false);
+    router.push(`/payment/billing-method?returnTo=subscribe`);
+  };
+
+  const handleCloseModal = () => {
+    setShowPaymentModal(false);
+  };
+
+  const handleSuccessModalContinue = () => {
+    setShowSuccessModal(false);
+    router.push('/subscribe');
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
   };
 
   if (loading) {
@@ -68,7 +162,6 @@ const SubscriptionCheckoutPage = () => {
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-6 py-12">
-
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-boldblue mb-3">Upgrade to Premium</h1>
@@ -79,10 +172,6 @@ const SubscriptionCheckoutPage = () => {
 
         <div className="bg-white rounded-2xl overflow-hidden bg-gradient-to-br from-white to-skyblue/10 border-2 border-skyblue">
           <div className="p-8">
-
-            {/* Premium Features */}
-      
-
             {/* Plan Selection */}
             <div className="mb-8">
               <div className="flex items-center mb-6">
@@ -152,11 +241,99 @@ const SubscriptionCheckoutPage = () => {
                     <span className="text-3xl font-bold text-darkgray">${subscriptionPlans.annual.price}</span>
                     <span className="text-mediumgray ml-1">/year</span>
                     <div className="text-sm text-aquagreen font-semibold">
-                      Save ${subscriptionPlans.annual.savings.toFixed(2)}
+                      Save {(
+                        ((subscriptionPrices.monthly * 12 - subscriptionPrices.annual) /
+                          (subscriptionPrices.monthly * 12) * 100)
+                      ).toFixed(0)}%
                     </div>
                   </div>
                   <p className="text-sm text-mediumgray">{subscriptionPlans.annual.description}</p>
                 </div>
+              </div>
+
+              {/* Premium Features */}
+              <div className="bg-gradient-to-br from-boldblue/5 to-aquagreen/5 rounded-xl p-6 border border-boldblue/10">
+                <h3 className="text-lg font-bold text-darkgray mb-4">Premium Features</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-aquagreen mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-darkgray">Unlimited Projects</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-aquagreen mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-darkgray">Advanced Analytics</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-aquagreen mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-darkgray">Priority Support</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-aquagreen mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-darkgray">Custom Integrations</span>
+                  </div>
+                  <div className="flex items-center">
+                    <svg className="w-5 h-5 text-aquagreen mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-darkgray">Team Collaboration</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Auto-Renew Toggle */}
+            <div className="mb-8">
+              <div className="bg-lightgray/20 rounded-xl p-6 border border-lightgray/50">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-darkgray mb-2">Auto-Renewal</h3>
+                    <p className="text-sm text-mediumgray">
+                      {autoRenew 
+                        ? `Your subscription will automatically renew every ${selectedPlan === 'monthly' ? 'month' : 'year'}. You can cancel anytime.`
+                        : `Your subscription will not automatically renew. You'll need to manually renew before it expires.`
+                      }
+                    </p>
+                  </div>
+                  <div className="ml-6">
+                    <button
+                      type="button"
+                      onClick={() => setAutoRenew(!autoRenew)}
+                      className={`cursor-pointer relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-offset-2 ${
+                        autoRenew ? 'bg-boldblue' : 'bg-mediumgray'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          autoRenew ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+                
+                {!autoRenew && (
+                  <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-medium text-yellow-800">Reminder Required</p>
+                        <p className="text-sm text-yellow-700">
+                          We'll send you an email reminder before your subscription expires so you can renew manually.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -168,6 +345,7 @@ const SubscriptionCheckoutPage = () => {
                 <div className="flex justify-between items-center py-2 px-4 bg-lightgray/30 rounded-lg">
                   <span className="text-mediumgray">
                     Premium {selectedPlan === 'monthly' ? 'Monthly' : 'Annual'} Plan
+                    {autoRenew && <span className="text-xs ml-2 text-boldblue">(Auto-renewing)</span>}
                   </span>
                   <span className="font-semibold text-darkgray">${currentPlan.price}</span>
                 </div>
@@ -209,9 +387,6 @@ const SubscriptionCheckoutPage = () => {
                   </div>
                 ) : (
                   <div className="flex items-center">
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                    </svg>
                     <span className="mr-2">Subscribe to Premium</span>
                     <span className="font-bold">${totalAmount.toFixed(2)}</span>
                   </div>
@@ -233,13 +408,28 @@ const SubscriptionCheckoutPage = () => {
                   <svg className="w-4 h-4 mr-2 text-boldblue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  30-day money-back guarantee • Cancel anytime
+                  Cancel anytime
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Payment Method Setup Modal */}
+      <PaymentMethodModal
+        isOpen={showPaymentModal}
+        onClose={handleCloseModal}
+        onSetupPayment={handleSetupPayment}
+      />
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        onContinue={handleSuccessModalContinue}
+        planType={selectedPlan}
+      />
     </div>
   );
 };

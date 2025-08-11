@@ -1,13 +1,22 @@
 import React, { useState } from 'react'
 import { Check, Star, Crown, FileText, Clock, Award, MessageCircle, Briefcase, Headphones, X } from 'lucide-react';
 import { PricingContent } from '@/types/subscription';
+import { useRouter } from 'next/router';
+import useSubscriptionPrices from '@/hooks/useSubscriptionPrices';
 
 const SubscriptionPricing = ({ pricingContent }: { pricingContent: PricingContent }) => {
+
+  const router = useRouter();
+  const { subscriptionPrices } = useSubscriptionPrices();
   const [isAnnual, setIsAnnual] = useState(false);
 
   const handleSubscribe = (tier: string) => {
-    // This would trigger the payment flow
-    console.log(`Subscribing to ${tier} plan (${isAnnual ? 'Annual' : 'Monthly'})`);
+    if (tier === 'premium') {
+
+      router.push(`/payment/subscription-checkout?plan=${isAnnual ? 'annual' : 'monthly'}`);
+    } else {
+      router.push('/')
+    }
   };
 
   const getIcon = (iconName: string) => {
@@ -29,7 +38,7 @@ const SubscriptionPricing = ({ pricingContent }: { pricingContent: PricingConten
   const renderFeature = (feature: { icon: string; additionalIcon: string; included: any; text: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, index: React.Key | null | undefined) => {
     const IconComponent = getIcon(feature.icon);
     const AdditionalIconComponent = feature.additionalIcon ? getIcon(feature.additionalIcon) : null;
-    
+
     if (!feature.included) {
       return (
         <li key={index} className="flex items-start opacity-50">
@@ -76,7 +85,10 @@ const SubscriptionPricing = ({ pricingContent }: { pricingContent: PricingConten
             >
               Annual
               <span className="absolute -top-4 -right-2 text-red-500 text-xs px-2 py-1 bg-red-50 rounded-full font-bold border border-red-200">
-                Save {pricingContent.premiumTier.savingsPercentage}
+                Save {(
+                    ((subscriptionPrices.monthly * 12 - subscriptionPrices.annual) /
+                      (subscriptionPrices.monthly * 12) * 100)
+                  ).toFixed(0)}%
               </span>
             </button>
           </div>
@@ -104,16 +116,16 @@ const SubscriptionPricing = ({ pricingContent }: { pricingContent: PricingConten
             </div>
 
             <ul className="space-y-6 mb-12">
-              {pricingContent.freeTier.features.map((feature: any, index: any) => 
+              {pricingContent.freeTier.features.map((feature: any, index: any) =>
                 renderFeature(feature, index)
               )}
             </ul>
           </div>
-          
+
           <div className="p-12">
             <button
               onClick={() => handleSubscribe('free')}
-              className="w-full py-5 px-8 border-2 border-boldblue text-boldblue font-semibold rounded-2xl hover:bg-boldblue hover:text-white transition-all duration-300 text-lg"
+              className="cursor-pointer w-full py-5 px-8 border-2 border-boldblue text-boldblue font-semibold rounded-2xl hover:bg-boldblue hover:text-white transition-all duration-300 text-lg"
             >
               {pricingContent.freeTier.buttonText}
             </button>
@@ -140,31 +152,34 @@ const SubscriptionPricing = ({ pricingContent }: { pricingContent: PricingConten
             <div className="mb-10">
               <div className="flex items-baseline mb-3">
                 <span className="text-5xl font-bold bg-gradient-to-r from-boldblue to-aquagreen bg-clip-text text-transparent">
-                  ${isAnnual ? pricingContent.premiumTier.price.annual : pricingContent.premiumTier.price.monthly}
+                  ${isAnnual ? subscriptionPrices.annual : subscriptionPrices.monthly}
                 </span>
                 <span className="text-gray-500 ml-3 text-lg">
                   /{isAnnual ? 'year' : 'month'}
                 </span>
               </div>
-              {isAnnual && pricingContent.premiumTier.savings && (
+              {isAnnual && (
                 <p className="text-emerald-600 font-semibold mt-2 text-lg">
-                  {pricingContent.premiumTier.savings}
+                  Save {(
+                    ((subscriptionPrices.monthly * 12 - subscriptionPrices.annual) /
+                      (subscriptionPrices.monthly * 12) * 100)
+                  ).toFixed(0)}%
                 </p>
               )}
               <p className="text-gray-600 text-lg mt-2">{pricingContent.premiumTier.description}</p>
             </div>
 
             <ul className="space-y-6 mb-12">
-              {pricingContent.premiumTier.features.map((feature: any, index: any) => 
+              {pricingContent.premiumTier.features.map((feature: any, index: any) =>
                 renderFeature(feature, index)
               )}
             </ul>
           </div>
-          
+
           <div className="p-12">
             <button
               onClick={() => handleSubscribe('premium')}
-              className="w-full py-5 px-8 bg-gradient-to-r from-boldblue to-aquagreen text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
+              className="cursor-pointer w-full py-5 px-8 bg-gradient-to-r from-boldblue to-aquagreen hover:to-boldblue hover:from-aquagreen text-white font-semibold rounded-2xl  transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
             >
               {pricingContent.premiumTier.buttonText}
             </button>

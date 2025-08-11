@@ -1,54 +1,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Edit3, X, Save, AlertCircle } from 'lucide-react';
-import { fetchSubscriptionSettings } from '@/api/admin-subscription-api';
+import { Edit3, X, Save, AlertCircle, RefreshCw, Copy } from 'lucide-react';
+import { fetchSubscriptionSettings, saveEarlyAccessDuration, saveFeePercentage, saveSubscriptionPrice, saveTips, fetchGCCToken } from '@/api/admin-subscription-api';
+import { EditSection, EditStates, EditValues, Settings, ValidationErrors } from '@/types/subscriptionSettings';
+import { toast } from 'react-toastify';
 
-
-// Types
-interface SubscriptionPricing {
-  consultant: {
-    monthly: number;
-    annual: number;
-  };
-  client: {
-    monthly: number;
-    annual: number;
-  };
-}
-
-interface GccDiscount {
-  token: string;
-  percentOff: number;
-}
-
-interface Settings {
-  subscriptionPricing: SubscriptionPricing;
-  gccDiscount: GccDiscount;
-  adminFeePercent: number;
-  tips: string;
-  earlyAccessDurationHours: number;
-}
-
-type EditSection = 'consultantPricing' | 'clientPricing' | 'gccDiscount' | 'adminFee' | 'tips' | 'earlyAccess';
-
-interface EditValues {
-  consultantMonthly?: string;
-  consultantAnnual?: string;
-  clientMonthly?: string;
-  clientAnnual?: string;
-  gccToken?: string;
-  gccPercent?: string;
-  adminFee?: string;
-  tips?: string;
-  earlyAccess?: string;
-}
-
-interface EditStates {
-  [key: string]: boolean;
-}
-
-interface ValidationErrors {
-  [key: string]: string;
-}
 
 const AdminSubscriptionSettings = () => {
   // Main settings state - Initialize with empty structure
@@ -74,7 +29,8 @@ const AdminSubscriptionSettings = () => {
 
   const [loading, setLoading] = useState(true);
 
-  // Edit states
+  const [savingStates, setSavingStates] = useState<{ [key: string]: boolean }>({});
+
   const [editStates, setEditStates] = useState<EditStates>({});
   const [editValues, setEditValues] = useState<EditValues>({});
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
@@ -86,7 +42,7 @@ const AdminSubscriptionSettings = () => {
         setLoading(true);
         const fetchedSettings = await fetchSubscriptionSettings();
         console.log('fetchedSettings: ', fetchedSettings.data);
-        
+
         // Update the settings state with fetched data
         setSettings({
           subscriptionPricing: fetchedSettings.data.subscriptionPricing,
@@ -104,6 +60,16 @@ const AdminSubscriptionSettings = () => {
     }
     fetchSettings();
   }, [])
+
+  // copy to clipboard
+  const handleCopyToken = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(settings.gccDiscount.token);
+      toast.info('copied')
+    } catch (error) {
+      console.error('Failed to copy token:', error);
+    }
+  }, [settings.gccDiscount.token])
 
   // Validation functions
   const validatePrice = (value: string): boolean => {
@@ -129,9 +95,9 @@ const AdminSubscriptionSettings = () => {
   const handleEdit = useCallback((section: EditSection): void => {
     setEditStates(prev => ({ ...prev, [section]: true }));
     setValidationErrors(prev => ({ ...prev, [section]: '' }));
-    
+
     // Initialize edit values with current values
-    switch(section) {
+    switch (section) {
       case 'consultantPricing':
         setEditValues(prev => ({
           ...prev,
@@ -172,13 +138,68 @@ const AdminSubscriptionSettings = () => {
     setHasUnsavedChanges(false);
   }, []);
 
+  // Handle GCC token generation
+  const handleGenerateGCCToken = useCallback(async (): Promise<void> => {
+    // Validate percentage first
+    if (!validatePercent(editValues.gccPercent || '')) {
+      setValidationErrors(prev => ({
+        ...prev,
+        gccDiscount: 'Discount must be between 0% and 100%'
+      }));
+      return;
+    }
+
+    setSavingStates(prev => ({ ...prev, gccDiscount: true }));
+    setValidationErrors(prev => ({ ...prev, gccDiscount: '' }));
+
+    try {
+      // Call the API to generate new token
+      const response = await fetchGCCToken(settings.gccDiscount.percentOff);
+
+      if (response && response.success) {
+        // Update local state with the new token data
+        setSettings(prev => ({
+          ...prev,
+          gccDiscount: {
+            token: response.data.token,
+            percentOff: parseInt(editValues.gccPercent!)
+          }
+        }));
+
+        // Update edit values with the new token
+        setEditValues(prev => ({
+          ...prev,
+          gccToken: response.data.token
+        }));
+
+        // Exit edit mode
+        setEditStates(prev => ({ ...prev, gccDiscount: false }));
+        setHasUnsavedChanges(false);
+      }
+    } catch (error) {
+      console.error('Error generating GCC token:', error);
+      setValidationErrors(prev => ({
+        ...prev,
+        gccDiscount: 'Failed to generate token. Please try again.'
+      }));
+    } finally {
+      setSavingStates(prev => ({ ...prev, gccDiscount: false }));
+    }
+  }, [editValues.gccPercent]);
+
   // Handle save
-  const handleSave = useCallback((section: EditSection): void => {
+  const handleSave = useCallback(async (section: EditSection): Promise<void> => {
+    // Special handling for GCC discount - generate token instead of regular save
+    if (section === 'gccDiscount') {
+      await handleGenerateGCCToken();
+      return;
+    }
+
     let isValid = true;
     let errorMessage = '';
 
     // Validation based on section
-    switch(section) {
+    switch (section) {
       case 'consultantPricing':
         if (!validatePrice(editValues.consultantMonthly || '')) {
           errorMessage = 'Monthly price must be between $0.01 and $9,999.99';
@@ -194,15 +215,6 @@ const AdminSubscriptionSettings = () => {
           isValid = false;
         } else if (!validatePrice(editValues.clientAnnual || '')) {
           errorMessage = 'Annual price must be between $0.01 and $9,999.99';
-          isValid = false;
-        }
-        break;
-      case 'gccDiscount':
-        if (!validateToken(editValues.gccToken || '')) {
-          errorMessage = 'Token must be a valid UUID format';
-          isValid = false;
-        } else if (!validatePercent(editValues.gccPercent || '')) {
-          errorMessage = 'Discount must be between 0% and 100%';
           isValid = false;
         }
         break;
@@ -231,56 +243,101 @@ const AdminSubscriptionSettings = () => {
       return;
     }
 
-    // Update main settings
-    switch(section) {
-      case 'consultantPricing':
-        setSettings(prev => ({
-          ...prev,
-          subscriptionPricing: {
-            ...prev.subscriptionPricing,
-            consultant: {
-              monthly: parseFloat(editValues.consultantMonthly!),
-              annual: parseFloat(editValues.consultantAnnual!)
-            }
-          }
-        }));
-        break;
-      case 'clientPricing':
-        setSettings(prev => ({
-          ...prev,
-          subscriptionPricing: {
-            ...prev.subscriptionPricing,
-            client: {
-              monthly: parseFloat(editValues.clientMonthly!),
-              annual: parseFloat(editValues.clientAnnual!)
-            }
-          }
-        }));
-        break;
-      case 'gccDiscount':
-        setSettings(prev => ({
-          ...prev,
-          gccDiscount: {
-            token: editValues.gccToken!,
-            percentOff: parseInt(editValues.gccPercent!)
-          }
-        }));
-        break;
-      case 'adminFee':
-        setSettings(prev => ({ ...prev, adminFeePercent: parseFloat(editValues.adminFee!) }));
-        break;
-      case 'tips':
-        setSettings(prev => ({ ...prev, tips: editValues.tips! }));
-        break;
-      case 'earlyAccess':
-        setSettings(prev => ({ ...prev, earlyAccessDurationHours: parseInt(editValues.earlyAccess!) }));
-        break;
-    }
-    
-    setEditStates(prev => ({ ...prev, [section]: false }));
+    // Set saving state
+    setSavingStates(prev => ({ ...prev, [section]: true }));
     setValidationErrors(prev => ({ ...prev, [section]: '' }));
-    setHasUnsavedChanges(false);
-  }, [editValues]);
+
+    try {
+      // Handle API calls and state updates based on section
+      switch (section) {
+        case 'consultantPricing':
+        case 'clientPricing':
+          // For both consultant and client pricing, we need all 4 values
+          // Get current values for the section we're not editing
+          const consultantMonthly = section === 'consultantPricing'
+            ? parseFloat(editValues.consultantMonthly!)
+            : settings.subscriptionPricing.consultant.monthly;
+          const consultantAnnual = section === 'consultantPricing'
+            ? parseFloat(editValues.consultantAnnual!)
+            : settings.subscriptionPricing.consultant.annual;
+          const clientMonthly = section === 'clientPricing'
+            ? parseFloat(editValues.clientMonthly!)
+            : settings.subscriptionPricing.client.monthly;
+          const clientAnnual = section === 'clientPricing'
+            ? parseFloat(editValues.clientAnnual!)
+            : settings.subscriptionPricing.client.annual;
+
+          // Call the API
+          await saveSubscriptionPrice({
+            consultantMonthlyPrice: consultantMonthly,
+            consultantAnnualPrice: consultantAnnual,
+            clientMonthlyPrice: clientMonthly,
+            clientAnnualPrice: clientAnnual
+          });
+
+          // Update local state with all pricing data
+          setSettings(prev => ({
+            ...prev,
+            subscriptionPricing: {
+              consultant: {
+                monthly: consultantMonthly,
+                annual: consultantAnnual
+              },
+              client: {
+                monthly: clientMonthly,
+                annual: clientAnnual
+              }
+            }
+          }));
+          break;
+
+        case 'adminFee':
+          const feePercent = parseFloat(editValues.adminFee!);
+
+          // Call the API
+          await saveFeePercentage(feePercent);
+
+          // Update local state
+          setSettings(prev => ({ ...prev, adminFeePercent: feePercent }));
+          break;
+
+        case 'tips':
+          const tipsContent = editValues.tips!;
+
+          // Call the API
+          await saveTips(tipsContent);
+
+          // Update local state
+          setSettings(prev => ({ ...prev, tips: tipsContent }));
+          break;
+
+        case 'earlyAccess':
+          const hours = parseInt(editValues.earlyAccess!);
+
+          // Call the API
+          await saveEarlyAccessDuration(hours);
+
+          // Update local state
+          setSettings(prev => ({ ...prev, earlyAccessDurationHours: hours }));
+          break;
+      }
+
+      // Exit edit mode on successful save
+      setEditStates(prev => ({ ...prev, [section]: false }));
+      setHasUnsavedChanges(false);
+
+    } catch (error) {
+      // Handle API error
+      console.error(`Error saving ${section}:`, error);
+      setValidationErrors(prev => ({
+        ...prev,
+        [section]: 'Failed to save changes. Please try again.'
+      }));
+    } finally {
+      // Clear saving state
+      setSavingStates(prev => ({ ...prev, [section]: false }));
+    }
+  }, [editValues, settings, handleGenerateGCCToken]);
 
   // Handle input changes
   const handleInputChange = useCallback((key: keyof EditValues, value: string): void => {
@@ -296,12 +353,12 @@ const AdminSubscriptionSettings = () => {
     className?: string;
   }> = ({ section, title, children, className = '' }) => {
     const isEditing = editStates[section];
+    const isSaving = savingStates[section];
     const hasError = validationErrors[section];
 
     return (
-      <div className={`bg-white rounded-lg border-2 transition-all duration-200 ${
-        isEditing ? 'border-blue-500 shadow-lg' : hasError ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
-      } ${className}`}>
+      <div className={`bg-white rounded-lg border-2 transition-all duration-200 ${isEditing ? 'border-blue-500 shadow-lg' : hasError ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
+        } ${className}`}>
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -311,17 +368,23 @@ const AdminSubscriptionSettings = () => {
                 <>
                   <button
                     onClick={() => handleCancel(section)}
-                    className="cursor-pointer flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-red-600 rounded-md transition-colors text-sm"
+                    disabled={isSaving}
+                    className="cursor-pointer flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-red-600 rounded-md transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <X size={14} />
                     Cancel
                   </button>
                   <button
                     onClick={() => handleSave(section)}
-                    className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-boldblue text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                    disabled={isSaving}
+                    className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-boldblue text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Save size={14} />
-                    Save
+                    {isSaving ? (
+                      <RefreshCw size={14} className="animate-spin" />
+                    ) : (
+                      <Save size={14} />
+                    )}
+                    {section === 'gccDiscount' ? 'Generate Token' : 'Save'}
                   </button>
                 </>
               ) : (
@@ -335,7 +398,7 @@ const AdminSubscriptionSettings = () => {
               )}
             </div>
           </div>
-          
+
           {/* Content */}
           <div className="space-y-4">
             {children}
@@ -363,32 +426,54 @@ const AdminSubscriptionSettings = () => {
     suffix?: string;
     placeholder?: string;
     className?: string;
-  }> = ({ label, value, onChange, type = 'text', prefix, suffix, placeholder, className = '' }) => (
-    <div className={className}>
-      <label className="block text-sm font-medium text-gray-600 mb-2">{label}</label>
-      <div className="relative">
-        {prefix && (
-          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
-            {prefix}
-          </span>
-        )}
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-            prefix ? 'pl-8' : ''
-          } ${suffix ? 'pr-12' : ''}`}
-        />
-        {suffix && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
-            {suffix}
-          </span>
-        )}
+    disabled?: boolean;
+    numbersOnly?: boolean;
+  }> = ({ label, value, onChange, type = 'text', prefix, suffix, placeholder, className = '', disabled = false, numbersOnly = false }) => {
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      let newValue = e.target.value;
+
+      if (numbersOnly) {
+        // Allow only numbers and decimal point
+        newValue = newValue.replace(/[^0-9.]/g, '');
+
+        // Ensure only one decimal point
+        const parts = newValue.split('.');
+        if (parts.length > 2) {
+          newValue = parts[0] + '.' + parts.slice(1).join('');
+        }
+      }
+
+      onChange(newValue);
+    };
+
+    return (
+      <div className={className}>
+        <label className="block text-sm font-medium text-gray-600 mb-2">{label}</label>
+        <div className="relative">
+          {prefix && (
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
+              {prefix}
+            </span>
+          )}
+          <input
+            type="text"
+            value={value}
+            onChange={handleInputChange}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${prefix ? 'pl-8' : ''
+              } ${suffix ? 'pr-12' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+          />
+          {suffix && (
+            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
+              {suffix}
+            </span>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Loading state
   if (loading) {
@@ -412,7 +497,7 @@ const AdminSubscriptionSettings = () => {
 
         {/* Settings Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
+
           {/* Consultant Pricing */}
           <EditableCard section="consultantPricing" title="Consultant Pricing">
             {editStates.consultantPricing ? (
@@ -421,17 +506,17 @@ const AdminSubscriptionSettings = () => {
                   label="Monthly Price"
                   value={editValues.consultantMonthly || ''}
                   onChange={(value) => handleInputChange('consultantMonthly', value)}
-                  type="number"
                   prefix="$"
                   placeholder="49.99"
+                  numbersOnly={true}
                 />
                 <InputField
                   label="Annual Price"
                   value={editValues.consultantAnnual || ''}
                   onChange={(value) => handleInputChange('consultantAnnual', value)}
-                  type="number"
                   prefix="$"
                   placeholder="499.99"
+                  numbersOnly={true}
                 />
               </div>
             ) : (
@@ -456,17 +541,17 @@ const AdminSubscriptionSettings = () => {
                   label="Monthly Price"
                   value={editValues.clientMonthly || ''}
                   onChange={(value) => handleInputChange('clientMonthly', value)}
-                  type="number"
                   prefix="$"
                   placeholder="29.99"
+                  numbersOnly={true}
                 />
                 <InputField
                   label="Annual Price"
                   value={editValues.clientAnnual || ''}
                   onChange={(value) => handleInputChange('clientAnnual', value)}
-                  type="number"
                   prefix="$"
                   placeholder="299.99"
+                  numbersOnly={true}
                 />
               </div>
             ) : (
@@ -488,32 +573,59 @@ const AdminSubscriptionSettings = () => {
             {editStates.gccDiscount ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-2">Discount Token</label>
-                  <input
-                    type="text"
-                    value={editValues.gccToken || ''}
-                    onChange={(e) => handleInputChange('gccToken', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors font-mono text-sm"
-                    placeholder="Enter UUID token"
-                  />
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Current Token <span className="text-xs text-gray-500">(will be replaced when generating new token)</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={editValues.gccToken || ''}
+                      disabled={true}
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md font-mono text-sm bg-gray-100 cursor-not-allowed"
+                      placeholder="Token will be generated automatically"
+                    />
+                    {settings.gccDiscount.token && (
+                      <button
+                        onClick={handleCopyToken}
+                        className="cursor-pointer absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-500 hover:text-boldblue transition-colors"
+                        title="Copy token"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <InputField
                   label="Discount Percentage"
                   value={editValues.gccPercent || ''}
                   onChange={(value) => handleInputChange('gccPercent', value)}
-                  type="number"
                   suffix="%"
                   placeholder="15"
                   className="w-32"
+                  numbersOnly={true}
                 />
+                <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md border border-blue-200">
+                  <p><strong>Note:</strong> Clicking "Generate Token" will create a new token with the specified discount percentage and replace the current token.</p>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
                   <span className="text-sm font-medium text-gray-600">Token</span>
-                  <p className="font-mono text-xs text-boldblue mt-1 p-2 bg-gray-50 rounded border break-all">
-                    {settings.gccDiscount.token}
-                  </p>
+                  <div className="relative">
+                    <p className="font-mono text-xs text-boldblue mt-1 p-2 pr-10 bg-gray-50 rounded border break-all">
+                      {settings.gccDiscount.token || 'No token generated yet'}
+                    </p>
+                    {settings.gccDiscount.token && (
+                      <button
+                        onClick={handleCopyToken}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-500 hover:text-boldblue transition-colors"
+                        title="Copy token"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <span className="text-sm font-medium text-gray-600">Discount</span>
@@ -530,10 +642,10 @@ const AdminSubscriptionSettings = () => {
                 label="Fee Percentage"
                 value={editValues.adminFee || ''}
                 onChange={(value) => handleInputChange('adminFee', value)}
-                type="number"
                 suffix="%"
                 placeholder="7.5"
                 className="w-32"
+                numbersOnly={true}
               />
             ) : (
               <div>
@@ -571,25 +683,18 @@ const AdminSubscriptionSettings = () => {
                 label="Duration"
                 value={editValues.earlyAccess || ''}
                 onChange={(value) => handleInputChange('earlyAccess', value)}
-                type="number"
                 suffix="hours"
                 placeholder="24"
                 className="w-40"
+                numbersOnly={true}
               />
             ) : (
               <div>
-                <span className="text-sm font-medium text-gray-600">Duration</span>
+                <span className="text-sm font-medium text-gray-600">Duration (duration must be either 24 or 48 hours)</span>
                 <p className="text-2xl font-semibold text-boldblue">{settings.earlyAccessDurationHours} hours</p>
               </div>
             )}
           </EditableCard>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 p-4 bg-white rounded-lg border border-gray-200">
-          <p className="text-sm text-gray-600 text-center">
-            Last updated: August 4, 2025 at 1:00 PM
-          </p>
         </div>
       </div>
     </div>

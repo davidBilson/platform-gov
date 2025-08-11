@@ -11,6 +11,7 @@ import Logo from '@/components/ui/logo';
 import NotificationsDropdown from '@/components/notifications/notificationDropdown';
 
 import { FaBell } from 'react-icons/fa6';
+import { Crown } from 'lucide-react';
 import { FiLogOut, FiSearch } from 'react-icons/fi';
 import { HiMenuAlt3 } from 'react-icons/hi';
 import { IoMdArrowDropdown, IoMdArrowDropup } from 'react-icons/io';
@@ -88,19 +89,13 @@ const ContractorNavbar = () => {
         ]
       },
       { 
-        label: 'Manage Contracts',
-        dropdown: [
-          { label: 'Proposals', action: () => handleNavigation('/proposals') },
-          { label: 'Contracts', action: () => handleNavigation('/contract') }
-        ]
-      },
-      { 
         label: 'Manage Payment',
         dropdown: [
           { label: 'Earnings', action: () => handleNavigation('/payment') },
           { label: 'Withdraw Funds', action: () => handleNavigation('/payment/withdraw') },
           { label: 'Manage Account', action: () => handleNavigation('/payment/payout-setup') },
-          { label: 'Transaction History', action: () => handleNavigation('/payment/transaction-history') }
+          { label: 'Transaction History', action: () => handleNavigation('/payment/transaction-history') },
+          { label: 'Manage Subscription', action: () => handleNavigation('/subscribe') }
         ]
       },
       { 
@@ -111,7 +106,8 @@ const ContractorNavbar = () => {
       { 
         label: 'Contract Wizard',
         dropdown: null,
-        action: () => handleNavigation('/contract-wizard')
+        action: () => handleNavigation('/contract-wizard'),
+        hasLock: true // Added flag to identify this item needs a lock icon
       }
     ]
   };
@@ -120,6 +116,7 @@ const ContractorNavbar = () => {
     label: string;
     dropdown?: { label: string; action: () => void }[] | null;
     action?: () => void;
+    hasLock?: boolean; // Added optional hasLock property
   }
 
   const renderDesktopNavItem = (item: NavItem, index: number) => {
@@ -131,7 +128,10 @@ const ContractorNavbar = () => {
           onClick={() => item.dropdown ? toggleDropdown(dropdownId) : item.action?.()}
           className="flex items-center gap-1.25 hover:text-deepskyblue"
         >
-          <span>{item.label}</span>
+          <span className="flex items-center gap-1.5">
+            {item.label}
+            {item.hasLock && <Crown size={16} />}
+          </span>
           {item.dropdown && (
             <span>
               {activeDropdown === dropdownId ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}
@@ -165,7 +165,10 @@ const ContractorNavbar = () => {
           onClick={() => item.dropdown ? toggleDropdown(dropdownId) : item.action?.()}
           className="flex items-center justify-center gap-1.25"
         >
-          <span>{item.label}</span>
+          <span className="flex items-center gap-1.5">
+            {item.label}
+            {item.hasLock && <Crown size={16} />}
+          </span>
           {item.dropdown && (
             <span>
               {activeDropdown === dropdownId ? <IoMdArrowDropup size={20} /> : <IoMdArrowDropdown size={20} />}

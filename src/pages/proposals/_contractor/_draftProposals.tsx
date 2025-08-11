@@ -55,8 +55,8 @@ const DraftProposals: React.FC<DraftProposalsProps> = ({ applications = [] }) =>
   };
 
   return (
-    <section className='w-full max-w-275 m-auto border-b border-b-skyblue pb-10 mb-7.5'>
-      <h2 className='pb-5 mb-7.5 text-darkgray border-b border-b-deepskyblue'>Draft Proposals</h2>
+    <section className='w-full m-auto border-b border-b-skyblue pb-10 mb-7.5'>
+      <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold border-b border-b-deepskyblue'>Draft Proposals</h2>
       
       {applications.length === 0 ? (
         <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">

@@ -60,7 +60,7 @@ const SignIn = () => {
       }
 
       const userData = result.data.user;
-
+      
       setUserId(userData._id);
 
       setFormData({
@@ -68,7 +68,8 @@ const SignIn = () => {
         role: userData.role,
         email: userData.email,
         phoneNumber: userData.phoneNumber,
-        userId: userData._id
+        userId: userData._id,
+        isSubscribed: userData.isSubscribed
       });
 
       setEmailVerified(userData.isEmailVerified);

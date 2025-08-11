@@ -12,16 +12,20 @@ import LoadingAnimation from '@/components/ui/loading';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 const PaymentMethodSetup = () => {
+
   const router = useRouter();
   const { jobId, returnTo } = router.query;
   const { userId, role } = useAuthStore();
+  
   const [paymentMethodSaved, setPaymentMethodSaved] = useState(false);
   const [hasExistingMethod, setHasExistingMethod] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check if coming from contract page
-  const isFromContract = typeof returnTo === 'string' && returnTo.startsWith('/contract');
+  const isFromContractOrSubscription =
+  typeof returnTo === 'string' &&
+  (returnTo.startsWith('/contract') || returnTo.startsWith('subscribe'));
 
+  
   interface PaymentMethod {
     id: string;
     brand: | "Alipay"
@@ -118,7 +122,7 @@ const PaymentMethodSetup = () => {
     }
   };
 
-  const handleReturnToContract = () => {
+  const handleReturnToPrevPage = () => {
     if (returnTo && typeof returnTo === 'string') {
       router.back();
     } else {
@@ -132,14 +136,6 @@ const PaymentMethodSetup = () => {
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
       </div>
     );
-  }
-
-  if (role !== 'client') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingAnimation />
-      </div>
-    )
   }
 
   if (paymentMethodSaved) {
@@ -157,7 +153,7 @@ const PaymentMethodSetup = () => {
             </div>
 
             {/* Show contract return option if coming from contract */}
-            {isFromContract ? (
+            {isFromContractOrSubscription ? (
               <div className="rounded-2xl p-8 border border-lightblue/30 mb-8">
                 <div className="flex items-center justify-center mb-6">
                   <div className="w-16 h-16 rounded-2xl flex items-center justify-center">
@@ -168,14 +164,14 @@ const PaymentMethodSetup = () => {
                 </div>
                 <h3 className="text-xl font-bold text-darkgray mb-3">Payment Method Ready</h3>
                 <p className="text-mediumgray mb-6">
-                  Your payment method has been saved. You can now continue with your contract payment.
+                  Your payment method has been saved. You can now continue with your payment.
                 </p>
 
                 <button
-                  onClick={handleReturnToContract}
+                  onClick={handleReturnToPrevPage}
                   className="cursor-pointer group relative inline-flex items-center justify-center px-6 py-3 bg-deepskyblue text-white text-sm font-bold rounded-lg transform hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-boldblue/30"
                 >
-                  <span className="mr-2">Continue Contract Payment</span>
+                  <span className="mr-2">Continue Payment</span>
                   <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -233,16 +229,16 @@ const PaymentMethodSetup = () => {
           </p>
         </div>
 
-        {isFromContract && (
+        {isFromContractOrSubscription && (
           <div className="mb-6 text-center">
             <button
-              onClick={handleReturnToContract}
+              onClick={handleReturnToPrevPage}
               className="inline-flex items-center text-sm text-boldblue hover:text-deepskyblue font-medium"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              Back to Contract Payment
+              Back to Payment
             </button>
           </div>
         )}
