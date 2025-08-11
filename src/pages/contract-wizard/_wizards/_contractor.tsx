@@ -13,7 +13,6 @@ const ContractorWizard = () => {
     { id: 'contracts', label: 'Contracts', icon: FileText },
     { id: 'proposals', label: 'Proposals', icon: DollarSign },
     { id: 'invoices', label: 'Invoice Generator', icon: FileText },
-    { id: 'payments', label: 'Payment Tracking', icon: CreditCard },
     { id: 'export', label: 'File 1099 Tax Form', icon: FileCheck }
   ]
 
@@ -25,8 +24,6 @@ const ContractorWizard = () => {
         return <ContractorProposals />
       case 'invoices':
         return <InvoiceGenerator />
-      case 'payments':
-        return <h2>Payment Tracking</h2>
       case 'export':
         return <Form1099NECGenerator />
       default:

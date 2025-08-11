@@ -1,11 +1,7 @@
-import useAuthStore from '@/store/useAuth'
-import React from 'react'
-import ContractorContracts from './_contractorContracts';
-import ClientContracts from './_clientContracts';
-import useSubscription from '@/hooks/useSubscription';
+import useAuthStore from '@/store/useAuth';
 import LockedOverlay from '@/components/subscription/LockedOverlay';
-import ContractorProposals from '../proposals/_contractor';
 import ContractorWizard from './_wizards/_contractor';
+import ClientWizard from './_wizards/_client';
 
 const AllContracts = () => {
 
@@ -24,7 +20,7 @@ const AllContracts = () => {
       role === "client" &&
       (
         <>
-          <ClientContracts />
+          <ClientWizard />
         </>
       )
     }
