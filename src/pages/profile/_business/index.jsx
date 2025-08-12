@@ -68,9 +68,7 @@ const BusinessProfile = () => {
 
   return (
     <section className='p-5 pb-20 md:p-6'>
-      {showBankDetailsPrompt && <BankDetailsPromptModal toggle={() => setShowBankDetailsPrompt(!showBankDetailsPrompt)} />}
       <section className='w-full max-w-275 m-auto'>
-
         <div className='mb-6'>
           <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
             <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
