@@ -41,7 +41,6 @@ const CreateFreelancerProfile = () => {
     primaryPosition: "",
     skills: [],
     certifications: [],
-    // expertise: [],
     firmAffiliation: "",
     clearance: "",
     location: {
@@ -78,12 +77,10 @@ const CreateFreelancerProfile = () => {
   const [filteredSkills, setFilteredSkills] = useState<string[]>([]);
   const [filteredCertifications, setFilteredCertifications] = useState<string[]>([]);
   const [expertiseInput, setExpertiseInput] = useState<string>("");
-  const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
-  const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   const [showStatesDropdown, setShowStatesDropdown] = useState<boolean>(false);
   const [showFirmDropdown, setShowFirmDropdown] = useState<boolean>(false);
   const [showClearancesDropdown, setShowClearancesDropdown] = useState<boolean>(false);

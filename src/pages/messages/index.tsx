@@ -223,7 +223,7 @@ export default function ChatIndex() {
 
   return (
     <main className="relative container mx-auto p-4 md:p-6 h-[calc(100vh-112px)] flex flex-col">
-      {!isSubscribed && <LockedOverlay descriptionText='Subscribe to access advanced chat functionalities.' />}
+      {!isSubscribed && <LockedOverlay position='fixed' descriptionText='Subscribe to access advanced chat functionalities.' />}
       <section className="mb-4 md:mb-5 w-full relative">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl md:text-2xl text-deepskyblue font-bold">Messages</h1>

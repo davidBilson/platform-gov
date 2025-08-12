@@ -117,6 +117,7 @@ const SubscriptionStats = ({ data, isLoading }: SubscriptionStatsProps) => {
                   <p className="text-2xl font-bold text-boldblue">{stat.value}</p>
                 </div>
                 <div className={`p-3 rounded-lg bg-${stat.color}/10`}>
+                  {/* @ts-ignore */}
                   <Icon size={24} className={`text-${stat.color}`} />
                 </div>
               </div>

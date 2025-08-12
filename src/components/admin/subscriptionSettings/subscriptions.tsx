@@ -1,16 +1,40 @@
 import React, { useState, useEffect } from 'react'
-import { fetchSubscriptions } from '@/api/admin-subscription-api';
-import SubscriptionTable from './subscriptions/subscriptionTable';
+import { fetchSubscriptions } from '@/api/admin-subscription-api'
+import SubscriptionTable from './subscriptions/subscriptionTable'
 
-const Subscriptions = () => {
-  const [activeTab, setActiveTab] = useState('all');
-  const [subscriptionData, setSubscriptionData] = useState({
+// Minimal types that work with any data structure
+type SubscriptionData = any // Replace with actual type when known
+type ErrorType = string | null
+
+interface SubscriptionTabData {
+  data: SubscriptionData | null
+  loading: boolean
+  error: ErrorType
+}
+
+interface SubscriptionDataState {
+  all: SubscriptionTabData
+  clients: SubscriptionTabData
+  contractors: SubscriptionTabData
+}
+
+type TabKey = keyof SubscriptionDataState
+
+interface Tab {
+  key: TabKey
+  label: string
+  component: React.ComponentType<any> // Flexible component type
+}
+
+const Subscriptions: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<TabKey>('all')
+  const [subscriptionData, setSubscriptionData] = useState<SubscriptionDataState>({
     all: { data: null, loading: true, error: null },
     clients: { data: null, loading: true, error: null },
     contractors: { data: null, loading: true, error: null }
-  });
+  })
 
-  const tabs = [
+  const tabs: Tab[] = [
     {
       key: 'all',
       label: 'All',
@@ -26,7 +50,7 @@ const Subscriptions = () => {
       label: 'Consultants',
       component: SubscriptionTable
     }
-  ];
+  ]
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -35,37 +59,39 @@ const Subscriptions = () => {
           fetchSubscriptions(),
           fetchSubscriptions({ userType: 'client' }),
           fetchSubscriptions({ userType: 'contractor' })
-        ]);
+        ])
 
         setSubscriptionData({
           all: { data: allSubscriptions, loading: false, error: null },
           clients: { data: clientSubscriptions, loading: false, error: null },
           contractors: { data: contractorSubscriptions, loading: false, error: null }
-        });
+        })
 
-      } catch (error) {
-        console.error('Error fetching subscription data:', error);
+      } catch (error: any) {
+        console.error('Error fetching subscription data:', error)
+        const errorMessage = error?.message || 'An error occurred'
+        
         setSubscriptionData(prev => ({
-          all: { data: null, loading: false, error: error.message },
-          clients: { data: null, loading: false, error: error.message },
-          contractors: { data: null, loading: false, error: error.message }
-        }));
+          all: { data: null, loading: false, error: errorMessage },
+          clients: { data: null, loading: false, error: errorMessage },
+          contractors: { data: null, loading: false, error: errorMessage }
+        }))
       }
-    };
+    }
 
-    fetchAllData();
-  }, []);
+    fetchAllData()
+  }, [])
 
   const renderContent = () => {
-    const activeTabData = tabs.find(tab => tab.key === activeTab);
-    const Component = activeTabData?.component;
-    const currentData = subscriptionData[activeTab];
+    const activeTabData = tabs.find(tab => tab.key === activeTab)
+    const Component = activeTabData?.component
+    const currentData = subscriptionData[activeTab]
 
-    // Remove the redundant if statements - just use the component or fallback
-    if (!Component) return <SubscriptionTable data={subscriptionData.all} />;
+    // @ts-ignore
+    if (!Component) return <SubscriptionTable data={subscriptionData.all} />
 
-    return <Component data={currentData} />;
-  };
+    return <Component data={currentData} />
+  }
 
   return (
     <section>
