@@ -234,10 +234,10 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
                       </div>
                     }
                   </div>
-                  <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 w-1/2 h-full'>
-                    <span className='flex items-center gap-2 bg-yellow-500'>
+                  <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 h-full'>
+                    <span className='flex items-center gap-2 '>
                       <Link href={`/profile/${contractor.user._id}`} className="text-lg md:text-xl font-semibold cursor-pointer hover:underline">
-                        {isSubscribed ? contractor.user.name : formatName(contractor.user.name)}
+                        {isSubscribed ? (contractor.user.name ?? "N/A") : formatName(contractor.user.name)}
                       </Link>
                       {contractor.user.isSubscribed && <RiVerifiedBadgeFill size={20} color='#00A871' />}
                     </span>
