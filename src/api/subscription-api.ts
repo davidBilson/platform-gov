@@ -7,6 +7,7 @@ const CANCEL_SUBSCRIPTION = process.env.NEXT_PUBLIC_CANCEL_SUBSCRIPTION || '';
 const RESUME_SUBSCRIPTION = process.env.NEXT_PUBLIC_RESUME_SUBSCRIPTION || '';
 const CHECK_SUBSCRIPTION_STATUS = process.env.NEXT_PUBLIC_CHECK_SUBSCRIPTION_STATUS || '';
 const FETCH_SUBSCRIPTION_PRICES = process.env.NEXT_PUBLIC_FETCH_SUBSCRIPTION_PRICES || '';
+const FETCH_TIPS = process.env.NEXT_PUBLIC_FETCH_TIPS || '';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -253,6 +254,16 @@ export const isSubscriptionExpiringSoon = async (
 export const fetchSubscriptionPrices = async () => {
     try {
         const response = await api.get(FETCH_SUBSCRIPTION_PRICES);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching subscription prices:', error);
+        throw error;
+    }
+}
+
+export const fetchTips = async () => {
+    try {
+        const response = await api.get(FETCH_TIPS);
         return response.data;
     } catch (error) {
         console.error('Error fetching subscription prices:', error);

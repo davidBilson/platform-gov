@@ -18,6 +18,7 @@ const SET_FEE_PERCENT = process.env.NEXT_PUBLIC_SET_FEE_PERCENT || '';
 const SET_TIPS = process.env.NEXT_PUBLIC_SET_TIPS|| '';
 const SET_EARLY_ACCESS_DURATION = process.env.NEXT_PUBLIC_SET_EARLY_ACCESS_DURATION || '';
 const GENERATE_GCC_DISCOUNT_TOKEN = process.env.NEXT_PUBLIC_GENERATE_GCC_DISCOUNT_TOKEN || "";
+const FETCH_ALL_DISCOUNT_CODES = process.env.NEXT_PUBLIC_FETCH_ALL_DISCOUNT_CODES || '';
 
 export const fetchSubscriptionStats = async () => {
   try {
@@ -180,7 +181,7 @@ export const saveEarlyAccessDuration = async (hours: number) => {
   }
 }
 
-export const fetchGCCToken = async (percentOff: number) => {
+export const generateGCCToken = async (percentOff: number) => {
   try {
     const response = await axios.post(`${BASE_URL}${GENERATE_GCC_DISCOUNT_TOKEN}?adminId=${adminId}`, {
       percentOff
@@ -194,6 +195,16 @@ export const fetchGCCToken = async (percentOff: number) => {
   } catch (error) {
     toast.error('Failed to generate GCC discount token');
     console.error('Error generating GCC token:', error);
+    throw error;
+  }
+}
+
+export const fetchAllDiscountCodes = async () => {
+  try {
+    const response = await axios.get(`${BASE_URL}${FETCH_ALL_DISCOUNT_CODES}?adminId=${adminId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all discount codes:', error);
     throw error;
   }
 }

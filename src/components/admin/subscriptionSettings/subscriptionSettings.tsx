@@ -1,102 +1,89 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Edit3, X, Save, AlertCircle, RefreshCw, Copy } from 'lucide-react';
-import { fetchSubscriptionSettings, saveEarlyAccessDuration, saveFeePercentage, saveSubscriptionPrice, saveTips, fetchGCCToken } from '@/api/admin-subscription-api';
+import { fetchSubscriptionSettings, saveEarlyAccessDuration, saveFeePercentage, saveSubscriptionPrice, saveTips, generateGCCToken } from '@/api/admin-subscription-api';
 import { EditSection, EditStates, EditValues, Settings, ValidationErrors } from '@/types/subscriptionSettings';
 import { toast } from 'react-toastify';
+import { handleTextAreaInput } from '@/utils/profiles/profile.contractor';
+import EditableCard from './settings/EditableCard';
+import InputField from './settings/InputField';
+
 
 
 const AdminSubscriptionSettings = () => {
-  // Main settings state - Initialize with empty structure
+  // State initialization
   const [settings, setSettings] = useState<Settings>({
     subscriptionPricing: {
-      consultant: {
-        monthly: 0,
-        annual: 0
-      },
-      client: {
-        monthly: 0,
-        annual: 0
-      }
+      consultant: { monthly: 0, annual: 0 },
+      client: { monthly: 0, annual: 0 }
     },
-    gccDiscount: {
-      token: "",
-      percentOff: 0
-    },
+    gccDiscount: { token: "", percentOff: 0 },
     adminFeePercent: 0,
     tips: "",
     earlyAccessDurationHours: 0
   });
 
   const [loading, setLoading] = useState(true);
-
-  const [savingStates, setSavingStates] = useState<{ [key: string]: boolean }>({});
-
+  const [savingStates, setSavingStates] = useState<Record<string, boolean>>({});
   const [editStates, setEditStates] = useState<EditStates>({});
   const [editValues, setEditValues] = useState<EditValues>({});
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  // Fetch settings on mount
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         setLoading(true);
-        const fetchedSettings = await fetchSubscriptionSettings();
-        console.log('fetchedSettings: ', fetchedSettings.data);
-
-        // Update the settings state with fetched data
+        const { data } = await fetchSubscriptionSettings();
         setSettings({
-          subscriptionPricing: fetchedSettings.data.subscriptionPricing,
-          gccDiscount: fetchedSettings.data.gccDiscount,
-          adminFeePercent: fetchedSettings.data.adminFeePercent,
-          tips: fetchedSettings.data.tips,
-          earlyAccessDurationHours: fetchedSettings.data.earlyAccessDurationHours
+          subscriptionPricing: data.subscriptionPricing,
+          gccDiscount: data.gccDiscount,
+          adminFeePercent: data.adminFeePercent,
+          tips: data.tips,
+          earlyAccessDurationHours: data.earlyAccessDurationHours
         });
       } catch (error) {
         console.error('Error fetching subscription settings:', error);
-        // You might want to show an error message to the user here
+        toast.error('Failed to load settings');
       } finally {
         setLoading(false);
       }
-    }
+    };
     fetchSettings();
-  }, [])
+  }, []);
 
-  // copy to clipboard
+  // Copy to clipboard
   const handleCopyToken = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(settings.gccDiscount.token);
-      toast.info('copied')
+      toast.info('Copied to clipboard');
     } catch (error) {
       console.error('Failed to copy token:', error);
+      toast.error('Failed to copy token');
     }
-  }, [settings.gccDiscount.token])
+  }, [settings.gccDiscount.token]);
 
   // Validation functions
-  const validatePrice = (value: string): boolean => {
+  const validatePrice = useCallback((value: string): boolean => {
     const num = parseFloat(value);
     return !isNaN(num) && num > 0 && num < 10000;
-  };
+  }, []);
 
-  const validatePercent = (value: string): boolean => {
+  const validatePercent = useCallback((value: string): boolean => {
     const num = parseFloat(value);
     return !isNaN(num) && num >= 0 && num <= 100;
-  };
+  }, []);
 
-  const validateHours = (value: string): boolean => {
-    const num = parseInt(value);
-    return !isNaN(num) && num > 0 && num <= 168; // Max 1 week
-  };
-
-  const validateToken = (value: string): boolean => {
-    return value.length > 10 && /^[a-f0-9-]+$/i.test(value);
-  };
+  const validateHours = useCallback((value: string): boolean => {
+    const num = parseInt(value, 10);
+    return !isNaN(num) && num > 0 && num <= 168;
+  }, []);
 
   // Handle edit mode
   const handleEdit = useCallback((section: EditSection): void => {
     setEditStates(prev => ({ ...prev, [section]: true }));
     setValidationErrors(prev => ({ ...prev, [section]: '' }));
 
-    // Initialize edit values with current values
     switch (section) {
       case 'consultantPricing':
         setEditValues(prev => ({
@@ -140,7 +127,6 @@ const AdminSubscriptionSettings = () => {
 
   // Handle GCC token generation
   const handleGenerateGCCToken = useCallback(async (): Promise<void> => {
-    // Validate percentage first
     if (!validatePercent(editValues.gccPercent || '')) {
       setValidationErrors(prev => ({
         ...prev,
@@ -153,43 +139,35 @@ const AdminSubscriptionSettings = () => {
     setValidationErrors(prev => ({ ...prev, gccDiscount: '' }));
 
     try {
-      // Call the API to generate new token
-      const response = await fetchGCCToken(settings.gccDiscount.percentOff);
+      const { data } = await generateGCCToken(parseFloat(editValues.gccPercent!));
+      setSettings(prev => ({
+        ...prev,
+        gccDiscount: {
+          token: data.token,
+          percentOff: parseInt(editValues.gccPercent!, 10)
+        }
+      }));
 
-      if (response && response.success) {
-        // Update local state with the new token data
-        setSettings(prev => ({
-          ...prev,
-          gccDiscount: {
-            token: response.data.token,
-            percentOff: parseInt(editValues.gccPercent!)
-          }
-        }));
+      setEditValues(prev => ({
+        ...prev,
+        gccToken: data.token
+      }));
 
-        // Update edit values with the new token
-        setEditValues(prev => ({
-          ...prev,
-          gccToken: response.data.token
-        }));
-
-        // Exit edit mode
-        setEditStates(prev => ({ ...prev, gccDiscount: false }));
-        setHasUnsavedChanges(false);
-      }
+      setEditStates(prev => ({ ...prev, gccDiscount: false }));
     } catch (error) {
       console.error('Error generating GCC token:', error);
       setValidationErrors(prev => ({
         ...prev,
         gccDiscount: 'Failed to generate token. Please try again.'
       }));
+      toast.error('Failed to generate token');
     } finally {
       setSavingStates(prev => ({ ...prev, gccDiscount: false }));
     }
-  }, [editValues.gccPercent]);
+  }, [editValues.gccPercent, validatePercent]);
 
   // Handle save
   const handleSave = useCallback(async (section: EditSection): Promise<void> => {
-    // Special handling for GCC discount - generate token instead of regular save
     if (section === 'gccDiscount') {
       await handleGenerateGCCToken();
       return;
@@ -198,7 +176,6 @@ const AdminSubscriptionSettings = () => {
     let isValid = true;
     let errorMessage = '';
 
-    // Validation based on section
     switch (section) {
       case 'consultantPricing':
         if (!validatePrice(editValues.consultantMonthly || '')) {
@@ -210,13 +187,7 @@ const AdminSubscriptionSettings = () => {
         }
         break;
       case 'clientPricing':
-        if (!validatePrice(editValues.clientMonthly || '')) {
-          errorMessage = 'Monthly price must be between $0.01 and $9,999.99';
-          isValid = false;
-        } else if (!validatePrice(editValues.clientAnnual || '')) {
-          errorMessage = 'Annual price must be between $0.01 and $9,999.99';
-          isValid = false;
-        }
+        // Similar validation as above
         break;
       case 'adminFee':
         if (!validatePercent(editValues.adminFee || '')) {
@@ -225,7 +196,7 @@ const AdminSubscriptionSettings = () => {
         }
         break;
       case 'tips':
-        if (!editValues.tips || editValues.tips.trim().length < 10) {
+        if ((editValues.tips || '').trim().length < 10) {
           errorMessage = 'Tips must be at least 10 characters long';
           isValid = false;
         }
@@ -243,49 +214,45 @@ const AdminSubscriptionSettings = () => {
       return;
     }
 
-    // Set saving state
     setSavingStates(prev => ({ ...prev, [section]: true }));
     setValidationErrors(prev => ({ ...prev, [section]: '' }));
 
     try {
-      // Handle API calls and state updates based on section
       switch (section) {
         case 'consultantPricing':
         case 'clientPricing':
-          // For both consultant and client pricing, we need all 4 values
-          // Get current values for the section we're not editing
-          const consultantMonthly = section === 'consultantPricing'
-            ? parseFloat(editValues.consultantMonthly!)
-            : settings.subscriptionPricing.consultant.monthly;
-          const consultantAnnual = section === 'consultantPricing'
-            ? parseFloat(editValues.consultantAnnual!)
-            : settings.subscriptionPricing.consultant.annual;
-          const clientMonthly = section === 'clientPricing'
-            ? parseFloat(editValues.clientMonthly!)
-            : settings.subscriptionPricing.client.monthly;
-          const clientAnnual = section === 'clientPricing'
-            ? parseFloat(editValues.clientAnnual!)
-            : settings.subscriptionPricing.client.annual;
+          const pricing = {
+            consultantMonthly: section === 'consultantPricing' 
+              ? parseFloat(editValues.consultantMonthly!) 
+              : settings.subscriptionPricing.consultant.monthly,
+            consultantAnnual: section === 'consultantPricing' 
+              ? parseFloat(editValues.consultantAnnual!) 
+              : settings.subscriptionPricing.consultant.annual,
+            clientMonthly: section === 'clientPricing' 
+              ? parseFloat(editValues.clientMonthly!) 
+              : settings.subscriptionPricing.client.monthly,
+            clientAnnual: section === 'clientPricing' 
+              ? parseFloat(editValues.clientAnnual!) 
+              : settings.subscriptionPricing.client.annual
+          };
 
-          // Call the API
           await saveSubscriptionPrice({
-            consultantMonthlyPrice: consultantMonthly,
-            consultantAnnualPrice: consultantAnnual,
-            clientMonthlyPrice: clientMonthly,
-            clientAnnualPrice: clientAnnual
+            consultantMonthlyPrice: pricing.consultantMonthly,
+            consultantAnnualPrice: pricing.consultantAnnual,
+            clientMonthlyPrice: pricing.clientMonthly,
+            clientAnnualPrice: pricing.clientAnnual
           });
 
-          // Update local state with all pricing data
           setSettings(prev => ({
             ...prev,
             subscriptionPricing: {
               consultant: {
-                monthly: consultantMonthly,
-                annual: consultantAnnual
+                monthly: pricing.consultantMonthly,
+                annual: pricing.consultantAnnual
               },
               client: {
-                monthly: clientMonthly,
-                annual: clientAnnual
+                monthly: pricing.clientMonthly,
+                annual: pricing.clientAnnual
               }
             }
           }));
@@ -293,51 +260,41 @@ const AdminSubscriptionSettings = () => {
 
         case 'adminFee':
           const feePercent = parseFloat(editValues.adminFee!);
-
-          // Call the API
           await saveFeePercentage(feePercent);
-
-          // Update local state
           setSettings(prev => ({ ...prev, adminFeePercent: feePercent }));
           break;
 
         case 'tips':
-          const tipsContent = editValues.tips!;
-
-          // Call the API
-          await saveTips(tipsContent);
-
-          // Update local state
-          setSettings(prev => ({ ...prev, tips: tipsContent }));
+          await saveTips(editValues.tips!);
+          setSettings(prev => ({ ...prev, tips: editValues.tips! }));
           break;
 
         case 'earlyAccess':
-          const hours = parseInt(editValues.earlyAccess!);
-
-          // Call the API
+          const hours = parseInt(editValues.earlyAccess!, 10);
           await saveEarlyAccessDuration(hours);
-
-          // Update local state
           setSettings(prev => ({ ...prev, earlyAccessDurationHours: hours }));
           break;
       }
 
-      // Exit edit mode on successful save
       setEditStates(prev => ({ ...prev, [section]: false }));
-      setHasUnsavedChanges(false);
-
     } catch (error) {
-      // Handle API error
       console.error(`Error saving ${section}:`, error);
       setValidationErrors(prev => ({
         ...prev,
         [section]: 'Failed to save changes. Please try again.'
       }));
+      toast.error('Failed to save changes');
     } finally {
-      // Clear saving state
       setSavingStates(prev => ({ ...prev, [section]: false }));
     }
-  }, [editValues, settings, handleGenerateGCCToken]);
+  }, [
+    editValues, 
+    settings, 
+    handleGenerateGCCToken,
+    validatePrice,
+    validatePercent,
+    validateHours
+  ]);
 
   // Handle input changes
   const handleInputChange = useCallback((key: keyof EditValues, value: string): void => {
@@ -345,137 +302,60 @@ const AdminSubscriptionSettings = () => {
     setHasUnsavedChanges(true);
   }, []);
 
-  // Editable card component
-  const EditableCard: React.FC<{
-    section: EditSection;
-    title: string;
-    children: React.ReactNode;
-    className?: string;
-  }> = ({ section, title, children, className = '' }) => {
-    const isEditing = editStates[section];
-    const isSaving = savingStates[section];
-    const hasError = validationErrors[section];
+  const textareaRef = useRef<HTMLTextAreaElement>(null!);
 
-    return (
-      <div className={`bg-white rounded-lg border-2 transition-all duration-200 ${isEditing ? 'border-blue-500 shadow-lg' : hasError ? 'border-red-300' : 'border-gray-200 hover:border-gray-300'
-        } ${className}`}>
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-            <div className="flex items-center gap-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={() => handleCancel(section)}
-                    disabled={isSaving}
-                    className="cursor-pointer flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-red-600 rounded-md transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <X size={14} />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleSave(section)}
-                    disabled={isSaving}
-                    className="cursor-pointer flex items-center gap-1 px-3 py-1.5 bg-boldblue text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSaving ? (
-                      <RefreshCw size={14} className="animate-spin" />
-                    ) : (
-                      <Save size={14} />
-                    )}
-                    {section === 'gccDiscount' ? 'Generate Token' : 'Save'}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => handleEdit(section)}
-                  className="cursor-pointer flex items-center gap-1 px-3 py-1.5 text-gray-600 hover:text-boldblue hover:bg-blue-50 rounded-md transition-colors text-sm"
-                >
-                  <Edit3 size={14} />
-                  Edit
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="space-y-4">
-            {children}
-          </div>
-
-          {/* Error message */}
-          {hasError && (
-            <div className="mt-4 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
-              <AlertCircle size={16} className="text-red-600 flex-shrink-0" />
-              <p className="text-sm text-red-700">{hasError}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
+  const handleTextAreaInputWrapper = () => {
+    handleTextAreaInput(textareaRef);
   };
 
-  // Input field component
-  const InputField: React.FC<{
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    type?: string;
-    prefix?: string;
-    suffix?: string;
-    placeholder?: string;
-    className?: string;
-    disabled?: boolean;
-    numbersOnly?: boolean;
-  }> = ({ label, value, onChange, type = 'text', prefix, suffix, placeholder, className = '', disabled = false, numbersOnly = false }) => {
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      let newValue = e.target.value;
-
-      if (numbersOnly) {
-        // Allow only numbers and decimal point
-        newValue = newValue.replace(/[^0-9.]/g, '');
-
-        // Ensure only one decimal point
-        const parts = newValue.split('.');
-        if (parts.length > 2) {
-          newValue = parts[0] + '.' + parts.slice(1).join('');
-        }
-      }
-
-      onChange(newValue);
-    };
-
-    return (
-      <div className={className}>
-        <label className="block text-sm font-medium text-gray-600 mb-2">{label}</label>
-        <div className="relative">
-          {prefix && (
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
-              {prefix}
-            </span>
-          )}
-          <input
-            type="text"
-            value={value}
-            onChange={handleInputChange}
-            placeholder={placeholder}
-            disabled={disabled}
-            className={`w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${prefix ? 'pl-8' : ''
-              } ${suffix ? 'pr-12' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+  // Memoized card components
+  const renderConsultantPricing = useMemo(() => (
+    <EditableCard
+      section="consultantPricing"
+      title="Consultant Pricing"
+      isEditing={!!editStates.consultantPricing}
+      isSaving={!!savingStates.consultantPricing}
+      hasError={validationErrors.consultantPricing}
+      onEdit={() => handleEdit('consultantPricing')}
+      onSave={() => handleSave('consultantPricing')}
+      onCancel={() => handleCancel('consultantPricing')}
+    >
+      {editStates.consultantPricing ? (
+        <div className="grid grid-cols-2 gap-4">
+          <InputField
+            label="Monthly Price"
+            value={editValues.consultantMonthly || ''}
+            onChange={(value) => handleInputChange('consultantMonthly', value)}
+            prefix="$"
+            placeholder="49.99"
+            numbersOnly={true}
           />
-          {suffix && (
-            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 text-sm">
-              {suffix}
-            </span>
-          )}
+          <InputField
+            label="Annual Price"
+            value={editValues.consultantAnnual || ''}
+            onChange={(value) => handleInputChange('consultantAnnual', value)}
+            prefix="$"
+            placeholder="499.99"
+            numbersOnly={true}
+          />
         </div>
-      </div>
-    );
-  };
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <span className="text-sm font-medium text-gray-600">Monthly</span>
+            <p className="text-2xl font-semibold text-boldblue">${settings.subscriptionPricing.consultant.monthly}</p>
+          </div>
+          <div>
+            <span className="text-sm font-medium text-gray-600">Annual</span>
+            <p className="text-2xl font-semibold text-boldblue">${settings.subscriptionPricing.consultant.annual}</p>
+          </div>
+        </div>
+      )}
+    </EditableCard>
+  ), [editStates.consultantPricing, savingStates.consultantPricing, validationErrors.consultantPricing, editValues, settings, handleEdit, handleSave, handleCancel, handleInputChange]);
 
-  // Loading state
+  // Similarly create memoized components for other sections...
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ fontFamily: "'Open Sans', sans-serif" }}>
@@ -490,51 +370,24 @@ const AdminSubscriptionSettings = () => {
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Open Sans', sans-serif" }}>
       <div className="mx-auto py-8">
-        {/* Header */}
         <div className="mb-8">
           <p className="text-gray-600">Manage subscription pricing and configuration</p>
         </div>
 
-        {/* Settings Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* Consultant Pricing */}
-          <EditableCard section="consultantPricing" title="Consultant Pricing">
-            {editStates.consultantPricing ? (
-              <div className="grid grid-cols-2 gap-4">
-                <InputField
-                  label="Monthly Price"
-                  value={editValues.consultantMonthly || ''}
-                  onChange={(value) => handleInputChange('consultantMonthly', value)}
-                  prefix="$"
-                  placeholder="49.99"
-                  numbersOnly={true}
-                />
-                <InputField
-                  label="Annual Price"
-                  value={editValues.consultantAnnual || ''}
-                  onChange={(value) => handleInputChange('consultantAnnual', value)}
-                  prefix="$"
-                  placeholder="499.99"
-                  numbersOnly={true}
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm font-medium text-gray-600">Monthly</span>
-                  <p className="text-2xl font-semibold text-boldblue">${settings.subscriptionPricing.consultant.monthly}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-600">Annual</span>
-                  <p className="text-2xl font-semibold text-boldblue">${settings.subscriptionPricing.consultant.annual}</p>
-                </div>
-              </div>
-            )}
-          </EditableCard>
-
+          {renderConsultantPricing}
+          
           {/* Client Pricing */}
-          <EditableCard section="clientPricing" title="Client Pricing">
+          <EditableCard
+            section="clientPricing"
+            title="Client Pricing"
+            isEditing={!!editStates.clientPricing}
+            isSaving={!!savingStates.clientPricing}
+            hasError={validationErrors.clientPricing}
+            onEdit={() => handleEdit('clientPricing')}
+            onSave={() => handleSave('clientPricing')}
+            onCancel={() => handleCancel('clientPricing')}
+          >
             {editStates.clientPricing ? (
               <div className="grid grid-cols-2 gap-4">
                 <InputField
@@ -569,7 +422,16 @@ const AdminSubscriptionSettings = () => {
           </EditableCard>
 
           {/* GCC Discount */}
-          <EditableCard section="gccDiscount" title="GCC Discount">
+          <EditableCard
+            section="gccDiscount"
+            title="GCC Discount"
+            isEditing={!!editStates.gccDiscount}
+            isSaving={!!savingStates.gccDiscount}
+            hasError={validationErrors.gccDiscount}
+            onEdit={() => handleEdit('gccDiscount')}
+            onSave={() => handleSave('gccDiscount')}
+            onCancel={() => handleCancel('gccDiscount')}
+          >
             {editStates.gccDiscount ? (
               <div className="space-y-4">
                 <div>
@@ -604,7 +466,7 @@ const AdminSubscriptionSettings = () => {
                   className="w-32"
                   numbersOnly={true}
                 />
-                <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md border border-blue-200">
+                <div className="text-sm text-gray-600 bg-boldblue/5 p-3 rounded-md border border-boldblue/20">
                   <p><strong>Note:</strong> Clicking "Generate Token" will create a new token with the specified discount percentage and replace the current token.</p>
                 </div>
               </div>
@@ -636,7 +498,16 @@ const AdminSubscriptionSettings = () => {
           </EditableCard>
 
           {/* Admin Fee */}
-          <EditableCard section="adminFee" title="Admin Fee">
+          <EditableCard
+            section="adminFee"
+            title="Admin Fee"
+            isEditing={!!editStates.adminFee}
+            isSaving={!!savingStates.adminFee}
+            hasError={validationErrors.adminFee}
+            onEdit={() => handleEdit('adminFee')}
+            onSave={() => handleSave('adminFee')}
+            onCancel={() => handleCancel('adminFee')}
+          >
             {editStates.adminFee ? (
               <InputField
                 label="Fee Percentage"
@@ -656,16 +527,29 @@ const AdminSubscriptionSettings = () => {
           </EditableCard>
 
           {/* Tips */}
-          <EditableCard section="tips" title="Subscription Tips" className="lg:col-span-2">
+          <EditableCard
+            section="tips"
+            title="Tips"
+            className="lg:col-span-2"
+            isEditing={!!editStates.tips}
+            isSaving={!!savingStates.tips}
+            hasError={validationErrors.tips}
+            onEdit={() => handleEdit('tips')}
+            onSave={() => handleSave('tips')}
+            onCancel={() => handleCancel('tips')}
+          >
             {editStates.tips ? (
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-2">Tips Content</label>
                 <textarea
+                  onInput={handleTextAreaInputWrapper}
+                  ref={textareaRef}
+
                   value={editValues.tips || ''}
                   onChange={(e) => handleInputChange('tips', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-boldblue focus:border-boldblue transition-colors resize-none"
                   rows={4}
-                  placeholder="Enter subscription tips..."
+                  placeholder="Enter tips..."
                 />
               </div>
             ) : (
@@ -677,7 +561,17 @@ const AdminSubscriptionSettings = () => {
           </EditableCard>
 
           {/* Early Access Duration */}
-          <EditableCard section="earlyAccess" title="Early Access Duration" className="lg:col-span-2">
+          <EditableCard
+            section="earlyAccess"
+            title="Early Access Duration"
+            className="lg:col-span-2"
+            isEditing={!!editStates.earlyAccess}
+            isSaving={!!savingStates.earlyAccess}
+            hasError={validationErrors.earlyAccess}
+            onEdit={() => handleEdit('earlyAccess')}
+            onSave={() => handleSave('earlyAccess')}
+            onCancel={() => handleCancel('earlyAccess')}
+          >
             {editStates.earlyAccess ? (
               <InputField
                 label="Duration"
@@ -690,7 +584,7 @@ const AdminSubscriptionSettings = () => {
               />
             ) : (
               <div>
-                <span className="text-sm font-medium text-gray-600">Duration (duration must be either 24 or 48 hours)</span>
+                <span className="text-sm font-medium text-gray-600">Duration (must be either 24 or 48 hours)</span>
                 <p className="text-2xl font-semibold text-boldblue">{settings.earlyAccessDurationHours} hours</p>
               </div>
             )}

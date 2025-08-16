@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react'
-import { FileText, CreditCard, FileCheck, Crown } from 'lucide-react'
+import { FileText, CreditCard, FileCheck, Crown, Lightbulb } from 'lucide-react'
 import ContractorContracts from '../_contractorContracts'
 import InvoiceGenerator from '@/components/wizardTools/invoiceGenerator'
 import Form1099NECGenerator from '@/components/wizardTools/NECTax1099'
 import ClientContracts from '../_clientContracts'
+import Tips from '@/components/wizardTools/tips'
 
 
 const ClientWizard = () => {
@@ -13,7 +14,8 @@ const ClientWizard = () => {
   const tabs = [
     { id: 'contracts', label: 'Contracts', icon: FileText },
     { id: 'invoices', label: 'Invoice Generator', icon: FileText },
-    { id: 'export', label: 'File 1099 Tax Form', icon: FileCheck }
+    { id: 'export', label: 'File 1099 Tax Form', icon: FileCheck },
+    { id: 'tips', label: 'Tips', icon: Lightbulb }
   ]
 
   const renderContent = () => {
@@ -24,6 +26,8 @@ const ClientWizard = () => {
         return <InvoiceGenerator />
       case 'export':
         return <Form1099NECGenerator />
+      case 'tips':
+        return <Tips />
       default:
         return <ContractorContracts />
     }

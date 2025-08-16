@@ -5,16 +5,19 @@ import AdminSubscriptionSettings from '@/components/admin/subscriptionSettings/s
 import SubscriptionStats from '@/components/admin/subscriptionSettings/subscriptionStats'
 import { fetchSubscriptionStats } from '@/api/admin-subscription-api'
 import { SubscriptionStatsData } from '@/types/subscription'
+import DiscountCodes from '@/components/admin/subscriptionSettings/DiscountCodes';
 
 
 const SubscriptionSettings = () => {
+
   const [activeTab, setActiveTab] = useState('subscriptions')
   const [statsData, setStatsData] = useState<SubscriptionStatsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const tabs = [
     { id: 'subscriptions', label: 'Subscriptions', component: <Subscriptions /> },
-    { id: 'settings', label: 'Settings', component: <AdminSubscriptionSettings /> }
+    { id: 'settings', label: 'Settings', component: <AdminSubscriptionSettings /> },
+    { id: 'discount-codes', label: 'Manage Discount Codes', component: <DiscountCodes /> }
   ]
 
   useEffect(() => {
