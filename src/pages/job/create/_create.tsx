@@ -283,7 +283,7 @@ const CreateJob = () => {
 
   return (
     <>
-      {isSubscribed &&
+      {!isSubscribed &&
         <LockedOverlay
           position='fixed'
           descriptionText="Unlock full access to post jobs and connect with top consultants. Upgrade to Premium today to start hiring faster and more efficiently."

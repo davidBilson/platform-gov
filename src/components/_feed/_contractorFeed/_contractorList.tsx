@@ -218,14 +218,13 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
 
                 <div className='flex items-center  gap-4.25 w-full md:max-w-[20%] h-26  '>
 
-                  <div className='border border-boldblue rounded-full h-19 w-19 flex items-center justify-center overflow-hidden'>
+                  <div className=''>
                     {contractor.profileImage ? (
-                      <div className='rounded-full h-19 w-19 flex items-center justify-center'>
+                      <div className='rounded-full flex items-center justify-center'>
                         <ProfilePicture
                           source={contractor?.profileImage ?? ""}
                           alt={contractor?.user?.name ?? ""}
-                          width={76}
-                          height={76}
+                          dimension={76}
                         />
                       </div>
                     ) :

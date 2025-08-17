@@ -8,6 +8,7 @@ const RESUME_SUBSCRIPTION = process.env.NEXT_PUBLIC_RESUME_SUBSCRIPTION || '';
 const CHECK_SUBSCRIPTION_STATUS = process.env.NEXT_PUBLIC_CHECK_SUBSCRIPTION_STATUS || '';
 const FETCH_SUBSCRIPTION_PRICES = process.env.NEXT_PUBLIC_FETCH_SUBSCRIPTION_PRICES || '';
 const FETCH_TIPS = process.env.NEXT_PUBLIC_FETCH_TIPS || '';
+const GET_DISCOUNT_TOKEN_DETAILS = process.env.NEXT_PUBLIC_GET_DISCOUNT_TOKEN_DETAILS || '';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -69,6 +70,7 @@ interface SubscriptionData {
     subscriptionAmount: number;
     currency?: string;
     autoRenew?: boolean;
+    discountToken?: string;
 }
 
 interface CreateSubscriptionResponse {
@@ -77,12 +79,9 @@ interface CreateSubscriptionResponse {
     status: number;
 }
 
-export const createSubscription = async (
-    userId: string,
-    subscriptionData: SubscriptionData
-) => {
+export const createSubscription = async (userId: string, subscriptionData: SubscriptionData) => {
     try {
-        const { planName, userType, billingInterval, subscriptionAmount, currency = 'USD', autoRenew } = subscriptionData;
+        const { planName, userType, billingInterval, subscriptionAmount, currency = 'USD', autoRenew, discountToken } = subscriptionData;
 
         // Validate required fields
         if (!userId) {
@@ -98,6 +97,7 @@ export const createSubscription = async (
             billingInterval,
             subscriptionAmount,
             currency,
+            discountToken,
             autoRenew: autoRenew !== undefined ? autoRenew : false,
         });
 
@@ -267,6 +267,18 @@ export const fetchTips = async () => {
         return response.data;
     } catch (error) {
         console.error('Error fetching subscription prices:', error);
+        throw error;
+    }
+}
+
+export const fetchSubscriptionFee = async () => {}
+
+export const fetchDiscountTokenDetails = async (discountToken: string) => {
+    try {
+        const response = await api.get(`${BASE_URL}${GET_DISCOUNT_TOKEN_DETAILS}?token=${discountToken}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching discount token details:', error);
         throw error;
     }
 }

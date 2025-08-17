@@ -500,7 +500,7 @@ const AdminSubscriptionSettings = () => {
           {/* Admin Fee */}
           <EditableCard
             section="adminFee"
-            title="Admin Fee"
+            title="Subscription Fee"
             isEditing={!!editStates.adminFee}
             isSaving={!!savingStates.adminFee}
             hasError={validationErrors.adminFee}
