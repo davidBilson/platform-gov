@@ -317,7 +317,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
             
             <div className='flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0'>
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
-                <ProfilePicture source={getProfileImageUrl()} alt={name} width={88} height={88} />
+                <ProfilePicture source={getProfileImageUrl()} alt={name} dimension={88} />
                 <div className="text-center sm:text-left mt-2 sm:mt-0">
                   <p className='font-semibold text-xl'>{name}</p>
                   <p className='text-xs font-bold py-2.5'>{profession}</p>
