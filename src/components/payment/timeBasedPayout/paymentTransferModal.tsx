@@ -234,7 +234,7 @@ const PaymentTransferModal = ({
   const handleAddPaymentMethod = () => {
     // Get current URL to determine return path
     const currentPath = window.location.pathname;
-    const returnPath = currentPath.startsWith('/contract') ? currentPath : '';
+    const returnPath = currentPath.startsWith('/contract-wizard') ? currentPath : '';
 
     // Navigate to payment method setup with return path
     window.location.href = `/payment/billing-method${returnPath ? `?returnTo=${encodeURIComponent(returnPath)}` : ''}`;

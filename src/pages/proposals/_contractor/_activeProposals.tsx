@@ -40,8 +40,8 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
 
   const messageClient = (id: string, application: Application) => {
     router.push({
-      pathname: `/contract/${id}`,
-      query: { 
+      pathname: `/contract-wizard/${id}`,
+      query: {
         jobId: typeof application?.jobId === 'object' ? application?.jobId?._id : undefined,
         tab: 'messages'
       }
@@ -51,7 +51,7 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
   return (
     <section className='w-full m-auto border-b border-b-skyblue pb-10 mb-7.5'>
       <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold border-b border-b-deepskyblue'>Active Proposals</h2>
-      
+
       {applications.length === 0 ? (
         <section className="p-5 bg-gray-50 rounded-lg border border-lightblue">
           <p className="text-center text-gray-600">No active proposals</p>
@@ -62,31 +62,30 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
             <p className='text-xs text-boldblue font-semibold mb-5'>
               Applied {formatDate(application?.createdAt)}
             </p>
-            
+
             <div className='mb-3.75 flex items-start justify-between gap-1'>
               <h3 className="text-xl font-semibold">
                 {typeof application.jobId === 'object' ? application?.jobId?.jobTitle : "Job Title"}
               </h3>
               <small
-                className={`text-[10px] text-white font-bold px-2 py-1 rounded-full ${
-                  application?.status === 'pending'
+                className={`text-[10px] text-white font-bold px-2 py-1 rounded-full ${application?.status === 'pending'
                     ? 'bg-gray-400'
                     : application?.status === 'viewed'
-                    ? 'bg-deepskyblue'
-                    : application?.status === 'active'
-                    ? 'bg-aquagreen'
-                    : 'bg-gray-100 text-gray-600'
-                }`}
-              > 
+                      ? 'bg-deepskyblue'
+                      : application?.status === 'active'
+                        ? 'bg-aquagreen'
+                        : 'bg-gray-100 text-gray-600'
+                  }`}
+              >
                 {application?.status === 'active' && "Offer"}
               </small>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-10 mb-4 text-sm font-semibold">
               <div className="flex items-center gap-1.25">
                 {`Proposed Rate: $${application?.proposedRate}`} | Availability: {application?.availability || "Full-time"}
               </div>
-              
+
               <div className="flex items-center gap-1.25">
                 <FaLocationDot size={15} />
                 {typeof application?.jobId === 'object' ? application?.jobId?.location : "Remote"}
@@ -98,7 +97,7 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
             </p>
 
             <div className='flex items-center flex-wrap gap-2.5 mb-3.75'>
-              <button 
+              <button
                 onClick={() => openProposalModal(application)}
                 className='text-boldblue border border-boldblue rounded-lg py-2.5 px-5 transition transform active:scale-95 hover:bg-boldblue hover:text-white duration-300 ease-in-out cursor-pointer'
               >
@@ -111,20 +110,20 @@ const ActiveProposals: React.FC<ActiveProposalsProps> = ({ applications = [] }) 
 
             <div className="flex items-center gap-5">
               <div className="w-8.75 h-8.75 rounded-full overflow-hidden flex items-center justify-center text-white font-bold">
-                <img width={35} height={35} className="rounded-full" 
-                  src={typeof application?.jobId === 'object' ? application?.jobId?.clientLogo : ""} 
-                  alt={typeof application?.jobId === 'object' ? application?.jobId?.clientName : "Client"} 
+                <img width={35} height={35} className="rounded-full"
+                  src={typeof application?.jobId === 'object' ? application?.jobId?.clientLogo : ""}
+                  alt={typeof application?.jobId === 'object' ? application?.jobId?.clientName : "Client"}
                 />
               </div>
-              <Link  href={''} className="font-semibold text-sm hover:underline">
+              <Link href={''} className="font-semibold text-sm hover:underline">
                 {typeof application?.jobId === 'object' ? application?.jobId?.clientName : "Client"}
               </Link>
             </div>
           </article>
         ))
       )}
-      
-      {selectedProposal && ( <ProposalModal proposal={selectedProposal} onClose={closeProposalModal} /> )}
+
+      {selectedProposal && (<ProposalModal proposal={selectedProposal} onClose={closeProposalModal} />)}
 
     </section>
   );

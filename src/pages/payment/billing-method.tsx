@@ -23,7 +23,7 @@ const PaymentMethodSetup = () => {
 
   const isFromContractOrSubscription =
   typeof returnTo === 'string' &&
-  (returnTo.startsWith('/contract') || returnTo.startsWith('subscribe'));
+  (returnTo.startsWith('/contract-wizard') || returnTo.startsWith('subscribe'));
 
   
   interface PaymentMethod {

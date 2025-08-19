@@ -82,11 +82,9 @@ export const fetchProfilePicture = async (id: string): Promise<string> => {
     }
 
     const response = await axios.get(`${API_BASE_URL}${endpoint}`, {
-      // Adding timeout to prevent hanging requests
-      timeout: 5000,
-      // Don't throw an error on 404, we'll handle it
+      timeout: 15000,
       validateStatus: function (status) {
-        return status < 500; // Only throw for server errors
+        return status < 500;
       }
     });
 
