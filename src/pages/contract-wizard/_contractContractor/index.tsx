@@ -59,14 +59,16 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
     }, [middleTab]);
 
     // Extract bank accounts from contract data
-    const bankAccounts = useMemo(() => {
-        return contract?.contractorId?.bankAccounts || [];
-    }, [contract?.contractorId?.bankAccounts]);
+    // const bankAccounts = useMemo(() => {
+    //     return contract?.contractorId?.bankAccounts || [];
+    // }, [contract?.contractorId?.bankAccounts]);
 
     const fetchJobData = useCallback(async () => {
         if (!jobId) return;
         try {
+            
             const jobData = await fetchJob(jobId as string);
+
             setJob(jobData);
 
             if (jobData?.paymentType === 'hourly') {
@@ -74,9 +76,9 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             } else if (jobData?.paymentType === 'retainer') {
                 setMiddleTab('retainer');
             } else {
-                // Default to milestone for fixed-price or if not specified
                 setMiddleTab('milestone');
             }
+
         } catch (error) {
             console.error('Error loading job:', error);
             setJob(null);
@@ -109,6 +111,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             clientId: job.userId._id,
             contractorId: userId
         });
+
         if (response.success && response.data) {
             setMutualContractId(response.data._id);
             setContract(response.data);
@@ -118,12 +121,13 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             }
             return response.data;
         }
+
         return null;
     }
 
-    useEffect(() => {
-        fetchMutualContract();
-    }, [job, userId, jobId])
+    // useEffect(() => {
+    //     fetchMutualContract();
+    // }, [job, userId, jobId])
 
     const {
         refetch: refetchContract

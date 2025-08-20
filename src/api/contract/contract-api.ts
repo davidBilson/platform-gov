@@ -10,25 +10,25 @@ export const createContract = async (contractData: {
   hiringId: string;
   clientId?: string;
   contractorId: string;
-})  => {
-  
+}) => {
+
   try {
     const endpoint = process.env.NEXT_PUBLIC_CREATE_CONTRACT;
-    
+
     const response = await axios.post(
       `${baseURL}${endpoint}`,
       contractData,
       { timeout: 10000 }
     );
-    
+
     return response.data;
   } catch (error) {
     console.error('Error creating contract:', error);
-    
+
     if (axios.isAxiosError(error)) {
       const errorMessage = error.response?.data?.message || 'Failed to create contract';
       toast.error(errorMessage);
-      
+
       // Provide additional information for specific error types
       if (error.code === 'ECONNABORTED') {
         toast.error('Request timed out. Please try again.');
@@ -36,7 +36,7 @@ export const createContract = async (contractData: {
     } else {
       toast.error('An unknown error occurred while creating the contract');
     }
-    
+
     throw error;
   }
 };
@@ -50,7 +50,7 @@ export const getSingleContract = async (contractData: {
 
   const hasMutualId = contractData.mutualContractId;
   const hasRequiredIds = contractData.jobId && contractData.clientId && contractData.contractorId;
-  
+
   if (!hasMutualId && !hasRequiredIds) {
     return {
       success: false,
@@ -64,7 +64,7 @@ export const getSingleContract = async (contractData: {
 
   try {
     const endpoint = process.env.NEXT_PUBLIC_GET_SINGLE_CONTRACT;
-    
+
     if (!endpoint) {
       return {
         success: false,
@@ -75,11 +75,11 @@ export const getSingleContract = async (contractData: {
         }
       };
     }
-    
+
     const response = await axios.post(
       `${baseURL}${endpoint}`,
       contractData,
-      { 
+      {
         timeout: 8000,
         headers: {
           'Content-Type': 'application/json'
@@ -92,6 +92,7 @@ export const getSingleContract = async (contractData: {
       data: response.data.data || response.data,
       error: null
     };
+
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 404) {
       return {
@@ -103,13 +104,13 @@ export const getSingleContract = async (contractData: {
         }
       };
     }
-    
+
     return {
       success: false,
       data: null,
       error: {
-        message: axios.isAxiosError(error) && error.response?.data?.message 
-          ? error.response.data.message 
+        message: axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
           : error instanceof Error ? error.message : 'Unknown error occurred',
         status: axios.isAxiosError(error) && error.response ? error.response.status : 500,
         code: axios.isAxiosError(error) ? error.code : 'UNKNOWN_ERROR'
@@ -129,7 +130,7 @@ export const getContracts = async (contractorId: string): Promise<{
     return response.data.data;
   } catch (error) {
     console.error('Error fetching contractor contracts:', error);
-    
+
     // Handle specific error cases
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
@@ -141,7 +142,7 @@ export const getContracts = async (contractorId: string): Promise<{
           completed: []
         };
       }
-      
+
       // Handle other HTTP errors (500, 403, etc.)
       if ((error.response?.status ?? 0) >= 500) {
         console.error('Server error:', error.response?.status ?? 'Unknown status');
@@ -149,7 +150,7 @@ export const getContracts = async (contractorId: string): Promise<{
         console.error('Unauthorized access');
       }
     }
-    
+
     // For network errors or other unexpected errors, return empty data
     // instead of letting the error propagate
     return {
@@ -172,8 +173,8 @@ export const endContract = async (contractId: string, userId: string) => {
     return response.data;
 
   } catch (error) {
-    const errorMessage = axios.isAxiosError(error) && error.response?.data?.message 
-      ? error.response.data.message 
+    const errorMessage = axios.isAxiosError(error) && error.response?.data?.message
+      ? error.response.data.message
       : error instanceof Error ? error.message : 'An unknown error occurred';
     toast.error(errorMessage);
     console.error('Error ending contract:', error);
