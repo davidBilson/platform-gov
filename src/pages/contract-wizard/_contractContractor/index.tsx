@@ -1,4 +1,5 @@
 // CONTRACTOR
+"use client";
 import Messages from '../../../components/chat/_messages';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { getSingleContract } from '@/api/contract/contract-api';
