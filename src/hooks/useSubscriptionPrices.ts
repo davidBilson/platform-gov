@@ -44,7 +44,6 @@ const useSubscriptionPrices = () => {
             }
         } catch (error) {
             console.error('Error fetching subscription prices:', error)
-            toast.error('An error occurred while fetching subscription prices.')
         } finally {
             setLoading(false)
         }

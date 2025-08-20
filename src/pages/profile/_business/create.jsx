@@ -13,6 +13,7 @@ import { GovernmentDepartmentsAndAgenciesByCountry } from "@/utils/feedFilter/Go
 import { BusinessIndustries } from "@/utils/feedFilter/BusinessIndustries";
 // Import Legal Agreement Component
 import Legalagreement from "@/components/ui/legal-agreement";
+import DotLoader from "@/components/ui/dotloader";
 
 const CreateBusinessProfile = () => {
   const [business, setBusiness] = useState({
@@ -315,7 +316,7 @@ const CreateBusinessProfile = () => {
       <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
         <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
           <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+          <DotLoader />
           </div>
         </section>
       </section>
