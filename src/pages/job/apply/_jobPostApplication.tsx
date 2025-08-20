@@ -74,7 +74,7 @@ const JobPostApplication = () => {
 
       {showApplication && (
         <div
-          className='fixed inset-0 bg-black/50 z-50 flex items-center justify-end transition-opacity duration-300 ease-in-out'
+          className='fixed inset-0 bg-black/50 z-200 flex items-center justify-end transition-opacity duration-300 ease-in-out'
           onClick={handleOverlayClick}
         >
           <div

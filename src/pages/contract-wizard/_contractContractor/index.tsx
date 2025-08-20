@@ -12,7 +12,7 @@ import ContractorTimesheet from './_timesheet';
 import ContractorRetainer from './_retainer';
 import { FaDollarSign } from 'react-icons/fa';
 import ConfirmPaymentAmount from '@/components/payment/timeBasedPayout/confirmPaymentAmount';
-import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
+// import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
 
 interface ContractContractorProps {
     hiringId?: string;
@@ -113,7 +113,6 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             setMutualContractId(response.data._id);
             setContract(response.data);
             setContractStatus(response?.data?.status);
-            console.log("Mutual Contract Data:", response.data.contractorId?.bankAccounts?.length || 0);
             if (response.data.paymentStructure) {
                 setMiddleTab(response.data.paymentStructure);
             }
@@ -220,10 +219,10 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                     fetchMutualContract={() => fetchMutualContract()}
                 />
             }
-
+{/* 
             {
                 contract && bankAccounts.length < 1 && <BankDetailsPromptModal />
-            }
+            } */}
 
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
 

@@ -103,9 +103,9 @@ const ClientNavbar = () => {
       {
         label: 'Manage Finances',
         dropdown: [
-          { label: 'Finance Overview', action: () => handleNavigation('/payment') },
+          // { label: 'Finance Overview', action: () => handleNavigation('/payment') },
           { label: 'Setup Billing', action: () => handleNavigation('/payment/billing-method') },
-          { label: 'Manage Account', action: () => handleNavigation('/payment/payout-setup') },
+          // { label: 'Manage Account', action: () => handleNavigation('/payment/payout-setup') },
           { label: 'Transaction History', action: () => handleNavigation('/payment/transaction-history') },
           { label: 'Manage Subscription', action: () => handleNavigation('/subscribe') }
         ]

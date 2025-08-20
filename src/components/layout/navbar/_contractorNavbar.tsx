@@ -91,9 +91,9 @@ const ContractorNavbar = () => {
       { 
         label: 'Manage Payment',
         dropdown: [
-          { label: 'Earnings', action: () => handleNavigation('/payment') },
-          { label: 'Withdraw Funds', action: () => handleNavigation('/payment/withdraw') },
-          { label: 'Manage Account', action: () => handleNavigation('/payment/payout-setup') },
+          // { label: 'Earnings', action: () => handleNavigation('/payment') },
+          // { label: 'Withdraw Funds', action: () => handleNavigation('/payment/withdraw') },
+          // { label: 'Manage Account', action: () => handleNavigation('/payment/payout-setup') },
           { label: 'Transaction History', action: () => handleNavigation('/payment/transaction-history') },
           { label: 'Manage Subscription', action: () => handleNavigation('/subscribe') }
         ]
