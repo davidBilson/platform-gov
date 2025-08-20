@@ -70,7 +70,7 @@ interface DetailsProps {
   job: Job;
   jobId: string;
   applicationId: string;
-  contract: Contract;
+  contract: Contract | null;
 }
 
 const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
