@@ -169,9 +169,9 @@ const ClientTimesheet = ({
     disputeMutation.mutate({ sessionId: disputingSessionId, reason: disputeReason });
   };
 
-  const handleEndContract = () => {
-    endContractMutation.mutate();
-  };
+  // const handleEndContract = () => {
+  //   endContractMutation.mutate();
+  // };
 
   const calculateDuration = (start: string, end?: string) => {
     const startTime = new Date(start).getTime();

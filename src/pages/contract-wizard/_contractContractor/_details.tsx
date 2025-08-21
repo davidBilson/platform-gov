@@ -403,7 +403,7 @@ const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
 
       {showSignContractModal && (
         <div
-          className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out'
+          className='fixed inset-0 bg-black/50 z-200 flex items-center justify-center transition-opacity duration-300 ease-in-out'
           onClick={handleOverlayClick}
         >
           {hiringOffer && (

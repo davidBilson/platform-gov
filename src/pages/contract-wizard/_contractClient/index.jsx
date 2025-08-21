@@ -11,9 +11,12 @@ import LoadingAnimation from '@/components/ui/loading';
 import ClientTimesheet from './_timesheet';
 import ClientRetainer from './_retainer';
 import PaymentModal from '@/components/payment/PaymentModal';
-import FundProjectBtn from '@/components/payment/FundProjectBtn';
-import { FaDollarSign, FaEdit } from 'react-icons/fa';
-import PaymentTransferModal from '@/components/payment/timeBasedPayout/paymentTransferModal';
+// import FundProjectBtn from '@/components/payment/FundProjectBtn';
+import { 
+    // FaDollarSign,
+    FaEdit
+} from 'react-icons/fa';
+// import PaymentTransferModal from '@/components/payment/timeBasedPayout/paymentTransferModal';
 import { startContract } from '@/api/payment/time-and-commission-based-payment';
 import EditContract from '@/components/contracts/editContract';
 import { toast } from 'react-toastify';
@@ -27,7 +30,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     const [job, setJob] = useState(null);
     const [jobIsFunded, setJobIsFunded] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [showTransferModal, setShowTransferModal] = useState(false);
+    // const [showTransferModal, setShowTransferModal] = useState(false);
     const [showEditContractModal, setShowEditContractModal] = useState(false);
     const [mutualContractId, setMutualContractId] = useState('');
     const [contract, setContract] = useState(null);
@@ -109,15 +112,15 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
         }
     }
 
-    const initiatePayment = () => {
-        if (!contract) return;
-        setShowTransferModal(true)
-    };
+    // const initiatePayment = () => {
+    //     if (!contract) return;
+    //     setShowTransferModal(true)
+    // };
 
-    // Function to trigger retainer refresh
-    const triggerRetainerRefresh = () => {
-        setRetainerRefreshTrigger(prev => prev + 1);
-    };
+    // // Function to trigger retainer refresh
+    // const triggerRetainerRefresh = () => {
+    //     setRetainerRefreshTrigger(prev => prev + 1);
+    // };
 
     useEffect(() => {
         fetchJobData();
@@ -222,7 +225,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
             case 'milestone':
                 return <Milestones 
                 jobId={jobId} 
-                jobIsFunded={jobIsFunded} 
+                // jobIsFunded={jobIsFunded} 
                 contractStatus={contractStatus} 
                 mutualContractId={mutualContractId} 
                 isLoading={contractLoading && !mutualContractId} />;
@@ -248,7 +251,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
             )}
 
             {/* Initiate payment to contractor */}
-            {
+            {/* {
                 showTransferModal &&
                 <PaymentTransferModal
                     refetchContract={refetchContract}
@@ -264,7 +267,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                         }
                     }}
                 />
-            }
+            } */}
 
             {!contract?.isStarted && showEditContractModal &&
                 <EditContract
@@ -283,7 +286,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     <div className='flex items-center justify-between gap-4'>
                         <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
 
-                        {(() => {
+                        {/* {(() => {
                             const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
 
                             return !jobIsFunded && job?.paymentType === 'fixed-price' ? (
@@ -303,6 +306,20 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                                         Pay Now <FaDollarSign />
                                     </button>
                                 )
+                            ) : null;
+                        })()} */}
+                        {(() => {
+                            const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
+
+                            return isTimeBased && !contract?.isStarted ? (
+                                <div className='flex items-center pt-6 gap-3'>
+                                    <button onClick={() => setShowEditContractModal(true)} className='bg-deepskyblue hover:bg-deepskyblue/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold'>
+                                        Edit Contract <FaEdit />
+                                    </button>
+                                    <button onClick={intializeContract} className='cursor-pointer bg-boldblue text-white text-sm py-2 px-4 font-semibold hover:bg-boldblue/70 rounded'>
+                                        Start Contract
+                                    </button>
+                                </div>
                             ) : null;
                         })()}
                     </div>

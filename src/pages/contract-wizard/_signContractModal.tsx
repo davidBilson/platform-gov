@@ -69,7 +69,7 @@ const SignContractModal = ({ hiringOffer, contractSigned, onClose, updateContrac
 
   return (
     <section 
-      className='fixed top-0 left-0 w-full h-screen p-6 flex items-center justify-center bg-black/50 bg-opacity-50 z-50'
+      className='fixed top-0 left-0 w-full h-screen p-6 flex items-center justify-center bg-black/50 bg-opacity-50 z-200'
       onClick={handleBackdropClick}
     >
       <div className='p-6 rounded-lg bg-white w-full max-w-2xl h-[80vh] overflow-y-auto shadow-xl relative flex flex-col justify-between'>

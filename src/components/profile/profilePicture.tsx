@@ -8,15 +8,13 @@ interface ProfilePictureProps {
 
 const ProfilePicture = ({ source, alt, dimension = 88 }: ProfilePictureProps) => {
 
-
-
   return (
     <div 
       className={`overflow-hidden ${source=="" ? 'bg-boldblue' : 'bg-gray-300'}  border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0`}
       style={{ width: `${dimension}px`, height: `${dimension}px` }}
     >
       {
-        source === "" || source === undefined || source.startsWith('blob') ?
+        source === "" || source === undefined || source?.startsWith('blob') ?
         <FaUser size={32} className="text-white" />
         :
         <img 

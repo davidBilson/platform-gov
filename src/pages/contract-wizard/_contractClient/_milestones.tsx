@@ -21,13 +21,13 @@ interface Milestone {
 }
 
 const ClientMilestones = ({
-  jobIsFunded,
+  // jobIsFunded,
   jobId,
   mutualContractId,
   contractStatus
 }: {
   jobId: string;
-  jobIsFunded?: boolean;
+  // jobIsFunded?: boolean;
   mutualContractId?: string;
   contractStatus: string;
 }) => {
@@ -151,7 +151,9 @@ const ClientMilestones = ({
           )}
         </section>
 
-        {role === 'client' && jobIsFunded && contractStatus !== 'completed' && (
+        {role === 'client' 
+        // && jobIsFunded 
+        && contractStatus !== 'completed' && (
           <button
             disabled={contractStatus === 'completed' && true}
             onClick={() => setShowNewMilestoneModal(true)}
@@ -163,16 +165,17 @@ const ClientMilestones = ({
         )}
       </section>
 
-      {!jobIsFunded &&
+      {/* {!jobIsFunded &&
         <>
           <p>Fund project before you can start contract</p>
           <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
         </>
-      }
+      } */}
       {contractStatus === 'completed' && <p className="text-aquagreen mt-7">This contract has ended</p>}
-      {contractStatus !== 'completed' && jobIsFunded &&
+      {contractStatus !== 'completed' && 
+      // jobIsFunded &&
         <button
-          disabled={!jobIsFunded}
+          // disabled={!jobIsFunded}
           onClick={() => { endContract(mutualContractId, userId) }}
           className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
         >
