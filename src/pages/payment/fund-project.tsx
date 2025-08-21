@@ -9,6 +9,7 @@ const FundProjectPage = () => {
   const router = useRouter();
   const { jobId } = router.query;
   const { userId } = useAuthStore();
+  
   interface Job {
     jobTitle: string;
     description: string;

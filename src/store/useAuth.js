@@ -13,7 +13,8 @@ const useAuthStore = create(
       userId: '',
       isEmailVerified: false,
       isPhoneVerified: false,
-      
+      isSubscribed: false,
+
       verificationCode: '',
       verificationStep: 'email',
       error: null,
@@ -38,12 +39,12 @@ const useAuthStore = create(
 
       setVerificationCode: (code) => set({ verificationCode: code }),
 
-      setEmailVerified: (status) => set({ 
+      setEmailVerified: (status) => set({
         isEmailVerified: status,
         verificationStep: status ? 'phone' : 'email'
       }),
 
-      setPhoneVerified: (status) => set({ 
+      setPhoneVerified: (status) => set({
         isPhoneVerified: status,
         verificationStep: status ? 'completed' : 'phone'
       }),
@@ -61,6 +62,7 @@ const useAuthStore = create(
         userId: null,
         isEmailVerified: false,
         isPhoneVerified: false,
+        isSubscribed: false,
         verificationCode: '',
         verificationStep: 'email',
         error: null
@@ -76,6 +78,7 @@ const useAuthStore = create(
         phoneNumber: state.phoneNumber,
         isEmailVerified: state.isEmailVerified,
         isPhoneVerified: state.isPhoneVerified,
+        isSubscribed: state.isSubscribed,
         verificationStep: state.verificationStep
       })
     }

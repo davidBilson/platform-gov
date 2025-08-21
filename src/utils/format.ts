@@ -43,7 +43,7 @@ export const formatDate = (dateString: string): string => {
 };
 
 export const formatName = (fullName: string) => {
-    if (!fullName) return 'Name not available';
+    if (!fullName) return 'N/A';
 
     const nameParts = fullName.split(' ');
     const firstName = nameParts[0];

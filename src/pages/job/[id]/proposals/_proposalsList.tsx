@@ -104,8 +104,8 @@ const ProposalsList = ({ jobId, jobStatus }: { jobId: string, jobStatus: string 
             className="absolute inset-0 h-full"
             onClick={handleOverlayClick}
           />
-          <div className="relative w-full md:max-w-1/2 h-full bg-white flex flex-col">
-            <div className="h-full flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="relative w-full md:max-w-1/2 h-full bg-white  flex flex-col">
+            <div className="mt-[112px] h-full flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <Proposal handleClose={handleClose} proposalData={selectedProposal} jobStatus={jobStatus} />
             </div>
           </div>

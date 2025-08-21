@@ -15,7 +15,7 @@ const BankDetailsPromptModal = ({ toggle }: { toggle?: () => void; }) => {
             <div className="rounded-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100">
 
                 {
-                    !router.pathname.startsWith('/contract') &&
+                    !router.pathname.startsWith('/contract-wizard') &&
                     <div className="bg-transparent py-6 rounded-t-2xl relative">
                         <button
                             onClick={toggle}
@@ -45,7 +45,7 @@ const BankDetailsPromptModal = ({ toggle }: { toggle?: () => void; }) => {
                     </button>
 
                     {
-                        !router.pathname.startsWith('/contract') &&
+                        !router.pathname.startsWith('/contract-wizard') &&
                         <button
                             onClick={toggle}
                             className="w-full mt-4 text-gray-500 hover:text-gray-700 py-2  cursor-pointer font-medium transition-colors"

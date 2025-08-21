@@ -14,6 +14,7 @@ import LoadingAnimation from '@/components/ui/loading';
 import FeeSettings from './_feeSettings';
 import Escrow from './_escrow';
 import ManageAdmins from './_manageAdmins';
+import SubscriptionSettings from './_subscriptionSettings';
 
 const AdminHomePage = () => {
   const [activeComponent, setActiveComponent] = useState('dashboard');
@@ -56,6 +57,8 @@ const AdminHomePage = () => {
         return <HelpAndSupport />;
       case 'fee-settings':
         return <FeeSettings />;
+      case 'subscription-settings':
+        return <SubscriptionSettings />;
       case 'escrow':
         return <Escrow />;
       case 'admins':

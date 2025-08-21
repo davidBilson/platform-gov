@@ -67,6 +67,7 @@ export interface SignInResponse {
       isPhoneVerified: boolean;
       isSuspended?: boolean;
       isHighPriority?: boolean;
+      isSubscribed?: boolean;
     };
   };
   error?: string;

@@ -125,7 +125,7 @@ const NotificationToast = ({
   if (!notification || !isVisible) return null;
 
   return (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-sm w-full">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-200 max-w-sm w-full">
       <div 
         className={`
           bg-white rounded-xl border shadow-lg transition-all duration-300 ease-out

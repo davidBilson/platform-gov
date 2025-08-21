@@ -10,7 +10,10 @@ import {
   Package,
   DollarSign,
   User2Icon,
-  ShieldUser
+  ShieldUser,
+  Repeat,
+  RefreshCcw,
+  Layers
 } from 'lucide-react';
 import Logo from '@/components/ui/logo';
 import useAuthStore from '@/store/useAuth';
@@ -63,6 +66,12 @@ const AdminSideBar = ({ setActiveComponent }: AdminSideBarProps) => {
       label: 'Manage Contents',
       icon: Package,
       path: '/admin/contents'
+    },
+    {
+      key: 'subscription-settings',
+      label: 'Subscriptions',
+      icon: Layers,
+      path: '/admin/subscription-settings'
     },
     {
       key: 'fee-settings',

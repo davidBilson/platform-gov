@@ -6,6 +6,7 @@ export interface UserDetails {
   phoneNumber: string;
   isSuspended: boolean;
   isHighPriority: boolean;
+  isSubscribed: boolean;
 }
 
 export interface WorkHistory {

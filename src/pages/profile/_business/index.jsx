@@ -8,6 +8,8 @@ import { fetchProfile } from '@/api/profile-api';
 import ProfilePicture from '@/components/profile/profilePicture';
 import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
 import BankDetailsLink from '@/components/ui/finance/bank-details-link';
+import { EditIcon } from 'lucide-react';
+import DotLoader from '@/components/ui/dotloader';
 
 const BusinessProfile = () => {
 
@@ -59,7 +61,7 @@ const BusinessProfile = () => {
       <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
         <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
           <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-boldblue"></div>
+            <DotLoader />
           </div>
         </section>
       </section>
@@ -68,28 +70,36 @@ const BusinessProfile = () => {
 
   return (
     <section className='p-5 pb-20 md:p-6'>
-      {showBankDetailsPrompt && <BankDetailsPromptModal toggle={() => setShowBankDetailsPrompt(!showBankDetailsPrompt)} />}
       <section className='w-full max-w-275 m-auto'>
-
         <div className='mb-6'>
-          <div className='flex flex-col sm:flex-row sm:items-center gap-5 mb-[30px]'>
-            <div className='relative w-22 h-22 bg-gray-300 border border-boldblue rounded-full flex items-center justify-center mx-auto sm:mx-0'>
-              <div className='absolute flex items-center justify-center w-full h-full'>
+
+          <div className='flex flex-col md:flex-row gap-5 justify-between md:items-center pb-6'>
+
+            <div className='flex items-center gap-5'>
+              <div className=' rounded-full flex items-center justify-center mx-auto sm:mx-0'>
                 {client && client.logo ? (
                   <ProfilePicture source={client.logo} alt={`${client.name} logo`} dimension={88} />
                 ) : (
                   <IoMdImages size={40} className='text-white/70' />
                 )}
               </div>
+
+              {/* Company Name */}
+              <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
+                <h1 className='text-boldblue text-xl font-semibold'>
+                  {client?.name || "Company Name"}
+                </h1>
+              </div>
             </div>
 
-            {/* Company Name */}
-            <div className='w-full sm:max-w-75 mt-4 sm:mt-0'>
-              <h1 className='text-boldblue text-xl font-semibold'>
-                {client?.name || "Company Name"}
-              </h1>
-            </div>
+            <Link
+              href="/profile/edit"
+              className="cursor-pointer h-fit w-fit flex items-center  gap-2 transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 px-4 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
+            >
+              {client ? "Edit Profile" : "Create Profile"} <EditIcon size={15} />
+            </Link>
           </div>
+
 
           {/* Company Overview */}
           <div className='mb-8 py-3.5 px-5 rounded-md border border-boldblue'>
@@ -198,14 +208,7 @@ const BusinessProfile = () => {
           <BankDetailsLink />
         </div>
 
-        <div className='flex '>
-          <Link
-            href="/profile/edit"
-            className="cursor-pointer transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out py-2 px-4 bg-boldblue text-white text-sm font-semibold rounded-lg border border-boldblue"
-          >
-            {client ? "Edit Profile" : "Create Profile"}
-          </Link>
-        </div>
+
       </section>
 
       <OpenJobs />

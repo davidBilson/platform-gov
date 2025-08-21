@@ -291,7 +291,6 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     );
   }, []);
 
-  // Function to get the proper profile image URL
   const getProfileImageUrl = useCallback((): string => {
     if (!profileImage) return '';
 
@@ -315,11 +314,10 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
           </div>
         ) : (
           <>
-            {showBankDetailsPrompt && !initialProfileId && <BankDetailsPromptModal toggle={() => setShowBankDetailsPrompt(!showBankDetailsPrompt)} />}
+            
             <div className='flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0'>
-
               <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
-                <ProfilePicture source={getProfileImageUrl()} alt={name} width={88} height={88} />
+                <ProfilePicture source={getProfileImageUrl()} alt={name} dimension={88} />
                 <div className="text-center sm:text-left mt-2 sm:mt-0">
                   <p className='font-semibold text-xl'>{name}</p>
                   <p className='text-xs font-bold py-2.5'>{profession}</p>
@@ -329,9 +327,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
                 </div>
               </div>
 
-              {/* Title Rating Skills Certification */}
               <div className='w-full sm:max-w-85 mt-4 sm:mt-0'>
-                {/* Title & Rating */}
                 <div className='flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6'>
                   <h3 className="text-sm text-boldblue font-bold mb-2 sm:mb-0">{primaryPosition}</h3>
                   <div className='flex items-center gap-1'>
@@ -343,7 +339,6 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
                   </div>
                 </div>
 
-                {/* Skills & Certifications */}
                 <div className='flex items-center justify-center sm:justify-start flex-wrap gap-2'>
                   {skills.map((skill, index) => (
                     <button

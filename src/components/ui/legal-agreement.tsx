@@ -60,7 +60,7 @@ const Legalagreement = ({setShowLegalAgreement, acceptedLegalAgreement, setAccep
   }
 
   return (
-    <section className='fixed top-0 left-0 w-full min-h-screen z-50 bg-black/50 flex items-center justify-center p-6'>
+    <section className='fixed top-0 left-0 w-full min-h-screen z-200 bg-black/50 flex items-center justify-center p-6'>
       <div className='w-full max-w-158 h-fit overflow-hidden p-6 md:p-7.5 bg-white rounded-sm'>
 
         <h2 className='h-[5%] pb-7.5 font-bold'>

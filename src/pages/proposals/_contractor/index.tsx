@@ -89,7 +89,7 @@ const ContractorProposals = () => {
 
   return (
     
-    <main className='p-5 pb-20 md:p-6'>
+    <main className='pb-20'>
       <ActiveProposals applications={applications.active} />
       <PendingProposals applications={applications.pending} />
       <DraftProposals applications={applications.draft} />

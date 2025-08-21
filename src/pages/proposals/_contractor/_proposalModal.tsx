@@ -10,9 +10,9 @@ interface ProposalModalProps {
 }
 
 const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
-  
+
   const router = useRouter();
-  
+
   const formatDate = (dateString: string): string => {
     try {
       return format(new Date(dateString), 'MMMM dd, yyyy');
@@ -40,24 +40,24 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
   // duplicate this for message client button
   const viewContract = (id: string) => {
     router.push({
-      pathname: `/contract/${id}`,
+      pathname: `/contract-wizard/${id}`,
       query: { jobId: typeof proposal.jobId === 'object' ? proposal.jobId._id : undefined }
     });
   }
 
   return (
-    <section 
+    <section
       className='fixed top-0 left-0 w-full h-screen p-6 flex items-center justify-center bg-black/50 bg-opacity-50 z-50'
       onClick={handleBackdropClick}
     >
       <div className='p-6 rounded-lg bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl relative'>
-        <button 
-          className='absolute top-4 right-4 text-gray-500 hover:text-gray-700' 
+        <button
+          className='absolute top-4 right-4 text-gray-500 hover:text-gray-700'
           onClick={onClose}
         >
           <FaTimes size={20} />
         </button>
-        
+
         <div className="space-y-6">
           <div className="border-b pb-4">
             <h2 className="text-2xl font-semibold mb-2">{jobDetails?.jobTitle || "Job Title"}</h2>
@@ -65,12 +65,12 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
               Applied on {formatDate(proposal.createdAt)}
             </p>
           </div>
-          
+
           <div className="border-b pb-4">
             <h3 className="font-semibold text-lg mb-2">Cover Letter</h3>
             <p className="whitespace-pre-line">{proposal.coverLetter || "No cover letter provided"}</p>
           </div>
-          
+
           <div className="border-b pb-4">
             <h3 className="font-semibold text-lg mb-2">Proposal Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -88,13 +88,13 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
               </div>
               <div>
                 {
-                  proposal.status === 'active' && 
+                  proposal.status === 'active' &&
                   <button onClick={() => viewContract(proposal._id)} className='bg-deepskyblue rounded-lg text-white text-sm  px-3 py-2 font-semibold cursor-pointer hover:opacity-70 transition duration-300 ease-in-out' >View Contract</button>
                 }
               </div>
             </div>
           </div>
-          
+
           <div className="border-b pb-4">
             <h3 className="font-semibold text-lg mb-2">Attachments</h3>
             {!proposal.attachments || proposal.attachments.length === 0 ? (
@@ -109,9 +109,9 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
                         {formatFileSize(attachment.fileSize)} • {attachment.fileType.split('/')[1].toUpperCase()}
                       </p>
                     </div>
-                    <a 
-                      href={`${process.env.NEXT_PUBLIC_BASE_URL}${attachment.fileUrl}`} 
-                      target="_blank" 
+                    <a
+                      href={`${process.env.NEXT_PUBLIC_BASE_URL}${attachment.fileUrl}`}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="bg-boldblue text-white py-1 px-3 rounded-md text-sm transition transform active:scale-95 hover:opacity-70  duration-300 ease-in-out cursor-pointer"
                     >
@@ -122,7 +122,7 @@ const ProposalModal: React.FC<ProposalModalProps> = ({ proposal, onClose }) => {
               </ul>
             )}
           </div>
-          
+
           <div>
             <h3 className="font-semibold text-lg mb-2">Certifications</h3>
             <p>

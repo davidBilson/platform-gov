@@ -41,7 +41,6 @@ const CreateFreelancerProfile = () => {
     primaryPosition: "",
     skills: [],
     certifications: [],
-    // expertise: [],
     firmAffiliation: "",
     clearance: "",
     location: {
@@ -78,12 +77,10 @@ const CreateFreelancerProfile = () => {
   const [filteredSkills, setFilteredSkills] = useState<string[]>([]);
   const [filteredCertifications, setFilteredCertifications] = useState<string[]>([]);
   const [expertiseInput, setExpertiseInput] = useState<string>("");
-  const [filteredExpertise, setFilteredExpertise] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isProfileExists, setIsProfileExists] = useState<boolean>(false);
   const [showSkillsDropdown, setShowSkillsDropdown] = useState<boolean>(false);
   const [showCertificationsDropdown, setShowCertificationsDropdown] = useState<boolean>(false);
-  const [showExpertiseDropdown, setShowExpertiseDropdown] = useState<boolean>(false);
   const [showStatesDropdown, setShowStatesDropdown] = useState<boolean>(false);
   const [showFirmDropdown, setShowFirmDropdown] = useState<boolean>(false);
   const [showClearancesDropdown, setShowClearancesDropdown] = useState<boolean>(false);
@@ -379,7 +376,14 @@ const CreateFreelancerProfile = () => {
 
   return (
     <>
-      {showLegalAgreement && <Legalagreement setShowLegalAgreement={setShowLegalAgreement} acceptedLegalAgreement={acceptedLegalAgreement} setAcceptedLegalAgreement={setAcceptedLegalAgreement} />}
+      {
+        showLegalAgreement &&
+        <Legalagreement
+          setShowLegalAgreement={setShowLegalAgreement}
+          acceptedLegalAgreement={acceptedLegalAgreement}
+          setAcceptedLegalAgreement={setAcceptedLegalAgreement}
+        />
+      }
       <main className="p-6">
         <form onSubmit={handleSubmit} className="w-full max-w-275 m-auto pb-32">
           <div className="mb-7.5 pb-7.5 border-b border-b-deepskyblue flex flex-col sm:flex-row sm:items-start  gap-5">
