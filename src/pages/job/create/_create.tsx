@@ -266,11 +266,11 @@ const CreateJob = () => {
         setCreatedJobId(result.data._id);
         toast.success('Job created successfully');
 
-        if (formData.paymentType === 'fixed-price') {
-          setShowPaymentModal(true);
-        } else {
+        // if (formData.paymentType === 'fixed-price') {
+        //   setShowPaymentModal(true);
+        // } else {
           router.push('/job/manage');
-        }
+        // }
       } else {
         toast.error(result.message || 'Error creating job');
       }
@@ -853,12 +853,12 @@ const CreateJob = () => {
           </section>
         </section>
 
-        {showPaymentModal && createdJobId && formData.paymentType === 'fixed-price' && (
+        {/* {showPaymentModal && createdJobId && formData.paymentType === 'fixed-price' && (
           <PaymentModal
             jobId={createdJobId}
             onClose={() => setShowPaymentModal(false)}
           />
-        )}
+        )} */}
 
       </section>
     </>
