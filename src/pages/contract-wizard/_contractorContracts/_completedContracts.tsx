@@ -12,15 +12,15 @@ interface CompletedContractsProps {
 const CompletedContracts = ({ contracts }: CompletedContractsProps) => {
 
   return (
-    <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>
-      <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold'>Completed Contracts</h2>
+    <section className='pb-5 mb-12.5'>
+      <h2 className='pb-5 mb-7.5 text-aquagreen text-xl font-bold'>Completed Contracts</h2>
 
       <section className='flex flex-col gap-12.5'>
         {contracts.length === 0 ? (
           <p>No completed contracts found</p>
         ) :
           contracts.map((contract) => (
-            <article key={contract._id} className="mb-7.5 flex items-start">
+            <article key={contract._id} className="mb-7.5 flex items-start pb-10 border-b border-b-lightblue">
               <div className='w-full'>
                 <section className='flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5w-full'>
                   <div>

@@ -7,6 +7,8 @@ import {
 import useAuthStore from '@/store/useAuth';
 import { toast } from 'react-toastify';
 import { getRetainerContractPayments } from '@/api/payment/time-and-commission-based-payment';
+import { endContract } from '@/api/contract/contract-api';
+import { useRouter } from 'next/router';
 
 interface Job {
   _id: string;
@@ -49,10 +51,7 @@ const ClientRetainer = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [starting, setStarting] = useState<boolean>(false);
   const { userId } = useAuthStore();
-
-  useEffect(() => {
-    console.log(contractStatus);
-  }, [contractStatus])
+  const router = useRouter();
 
   const fetchPaymentTransactions = async () => {
     if (!mutualContractId) return;
@@ -118,13 +117,27 @@ const ClientRetainer = ({
 
     try {
       setStarting(true);
-      initializeContract;
+      initializeContract();
       await startRetainerContract(mutualContractId, userId);
       await fetchRetainerData();
     } catch (error) {
       console.error('Error starting retainer:', error);
     } finally {
       setStarting(false);
+    }
+  };
+
+  const handleEndContract = async () => {
+    try {
+      setLoading(true);
+      await endContract(mutualContractId, userId);
+      await fetchRetainerData();
+      toast.success('Contract ended successfully');
+    } catch (error) {
+      console.error('Error ending contract:', error);
+      toast.error('Failed to end contract');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -252,9 +265,29 @@ const ClientRetainer = ({
           </tbody>
         </table>
       </div>
-      {contractStatus === 'completed' &&
-        <p className="text-aquagreen">This contract has ended</p>
-      }
+     
+<div className="flex flex-col items-start gap-2">
+  {contractStatus === 'completed' && (
+    <p className="text-aquagreen">This contract has ended</p>
+  )}
+  
+  {!mutualContractId && contractStatus !== 'completed' && (
+    <p className="text-red-600">Contractor has not signed the contract yet.</p>
+  )}
+  
+  {contractStatus !== 'completed' && mutualContractId && (
+    <button
+      onClick={() =>{
+        if (starting) return;
+        handleEndContract();
+        router.reload();
+      }}
+      className="self-end px-4 py-2 bg-red-700 text-white rounded shadow hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
+    >
+      End Contract
+    </button>
+  )}
+</div>
     </section>
   );
 };

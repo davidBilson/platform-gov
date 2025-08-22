@@ -212,54 +212,47 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
     return (
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-300"></div>
-        Loading...
+        Loading ratings...
       </div>
     );
   }
 
-  // Show received rating if it exists (what the other person said about me)
-  if (receivedRating) {
-    return (
-      <div className="flex flex-col gap-1">
-        <RatingDisplay
-          rating={receivedRating.rating}
-          comments={receivedRating.comments}
-          size="sm"
-          showComments={!!receivedRating.comments}
-        />
-      </div>
-    );
-  }
-
-  // Show rate button only if user hasn't given a rating yet
-  if (!givenRating) {
-    return (
-      <>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsModalOpen(true);
-          }}
-          className="bg-boldblue text-xs text-white font-semibold py-2.75 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer"
-        >
-          Rate {revieweeInfo.role}
-        </button>
-
-        <RatingModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSubmit={handleRatingSubmit}
-          revieweeName={revieweeInfo.name}
-          isSubmitting={isSubmitting}
-        />
-      </>
-    );
-  }
-
-  // If user has given a rating but hasn't received one yet, show a neutral message
   return (
-    <div className="text-xs text-gray-500 italic">
-      Waiting for {revieweeInfo.name}&apos;s rating
+    <div className="flex flex-col gap-2">
+      {/* Show the other user's rating about me if it exists */}
+      {receivedRating && (
+        <div className="flex flex-col gap-1">
+          <RatingDisplay
+            rating={receivedRating.rating}
+            comments={receivedRating.comments}
+            size="sm"
+            showComments={!!receivedRating.comments}
+          />
+        </div>
+      )}
+
+      {/* Show rate button if I haven't rated the other user yet */}
+      {!givenRating && (
+        <>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            className="bg-boldblue text-xs text-white font-semibold py-2.75 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer"
+          >
+            Rate {revieweeInfo.name}
+          </button>
+
+          <RatingModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSubmit={handleRatingSubmit}
+            revieweeName={revieweeInfo.name}
+            isSubmitting={isSubmitting}
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -11,7 +11,7 @@ const InactiveContracts = ({ contracts }: InactiveContractsProps) => {
   // Render even if contracts array is empty (don't return null)
   return (
     <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>
-      <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold'>Inactive Contracts</h2>
+      <h2 className='pb-5 mb-7.5 text-boldblue text-xl font-bold'>Inactive Contracts</h2>
 
       <section className='flex flex-col gap-12.5'>
         {contracts.length === 0 ? (

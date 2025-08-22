@@ -15,7 +15,7 @@ import { ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
 // Components
 import ProfilePicture from '@/components/profile/profilePicture';
 import LoadingAnimation from '@/components/ui/loading';
-import BankDetailsLink from '@/components/ui/finance/bank-details-link';
+// import BankDetailsLink from '@/components/ui/finance/bank-details-link';
 import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
 import WorkHistory from './workHistory';
 
@@ -385,10 +385,10 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
             <p className='font-semibold mb-6'>Rate: ${rate}</p>
             {secondRate > 0 && <p className='font-semibold mb-6'>Second Rate: ${secondRate}</p>}
 
-            {/* Bank Details Link */}
+            {/* Bank Details Link
             {!initialProfileId && <div className='pb-6'>
               <BankDetailsLink />
-            </div>}
+            </div>} */}
 
             {/* Work History */}
             <WorkHistory

@@ -140,7 +140,6 @@ const ClientTimesheet = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract', mutualContractId] });
-      toast.success('Contract ended successfully');
     },
     onError: (error) => {
       console.error('Error ending contract:', error);
@@ -168,10 +167,6 @@ const ClientTimesheet = ({
     if (!disputingSessionId || !disputeReason.trim()) return;
     disputeMutation.mutate({ sessionId: disputingSessionId, reason: disputeReason });
   };
-
-  // const handleEndContract = () => {
-  //   endContractMutation.mutate();
-  // };
 
   const calculateDuration = (start: string, end?: string) => {
     const startTime = new Date(start).getTime();
@@ -226,6 +221,13 @@ const ClientTimesheet = ({
               className="px-3 py-2 bg-boldblue text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
             >
               {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Max Hours'}
+            </button>
+            <button
+              onClick={() => endContractMutation.mutate()}
+              disabled={endContractMutation.isPending}
+              className="px-3 py-2 bg-red-500 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
+            >
+              {endContractMutation.isPending ? 'Ending...' : 'End Contract'}
             </button>
           </div>
         )
