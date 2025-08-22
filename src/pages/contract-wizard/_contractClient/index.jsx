@@ -5,16 +5,18 @@ import Messages from '../../../components/chat/_messages';
 import { fetchApplication, fetchJob } from '@/api/job-api';
 import useAuthStore from '@/store/useAuth';
 import Milestones from './_milestones';
-import { getSingleContract } from '@/api/contract/contract-api';
+import { getSingleContract, endContract } from '@/api/contract/contract-api';
 import { useQuery } from '@tanstack/react-query';
 import LoadingAnimation from '@/components/ui/loading';
 import ClientTimesheet from './_timesheet';
 import ClientRetainer from './_retainer';
 import PaymentModal from '@/components/payment/PaymentModal';
+import EndContractModal from '@/components/contracts/endContractModal';
 // import FundProjectBtn from '@/components/payment/FundProjectBtn';
-import { 
+import {
     // FaDollarSign,
-    FaEdit
+    FaEdit,
+    FaStop
 } from 'react-icons/fa';
 // import PaymentTransferModal from '@/components/payment/timeBasedPayout/paymentTransferModal';
 import { startContract } from '@/api/payment/time-and-commission-based-payment';
@@ -32,13 +34,15 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     // const [showTransferModal, setShowTransferModal] = useState(false);
     const [showEditContractModal, setShowEditContractModal] = useState(false);
+    const [showEndContractModal, setShowEndContractModal] = useState(false); // New state for end contract modal
+    const [isEndingContract, setIsEndingContract] = useState(false); // Loading state for ending contract
     const [mutualContractId, setMutualContractId] = useState('');
     const [contract, setContract] = useState(null);
     const [contractStatus, setContractStatus] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [middleTab, setMiddleTab] = useState('milestone');
-    
+
     const [retainerRefreshTrigger, setRetainerRefreshTrigger] = useState(0);
 
     const tabOptions = useMemo(() => {
@@ -112,6 +116,33 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
         }
     }
 
+    // New function to handle end contract
+    const handleEndContract = async (reason) => {
+        if (!mutualContractId || !userId) {
+            toast.error('Unable to end contract. Missing required information.');
+            return;
+        }
+
+        setIsEndingContract(true);
+        try {
+            await endContract(mutualContractId, userId, reason);
+            setShowEndContractModal(false);
+            refetchContract();
+        } catch (error) {
+            console.error('Error ending contract:', error);
+            toast.error(error?.message || 'Failed to end contract. Please try again.');
+        } finally {
+            setIsEndingContract(false);
+        }
+    };
+
+    // Function to check if end contract button should be shown
+    const shouldShowEndContractButton = () => {
+        return mutualContractId &&
+               contractStatus && 
+               contractStatus.toLowerCase() !== 'completed';
+    };
+
     // const initiatePayment = () => {
     //     if (!contract) return;
     //     setShowTransferModal(true)
@@ -165,7 +196,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
             return !query.state.data ? 5000 : false;
         },
         refetchIntervalInBackground: true,
-        staleTime: 60000,
+        staleTime: 1000,
         retry: (failureCount, error) => {
             return failureCount < 2;
         },
@@ -223,12 +254,13 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     refreshTrigger={retainerRefreshTrigger}
                 />;
             case 'milestone':
-                return <Milestones 
-                jobId={jobId} 
-                // jobIsFunded={jobIsFunded} 
-                contractStatus={contractStatus} 
-                mutualContractId={mutualContractId} 
-                isLoading={contractLoading && !mutualContractId} />;
+                return <Milestones
+                    jobId={jobId}
+                    jobIsFunded={jobIsFunded}
+                    contractStatus={contractStatus}
+                    mutualContractId={mutualContractId}
+                    isLoading={contractLoading && !mutualContractId}
+                />;
             case 'messages':
                 return applicationDetail?.freelancerId ? (
                     <Messages jobId={jobId} proposalId={proposalId} currentUser={{ _id: userId, name: name, }} otherUser={{ _id: applicationDetail?.freelancerId, name: applicationDetail?.freelancerName, }} />
@@ -280,19 +312,70 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                 />
             }
 
+            {/* End Contract Modal */}
+            <EndContractModal
+                isOpen={showEndContractModal}
+                onClose={() => setShowEndContractModal(false)}
+                onConfirm={handleEndContract}
+                contractorName={applicationDetail?.freelancerName}
+                jobTitle={job?.jobTitle}
+                isLoading={isEndingContract}
+            />
+
             <main className='w-full'>
                 <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
 
                     <div className='flex items-center justify-between gap-4'>
                         <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
 
-                        {/* {(() => {
-                            const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
+                        <div className='flex flex-col-reverse items-end gap-3'>
+                            {/* End Contract Button - Show if conditions are met */}
+                            {shouldShowEndContractButton() && (
+                                <button
+                                    onClick={() => setShowEndContractModal(true)}
+                                    className='bg-crimson hover:bg-crimson/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold transition-colors'
+                                    disabled={isEndingContract}
+                                >
+                                    {isEndingContract ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Ending...
+                                        </>
+                                    ) : (
+                                        <>
+                                            End Contract
+                                        </>
+                                    )}
+                                </button>
+                            )}
 
-                            return !jobIsFunded && job?.paymentType === 'fixed-price' ? (
-                                <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
-                            ) : isTimeBased ? (
-                                !contract?.isStarted ? (
+                            {/* {(() => {
+                                const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
+
+                                return !jobIsFunded && job?.paymentType === 'fixed-price' ? (
+                                    <FundProjectBtn onClick={() => setShowPaymentModal(true)} />
+                                ) : isTimeBased ? (
+                                    !contract?.isStarted ? (
+                                        <div className='flex items-center pt-6 gap-3'>
+                                            <button onClick={() => setShowEditContractModal(true)} className='bg-deepskyblue hover:bg-deepskyblue/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold'>
+                                                Edit Contract <FaEdit />
+                                            </button>
+                                            <button onClick={intializeContract} className='cursor-pointer bg-boldblue text-white text-sm py-2 px-4 font-semibold hover:bg-boldblue/70 rounded'>
+                                                Start Contract
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button onClick={initiatePayment} className={`${contract?.isPaymentAmountConfirmed ? 'bg-aquagreen hover:bg-aquagreen/70' : 'bg-deepskyblue hover:bg-deepskyblue/70'} rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold mt-6`}>
+                                            Pay Now <FaDollarSign />
+                                        </button>
+                                    )
+                                ) : null;
+                            })()} */}
+
+                            {(() => {
+                                const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
+
+                                return isTimeBased && !contract?.isStarted && contractStatus !== 'completed' ? (
                                     <div className='flex items-center pt-6 gap-3'>
                                         <button onClick={() => setShowEditContractModal(true)} className='bg-deepskyblue hover:bg-deepskyblue/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold'>
                                             Edit Contract <FaEdit />
@@ -301,27 +384,9 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                                             Start Contract
                                         </button>
                                     </div>
-                                ) : (
-                                    <button onClick={initiatePayment} className={`${contract?.isPaymentAmountConfirmed ? 'bg-aquagreen hover:bg-aquagreen/70' : 'bg-deepskyblue hover:bg-deepskyblue/70'} rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold mt-6`}>
-                                        Pay Now <FaDollarSign />
-                                    </button>
-                                )
-                            ) : null;
-                        })()} */}
-                        {(() => {
-                            const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
-
-                            return isTimeBased && !contract?.isStarted ? (
-                                <div className='flex items-center pt-6 gap-3'>
-                                    <button onClick={() => setShowEditContractModal(true)} className='bg-deepskyblue hover:bg-deepskyblue/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold'>
-                                        Edit Contract <FaEdit />
-                                    </button>
-                                    <button onClick={intializeContract} className='cursor-pointer bg-boldblue text-white text-sm py-2 px-4 font-semibold hover:bg-boldblue/70 rounded'>
-                                        Start Contract
-                                    </button>
-                                </div>
-                            ) : null;
-                        })()}
+                                ) : null;
+                            })()}
+                        </div>
                     </div>
 
                     <div className='flex items-center md:gap-10 pt-5.5'>

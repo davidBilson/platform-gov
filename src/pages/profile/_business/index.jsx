@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { fetchProfile } from '@/api/profile-api';
 import ProfilePicture from '@/components/profile/profilePicture';
 import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
-import BankDetailsLink from '@/components/ui/finance/bank-details-link';
+// import BankDetailsLink from '@/components/ui/finance/bank-details-link';
 import { EditIcon } from 'lucide-react';
 import DotLoader from '@/components/ui/dotloader';
 
@@ -204,9 +204,9 @@ const BusinessProfile = () => {
           </div>
         </div>
 
-        <div className='py-6'>
+        {/* <div className='py-6'>
           <BankDetailsLink />
-        </div>
+        </div> */}
 
 
       </section>

@@ -11,7 +11,7 @@ const ActiveContracts = ({ contracts }: ActiveContractsProps) => {
 
   return (
     <section className='border-b border-b-deepskyblue pb-5 mb-12.5'>
-      <h2 className='pb-5 mb-7.5 text-darkgray text-xl font-bold'>Active Contracts</h2>
+      <h2 className='pb-5 mb-7.5 text-boldblue text-xl font-bold'>Active Contracts</h2>
       <section className='flex flex-col gap-12.5'>
         {contracts.length === 0 ? (
           <p>No active contracts found</p>

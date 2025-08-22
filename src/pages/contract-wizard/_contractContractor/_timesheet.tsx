@@ -298,17 +298,21 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus, contract, refet
         </div>
       </div>
       <div className='flex items-center flex-wrap gap-3.75'>
-        {contractStatus === 'completed' ? (
-          <p className="text-aquagreen">This contract has ended</p>
-        ) : maxHours !== null && loggedHours >= maxHours ? (
-          <div className="bg-red-50 p-3 rounded text-center">
-            <p className="text-red-800">Maximum hours reached</p>
-          </div>
-        ) : (
-          <></>
-        )}
+
         {contract.isStarted &&
-          <div className="flex gap-2">
+          <div className="flex justify-between gap-2 w-full">
+            
+            {
+              contractStatus === 'completed' ? (
+                <p className="text-aquagreen">This contract has ended</p>
+              ) : maxHours !== null && loggedHours >= maxHours ? (
+                <div className="bg-red-50 p-3 rounded text-center">
+                  <p className="text-red-800">Maximum hours reached</p>
+                </div>
+              ) : (
+                <></>
+              )
+            }
             <button
               onClick={() => setShowManualLogModal(true)}
               className="px-4 py-2 bg-boldblue text-white text-sm rounded-md hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
@@ -506,9 +510,9 @@ const ContractorTimesheet = ({ mutualContractId, contractStatus, contract, refet
                     )}
                   </div>
                   <span className={`text-xs px-2 py-1 font-semibold rounded ${session.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
-                        session.status === 'disputed' ? 'bg-red-100 text-red-800' :
-                          'bg-blue-100 text-boldblue'
+                    session.status === 'approved' ? 'bg-aquagreen/10 text-aquagreen' :
+                      session.status === 'disputed' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-boldblue'
                     }`}>
                     {session.status}
                   </span>

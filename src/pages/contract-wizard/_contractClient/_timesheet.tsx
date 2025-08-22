@@ -140,7 +140,6 @@ const ClientTimesheet = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contract', mutualContractId] });
-      toast.success('Contract ended successfully');
     },
     onError: (error) => {
       console.error('Error ending contract:', error);
@@ -168,10 +167,6 @@ const ClientTimesheet = ({
     if (!disputingSessionId || !disputeReason.trim()) return;
     disputeMutation.mutate({ sessionId: disputingSessionId, reason: disputeReason });
   };
-
-  // const handleEndContract = () => {
-  //   endContractMutation.mutate();
-  // };
 
   const calculateDuration = (start: string, end?: string) => {
     const startTime = new Date(start).getTime();

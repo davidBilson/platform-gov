@@ -62,6 +62,7 @@ export const useFeedStore = create(
       name: 'feed-storage',
       getStorage: () => localStorage,
       partialize: (state) => ({
+        feedType: state.feedType,
         savedSearches: state.savedSearches
       })
     }
