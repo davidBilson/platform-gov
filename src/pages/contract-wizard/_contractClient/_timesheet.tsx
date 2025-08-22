@@ -222,13 +222,6 @@ const ClientTimesheet = ({
             >
               {setMaxHoursMutation.isPending ? 'Setting...' : 'Set Max Hours'}
             </button>
-            <button
-              onClick={() => endContractMutation.mutate()}
-              disabled={endContractMutation.isPending}
-              className="px-3 py-2 bg-red-500 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer disabled:opacity-50"
-            >
-              {endContractMutation.isPending ? 'Ending...' : 'End Contract'}
-            </button>
           </div>
         )
       }

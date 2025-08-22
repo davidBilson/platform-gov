@@ -274,19 +274,6 @@ const ClientRetainer = ({
   {!mutualContractId && contractStatus !== 'completed' && (
     <p className="text-red-600">Contractor has not signed the contract yet.</p>
   )}
-  
-  {contractStatus !== 'completed' && mutualContractId && (
-    <button
-      onClick={() =>{
-        if (starting) return;
-        handleEndContract();
-        router.reload();
-      }}
-      className="self-end px-4 py-2 bg-red-700 text-white rounded shadow hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-    >
-      End Contract
-    </button>
-  )}
 </div>
     </section>
   );

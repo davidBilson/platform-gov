@@ -138,7 +138,9 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
 
     // Function to check if end contract button should be shown
     const shouldShowEndContractButton = () => {
-        return mutualContractId && contractStatus && contractStatus.toLowerCase() !== 'completed';
+        return mutualContractId &&
+               contractStatus && 
+               contractStatus.toLowerCase() !== 'completed';
     };
 
     // const initiatePayment = () => {
@@ -326,7 +328,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     <div className='flex items-center justify-between gap-4'>
                         <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
 
-                        <div className='flex items-center gap-3'>
+                        <div className='flex flex-col-reverse items-end gap-3'>
                             {/* End Contract Button - Show if conditions are met */}
                             {shouldShowEndContractButton() && (
                                 <button
@@ -373,7 +375,7 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                             {(() => {
                                 const isTimeBased = job?.paymentType === 'hourly' || job?.paymentType === 'retainer';
 
-                                return isTimeBased && !contract?.isStarted ? (
+                                return isTimeBased && !contract?.isStarted && contractStatus !== 'completed' ? (
                                     <div className='flex items-center pt-6 gap-3'>
                                         <button onClick={() => setShowEditContractModal(true)} className='bg-deepskyblue hover:bg-deepskyblue/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold'>
                                             Edit Contract <FaEdit />

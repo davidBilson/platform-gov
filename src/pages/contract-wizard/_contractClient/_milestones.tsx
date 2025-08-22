@@ -202,7 +202,7 @@ const ClientMilestones = ({
           ) : (
             <div>
               <p>No milestones yet</p>
-              {milestoneFetchAttempted && (
+              {/* {milestoneFetchAttempted && (
                 <button 
                   onClick={() => {
                     setMilestoneFetchAttempted(false);
@@ -212,7 +212,7 @@ const ClientMilestones = ({
                 >
                   Retry fetching milestones
                 </button>
-              )}
+              )} */}
             </div>
           )}
         </section>
@@ -230,14 +230,6 @@ const ClientMilestones = ({
       </section>
 
       {contractStatus === 'completed' && <p className="text-aquagreen mt-7">This contract has ended</p>}
-      {contractStatus !== 'completed' && (
-        <button
-          onClick={() => { endContract(mutualContractId, userId) }}
-          className="disabled:cursor-not-allowed disabled:opacity-50 mt-7.5 px-3 py-2 bg-red-700 text-white shadow-lg rounded text-sm hover:opacity-70 transition duration-300 ease-in-out cursor-pointer"
-        >
-          End Contract
-        </button>
-      )}
 
       {showPaymentModal && (
         <PaymentModal
