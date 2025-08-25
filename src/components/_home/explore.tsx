@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { 
-  Code, 
-  Palette, 
-  Brain, 
-  TrendingUp, 
-  PenTool, 
-  Headphones, 
-  Calculator, 
-  Scale, 
-  Users, 
-  Building,
+  FileText,       // Acquisition & Contracting
+  Award,          // Gov Specialty Certifications
+  Landmark,       // Government Affairs & Policy
+  Shield,         // Cybersecurity & IT Services
+  ShieldHalf,     // Defense & National Security
+  FileSignature,  // Grants & Cooperative Agreements
+  ShieldAlert,    // Compliance & Risk Management
+  HeartPulse,     // Healthcare & Public Health
+  Globe2,         // International Affairs & Development
+  Factory,        // Energy, Environment & Infrastructure
   ArrowRight,
   Sparkles
 } from 'lucide-react';
@@ -19,86 +19,87 @@ const Explore = () => {
 
   const categories = [
     {
-      title: "Development & IT",
-      icon: Code,
+      title: "Acquisition & Contracting",
+      icon: FileText,
       color: "from-blue-500 to-blue-600",
       bgColor: "bg-blue-50",
       borderColor: "border-blue-200",
-      description: "Web development, mobile apps, software engineering"
+      description: "Federal & International procurement, FAR/DFARS compliance, GSA schedules, contract management"
     },
     {
-      title: "Design & Creative",
-      icon: Palette,
+      title: "Government Specialty Certifications Filtering",
+      icon: Award,
       color: "from-purple-500 to-purple-600",
       bgColor: "bg-purple-50",
       borderColor: "border-purple-200",
-      description: "UI/UX design, branding, graphic design, video editing"
+      description: "Search by GCC, CISSP, CFCM, PMP, GSA, etc"
     },
     {
-      title: "AI Services",
-      icon: Brain,
+      title: "Government Affairs & Policy",
+      icon: Landmark,
       color: "from-emerald-500 to-emerald-600",
       bgColor: "bg-emerald-50",
       borderColor: "border-emerald-200",
-      description: "Machine learning, AI development, automation"
+      description: "Lobbying and non-lobbying, policy analysis, congressional affairs, regulatory compliance"
     },
     {
-      title: "Sales & Marketing",
-      icon: TrendingUp,
+      title: "Cybersecurity & IT Services",
+      icon: Shield,
       color: "from-orange-500 to-orange-600",
       bgColor: "bg-orange-50",
       borderColor: "border-orange-200",
-      description: "Digital marketing, lead generation, social media"
+      description: "AI, FedRAMP, CMMC, architecture, cyber defense, data protection"
     },
     {
-      title: "Writing & Translation",
-      icon: PenTool,
+      title: "Defense & National Security",
+      icon: ShieldHalf,
       color: "from-teal-500 to-teal-600",
       bgColor: "bg-teal-50",
       borderColor: "border-teal-200",
-      description: "Content writing, copywriting, translation services"
+      description: "DoD procurement, intelligence support, logistics, foreign military sales, counterterrorism"
     },
     {
-      title: "Admin & Support",
-      icon: Headphones,
+      title: "Grants & Cooperative Agreements",
+      icon: FileSignature,
       color: "from-indigo-500 to-indigo-600",
       bgColor: "bg-indigo-50",
       borderColor: "border-indigo-200",
-      description: "Virtual assistance, customer support, data entry"
+      description: "NIH, NSF, HHS grants, SBIR/STTR, R&D funding strategies, grant writing"
     },
     {
-      title: "Finance & Accounting",
-      icon: Calculator,
+      title: "Compliance & Risk Management",
+      icon: ShieldAlert,
       color: "from-green-500 to-green-600",
       bgColor: "bg-green-50",
       borderColor: "border-green-200",
-      description: "Bookkeeping, financial planning, tax preparation"
+      description: "Export controls (ITAR/EAR), ethics & anti-corruption, insider threat mitigation, fraud detection"
     },
     {
-      title: "Legal",
-      icon: Scale,
+      title: "Healthcare & Public Health",
+      icon: HeartPulse,
       color: "from-gray-500 to-gray-600",
       bgColor: "bg-gray-50",
       borderColor: "border-gray-200",
-      description: "Legal consulting, contract review, compliance"
+      description: "NIH/CDC/FDA compliance, clinical trials, public health emergency response, biosecurity"
     },
     {
-      title: "HR & Training",
-      icon: Users,
+      title: "International Affairs & Development",
+      icon: Globe2,
       color: "from-pink-500 to-pink-600",
       bgColor: "bg-pink-50",
       borderColor: "border-pink-200",
-      description: "Recruitment, training programs, HR consulting"
+      description: "International procurement, FMF, diplomacy, humanitarian response "
     },
     {
-      title: "Engineering & Architecture",
-      icon: Building,
+      title: "Energy, Environment & Infrastructure",
+      icon: Factory,
       color: "from-amber-500 to-amber-600",
       bgColor: "bg-amber-50",
       borderColor: "border-amber-200",
-      description: "CAD design, structural engineering, architecture"
+      description: "Energy security, environmental policy, resilience planning, infrastructure modernization"
     }
   ];
+
 
   return (
     <section className=" overflow-hidden">
@@ -136,9 +137,9 @@ const Explore = () => {
                 className="group cursor-pointer"
               >
                 <div className={`
-                  relative p-6 rounded-2xl min-h-56  shadow transition-all duration-300 transform                `}>
+                  relative p-6 rounded-2xl min-h-fit md:min-h-70  shadow transition-all duration-300 transform`}>
                   <div className={`bg-boldblue/10 w-12 h-12 rounded-xl mb-4 flex items-center justify-center transition-all duration-300`}>
-                    <Icon 
+                    <Icon
                       className={`w-6 h-6 transition-colors duration-300 text-boldblue`} 
                       strokeWidth={2}
                     />

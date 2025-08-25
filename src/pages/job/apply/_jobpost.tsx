@@ -35,6 +35,7 @@ interface Rating {
 const JobPost = ({ job, onApply }: JobPostProps) => {
   const [clientRatings, setClientRatings] = useState<Rating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(false);
+  const [showAllReviews, setShowAllReviews] = useState<boolean>(false);
 
   const postedDate = job.createdAt ? format(new Date(job.createdAt), 'MMMM d, yyyy') : 'Recently';
 
@@ -113,6 +114,16 @@ const JobPost = ({ job, onApply }: JobPostProps) => {
       </div>
     );
   }, []);
+
+  // Function to handle view all reviews toggle
+  const handleViewAllReviews = useCallback(() => {
+    setShowAllReviews(!showAllReviews);
+  }, [showAllReviews]);
+
+  // Get reviews to display based on showAllReviews state
+  const reviewsToDisplay = useMemo(() => {
+    return showAllReviews ? clientRatings : clientRatings.slice(0, 3);
+  }, [clientRatings, showAllReviews]);
 
   return (
     <section className='w-full max-w-275 m-auto pb-64'>
@@ -263,7 +274,7 @@ const JobPost = ({ job, onApply }: JobPostProps) => {
         <section className='my-7'>
           <h3 className='font-semibold mb-4'>Recent Reviews</h3>
           <div className='space-y-4'>
-            {clientRatings.slice(0, 3).map((rating, index) => (
+            {reviewsToDisplay.map((rating, index) => (
               <div key={rating._id || index} className='bg-gray-50 p-4 rounded-lg'>
                 <div className='flex items-center justify-between mb-2'>
                   <h4 className='font-semibold'>
@@ -291,8 +302,11 @@ const JobPost = ({ job, onApply }: JobPostProps) => {
 
             {clientRatings.length > 3 && (
               <div className='text-center'>
-                <button className='text-boldblue text-sm font-semibold hover:underline'>
-                  View all {clientRatings.length} reviews
+                <button 
+                  onClick={handleViewAllReviews}
+                  className='text-boldblue text-sm font-semibold hover:underline cursor-pointer'
+                >
+                  {showAllReviews ? 'Show less reviews' : `View all ${clientRatings.length} reviews`}
                 </button>
               </div>
             )}

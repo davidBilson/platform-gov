@@ -29,6 +29,7 @@ const SubscriptionCheckoutPage: React.FC = () => {
   const [validatingToken, setValidatingToken] = useState<boolean>(false);
 
   const handleValidateToken = async (): Promise<void> => {
+
     if (!discountToken) {
       toast.error('Please enter a discount token');
       return;
@@ -522,6 +523,7 @@ const SubscriptionCheckoutPage: React.FC = () => {
           </div>
         </div>
       </div>
+      
       <PaymentMethodModal
         isOpen={showPaymentModal}
         onClose={handleCloseModal}

@@ -58,7 +58,7 @@ const Hero = () => {
     return (
         <section className="relative w-full overflow-hidden bg-white">
 
-            <div className="relative max-width mx-auto px-6 py-24">
+            <div className="relative max-width mx-auto px-6 pt-24 pb-12 md:pb-24">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
                     {/* Left Content */}
                     <div className={`space-y-8 transform transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
@@ -78,18 +78,17 @@ const Hero = () => {
                         <h1 className="text-5xl lg:text-7xl font-bold leading-[1.1]" style={{ color: '#333333' }}>
                             Your shortcut to{' '}
                             <span className="relative inline-block">
-                                <span className='text-boldblue'>elite talent</span>
+                                <span className='text-boldblue'>gov-focused</span>
                                 <div className="absolute -inset-2 rounded-lg opacity-20 animate-pulse"
                                     style={{ backgroundColor: 'rgba(160, 217, 246, 0.2)' }} />
                             </span>
                             <br />
-                            without the hassle
+                            elite talent without the hassle
                         </h1>
 
                         {/* Subtitle */}
                         <p className="text-xl leading-relaxed max-w-2xl" style={{ color: '#808080' }}>
-                            GovLink Global connects world-class consultants with ambitious projects.
-                            Scale faster, build smarter, and solve complex challenges with expert precision.
+                            GovLink Global connects world-class consultants and contractors with US Federal, State and International focused-projects and programs. Scale faster, build smarter, and solve complex challenges with expert precision
                         </p>
 
                         {/* Stats */}
@@ -150,7 +149,7 @@ const Hero = () => {
                     </div>
 
                     {/* Right Visual Section */}
-                    <div className={`relative h-[600px] transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
+                    <div className={`relative min-h-[380px] transform transition-all duration-1000 delay-300 ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0'
                         }`}>
                         {/* Main dashboard mockup */}
                         <div className="absolute inset-0 bg-white/80 backdrop-blur-xl rounded-3xl shadowxl overflow-hidden border-2"
@@ -207,7 +206,7 @@ const Hero = () => {
                                 </div>
                                 <div>
                                     <div className="text-sm font-semibold" style={{ color: '#333333' }}>New Match</div>
-                                    <div className="text-xs" style={{ color: '#808080' }}>AI Expert • $180/hr</div>
+                                    <div className="text-xs" style={{ color: '#808080' }}>Gov Proposal Expert</div>
                                 </div>
                             </div>
                         </FloatingCard>
@@ -233,7 +232,7 @@ const Hero = () => {
                                 </div>
                                 <div>
                                     <div className="text-sm font-semibold" style={{ color: '#333333' }}>Global Reach</div>
-                                    <div className="text-xs" style={{ color: '#808080' }}>50+ countries</div>
+                                    <div className="text-xs" style={{ color: '#808080' }}>Multiple countries</div>
                                 </div>
                             </div>
                         </FloatingCard>
