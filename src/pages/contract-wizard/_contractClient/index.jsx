@@ -139,8 +139,8 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
     // Function to check if end contract button should be shown
     const shouldShowEndContractButton = () => {
         return mutualContractId &&
-               contractStatus && 
-               contractStatus.toLowerCase() !== 'completed';
+            contractStatus &&
+            contractStatus.toLowerCase() !== 'completed';
     };
 
     // const initiatePayment = () => {
@@ -244,14 +244,17 @@ const ContractClient = ({ jobId, proposalId, tab }) => {
                     jobIsFunded={jobIsFunded}
                     contractStatus={contractStatus}
                     mutualContractId={mutualContractId}
-                />;
-            case 'retainer':
-                return <ClientRetainer
-                    intializeContract={intializeContract}
-                    contractStatus={contractStatus}
-                    job={job}
-                    mutualContractId={mutualContractId}
-                    refreshTrigger={retainerRefreshTrigger}
+                    />;
+                    case 'retainer':
+                        return <ClientRetainer
+                        job={job}
+                        mutualContractId={mutualContractId}
+                        contractStatus={contractStatus}
+                        contractStarted={contract?.isStarted}
+                        refetchContract={refetchContract}
+
+                    // intializeContract={intializeContract}
+                    // refreshTrigger={retainerRefreshTrigger}
                 />;
             case 'milestone':
                 return <Milestones

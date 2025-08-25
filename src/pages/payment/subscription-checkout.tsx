@@ -6,50 +6,7 @@ import { createSubscription, fetchDiscountTokenDetails } from '@/api/subscriptio
 import useAuthStore from '@/store/useAuth';
 import PaymentMethodModal from '@/components/payment/PaymentMethodModal';
 import SuccessModal from '@/components/subscription/SuccessModal';
-
-// Type definitions
-interface DiscountDetails {
-  token: string;
-  discountPercentage: number;
-  // Add other discount properties as needed
-}
-
-interface SubscriptionPlan {
-  price: number;
-  period: string;
-  savings: number;
-  description: string;
-}
-
-interface SubscriptionPlans {
-  monthly: SubscriptionPlan;
-  annual: SubscriptionPlan;
-}
-
-interface DiscountTokenResponse {
-  success: boolean;
-  discountCode: DiscountDetails;
-}
-
-interface SubscriptionData {
-  planName: string;
-  userType: string;
-  billingInterval: 'monthly' | 'annual';
-  subscriptionAmount: number;
-  currency: string;
-  discountToken: string;
-  autoRenew: boolean;
-}
-
-interface CreateSubscriptionResponse {
-  success: boolean;
-  data?: {
-    reason?: string;
-    requires_action?: boolean;
-  };
-}
-
-type PlanType = 'monthly' | 'annual';
+import { CreateSubscriptionResponse, DiscountDetails, DiscountTokenResponse, PlanType, SubscriptionData, SubscriptionPlans } from '@/types/subscription';
 
 const SubscriptionCheckoutPage: React.FC = () => {
   const router = useRouter();
@@ -140,7 +97,8 @@ const SubscriptionCheckoutPage: React.FC = () => {
     }
   }, [plan]);
 
-  const platformFeeRate = 0.03; // 3% processing fee
+  // Convert adminFeePercent (5) to decimal (0.05)
+  const platformFeeRate = (subscriptionPrices.adminFeePercent || 0) / 100;
   const currentPlan = subscriptionPlans[selectedPlan];
   const originalPrice = currentPlan.price;
   const discountedPrice = getDiscountedPrice(originalPrice);
@@ -498,7 +456,7 @@ const SubscriptionCheckoutPage: React.FC = () => {
                 )}
 
                 <div className="flex justify-between items-center py-2 px-4 bg-lightgray/30 rounded-lg">
-                  <span className="text-mediumgray">Processing fee ({(platformFeeRate * 100).toFixed(1)}%)</span>
+                  <span className="text-mediumgray">Processing fee ({subscriptionPrices.adminFeePercent || 0}%)</span>
                   <span className="font-semibold text-darkgray">${processingFee.toFixed(2)}</span>
                 </div>
 

@@ -44,3 +44,46 @@ export interface PricingContent {
     sortBy?: string;
     sortOrder?: string;
   }
+
+  export interface DiscountDetails {
+    token: string;
+    discountPercentage: number;
+    // Add other discount properties as needed
+  }
+  
+  export interface SubscriptionPlan {
+    price: number;
+    period: string;
+    savings: number;
+    description: string;
+  }
+  
+  export interface SubscriptionPlans {
+    monthly: SubscriptionPlan;
+    annual: SubscriptionPlan;
+  }
+  
+  export interface DiscountTokenResponse {
+    success: boolean;
+    discountCode: DiscountDetails;
+  }
+  
+  export interface SubscriptionData {
+    planName: string;
+    userType: string;
+    billingInterval: 'monthly' | 'annual';
+    subscriptionAmount: number;
+    currency: string;
+    discountToken: string;
+    autoRenew: boolean;
+  }
+  
+ export interface CreateSubscriptionResponse {
+    success: boolean;
+    data?: {
+      reason?: string;
+      requires_action?: boolean;
+    };
+  }
+  
+  export type PlanType = 'monthly' | 'annual';
