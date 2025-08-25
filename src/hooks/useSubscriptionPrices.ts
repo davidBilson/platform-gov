@@ -11,7 +11,7 @@ const useSubscriptionPrices = () => {
     const [subscriptionPrices, setSubscriptionPrices] = useState({
             monthly: 0,
             annual: 0,
-            percentageOff : 0
+            adminFeePercent : 0
         }
     )
 
@@ -31,14 +31,14 @@ const useSubscriptionPrices = () => {
                         ...prev,
                         monthly: response.prices.consultant.monthly,
                         annual: response.prices.consultant.annual,
-                        percentageOff: response.prices.adminFeePercent
+                        adminFeePercent: response.prices.adminFeePercent
                     }))
                 } else if (userId && role === 'client') {
                     setSubscriptionPrices(prev => ({
                         ...prev,
                         monthly: response.prices.client.monthly,
                         annual: response.prices.client.annual,
-                        percentageOff: response.prices.adminFeePercent
+                        adminFeePercent: response.prices.adminFeePercent
                     }))
                 }
             }
