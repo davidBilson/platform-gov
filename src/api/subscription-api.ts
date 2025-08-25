@@ -8,6 +8,7 @@ const RESUME_SUBSCRIPTION = process.env.NEXT_PUBLIC_RESUME_SUBSCRIPTION || '';
 const CHECK_SUBSCRIPTION_STATUS = process.env.NEXT_PUBLIC_CHECK_SUBSCRIPTION_STATUS || '';
 const FETCH_SUBSCRIPTION_PRICES = process.env.NEXT_PUBLIC_FETCH_SUBSCRIPTION_PRICES || '';
 const FETCH_TIPS = process.env.NEXT_PUBLIC_FETCH_TIPS || '';
+const FETCH_EARLY_ACCESS_DURATION = process.env.NEXT_PUBLIC_FETCH_EARLY_ACCESS_DURATION || '';
 const GET_DISCOUNT_TOKEN_DETAILS = process.env.NEXT_PUBLIC_GET_DISCOUNT_TOKEN_DETAILS || '';
 
 // Create axios instance with default config
@@ -267,6 +268,16 @@ export const fetchTips = async () => {
         return response.data;
     } catch (error) {
         console.error('Error fetching subscription prices:', error);
+        throw error;
+    }
+}
+
+export const fetchEarlyAccessDuration = async () => {
+    try {
+        const response = await api.get(FETCH_EARLY_ACCESS_DURATION);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching early access duration:', error);
         throw error;
     }
 }
