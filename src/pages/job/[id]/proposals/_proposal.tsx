@@ -1,18 +1,49 @@
 import ProfilePicture from '@/components/profile/profilePicture'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { IoLocationOutline } from 'react-icons/io5';
-// import { WorkHistoryItem } from '@/types/profile';
-// import RatingStars from '@/components/ui/rating';
+import { MdStar, MdStarBorder } from "react-icons/md";
 import { ProposalData } from '@/types/proposalsList';
 import { useHire } from '@/store/useHire';
 import { useRouter } from 'next/router';
 import useAuthStore from '@/store/useAuth';
 import { trackHiringStatus, updateJobApplicationStatus } from '@/api/status-api';
+import { getContracts } from '@/api/contract/contract-api';
+import { getUserRatings } from '@/api/rating-api';
+import WorkHistory from '@/pages/profile/_freelancer/workHistory';
 
 interface ProposalProps {
   handleClose: () => void;
   proposalData: ProposalData;
   jobStatus: string;
+}
+
+interface Contract {
+  id: string;
+  jobId: {
+    _id: string;
+    jobTitle: string;
+    price?: number;
+    retainerAmount?: number;
+  };
+  startDate: string;
+  endDate: string;
+}
+
+interface Rating {
+  _id: string;
+  contractId: string;
+  jobId: string;
+  reviewer: string;
+  reviewee: string | { _id: string; name: string };
+  role: 'client' | 'contractor';
+  rating: number;
+  comments?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ContractWithRating extends Contract {
+  ratingData?: Rating | undefined;
 }
 
 const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData, jobStatus }) => {
@@ -22,9 +53,130 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData, jobStatu
   const { userId } = useAuthStore();
   const [contractorHired, setContractorHired] = useState(false);
   const [contractorHiredStatus, setContractorHiredStatus] = useState("");
+  const [completedContracts, setCompletedContracts] = useState<Contract[]>([]);
+  const [contractorRatings, setContractorRatings] = useState<Rating[]>([]);
+
+  // Exact functions from FreelancerProfile
+  const normalizeId = useCallback((id: unknown): string => {
+    if (!id) return '';
+    if (typeof id === 'object' && id !== null && '_id' in id) {
+      return String(id._id);
+    }
+    return String(id);
+  }, []);
+
+  const getContractorRatings = useCallback(async (contractorId: string): Promise<Rating[]> => {
+    try {
+      const ratings = await getUserRatings(contractorId, 'contractor');
+      return (ratings || []).map(rating => ({
+        ...rating,
+        _id: rating._id || '', // Ensure _id is always a string
+        createdAt: rating.createdAt ? String(rating.createdAt) : '',
+        updatedAt: rating.updatedAt ? String(rating.updatedAt) : '',
+      }));
+    } catch (error) {
+      console.error('Error fetching contractor ratings:', error);
+      return [];
+    }
+  }, []);
+
+  const getCompletedContracts = useCallback(async (contractorId: string): Promise<Contract[]> => {
+    try {
+      // Add validation
+      if (!contractorId || contractorId.trim() === '') {
+        console.warn('Invalid contractorId provided to getCompletedContracts');
+        return [];
+      }
+  
+      const contracts = await getContracts(contractorId);
+      
+      // Since getContracts now always returns an object (never null), we can safely access completed
+      const completedContracts = contracts?.completed || [];
+      
+      return completedContracts.map(contract => ({
+        ...contract,
+        id: contract.id || contract._id || '', // Ensure 'id' is populated
+        startDate: contract.startDate ? new Date(contract.startDate).toISOString() : '',
+        endDate: contract.endDate ? new Date(contract.endDate).toISOString() : '',
+      }));
+      
+    } catch (error) {
+      // This catch block should rarely execute now since getContracts handles all errors
+      console.error('Unexpected error in getCompletedContracts:', error);
+      return [];
+    }
+  }, []);
+
+  // Exact memoized contracts with ratings from FreelancerProfile
+  const contractsWithRatings = useMemo((): ContractWithRating[] => {
+    if (!completedContracts.length || !contractorRatings.length) {
+      return completedContracts.map(contract => ({ ...contract, ratingData: undefined }));
+    }
+
+    // Create a rating lookup map for better performance
+    const ratingMap = new Map<string, Rating>();
+    contractorRatings.forEach(rating => {
+      const jobId = normalizeId(rating.jobId);
+      const contractId = normalizeId(rating.contractId);
+
+      // Use both jobId and contractId as keys for lookup
+      if (jobId) ratingMap.set(`job-${jobId}`, rating);
+      if (contractId) ratingMap.set(`contract-${contractId}`, rating);
+    });
+
+    return completedContracts.map(contract => {
+      const jobId = normalizeId(contract.jobId?._id || contract.jobId);
+      const contractId = normalizeId(contract.id);
+
+      // Try to find rating by jobId first, then by contractId
+      const ratingData = ratingMap.get(`job-${jobId}`) || ratingMap.get(`contract-${contractId}`);
+
+      return {
+        ...contract,
+        ratingData
+      };
+    });
+  }, [completedContracts, contractorRatings, normalizeId]);
+
+  // Exact renderRating function from FreelancerProfile
+  const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false) => {
+    const filledStars = Math.floor(rating);
+
+    return (
+      <div className="flex items-center gap-1">
+        <div className="flex">
+          {Array.from({ length: maxRating }).map((_, i) => (
+            i < filledStars ?
+              <MdStar key={i} className="text-deepskyblue text-lg" /> :
+              <MdStarBorder key={i} className="text-deepskyblue text-lg" />
+          ))}
+        </div>
+        {showCount && (
+          <span className="text-sm text-gray-600 ml-1">
+            ({rating.toFixed(1)})
+          </span>
+        )}
+      </div>
+    );
+  }, []);
+
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      if (proposalData.contractorId) {
+        const [contracts, ratings] = await Promise.all([
+          getCompletedContracts(proposalData.contractorId),
+          getContractorRatings(proposalData.contractorId)
+        ]);
+        setCompletedContracts(contracts);
+        setContractorRatings(ratings);
+      }
+    };
+
+    fetchData();
+  }, [proposalData.contractorId, getCompletedContracts, getContractorRatings]);
 
   useEffect(() => {
-
     setHireData({
       jobId: proposalData.jobId,
       contractorId: proposalData.contractorId,
@@ -32,7 +184,6 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData, jobStatu
       contractorProfilePicture: proposalData.contractorProfilePicture,
       applicationId: proposalData.applicationId
     });
-
   }, [proposalData])
 
   useEffect(() => {
@@ -95,7 +246,7 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData, jobStatu
             ))}
 
             {proposalData.expertise.map((exp, index) => (
-              <span key={`skill-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
+              <span key={`exp-${index}`} className="bg-deepskyblue text-white text-xs rounded-full px-2 md:px-3 py-1">
                 {exp}
               </span>
             ))}
@@ -113,48 +264,11 @@ const Proposal: React.FC<ProposalProps> = ({ handleClose, proposalData, jobStatu
       <p className='font-semibold mb-7.5 px-7.5'>Proposed Rate: ${proposalData.proposedRate}</p>
       <p className='font-semibold mb-7.5 px-7.5'>Work History</p>
 
-      <div className="overflow-x-auto px-7.5 pb-20">
-        <table className="min-w-full bg-white rounded-lg">
-          <thead>
-            <tr className="border-b border-b-black text-left font-bold">
-              <th className="py-3 px-4">Job Title</th>
-              <th className="py-3 px-4">Dates</th>
-              <th className="py-3 px-4">Rating</th>
-              <th className="py-3 px-4">Amount</th>
-            </tr>
-          </thead>
-
-          {proposalData.workHistory.length > 0 &&
-            <tbody>
-              {proposalData.workHistory.length > 0 ?
-                (proposalData.workHistory.map((job, index) => (
-                  <tr key={index} className={index % 2 === 1 ? "bg-skyblue" : "bg-white"}>
-                    <td className="py-3 px-4">
-                      {"job.jobTitle"}
-                    </td>
-                    <td className="py-3 px-4 text-xs">
-                      {"2023-01-01 to 2023-12-31"}
-                    </td>
-                    <td className="py-3 px-4">
-                      {"3"}
-                    </td>
-                    <td className="py-3 px-4">
-                      {"$5,000"}
-                    </td>
-                  </tr>
-                )
-                )) :
-                (
-                  <tr>
-                    <td colSpan={4} className="py-4 px-4 text-center text-gray-500">
-                      No work history available
-                    </td>
-                  </tr>
-                )
-              }
-            </tbody>
-          }
-        </table>
+      <div className="px-7.5 pb-100">
+        <WorkHistory
+          completedContracts={contractsWithRatings}
+          renderRating={renderRating}
+        />
       </div>
 
       <div className="md:max-w-1/2 w-full h-2/12 fixed bottom-0 bg-skyblue border-t border-t-boldblue py-12.5 px-6 mt-30">

@@ -70,11 +70,11 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             setJobLoading(false);
             return;
         }
-        
+
         try {
             setJobLoading(true);
             setJobError(null);
-            
+
             const jobData = await fetchJob(jobId as string);
             setJob(jobData);
 
@@ -166,7 +166,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             setContract(contractData);
             setMutualContractId(contractData._id || '');
             setContractStatus(contractData.status || '');
-            
+
             if (contractData.paymentStructure) {
                 setMiddleTab(contractData.paymentStructure);
             }
@@ -199,7 +199,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             return (
                 <div className="text-center py-8">
                     <p className="text-red-500 mb-4">Error loading job: {jobError}</p>
-                    <button 
+                    <button
                         onClick={fetchJobData}
                         className="bg-boldblue text-white px-4 py-2 rounded hover:bg-boldblue/70"
                     >
@@ -214,7 +214,7 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             return (
                 <div className="text-center py-8">
                     <p className="text-red-500 mb-4">Error loading contract: {contractError.message}</p>
-                    <button 
+                    <button
                         onClick={() => refetchContract()}
                         className="bg-boldblue text-white px-4 py-2 rounded hover:bg-boldblue/70"
                     >
@@ -253,7 +253,13 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             case 'milestone':
                 return <Milestones mutualContractId={mutualContractId} />;
             case 'retainer':
-                return <ContractorRetainer job={job} mutualContractId={mutualContractId} />;
+                return <ContractorRetainer
+                    job={job}
+                    mutualContractId={mutualContractId}
+                    refetchContract={handleRefetchContract}
+                    contract={contract}
+                    contractStatus={contractStatus}
+                />;
             case 'messages':
                 return (
                     <Messages
@@ -289,17 +295,17 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
             <section className='w-full mx-auto bg-skyblue border-b border-b-deepskyblue rounded-lg p-7.5 pb-0 mb-7.5'>
                 <div className='flex items-center justify-between gap-4'>
                     <h1 className='font-bold text-xl'>{job?.jobTitle ?? "Contract Details"}</h1>
-                    {contract && 
-                     (contract.timeBasedPayment?.amount ?? 0) > 0 && 
-                     !contract.isPaymentAmountConfirmed && 
-                     contract.isStarted && (
-                        <button 
-                            onClick={() => setShowConfirmPaymentAmount(true)} 
-                            className="bg-aquagreen hover:bg-aquagreen/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold mt-6"
-                        >
-                            Confirm Payment Amount <FaDollarSign />
-                        </button>
-                    )}
+                    {contract &&
+                        (contract.timeBasedPayment?.amount ?? 0) > 0 &&
+                        !contract.isPaymentAmountConfirmed &&
+                        contract.isStarted && (
+                            <button
+                                onClick={() => setShowConfirmPaymentAmount(true)}
+                                className="bg-aquagreen hover:bg-aquagreen/70 rounded py-2 px-4 h-fit w-fit text-white cursor-pointer flex items-center gap-2 text-sm font-semibold mt-6"
+                            >
+                                Confirm Payment Amount <FaDollarSign />
+                            </button>
+                        )}
                 </div>
 
                 <div className='flex items-center md:gap-10 pt-5.5'>
@@ -307,11 +313,10 @@ const ContractContractor = ({ jobId, proposalId, tab }: ContractContractorProps)
                         <button
                             key={tabOption}
                             onClick={() => setActiveTab(tabOption)}
-                            className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${
-                                activeTab === tabOption
+                            className={`border-b-3 pb-5 px-5 text-sm text-darkgray cursor-pointer ${activeTab === tabOption
                                     ? 'border-b-boldblue'
                                     : 'border-b-transparent hover:border-b-skyblue'
-                            }`}
+                                }`}
                         >
                             {tabOption.charAt(0).toUpperCase() + tabOption.slice(1)}
                         </button>
