@@ -7,6 +7,7 @@ import FAQ from '@/components/_home/faq'
 import CTA from '@/components/_home/CTA'
 import Explore from '@/components/_home/explore'
 import useAuthStore from '@/store/useAuth'
+import ContractWizardAd from '@/components/_home/contractWizard'
 
 const LandingPage = () => {
 
@@ -21,6 +22,7 @@ const LandingPage = () => {
             <Hero />
             <Explore />
             <HowItWorks />
+            <ContractWizardAd />
             <Reviews />
             <FAQ />
             <CTA />
