@@ -383,7 +383,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
 
             {/* Rate */}
             <p className='font-semibold mb-6'>Rate: ${rate}</p>
-            {secondRate > 0 && <p className='font-semibold mb-6'>Second Rate: ${secondRate}</p>}
+            {/* {secondRate > 0 && <p className='font-semibold mb-6'>Second Rate: ${secondRate}</p>} */}
 
             {/* Bank Details Link
             {!initialProfileId && <div className='pb-6'>

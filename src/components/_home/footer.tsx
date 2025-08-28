@@ -15,7 +15,7 @@ const Footer = () => {
                                 Connecting elite consultants with ambitious projects worldwide.
                             </p>
                         </div>
-                        
+
                         {/* Social Links */}
                         <div className="flex items-center gap-3">
                             {[
@@ -60,11 +60,15 @@ const Footer = () => {
                         <div className="space-y-3">
                             <div className="flex items-center gap-3">
                                 <Mail className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">
+                                <a
+                                    href="mailto:admin@govlinkglobal.com"
+                                    className="text-sm text-gray-600 hover:text-boldblue hover:underline"
+                                >
                                     admin@govlinkglobal.com
-                                </span>
+                                </a>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -74,7 +78,7 @@ const Footer = () => {
                         <p className="text-sm text-gray-500">
                             © 2025 GovLink Global. All rights reserved.
                         </p>
-                        
+
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                             <a href="#" className="hover:text-gray-700">Privacy Policy</a>
                             <a href="#" className="hover:text-gray-700">Terms of Service</a>

@@ -19,11 +19,11 @@ export const RateSection = ({
         value={ratePerHour}
         onChange={handleInputChange}
         className="outline-none placeholder:font-semibold w-[80%]"
-        placeholder="Rate per hour"
+        placeholder="Rate per hour (optional)"
       />
       <span>Rate</span>
     </div>
-    <div className="flex justify-between border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 text-sm text-boldblue">
+    {/* <div className="flex justify-between border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 text-sm text-boldblue">
       <input
         type="text"
         name="secondRate"
@@ -33,6 +33,6 @@ export const RateSection = ({
         placeholder="Second Rate (optional)"
       />
       <span>Rate</span>
-    </div>
+    </div> */}
   </div>
 );

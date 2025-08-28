@@ -36,7 +36,7 @@ export const BioSection = ({
         <div className="text-left font-semibold">
           {showSubscriptionPrompt && (
             <span className="text-deepskyblue text-xs">
-              Subscribe to write more characters
+              Increase character count to 1500 with monthly premium membership
             </span>
           )}
         </div>
