@@ -114,7 +114,7 @@ const Explore = () => {
           </div>
           
           <h2 className="text-xl md:text-4xl font-semibold text-darkgray mb-6 tracking-tight">
-            Explore millions of{' '}
+            Explore {' '}
             <span className="text-boldblue bg-clip-text">
               professionals
             </span>

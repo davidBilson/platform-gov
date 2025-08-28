@@ -61,14 +61,7 @@ const Footer = () => {
                             <div className="flex items-center gap-3">
                                 <Mail className="w-4 h-4 text-gray-500" />
                                 <span className="text-sm text-gray-600">
-                                    hello@govlink.global
-                                </span>
-                            </div>
-                            
-                            <div className="flex items-center gap-3">
-                                <Phone className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">
-                                    +1 (555) 123-4567
+                                    admin@govlinkglobal.com
                                 </span>
                             </div>
                         </div>

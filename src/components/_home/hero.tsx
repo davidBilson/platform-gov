@@ -63,17 +63,6 @@ const Hero = () => {
                     {/* Left Content */}
                     <div className={`space-y-8 transform transition-all duration-1000 ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-8 opacity-0'
                         }`}>
-                        {/* Badge */}
-                        <div className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full"
-                            style={{
-                                backgroundColor: 'rgba(225, 245, 253, 0.8)',
-                                border: '1px solid rgba(160, 217, 246, 0.5)',
-                                color: '#0B5F94'
-                            }}>
-                            <Zap className="w-4 h-4" style={{ color: '#009DDE' }} />
-                            <span>Trusted by 500+ companies</span>
-                        </div>
-
                         {/* Main Headline */}
                         <h1 className="text-5xl lg:text-7xl font-bold leading-[1.1]" style={{ color: '#333333' }}>
                             Your shortcut to{' '}
