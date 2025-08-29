@@ -91,6 +91,7 @@ const ContractorNavbar = () => {
       { 
         label: 'Manage Payment',
         dropdown: [
+          { label: 'Setup Billing', action: () => handleNavigation('/payment/billing-method') },
           // { label: 'Earnings', action: () => handleNavigation('/payment') },
           // { label: 'Withdraw Funds', action: () => handleNavigation('/payment/withdraw') },
           // { label: 'Manage Account', action: () => handleNavigation('/payment/payout-setup') },
