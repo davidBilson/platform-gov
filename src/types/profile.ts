@@ -1,10 +1,10 @@
 export interface WorkHistory {
     id: string;
     title: string;
-    department: string;
-    departmentType: "state" | "federal" | "";
-    experienceLevel: string;
-    location: string;
+    department?: string;
+    departmentType?: "state" | "federal" | "";
+    experienceLevel?: string;
+    location?: string;
     fromDate: string;
     toDate: string;
   }
@@ -27,6 +27,7 @@ export interface WorkHistory {
     skills: string[];
     expertise?: string[];
     certifications: string[];
+    departments: string[];
     workHistory: WorkHistory[];
     degrees: Degree[];
     profileImage?: File | null;

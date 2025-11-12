@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { saveProfile } from "../../api/profile-api";
-import React from 'react';
-
 
 export const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);

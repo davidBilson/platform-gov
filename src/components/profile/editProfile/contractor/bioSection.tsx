@@ -41,7 +41,7 @@ export const BioSection = ({
           )}
         </div>
         <div className="text-gray-500">
-          {bio.length}/{maxLength}
+          {bio.length}/{maxLength} {" "} {!isSubscribed ? "characters" : "characters (Premium Tier Upgrade Allows 1500 character bio)"}
         </div>
       </div>
     </div>

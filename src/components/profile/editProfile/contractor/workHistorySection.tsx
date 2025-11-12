@@ -67,7 +67,7 @@ export const WorkHistorySection = ({
                 onFocus={() => setShowDepartmentDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
                 className="outline-none placeholder:font-semibold w-[80%]"
-                placeholder="Department/Agency"
+                placeholder="Department/Agency Expertise (Choose from drop-down or Type)"
               />
               <IoIosSearch />
             </div>
@@ -100,7 +100,7 @@ export const WorkHistorySection = ({
             )}
           </div>
 
-          <div className="flex flex-col gap-2.5">
+          {/* <div className="flex flex-col gap-2.5">
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-1">
                 <input
@@ -126,9 +126,9 @@ export const WorkHistorySection = ({
                 <label htmlFor={`federal-${work.id}`}>Federal</label>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="relative w-full md:max-w-[242px]">
+          {/* <div className="relative w-full md:max-w-[242px]">
             <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
               <input
                 type="text"
@@ -168,10 +168,10 @@ export const WorkHistorySection = ({
                   ))}
               </div>
             )}
-          </div>
+          </div> */}
         </div>
 
-        <div className="mb-7.5">
+        {/* <div className="mb-7.5">
           <input
             type="text"
             value={work.location}
@@ -179,7 +179,7 @@ export const WorkHistorySection = ({
             className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
             placeholder="Location"
           />
-        </div>
+        </div> */}
 
         <div className="mb-2.5">
           <div className="flex items-center gap-2">

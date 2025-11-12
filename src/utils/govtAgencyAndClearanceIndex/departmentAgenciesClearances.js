@@ -35,5 +35,6 @@ export const clearanceLevels = [
     "Q Clearance",
     "L Clearance",
     "CI Polygraph",
-    "FS Polygraph"
+    "FS Polygraph",
+    "Not Applicable"
   ];

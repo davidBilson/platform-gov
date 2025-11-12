@@ -8,7 +8,7 @@ import PaymentMethodModal from '@/components/payment/PaymentMethodModal';
 import SuccessModal from '@/components/subscription/SuccessModal';
 import { CreateSubscriptionResponse, DiscountDetails, DiscountTokenResponse, PlanType, SubscriptionData, SubscriptionPlans } from '@/types/subscription';
 
-const SubscriptionCheckoutPage: React.FC = () => {
+const SubscriptionCheckoutPage = () => {
   const router = useRouter();
   const { query } = router;
   const { plan } = query;

@@ -49,7 +49,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
         </option>
       </select>
 
-      {location.country && (
+      {/* {location.country && (
         <div className="relative w-full max-w-75">
           <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
             <input
@@ -99,7 +99,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({
             </div>
           )}
         </div>
-      )}
+      )} */}
     </div>
   </div>
 );

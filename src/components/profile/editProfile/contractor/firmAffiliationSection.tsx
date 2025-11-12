@@ -16,6 +16,7 @@ export const FirmAffiliationSection = ({
   showFirmDropdown,
   setShowFirmDropdown,
 }: FirmAffiliationSectionProps) => (
+  
   <div className="mb-7.5">
     <div className="flex items-center gap-2.5 text-boldblue text-sm">
 

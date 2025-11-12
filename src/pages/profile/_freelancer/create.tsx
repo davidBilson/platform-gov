@@ -27,6 +27,7 @@ import {
   DegreeSection,
   ActionButtons
 } from '@/components/profile/editProfile/contractor';
+import { DepartmentAgencySection } from "@/components/profile/editProfile/contractor/DepartmentAgencySection";
 
 const CreateFreelancerProfile = () => {
 
@@ -47,6 +48,7 @@ const CreateFreelancerProfile = () => {
       country: "",
       state: ""
     },
+    departments: [],
     workHistory: [
       {
         id: generateId(),
@@ -72,6 +74,8 @@ const CreateFreelancerProfile = () => {
     profileImageUrl: "",
   });
 
+
+  const [departmentInput, setDepartmentInput] = useState<string>("");
   const [skillInput, setSkillInput] = useState<string>("");
   const [certificationInput, setCertificationInput] = useState<string>("");
   const [filteredSkills, setFilteredSkills] = useState<string[]>([]);
@@ -177,21 +181,6 @@ const CreateFreelancerProfile = () => {
     }
   }, [skillInput, formData.skills, showSkillsDropdown]);
 
-  // useEffect(() => {
-  //   if (showExpertiseDropdown) {
-  //     const availableExpertise = ProfessionalFieldsAndAreasOfExpertise152.filter(exp => !formData.expertise.includes(exp));
-
-  //     if (expertiseInput.trim()) {
-  //       const filtered = availableExpertise.filter(exp => exp.toLowerCase().includes(expertiseInput.toLowerCase()));
-  //       setFilteredExpertise(filtered);
-  //     } else {
-  //       setFilteredExpertise(availableExpertise);
-  //     }
-  //   } else {
-  //     setFilteredExpertise(ProfessionalFieldsAndAreasOfExpertise152.filter(exp => !formData.expertise.includes(exp)));
-  //   }
-  // }, [expertiseInput, formData.expertise, showExpertiseDropdown]);
-
   useEffect(() => {
     if (showCertificationsDropdown) {
       const availableCertifications = certificatesAndEducationList.filter(cert => !formData.certifications.includes(cert));
@@ -230,6 +219,7 @@ const CreateFreelancerProfile = () => {
             country: profileData?.location?.country || "",
             state: profileData?.location?.state || ""
           },
+          departments: profileData.departments || [],
           workHistory: profileData.workHistory?.length > 0 ? profileData.workHistory : [{
             id: generateId(),
             title: "",
@@ -374,6 +364,23 @@ const CreateFreelancerProfile = () => {
     }
   }, [formData.bio]);
 
+  const addDepartment = (value: string) => {
+    if (value && !formData.departments.includes(value)) {
+      setFormData({
+        ...formData,
+        departments: [...formData.departments, value]
+      });
+      setDepartmentInput("");
+    }
+  };
+
+  const removeDepartment = (index: number) => {
+    setFormData({
+      ...formData,
+      departments: formData.departments.filter((_, i) => i !== index)
+    });
+  };
+
   return (
     <>
       {
@@ -419,7 +426,7 @@ const CreateFreelancerProfile = () => {
             value={formData.primaryPosition}
             onChange={handleInputChangeWrapper}
             className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
-            placeholder="Consultant Focus Area"
+            placeholder="Current Focus Area"
           />
 
           <FirmAffiliationSection
@@ -454,7 +461,7 @@ const CreateFreelancerProfile = () => {
               showDropdown={showCertificationsDropdown}
               setShowDropdown={setShowCertificationsDropdown}
               filteredOptions={filteredCertifications}
-              placeholder="Certifications"
+              placeholder="Certifications: Use Drop Down or Type"
               bgColor="bg-aquagreen"
             />
           </div>
@@ -490,6 +497,16 @@ const CreateFreelancerProfile = () => {
               bgColor="bg-deepskyblue"
             />
           </div> */}
+
+          <DepartmentAgencySection
+            departments={formData.departments}
+            departmentInput={departmentInput}
+            setDepartmentInput={setDepartmentInput}
+            showDepartmentDropdown={showDepartmentDropdown}
+            setShowDepartmentDropdown={setShowDepartmentDropdown}
+            addDepartment={addDepartment}
+            removeDepartment={removeDepartment}
+          />
 
           <WorkHistorySection
             workHistory={formData.workHistory}

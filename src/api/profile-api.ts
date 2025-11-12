@@ -37,6 +37,7 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
       skills: formData.skills,
       // expertise: formData.expertise,
       certifications: formData.certifications,
+      departments: formData.departments,
       workHistory: formData.workHistory,
       degrees: formData.degrees,
       firmAffiliation: formData.firmAffiliation || '',
