@@ -333,14 +333,14 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
                   </div>
                 </div>
 
-                {/* {
+                {
                   profileData?.user?.isSubscribed &&
                   <p className="inline-flex items-center gap-1 text-xs bg-gray-50 text-[#009DDE] px-2 py-1 rounded-full">
                     Recommended by a past client <BiSolidLike size={12} color="#009DDE" />
                   </p>
-                } */}
+                }
                 {
-                  profileData?.user?.isSubscribed && !initialProfileId &&
+                  !profileData?.user?.isSubscribed && !initialProfileId &&
                   <div className="w-fit h-fit relative">
                     <p onMouseEnter={() => setShowRecommendationModal(true)} className="inline-flex items-center gap-1 text-xs bg-gray-50 text-orange-400 px-2 py-1 rounded-full cursor-pointer">
                       Recommendation system for Premium Tiers <AlertCircleIcon size={16} />
