@@ -9,6 +9,7 @@ import { formatName } from '@/utils/format';
 import ProfilePicture from '@/components/profile/profilePicture';
 import { RiVerifiedBadgeFill } from 'react-icons/ri';
 import useAuthStore from '@/store/useAuth';
+import { BiSolidLike } from "react-icons/bi";
 
 interface ContractorWithRating {
   contractor: {
@@ -39,7 +40,7 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
   const [contractorsWithRatings, setContractorsWithRatings] = useState<ContractorWithRating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(true);
 
-  const { isSubscribed }  = useAuthStore();
+  const { isSubscribed } = useAuthStore();
 
   const getContractorRatings = useCallback(async (contractorId: string, isSubscribed: boolean = false): Promise<{ average: number; count: number }> => {
     try {
@@ -109,13 +110,13 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
         );
 
         setContractorsWithRatings(contractorsWithRatingsData);
-        
+
       } catch (error) {
         console.error('Error fetching contractor ratings:', error);
         // Set contractors with default ratings if fetching fails
         const defaultContractors = contractors.map(contractor => ({
           contractor,
-          rating: contractor.user.isSubscribed 
+          rating: contractor.user.isSubscribed
             ? { average: 5.0, count: 1 } // 5 stars for subscribed users even on error
             : { average: 0, count: 0 }
         }));
@@ -214,11 +215,11 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
             >
 
 
-              <div className='flex flex-col md:flex-row items-start gap-4 md:gap-18.25 mb-6 md:mb-10.25'>
+              <div className='flex flex-col lg:flex-row items-start gap-4 md:6 mb-6 md:mb-6'>
 
-                <div className='flex items-center  gap-4.25 w-full md:max-w-[20%] h-26  '>
+                <div className='flex items-center gap-2.5 w-fit lg:w-[25%] h-26'>
 
-                  <div className=''>
+                  <div>
                     {contractor.profileImage ? (
                       <div className='rounded-full flex items-center justify-center'>
                         <ProfilePicture
@@ -234,26 +235,32 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
                     }
                   </div>
                   <div className='flex flex-col items-start justify-center gap-1 md:gap-2.5 h-full'>
-                    <span className='flex items-center gap-2 '>
-                      <Link href={`/profile/${contractor.user._id}`} className="text-lg md:text-xl font-semibold cursor-pointer hover:underline">
+                    <div className='flex items-start gap-2'>
+                      <div className='pt-1'>
+                        {contractor.user.isSubscribed && <RiVerifiedBadgeFill size={20} color='#00A871' />}
+                      </div>
+                      <Link href={`/profile/${contractor.user._id}`} className="text-base md:text-lg font-semibold cursor-pointer hover:underline">
                         {isSubscribed ? (contractor.user.name ?? "N/A") : formatName(contractor.user.name)}
                       </Link>
-                      {contractor.user.isSubscribed && <RiVerifiedBadgeFill size={20} color='#00A871' />}
-                    </span>
+                    </div>
                     <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
                     <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
                   </div>
 
                 </div>
 
-                <div className='w-full md:max-w-[80%] mt-4 md:mt-0'>
+                <div className='w-full md:w-[75%] mt-4 md:mt-0'>
                   <div className='mb-3 md:mb-6.25 flex items-center justify-between flex-wrap'>
                     <h3 className='font-bold text-sm text-boldblue'>{contractor.primaryPosition}</h3>
-                    {ratingsLoading ? (
+                    {/* {ratingsLoading ? (
                       <span className="text-sm text-gray-500">Loading...</span>
                     ) : (
                       renderRating(rating.average, 5, true, rating.count)
-                    )}
+                    )} */}
+                    {contractor.user.isSubscribed && <p className="inline-flex items-center gap-1 text-[10px] sm:text-xs bg-gray-100 text-[#009DDE] px-2 py-1 rounded-full">
+                      Recommended by a past client <BiSolidLike size={12} color="#009DDE" />
+                    </p>}
+
                   </div>
                   <div className="flex flex-wrap gap-2 md:gap-2.5 mb-3 md:mb-3.75">
                     {contractor.skills.slice(0, 3).map((skill, index) => (

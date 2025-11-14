@@ -1,6 +1,6 @@
 // RatingDisplay.tsx
 import React from 'react';
-import { FaStar, FaRegStar } from 'react-icons/fa6';
+import { BiLike, BiSolidLike } from 'react-icons/bi';
 
 interface RatingDisplayProps {
   rating: number;
@@ -52,13 +52,13 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 star <= rating ? (
-                  <FaStar
+                  <BiSolidLike
                     key={star}
                     size={classes.star}
                     className="text-deepskyblue"
                   />
                 ) : (
-                  <FaRegStar
+                  <BiLike
                     key={star}
                     size={classes.star}
                     className="text-deepskyblue"
@@ -75,13 +75,13 @@ const RatingDisplay: React.FC<RatingDisplayProps> = ({
               <div className="flex items-center gap-1 w-50 p-5">
                 {[1, 2, 3, 4, 5].map((star) => (
                   star <= rating ? (
-                    <FaStar
+                    <BiSolidLike
                       key={star}
                       size={classes.star}
                       className="text-deepskyblue"
                     />
                   ) : (
-                    <FaRegStar
+                    <BiLike
                       key={star}
                       size={classes.star}
                       className="text-deepskyblue"

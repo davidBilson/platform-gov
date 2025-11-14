@@ -70,6 +70,7 @@ export interface ProfileData {
   }>;
   user: {
     bankAccounts: Array<{}>;
+    isSubscribed?: boolean;
   },
   ratePerHour?: number;
   secondRate?: number;

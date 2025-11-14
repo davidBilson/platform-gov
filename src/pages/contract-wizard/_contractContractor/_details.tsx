@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { FaLocationDot, FaRegHourglass } from 'react-icons/fa6';
 import { format } from 'date-fns';
@@ -361,7 +360,7 @@ const Details = ({ job, jobId, applicationId, contract }: DetailsProps) => {
 
                 <ProfilePicture source={job?.clientLogo ?? ""} alt={job?.clientName ?? ""} dimension={48} />
 
-                <Link href="" className="cursor-pointer hover:underline font-medium">{job?.clientName ?? ""}</Link>
+                <p className="font-medium">{job?.clientName ?? ""}</p>
 
               </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { BiLike, BiSolidLike } from 'react-icons/bi';
 import {  FaTimes } from 'react-icons/fa';
-import { FaStar, FaRegStar } from 'react-icons/fa6';
+// import { FaStar, FaRegStar } from 'react-icons/fa6';
 
 interface RatingModalProps {
   isOpen: boolean;
@@ -62,10 +63,10 @@ const RatingModal: React.FC<RatingModalProps> = ({
 
         <div className="mb-6">
           <h2>
-            Rate {revieweeName.replace(/\b\w/g,c=>c.toUpperCase())}
+            Recommendations {revieweeName.replace(/\b\w/g,c=>c.toUpperCase())}
           </h2>
           <p className="text-sm text-gray-600">
-            How was your experience working with {revieweeName}?
+            How likely are you to recommend {revieweeName}?
           </p>
         </div>
 
@@ -85,12 +86,12 @@ const RatingModal: React.FC<RatingModalProps> = ({
                 disabled={isSubmitting}
               >
                 {star <= (hoverRating || rating) ? (
-                  <FaStar
+                  <BiSolidLike
                     size={20}
                     className="text-deepskyblue"
                   />
                 ) : (
-                  <FaRegStar
+                  <BiLike
                     size={20}
                     className="text-deepskyblue"
                   />
@@ -102,7 +103,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
 
         <div className="mb-6">
           <label className="block text-sm font-medium text-mediumgray mb-2">
-            Comments (Optional)
+            Comments
           </label>
           <fieldset className="border border-boldblue px-5 py-3.75 w-full rounded-lg">
             <legend className="text-[10px] text-mediumgray outline-none border-none">Feedback</legend>
@@ -137,7 +138,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
             disabled={rating === 0 || isSubmitting}
             className="flex-1 px-4 py-2 bg-boldblue text-white rounded-lg disabled:bg-lightgray disabled:cursor-not-allowed transition-colors hover:opacity-70 duration-300 ease-in-out cursor-pointer text-sm"
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Rating'}
+            {isSubmitting ? 'Submitting...' : 'Submit Recommendations'}
           </button>
         </div>
       </div>

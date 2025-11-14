@@ -1,7 +1,7 @@
 // React and core libraries
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 // Third-party libraries
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 import { MdStar, MdStarBorder } from "react-icons/md";
 import { IoLocationOutline } from "react-icons/io5";
 // Store / State Management
@@ -16,8 +16,12 @@ import { ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
 import ProfilePicture from '@/components/profile/profilePicture';
 import LoadingAnimation from '@/components/ui/loading';
 // import BankDetailsLink from '@/components/ui/finance/bank-details-link';
-import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
+// import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
 import WorkHistory from './workHistory';
+import { BiSolidLike } from "react-icons/bi";
+import { AlertCircleIcon } from 'lucide-react';
+import Link from 'next/link';
+
 
 
 interface Contract {
@@ -61,6 +65,8 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(false);
   const [bankAccountAdded, setBankAccountAdded] = useState<boolean>(false);
   const [showBankDetailsPrompt, setShowBankDetailsPrompt] = useState<boolean>(false);
+  const [showRecommendationModal, setShowRecommendationModal] = useState(false)
+
 
   const normalizeId = useCallback((id: unknown): string => {
     if (!id) return '';
@@ -96,19 +102,19 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
         console.warn('Invalid contractorId provided to getCompletedContracts');
         return [];
       }
-  
+
       const contracts = await getContracts(contractorId);
-      
+
       // Since getContracts now always returns an object (never null), we can safely access completed
       const completedContracts = contracts?.completed || [];
-      
+
       return completedContracts.map(contract => ({
         ...contract,
         id: contract.id || contract._id || '', // Ensure 'id' is populated
         startDate: contract.startDate ? new Date(contract.startDate).toISOString() : '',
         endDate: contract.endDate ? new Date(contract.endDate).toISOString() : '',
       }));
-      
+
     } catch (error) {
       // This catch block should rarely execute now since getContracts handles all errors
       console.error('Unexpected error in getCompletedContracts:', error);
@@ -141,26 +147,26 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   const fetchAllData = useCallback(async (profileId: string): Promise<void> => {
     try {
       setLoading(true);
-      
+
       // Validate profileId
       if (!profileId || profileId.trim() === '') {
         console.warn('Invalid profileId provided to fetchAllData');
         return;
       }
-  
+
       const results = await Promise.allSettled([
         getProfileData(profileId),
         getCompletedContracts(profileId),
         getContractorRatings(profileId)
       ]);
-  
+
       // Handle profile data
       const profileResult = results[0];
       if (profileResult.status === 'rejected') {
         console.error('Failed to fetch profile data:', profileResult.reason);
         // You might want to show an error to the user for profile data since it's critical
       }
-  
+
       // Handle contracts data
       const contractsResult = results[1];
       if (contractsResult.status === 'fulfilled') {
@@ -170,7 +176,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
         // Set empty array as fallback
         setCompletedContracts([]);
       }
-  
+
       // Handle ratings data
       const ratingsResult = results[2];
       if (ratingsResult.status === 'fulfilled') {
@@ -180,7 +186,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
         // Set empty array as fallback
         setContractorRatings([]);
       }
-  
+
     } catch (error) {
       console.error('Unexpected error in fetchAllData:', error);
     } finally {
@@ -192,7 +198,6 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     const profileId = initialProfileId ?? userId;
 
     if (!profileId) {
-      console.warn('No profile ID available');
       setLoading(false);
       return;
     }
@@ -238,19 +243,19 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     });
   }, [completedContracts, contractorRatings, normalizeId]);
 
-  const overallRating = useMemo((): { average: number; count: number } => {
-    if (!contractorRatings || contractorRatings.length === 0) {
-      return { average: profileData?.rating || 0, count: 0 };
-    }
+  // const overallRating = useMemo((): { average: number; count: number } => {
+  //   if (!contractorRatings || contractorRatings.length === 0) {
+  //     return { average: profileData?.rating || 0, count: 0 };
+  //   }
 
-    const sum = contractorRatings.reduce((acc, rating) => acc + rating.rating, 0);
-    const average = sum / contractorRatings.length;
+  //   const sum = contractorRatings.reduce((acc, rating) => acc + rating.rating, 0);
+  //   const average = sum / contractorRatings.length;
 
-    return {
-      average: Math.round(average * 10) / 10,
-      count: contractorRatings.length
-    };
-  }, [contractorRatings, profileData?.rating]);
+  //   return {
+  //     average: Math.round(average * 10) / 10,
+  //     count: contractorRatings.length
+  //   };
+  // }, [contractorRatings, profileData?.rating]);
 
   const {
     profession = "Profession",
@@ -314,28 +319,64 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
           </div>
         ) : (
           <>
-            
+
             <div className='flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0'>
-              <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto'>
-                <ProfilePicture source={getProfileImageUrl()} alt={name} dimension={88} />
-                <div className="text-center sm:text-left mt-2 sm:mt-0">
-                  <p className='font-semibold text-xl'>{name}</p>
-                  <p className='text-xs font-bold py-2.5'>{profession}</p>
-                  <p className='text-xs font-bold flex items-center gap-1'>
-                    <IoLocationOutline size={20} /> {locationString}
-                  </p>
+              <div>
+                <div className='flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-4'>
+                  <ProfilePicture source={getProfileImageUrl()} alt={name} dimension={88} />
+                  <div className="text-center sm:text-left mt-2 sm:mt-0">
+                    <p className='font-semibold text-xl'>{name}</p>
+                    <p className='text-xs font-bold py-2.5'>{profession}</p>
+                    <p className='text-xs font-bold flex items-center gap-1'>
+                      <IoLocationOutline size={20} /> {locationString}
+                    </p>
+                  </div>
                 </div>
+
+                {/* {
+                  profileData?.user?.isSubscribed &&
+                  <p className="inline-flex items-center gap-1 text-xs bg-gray-50 text-[#009DDE] px-2 py-1 rounded-full">
+                    Recommended by a past client <BiSolidLike size={12} color="#009DDE" />
+                  </p>
+                } */}
+                {
+                  profileData?.user?.isSubscribed && !initialProfileId &&
+                  <div className="w-fit h-fit relative">
+                    <p onMouseEnter={() => setShowRecommendationModal(true)} className="inline-flex items-center gap-1 text-xs bg-gray-50 text-orange-400 px-2 py-1 rounded-full cursor-pointer">
+                      Recommendation system for Premium Tiers <AlertCircleIcon size={16} />
+                    </p>
+                    {showRecommendationModal && (
+                      <div
+                        onMouseEnter={() => setShowRecommendationModal(true)}
+                        onMouseLeave={() => setShowRecommendationModal(false)}
+                        className="absolute top-full left-0 mt-2 w-64 bg-white text-gray-400  text-xs rounded-lg p-3 shadow-lg z-10"
+                      >
+                        <p className="mb-2">
+                          Upgrade to premium to unlock personalized recommendations from past clients, making you instantly more credible and attractive to new opportunities.
+                        </p>
+                        <Link
+                          href="/subscribe"
+                          className="text-deepskyblue hover:text-deepskyblue/70 transition-all ease-in duration-300"
+                        >
+                          Subscribe now →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                }
+
               </div>
 
               <div className='w-full sm:max-w-85 mt-4 sm:mt-0'>
                 <div className='flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-6'>
                   <h3 className="text-sm text-boldblue font-bold mb-2 sm:mb-0">{primaryPosition}</h3>
                   <div className='flex items-center gap-1'>
-                    {ratingsLoading ? (
+                    {/* {ratingsLoading ? (
                       <span className="text-sm text-gray-500">Loading ratings...</span>
                     ) : (
                       renderRating(overallRating.average, 5, true)
-                    )}
+                    )} */}
+
                   </div>
                 </div>
 
@@ -410,7 +451,7 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
                         {typeof rating.jobId === 'object' && rating.jobId && 'jobTitle' in rating.jobId ? (rating.jobId as { jobTitle: string }).jobTitle : ''}
                       </p>
                       <div className='flex items-center gap-2 mb-2'>
-                        {renderRating(rating.rating)}
+                        {/* {renderRating(rating.rating)} */}
                         <span className='text-sm text-gray-500'>
                           {new Date(rating.createdAt).toLocaleDateString()}
                         </span>

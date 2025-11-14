@@ -64,7 +64,6 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
 
   const { userId, role } = useAuthStore();
 
-  // Determine who the current user should rate
   const getRevieweeInfo = () => {
     if (role === 'client') {
       return {
@@ -83,13 +82,11 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
 
   const revieweeInfo = getRevieweeInfo();
 
-  // Helper function to convert Rating to ExistingRating
   const convertRatingToExistingRating = (rating: Rating): ExistingRating | null => {
     if (!rating._id) {
       return null;
     }
 
-    // Handle reviewer field (can be string or populated object)
     let reviewer: { _id: string; name: string };
     if (typeof rating.reviewer === 'string') {
       reviewer = { _id: rating.reviewer, name: 'Unknown' };
@@ -232,7 +229,7 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
       )}
 
       {/* Show rate button if I haven't rated the other user yet */}
-      {!givenRating && (
+      {!givenRating && role === 'client' && (
         <>
           <button
             onClick={(e) => {
@@ -241,7 +238,7 @@ const RateUserBtn: React.FC<RateUserBtnProps> = ({
             }}
             className="bg-boldblue text-xs text-white font-semibold py-2.75 px-5 rounded-lg transition transform active:scale-95 hover:opacity-70 duration-300 ease-in-out cursor-pointer"
           >
-            Rate {revieweeInfo.name}
+            Give Feedback
           </button>
 
           <RatingModal

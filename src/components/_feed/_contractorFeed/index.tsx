@@ -34,7 +34,7 @@ const ContractorFeed = () => {
   } = useQuery({
     queryKey: ['contractors'],
     queryFn: fetchContractors,
-    staleTime: 5000, // 5 seconds
+    staleTime: 5000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retry: 3,
@@ -67,7 +67,7 @@ const ContractorFeed = () => {
   };
 
   return (
-    <main className="container mx-auto p-6">
+    <main className="max-width mx-auto p-6">
       <ContractorFilter />
       <ContractorCountFilters 
         contractors={contractors} 

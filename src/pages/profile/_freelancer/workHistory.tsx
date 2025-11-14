@@ -89,7 +89,7 @@ const WorkHistory = ({ completedContracts, renderRating }: WorkHistoryProps) => 
             <tr className="border-b border-b-black text-left font-bold">
               <th className="py-3 px-4">Job Title</th>
               <th className="py-3 px-4">Dates</th>
-              <th className="py-3 px-4">Rating</th>
+              {/* <th className="py-3 px-4">Rating</th> */}
               <th className="py-3 px-4">Amount</th>
             </tr>
           </thead>
@@ -97,15 +97,15 @@ const WorkHistory = ({ completedContracts, renderRating }: WorkHistoryProps) => 
             {completedContracts && completedContracts.length > 0 ? (
               completedContracts.map((contract, index) => (
                 <tr key={contract.id || index} className={index % 2 === 1 ? "bg-lightgray" : "bg-white"}>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 text-[10px] sm:text-sm">
                     <div className="font-medium">
                       {contract.jobId?.jobTitle || 'N/A'}
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-xs">
+                  <td className="py-3 px-4 text-[10px] sm:text-sm ">
                     {formatDateRange(contract.startDate, contract.endDate)}
                   </td>
-                  <td className="py-3 px-4">
+                  {/* <td className="py-3 px-4">
                     {contract.ratingData ? (
                       <div className="flex flex-col gap-1">
                         {renderRating ? renderRating(contract.ratingData.rating) : (
@@ -115,8 +115,8 @@ const WorkHistory = ({ completedContracts, renderRating }: WorkHistoryProps) => 
                     ) : (
                       <span className="text-gray-500 text-sm">No Rating</span>
                     )}
-                  </td>
-                  <td className="py-3 px-4 font-medium">
+                  </td> */}
+                  <td className="py-3 px-4 font-medium text-[10px] sm:text-sm">
                     ${contract.jobId?.price ?? contract.jobId?.retainerAmount ?? 'N/A'}
                   </td>
                 </tr>
@@ -147,7 +147,7 @@ const WorkHistory = ({ completedContracts, renderRating }: WorkHistoryProps) => 
               <p className="text-2xl font-bold text-deepskyblue">
                 {completedContracts.filter(c => c.ratingData).length}
               </p>
-              <p className="text-sm text-gray-600">Rated Jobs</p>
+              <p className="text-sm text-gray-600">Reviews</p>
             </div>
             <div>
               {/* <p className="text-2xl font-bold text-deepskyblue">
@@ -160,10 +160,10 @@ const WorkHistory = ({ completedContracts, renderRating }: WorkHistoryProps) => 
                   : 'N/A'
                 }
               </p> */}
-              <p className="text-2xl font-bold text-deepskyblue">
+              {/* <p className="text-2xl font-bold text-deepskyblue">
                 {calculateAverageRating()}
               </p>
-              <p className="text-sm text-gray-600">Avg Rating</p>
+              <p className="text-sm text-gray-600">Avg Rating</p> */}
             </div>
           </div>
         </div>

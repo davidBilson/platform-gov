@@ -2,7 +2,6 @@ import { format } from 'date-fns';
 import { FaRegHourglass } from "react-icons/fa6";
 import { FaLocationDot } from "react-icons/fa6";
 import { MdStar, MdStarBorder } from "react-icons/md";
-import Link from 'next/link';
 import { Jobs } from '@/types/jobs';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getUserRatings } from '@/api/rating-api';
@@ -210,7 +209,7 @@ const JobPost = ({ job, onApply }: JobPostProps) => {
             )}
           </div>
           <div className="flex flex-col">
-            <Link href="" className="cursor-pointer hover:underline font-medium">{job.clientName}</Link>
+            <p className="font-medium">{job.clientName}</p>
             {/* Client Rating */}
             <div className="flex items-center gap-2 mt-1">
               {ratingsLoading ? (
