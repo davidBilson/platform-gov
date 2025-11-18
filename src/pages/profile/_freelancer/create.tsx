@@ -527,16 +527,19 @@ const CreateFreelancerProfile = () => {
             removeDegree={removeDegreeWrapper}
             handleDegreeYearInput={handleDegreeYearInput}
           />
-          
+
           <div>
             <input
               type="text"
               name="linkedInUrl"
               value={formData.linkedInUrl}
               onChange={handleInputChangeWrapper}
-              className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-157.5 px-5 py-4 focus:outline focus:outline-boldblue"
+              className="block mb-2.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-157.5 px-5 py-4 focus:outline focus:outline-boldblue"
               placeholder="LinkedIn URL"
             />
+            <p className="text-xs text-gray-500 italic">
+              *For vetting purposes only: Will not be displayed on GovLink Profile
+            </p>
           </div>
         </form>
 
