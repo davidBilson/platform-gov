@@ -10,10 +10,10 @@ interface WorkHistorySectionProps {
   removeWorkHistory: (id: string) => void;
   handleYearInput: (e: ChangeEvent<HTMLInputElement>, workId: string, field: keyof WorkHistory) => void;
   handleCurrentRoleChange: (workId: string, isChecked: boolean) => void;
-  showDepartmentDropdown: boolean;
-  setShowDepartmentDropdown: React.Dispatch<React.SetStateAction<boolean>>;
-  showExperienceDropdown: boolean;
-  setShowExperienceDropdown: React.Dispatch<React.SetStateAction<boolean>>;
+  // showDepartmentDropdown: boolean;
+  // setShowDepartmentDropdown: React.Dispatch<React.SetStateAction<boolean>>;
+  // showExperienceDropdown: boolean;
+  // setShowExperienceDropdown: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const WorkHistorySection = ({
@@ -23,10 +23,10 @@ export const WorkHistorySection = ({
   removeWorkHistory,
   handleYearInput,
   handleCurrentRoleChange,
-  showDepartmentDropdown,
-  setShowDepartmentDropdown,
-  showExperienceDropdown,
-  setShowExperienceDropdown,
+  // showDepartmentDropdown,
+  // setShowDepartmentDropdown,
+  // showExperienceDropdown,
+  // setShowExperienceDropdown,
 }: WorkHistorySectionProps) => (
   <div className="mb-7.5">
     <h3 className="my-7.5 font-semibold text-black text-lg flex items-center gap-1">
@@ -58,129 +58,26 @@ export const WorkHistorySection = ({
         />
 
         <div className="flex flex-wrap items-start gap-7.5 mb-7.5">
-          <div className="relative w-full md:max-w-[242px]">
-            <div className="relative flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
+          <div className="relative flex flex-col">
+            <div className="relative flex justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue w-full lg:w-[300px]">
               <input
                 type="text"
-                value={work.department}
-                onChange={(e) => updateWorkHistory(work.id, 'department', e.target.value)}
-                onFocus={() => setShowDepartmentDropdown(true)}
-                onBlur={() => setTimeout(() => setShowDepartmentDropdown(false), 200)}
+                value={work.responsibility}
+                maxLength={120}
+                onChange={(e) => updateWorkHistory(work.id, 'responsibility', e.target.value)}
                 className="outline-none placeholder:font-semibold w-[80%]"
-                placeholder="Department/Agency Expertise (Choose from drop-down or Type)"
+                placeholder="Duties & Responsibilities"
               />
               <IoIosSearch />
             </div>
 
-            {showDepartmentDropdown && (
-              <div
-                className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-                onMouseDown={(e) => e.preventDefault()}
-              >
-                {GovernmentDepartmentsAndAgenciesByCountry
-                  .filter((dept) =>
-                    work.department
-                      ? dept.toLowerCase().includes(work.department.toLowerCase())
-                      : true
-                  )
-                  .map((dept, idx) => (
-                    <div
-                      key={`dept-option-${idx}`}
-                      className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        updateWorkHistory(work.id, 'department', dept);
-                        setShowDepartmentDropdown(false);
-                      }}
-                    >
-                      {dept}
-                    </div>
-                  ))}
-              </div>
-            )}
+            {/* Character Counter */}
+            <div className="text-xs text-gray-500 mt-1 text-right">
+              {work.responsibility.length}/120
+            </div>
           </div>
 
-          {/* <div className="flex flex-col gap-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center gap-1">
-                <input
-                  type="radio"
-                  id={`state-${work.id}`}
-                  name={`departmentType-${work.id}`}
-                  checked={work.departmentType === "state"}
-                  onChange={() => updateWorkHistory(work.id, 'departmentType', "state")}
-                  className="form-radio h-4 w-4 text-boldblue transition duration-150 ease-in-out"
-                />
-                <label htmlFor={`state-${work.id}`}>State</label>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <input
-                  type="radio"
-                  id={`federal-${work.id}`}
-                  name={`departmentType-${work.id}`}
-                  checked={work.departmentType === "federal"}
-                  onChange={() => updateWorkHistory(work.id, 'departmentType', "federal")}
-                  className="form-radio h-4 w-4 text-boldblue transition duration-150 ease-in-out"
-                />
-                <label htmlFor={`federal-${work.id}`}>Federal</label>
-              </div>
-            </div>
-          </div> */}
-
-          {/* <div className="relative w-full md:max-w-[242px]">
-            <div className="flex justify-between border border-boldblue rounded-lg w-full px-5 py-4 text-sm text-boldblue">
-              <input
-                type="text"
-                value={work.experienceLevel}
-                onChange={(e) => updateWorkHistory(work.id, 'experienceLevel', e.target.value)}
-                onFocus={() => setShowExperienceDropdown(true)}
-                onBlur={() => setTimeout(() => setShowExperienceDropdown(false), 200)}
-                className="outline-none placeholder:font-semibold w-[80%]"
-                placeholder="Level of Experience"
-              />
-              <IoIosSearch />
-            </div>
-
-            {showExperienceDropdown && (
-              <div
-                className="absolute z-20 w-full mt-1 bg-white border border-boldblue rounded-lg shadow-lg max-h-48 overflow-y-scroll dropdown-scrollbar"
-                onMouseDown={(e) => e.preventDefault()}
-              >
-                {["Entry level (0-2 years)", "Intermediate/Mid-Level (2-5 years)", "Senior Level (5+ Years)"]
-                  .filter((level) =>
-                    work.experienceLevel
-                      ? level.toLowerCase().includes(work.experienceLevel.toLowerCase())
-                      : true
-                  )
-                  .map((level, idx) => (
-                    <div
-                      key={`level-option-${idx}`}
-                      className="px-4 py-2 hover:bg-deepskyblue hover:text-white cursor-pointer text-sm"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        updateWorkHistory(work.id, 'experienceLevel', level);
-                        setShowExperienceDropdown(false);
-                      }}
-                    >
-                      {level}
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div> */}
         </div>
-
-        {/* <div className="mb-7.5">
-          <input
-            type="text"
-            value={work.location}
-            onChange={(e) => updateWorkHistory(work.id, 'location', e.target.value)}
-            className="placeholder:font-semibold block text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
-            placeholder="Location"
-          />
-        </div> */}
-
         <div className="mb-2.5">
           <div className="flex items-center gap-2">
             <input

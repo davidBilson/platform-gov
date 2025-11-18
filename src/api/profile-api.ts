@@ -28,6 +28,7 @@ export const saveProfile = async (formData: ProfileFormData, userId: string, pro
     const profileData = {
       userId: userId,
       bio: formData.bio,
+      linkedInUrl: formData.linkedInUrl || '',
       profileImage: formData.profileImageUrl,
       clearance: formData.clearance || '',
       ratePerHour: formData.ratePerHour,

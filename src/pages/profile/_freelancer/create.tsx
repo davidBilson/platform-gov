@@ -36,6 +36,7 @@ const CreateFreelancerProfile = () => {
 
   const [formData, setFormData] = useState<ProfileFormData>({
     bio: "",
+    linkedInUrl: "",
     ratePerHour: "",
     secondRate: "",
     profession: "",
@@ -53,7 +54,7 @@ const CreateFreelancerProfile = () => {
       {
         id: generateId(),
         title: "",
-        department: "",
+        responsibility: "",
         departmentType: "",
         experienceLevel: "",
         location: "",
@@ -206,6 +207,7 @@ const CreateFreelancerProfile = () => {
 
         setFormData({
           bio: profileData.bio || "",
+          linkedInUrl: profileData.linkedInUrl || "",
           ratePerHour: profileData.ratePerHour?.toString() || "",
           secondRate: profileData.secondRate?.toString() || "",
           primaryPosition: profileData.primaryPosition || "",
@@ -223,6 +225,7 @@ const CreateFreelancerProfile = () => {
           workHistory: profileData.workHistory?.length > 0 ? profileData.workHistory : [{
             id: generateId(),
             title: "",
+            responsibility: "",
             department: "",
             departmentType: "",
             experienceLevel: "",
@@ -426,7 +429,7 @@ const CreateFreelancerProfile = () => {
             value={formData.primaryPosition}
             onChange={handleInputChangeWrapper}
             className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-75 px-5 py-4 focus:outline focus:outline-boldblue"
-            placeholder="Current Focus Area"
+            placeholder="Consulting/Contracting Specialties"
           />
 
           <FirmAffiliationSection
@@ -461,7 +464,7 @@ const CreateFreelancerProfile = () => {
               showDropdown={showCertificationsDropdown}
               setShowDropdown={setShowCertificationsDropdown}
               filteredOptions={filteredCertifications}
-              placeholder="Certifications: Use Drop Down or Type"
+              placeholder="Certifications: Select from dropdown or type your own"
               bgColor="bg-aquagreen"
             />
           </div>
@@ -515,10 +518,6 @@ const CreateFreelancerProfile = () => {
             removeWorkHistory={removeWorkHistoryWrapper}
             handleYearInput={handleYearInput}
             handleCurrentRoleChange={handleCurrentRoleChange}
-            showDepartmentDropdown={showDepartmentDropdown}
-            setShowDepartmentDropdown={setShowDepartmentDropdown}
-            showExperienceDropdown={showExperienceDropdown}
-            setShowExperienceDropdown={setShowExperienceDropdown}
           />
 
           <DegreeSection
@@ -528,6 +527,17 @@ const CreateFreelancerProfile = () => {
             removeDegree={removeDegreeWrapper}
             handleDegreeYearInput={handleDegreeYearInput}
           />
+          
+          <div>
+            <input
+              type="text"
+              name="linkedInUrl"
+              value={formData.linkedInUrl}
+              onChange={handleInputChangeWrapper}
+              className="block mb-7.5 placeholder:font-semibold text-sm text-boldblue border border-boldblue rounded-lg w-full md:max-w-157.5 px-5 py-4 focus:outline focus:outline-boldblue"
+              placeholder="LinkedIn URL"
+            />
+          </div>
         </form>
 
         <ActionButtons

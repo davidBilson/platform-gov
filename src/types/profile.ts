@@ -1,6 +1,7 @@
 export interface WorkHistory {
     id: string;
     title: string;
+    responsibility: string;
     department?: string;
     departmentType?: "state" | "federal" | "";
     experienceLevel?: string;
@@ -19,6 +20,7 @@ export interface WorkHistory {
   
   export interface ProfileFormData {
     bio: string;
+    linkedInUrl: string;
     ratePerHour: string;
     secondRate?: string;
     primaryPosition?: string;
