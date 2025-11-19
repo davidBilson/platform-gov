@@ -57,12 +57,20 @@ export const WorkHistorySection = ({
           placeholder="Title"
         />
 
+        <input
+          type="text"
+          value={work.company || ''}
+          onChange={(e) => updateWorkHistory(work.id, 'company', e.target.value)}
+          className="placeholder:font-semibold mb-7.5 block text-sm text-boldblue border border-boldblue rounded-lg w-full max-w-157.5 px-5 py-4 focus:outline focus:outline-boldblue"
+          placeholder="Company/Organization"
+        />
+
         <div className="flex flex-wrap items-start gap-7.5 mb-7.5">
           <div className="relative flex flex-col">
             <div className="relative flex justify-between border border-boldblue rounded-lg px-5 py-4 text-sm text-boldblue w-full lg:w-[300px]">
               <input
                 type="text"
-                value={work.responsibility}
+                value={work.responsibility || ''}
                 maxLength={120}
                 onChange={(e) => updateWorkHistory(work.id, 'responsibility', e.target.value)}
                 className="outline-none placeholder:font-semibold w-[80%]"
@@ -73,7 +81,7 @@ export const WorkHistorySection = ({
 
             {/* Character Counter */}
             <div className="text-xs text-gray-500 mt-1 text-right">
-              {work.responsibility.length}/120
+              {(work.responsibility || '').length}/120
             </div>
           </div>
 

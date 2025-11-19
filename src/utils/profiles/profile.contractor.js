@@ -25,19 +25,19 @@ export const handleInputChange = (e, setFormData) => {
 export const handleProfileImageChange = async (e, setFormData) => {
   if (e.target.files && e.target.files[0]) {
     const file = e.target.files[0];
-    
+
     // Create a preview for the UI using blob URL (this is temporary, just for display)
     const previewUrl = URL.createObjectURL(file);
     setFormData(prev => ({
       ...prev,
       profileImageUrl: previewUrl // For preview only
     }));
-    
+
     // Upload the file
     try {
       const formData = new FormData();
       formData.append('profileImage', file);
-      
+
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}${process.env.NEXT_PUBLIC_POST_PROFILE_PIC}`,
         formData,
@@ -47,13 +47,13 @@ export const handleProfileImageChange = async (e, setFormData) => {
           },
         }
       );
-      
+
       const result = response.data;
-      
+
       if (result.success) {
         setFormData(prev => ({
           ...prev,
-          profileImage: result.data.imagePath 
+          profileImage: result.data.imagePath
         }));
       } else {
         toast.error('Failed to upload image');
@@ -67,7 +67,7 @@ export const handleProfileImageChange = async (e, setFormData) => {
 
 export const addTag = (type, value, formData, setFormData, setInput) => {
   if (!value.trim()) return;
-  
+
   // Check if the tag already exists - if it does, remove it instead of adding
   if (formData[type].includes(value.trim())) {
     // Find index of the item
@@ -76,13 +76,13 @@ export const addTag = (type, value, formData, setFormData, setInput) => {
     removeTag(type, index, setFormData);
     return;
   }
-  
+
   // Otherwise add as before
   setFormData(prev => ({
     ...prev,
     [type]: [...prev[type], value.trim()]
   }));
-  
+
   // Clear the input but DO NOT close the dropdown
   if (setInput) {
     setInput("");
@@ -100,6 +100,8 @@ export const addWorkHistory = (setFormData) => {
   const newWorkHistory = {
     id: generateId(),
     title: "",
+    company: "",
+    responsibility: "",
     department: "",
     departmentType: "",
     experienceLevel: "",
@@ -107,7 +109,7 @@ export const addWorkHistory = (setFormData) => {
     fromDate: "",
     toDate: ""
   };
-  
+
   setFormData(prev => ({
     ...prev,
     workHistory: [...prev.workHistory, newWorkHistory]
@@ -117,7 +119,7 @@ export const addWorkHistory = (setFormData) => {
 export const updateWorkHistory = (id, field, value, setFormData) => {
   setFormData(prev => ({
     ...prev,
-    workHistory: prev.workHistory.map(item => 
+    workHistory: prev.workHistory.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     )
   }));
@@ -126,7 +128,7 @@ export const updateWorkHistory = (id, field, value, setFormData) => {
 // Remove work history entry
 export const removeWorkHistory = (id, formData, setFormData) => {
   if (formData.workHistory.length <= 1) return; // Keep at least one entry
-  
+
   setFormData(prev => ({
     ...prev,
     workHistory: prev.workHistory.filter(item => item.id !== id)
@@ -141,7 +143,7 @@ export const addDegree = (setFormData) => {
     institution: "",
     yearCompleted: ""
   };
-  
+
   setFormData(prev => ({
     ...prev,
     degrees: [...prev.degrees, newDegree]
@@ -151,7 +153,7 @@ export const addDegree = (setFormData) => {
 export const updateDegree = (id, field, value, setFormData) => {
   setFormData(prev => ({
     ...prev,
-    degrees: prev.degrees.map(item => 
+    degrees: prev.degrees.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     )
   }));
@@ -159,7 +161,7 @@ export const updateDegree = (id, field, value, setFormData) => {
 
 export const removeDegree = (id, formData, setFormData) => {
   if (formData.degrees.length <= 1) return; // Keep at least one entry
-  
+
   setFormData(prev => ({
     ...prev,
     degrees: prev.degrees.filter(item => item.id !== id)
@@ -169,12 +171,12 @@ export const removeDegree = (id, formData, setFormData) => {
 export const submitProfileData = async (formData, userId, isProfileExists, setIsLoading, setIsProfileExists, toast, router, fetchUserProfile) => {
   try {
     setIsLoading(true);
-    
+
     if (!userId) {
       toast.error("User ID is required to save profile");
       return;
     }
-    
+
     if (!formData) {
       toast.error("Form data is missing");
       return;
@@ -182,25 +184,25 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
 
     const dataToSend = {
       ...formData,
-      location: formData.location && typeof formData.location === 'object' 
-        ? formData.location 
+      location: formData.location && typeof formData.location === 'object'
+        ? formData.location
         : {
-            country: formData.location?.country || "",
-            state: formData.location?.state || ""
-          },
-      firmAffiliation: formData.firmAffiliation !== undefined 
-        ? formData.firmAffiliation 
+          country: formData.location?.country || "",
+          state: formData.location?.state || ""
+        },
+      firmAffiliation: formData.firmAffiliation !== undefined
+        ? formData.firmAffiliation
         : ""
     };
-    
+
     // Handle profile image URLs properly
     if (formData.profileImageUrl?.startsWith('blob:') && formData.profileImage) {
       dataToSend.profileImageUrl = formData.profileImage;
     }
 
     const response = await saveProfile(
-      dataToSend, 
-      userId, 
+      dataToSend,
+      userId,
       isProfileExists && typeof userId === 'string' ? userId : null
     );
 
@@ -209,9 +211,9 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
       if (!isProfileExists && response.data.data?._id) {
         setIsProfileExists(true);
       }
-      
+
       toast.success(isProfileExists ? "Profile updated successfully" : "Profile created successfully");
-      
+
       try {
         await fetchUserProfile();
       } catch (fetchError) {
@@ -227,7 +229,7 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
     if (error.response) {
       const statusCode = error.response.status;
       const errorMessage = error.response.data?.message || "An error occurred while saving";
-      
+
       if (statusCode === 401) {
         toast.error("Authentication required. Please login again.");
       } else if (statusCode === 403) {
@@ -235,7 +237,7 @@ export const submitProfileData = async (formData, userId, isProfileExists, setIs
       } else {
         toast.error(errorMessage);
       }
-      
+
       console.error(`Axios error (${statusCode}) saving profile:`, error);
     } else if (error instanceof Error) {
       toast?.error(`Error: ${error.message}`);

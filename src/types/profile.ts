@@ -1,6 +1,7 @@
 export interface WorkHistory {
     id: string;
     title: string;
+    company?: string;
     responsibility: string;
     department?: string;
     departmentType?: "state" | "federal" | "";

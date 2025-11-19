@@ -12,6 +12,7 @@ export interface UserDetails {
 export interface WorkHistory {
   id: string;
   title: string;
+  company?: string;
   department: string;
   departmentType: string;
   experienceLevel: string;

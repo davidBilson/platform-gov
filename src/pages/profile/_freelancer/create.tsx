@@ -225,6 +225,7 @@ const CreateFreelancerProfile = () => {
           workHistory: profileData.workHistory?.length > 0 ? profileData.workHistory : [{
             id: generateId(),
             title: "",
+            company: "",
             responsibility: "",
             department: "",
             departmentType: "",
