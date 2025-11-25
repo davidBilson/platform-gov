@@ -158,7 +158,6 @@ const Signup = () => {
       
       setIsSubmitting(false);
     }
-    // Removed finally block - let navigation complete before removing loading state
   };
 
   const radioStyle: React.CSSProperties = {
