@@ -109,7 +109,7 @@ const Verification: React.FC = () => {
       setEmailVerified(true);
       toast.success('Email verified successfully!');
       setVerificationCode('');
-      setVerificationStep('completed'); //change to phone when twilio is ready
+      setVerificationStep('phone');
 
     } catch (err) {
       console.error('Email verification error:', err);
