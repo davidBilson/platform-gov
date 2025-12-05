@@ -104,6 +104,10 @@ img {
   object-fit: cover;
 }
 
+a, button {
+  cursor: pointer;
+}
+
 .max-width {
   max-width: var(--width-maxWidth);
   margin-left: auto;

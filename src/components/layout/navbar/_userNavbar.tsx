@@ -127,6 +127,14 @@ const UserNavbar = () => {
                 <a onClick={() => handleNavigation('/profile/edit')} className="block px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer">
                   Edit Profile
                 </a>
+                {role === 'contractor' && (
+                  <button
+                    onClick={() => handleNavigation('/profile/vetting')}
+                    className="block w-full text-left px-4 py-3 text-sm text-boldblue hover:bg-skyblue/20 cursor-pointer"
+                  >
+                    Vetting & Activation
+                  </button>
+                )}
                 <button
                   onClick={handleSignOut}
                   className="flex items-center justify-between w-full text-left px-4 py-3 text-sm text-red-500 font-semibold hover:bg-skyblue/20 cursor-pointer"

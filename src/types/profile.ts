@@ -1,54 +1,54 @@
 export interface WorkHistory {
-    id: string;
-    title: string;
-    company?: string;
-    responsibility: string;
-    department?: string;
-    departmentType?: "state" | "federal" | "";
-    experienceLevel?: string;
-    location?: string;
-    fromDate: string;
-    toDate: string;
-  }
-  
-  export interface Degree {
-    id: string;
-    degree: string;
-    institution: string;
-    yearCompleted: string;
-    gpa?: string;
-  }
-  
-  export interface ProfileFormData {
-    bio: string;
-    linkedInUrl: string;
-    ratePerHour: string;
-    secondRate?: string;
-    primaryPosition?: string;
-    profession?: string;
-    clearance?: string;
-    skills: string[];
-    expertise?: string[];
-    certifications: string[];
-    departments: string[];
-    workHistory: WorkHistory[];
-    degrees: Degree[];
-    profileImage?: File | null;
-    profileImageUrl?: string;
-    firmAffiliation: string;
-    location: {
-      country: string;
-      state: string;
-    };
-  }
-  
-  export interface CreateProfileProps {
-    userId: string;
-    initialData?: Partial<ProfileFormData>;
-    onSuccess?: () => void;
-    onCancel?: () => void;
-    onPreview?: (data: ProfileFormData) => void;
-  }
+  id: string;
+  title: string;
+  company?: string;
+  responsibility: string;
+  department?: string;
+  departmentType?: "state" | "federal" | "";
+  experienceLevel?: string;
+  location?: string;
+  fromDate: string;
+  toDate: string;
+}
+
+export interface Degree {
+  id: string;
+  degree: string;
+  institution: string;
+  yearCompleted: string;
+  gpa?: string;
+}
+
+export interface ProfileFormData {
+  bio: string;
+  linkedInUrl: string;
+  ratePerHour: string;
+  secondRate?: string;
+  primaryPosition?: string;
+  profession?: string;
+  clearance?: string;
+  skills: string[];
+  expertise?: string[];
+  certifications: string[];
+  departments: string[];
+  workHistory: WorkHistory[];
+  degrees: Degree[];
+  profileImage?: File | null;
+  profileImageUrl?: string;
+  firmAffiliation: string;
+  location: {
+    country: string;
+    state: string;
+  };
+}
+
+export interface CreateProfileProps {
+  userId: string;
+  initialData?: Partial<ProfileFormData>;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  onPreview?: (data: ProfileFormData) => void;
+}
 
 // /profile/_freelancer/index
 export interface WorkHistoryItem {
@@ -87,6 +87,10 @@ export interface ProfileData {
     country: string;
     state: string;
   };
+  vettingCount?: number;
+  gccCertificationId?: string;
+  gccCertificationVerified?: boolean;
+  status?: 'pending' | 'active' | 'suspended';
 }
 
 export interface FetchResponse {

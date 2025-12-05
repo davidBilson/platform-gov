@@ -362,6 +362,14 @@ const CreateFreelancerProfile = () => {
     }
   };
 
+  const handleGoToVetting = () => {
+    if (formData.bio !== "" && formData.profileImageUrl !== "" && isProfileExists) {
+      router.push('/profile/vetting');
+    } else {
+      toast.error("Please complete, and save your profile");
+    }
+  };
+
   useEffect(() => {
     if (textareaRef.current) {
       handleTextAreaInput(textareaRef);
@@ -541,6 +549,23 @@ const CreateFreelancerProfile = () => {
             <p className="text-xs text-gray-500 italic">
               *For vetting purposes only: Will not be displayed on GovLink Profile
             </p>
+          </div>
+
+          {/* Vetting CTA Section */}
+          <div className="bg-blue-50 border-l-4 border-boldblue p-4 mt-7.5 mb-7.5 rounded">
+            <h3 className="font-semibold text-lg mb-2 text-boldblue">
+              Profile Activation Required
+            </h3>
+            <p className="text-sm text-gray-700 mb-3">
+              After saving your profile, you'll need to add at least one vetter to activate it. Vetters will receive an email to confirm your profile.
+            </p>
+            <button
+              type="button"
+              onClick={handleGoToVetting}
+              className="bg-boldblue text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Go to Vetting Page →
+            </button>
           </div>
         </form>
 

@@ -11,7 +11,7 @@ const NotificationDropdown = ({ notificationsOpen, setNotificationsOpen }) => {
   const recentNotifications = notifications.slice(0, 5);
 
   return (
-    <div className={`absolute top-15 right-0 w-68.75 p-7.5 bg-white border border-skyblue rounded shadow-lg z-10 ${notificationsOpen ? 'block' : 'hidden'}`}>
+    <div className={`absolute top-15 right-0 w-68.75 p-5 bg-white border border-skyblue rounded shadow-lg z-10 ${notificationsOpen ? 'block' : 'hidden'}`}>
       <div className="max-h-60 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] flex items-start flex-col gap-7.5">
         {recentNotifications.map((notification) => (
           <div key={notification._id} className="border-b border-skyblue/10 hover:bg-skyblue/10 cursor-pointer flex items-center gap-2">

@@ -22,9 +22,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const initAuthCalled = useRef(false);
   const socketConnected = useRef(false);
   const redirectInProgress = useRef(false);
-  
+
   const { userId, isLoading, initAuth, verificationStep, resetAll } = useAuthStore();
-  
+
   const handleSignOut = useCallback(() => {
     useSocket.getState().disconnect();
     socketConnected.current = false;
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       handleSignOut();
     }
   }, [isSuspended, userId, handleSignOut]);
-  
+
   const publicRoutes = [
     '/account/sign-up',
     '/account/sign-in',
@@ -60,6 +60,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     '/account/reset-password',
     '/account/verification',
     '/privacy-policy',
+    '/vetting', // Public vetting confirmation/rejection pages
     '/',
   ];
 
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isVerificationPage = router.pathname === '/account/verification';
   const isAdminRoute = router.pathname.startsWith('/admin');
-  
+
   // Initialize auth only once
   useEffect(() => {
     if (!initAuthCalled.current) {
@@ -79,21 +80,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [initAuth]);
 
   // Handle socket connection with proper cleanup
+  // Only manage socket for authenticated users, skip on public routes
   useEffect(() => {
-    const { connect, disconnect, rejoinRooms } = useSocket.getState();
-    
+    // Skip socket management on public routes to prevent infinite loops
+    if (isPublicRoute) {
+      return;
+    }
+
+    const { connect, disconnect } = useSocket.getState();
+
     if (userId && !socketConnected.current) {
       connect();
       socketConnected.current = true;
-    } else if (userId && socketConnected.current) {
-      rejoinRooms();
     } else if (!userId && socketConnected.current) {
       console.log('Disconnecting socket - user not authenticated');
       disconnect();
       socketConnected.current = false;
     }
-  }, [userId]);
-  
+  }, [userId, isPublicRoute]);
+
   useEffect(() => {
     return () => {
       if (socketConnected.current) {
@@ -102,7 +107,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
   }, []);
-  
+
   // Route protection - separated from navigation logic
   useEffect(() => {
     if (!isLoading && !userId && !isPublicRoute && !redirectInProgress.current) {
@@ -112,11 +117,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
     }
   }, [userId, isPublicRoute, isLoading, router]);
-  
+
   // Navigation logic with admin route optimization
   useEffect(() => {
     if (isLoading || redirectInProgress.current) return; // Wait for auth to load and no concurrent redirects
-    
+
     const currentPath = router.pathname;
 
     // Handle verification page access
@@ -127,7 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       return;
     }
-    
+
     if (userId) {
       // Skip navigation logic for admin routes to prevent interference
       if (isAdminRoute) {
@@ -143,8 +148,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       if (currentPath === '/account/sign-up') {
-        const targetPath = verificationStep !== 'completed' 
-          ? '/account/verification' 
+        const targetPath = verificationStep !== 'completed'
+          ? '/account/verification'
           : '/feed';
         redirectInProgress.current = true;
         router.replace(targetPath).finally(() => {
@@ -152,7 +157,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
         return;
       }
-      
+
       if (currentPath === '/account/sign-in') {
         redirectInProgress.current = true;
         router.replace('/feed').finally(() => {

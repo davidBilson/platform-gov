@@ -10,17 +10,21 @@ import useAuthStore from '@/store/useAuth';
 import { fetchProfile } from "../../../api/profile-api";
 import { getContracts } from '@/api/contract/contract-api';
 import { getUserRatings } from '@/api/rating-api';
+import { getVettingStatus } from '@/api/vetting-api';
 // Types
 import { ProfileData, FetchResponse, ProfileProps } from '@/types/profile';
 // Components
 import ProfilePicture from '@/components/profile/profilePicture';
 import LoadingAnimation from '@/components/ui/loading';
+import { useRouter } from 'next/router';
 // import BankDetailsLink from '@/components/ui/finance/bank-details-link';
 // import BankDetailsPromptModal from '@/components/ui/finance/bank-details-prompt';
 import WorkHistory from './workHistory';
 import { BiSolidLike } from "react-icons/bi";
 import { AlertCircleIcon } from 'lucide-react';
 import Link from 'next/link';
+import VettingBadge from '@/components/profile/VettingBadge';
+import GCCBadge from '@/components/profile/GCCBadge';
 
 
 
@@ -56,6 +60,7 @@ interface ContractWithRating extends Contract {
 
 const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
 
+  const router = useRouter();
   const { userId } = useAuthStore() as { userId: string | null; name: string | null };
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
@@ -65,7 +70,8 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
   const [ratingsLoading, setRatingsLoading] = useState<boolean>(false);
   const [bankAccountAdded, setBankAccountAdded] = useState<boolean>(false);
   const [showBankDetailsPrompt, setShowBankDetailsPrompt] = useState<boolean>(false);
-  const [showRecommendationModal, setShowRecommendationModal] = useState(false)
+  const [showRecommendationModal, setShowRecommendationModal] = useState(false);
+  const [vettingStatus, setVettingStatus] = useState<{ profileActive: boolean; confirmedCount: number } | null>(null);
 
 
   const normalizeId = useCallback((id: unknown): string => {
@@ -154,11 +160,26 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
         return;
       }
 
+      // Fetch main profile data
       const results = await Promise.allSettled([
         getProfileData(profileId),
         getCompletedContracts(profileId),
         getContractorRatings(profileId)
       ]);
+
+      // Fetch vetting status separately if viewing own profile (not in Promise.allSettled to avoid type issues)
+      if (!initialProfileId && userId === profileId) {
+        getVettingStatus(profileId)
+          .then(response => {
+            setVettingStatus({
+              profileActive: response.data.profileActive,
+              confirmedCount: response.data.confirmedCount
+            });
+          })
+          .catch(() => {
+            // Silently fail - vetting status is not critical for profile display
+          });
+      }
 
       // Handle profile data
       const profileResult = results[0];
@@ -205,26 +226,21 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
     fetchAllData(profileId);
   }, [initialProfileId, userId, fetchAllData]);
 
-  // Cleanup timeout on component unmount
   useEffect(() => {
     return () => {
-      // This will cleanup any pending timeouts when component unmounts
     };
   }, []);
 
-  // Memoized contracts with ratings to avoid recalculation
   const contractsWithRatings = useMemo((): ContractWithRating[] => {
     if (!completedContracts.length || !contractorRatings.length) {
       return completedContracts.map(contract => ({ ...contract, ratingData: undefined }));
     }
 
-    // Create a rating lookup map for better performance
     const ratingMap = new Map<string, Rating>();
     contractorRatings.forEach(rating => {
       const jobId = normalizeId(rating.jobId);
       const contractId = normalizeId(rating.contractId);
 
-      // Use both jobId and contractId as keys for lookup
       if (jobId) ratingMap.set(`job-${jobId}`, rating);
       if (contractId) ratingMap.set(`contract-${contractId}`, rating);
     });
@@ -319,6 +335,32 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
           </div>
         ) : (
           <>
+            {/* Vetting Status Banner - Only show on own profile if pending */}
+            {!initialProfileId && userId && vettingStatus && !vettingStatus.profileActive && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+                      ⚠️ Profile Activation Required
+                    </h3>
+                    <p className="text-yellow-700 mb-3">
+                      Your profile is pending activation. Add at least one vetter who can confirm your profile to activate it.
+                    </p>
+                    <p className="text-sm text-yellow-600 mb-3">
+                      {vettingStatus.confirmedCount === 0
+                        ? "No vetters have confirmed yet. Add vetters to get started."
+                        : `${vettingStatus.confirmedCount} vetter(s) confirmed. Waiting for activation.`}
+                    </p>
+                    <button
+                      onClick={() => router.push('/profile/vetting')}
+                      className="bg-boldblue text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                    >
+                      Manage Vetting →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className='flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-0'>
               <div>
@@ -330,6 +372,23 @@ const FreelancerProfile = ({ initialProfileId }: ProfileProps) => {
                     <p className='text-xs font-bold flex items-center gap-1'>
                       <IoLocationOutline size={20} /> {locationString}
                     </p>
+                    {/* Vetting and GCC Badges */}
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      {profileData?.vettingCount !== undefined && (
+                        <VettingBadge
+                          vettingCount={profileData.vettingCount}
+                        />
+                      )}
+                      {profileData?.gccCertificationId && profileData?.gccCertificationVerified && (
+                        <GCCBadge
+                          gccCertificationId={profileData.gccCertificationId}
+                          gccCertificationVerified={profileData.gccCertificationVerified}
+                          {...(process.env.NEXT_PUBLIC_GCC_VERIFICATION_URL && {
+                            verificationUrl: process.env.NEXT_PUBLIC_GCC_VERIFICATION_URL
+                          })}
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
 
