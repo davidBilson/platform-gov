@@ -24,6 +24,7 @@ interface ContractorWithRating {
     primaryPosition: string;
     profession?: string;
     location: {
+      country?: string;
       state: string;
     };
     firmAffiliation?: string;
@@ -130,26 +131,26 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
   }, [contractors, getContractorRatings]);
 
   // Render rating component
-  const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false, count: number = 0) => {
-    const filledStars = Math.floor(rating);
+  // const renderRating = useCallback((rating: number, maxRating: number = 5, showCount: boolean = false, count: number = 0) => {
+  //   const filledStars = Math.floor(rating);
 
-    return (
-      <div className="flex items-center gap-1">
-        <div className="flex">
-          {Array.from({ length: maxRating }).map((_, i) => (
-            i < filledStars ?
-              <MdStar key={i} className="text-deepskyblue text-lg" /> :
-              <MdStarBorder key={i} className="text-deepskyblue text-lg" />
-          ))}
-        </div>
-        {showCount && count > 0 && (
-          <span className="text-sm text-boldblue ml-1">
-            ({rating.toFixed(1)})
-          </span>
-        )}
-      </div>
-    );
-  }, []);
+  //   return (
+  //     <div className="flex items-center gap-1">
+  //       <div className="flex">
+  //         {Array.from({ length: maxRating }).map((_, i) => (
+  //           i < filledStars ?
+  //             <MdStar key={i} className="text-deepskyblue text-lg" /> :
+  //             <MdStarBorder key={i} className="text-deepskyblue text-lg" />
+  //         ))}
+  //       </div>
+  //       {showCount && count > 0 && (
+  //         <span className="text-sm text-boldblue ml-1">
+  //           ({rating.toFixed(1)})
+  //         </span>
+  //       )}
+  //     </div>
+  //   );
+  // }, []);
 
   if (!contractors || contractors.length === 0) {
     return <section>No contractors found</section>;
@@ -244,7 +245,7 @@ const ContractorList = ({ contractors }: ContractorListProps) => {
                       </Link>
                     </div>
                     <p className='text-xs font-bold'>{contractor.profession ?? "Profession"}</p>
-                    <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor.location.state !== "" ? contractor?.location.state : "no location"}</p>
+                    <p className='text-xs font-bold flex items-center gap-1'><IoLocationOutline size={20} />{contractor?.location?.country ?? "no location"}</p>
                   </div>
 
                 </div>

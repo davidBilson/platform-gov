@@ -327,6 +327,7 @@ const CreateFreelancerProfile = () => {
       router,
       fetchUserProfile
     );
+    fetchUserProfile();
   };
 
   useEffect(() => {
@@ -363,7 +364,7 @@ const CreateFreelancerProfile = () => {
   };
 
   const handleGoToVetting = () => {
-    if (formData.bio !== "" && formData.profileImageUrl !== "" && isProfileExists) {
+    if (formData.bio !== "" && isProfileExists) {
       router.push('/profile/vetting');
     } else {
       toast.error("Please complete, and save your profile");

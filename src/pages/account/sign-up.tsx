@@ -5,13 +5,14 @@ import useAuthStore from '@/store/useAuth';
 import { SignupFormData, SignupApiResponse, ErrorResponse } from '@/types/auth/auth';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
+import PhoneInput from '@/components/PhoneInput';
 
 const Signup = () => {
 
   const router = useRouter();
-  
+
   const { type } = router.query;
- 
+
   const { setFormData: setStoreFormData, setUserId, setVerificationStep } = useAuthStore();
 
   const [formData, setLocalFormData] = useState<SignupFormData>({
@@ -23,6 +24,10 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
   });
+
+  useEffect(() => {
+    console.log("Phone Number: ", formData.phoneNumber)
+  }, [formData.phoneNumber])
 
   useEffect(() => {
     if (type === 'client') {
@@ -135,7 +140,7 @@ const Signup = () => {
           const errorResponseData = axiosError.response.data as ErrorResponse;
           const errorMsg = errorResponseData.message || 'An error occurred during signup';
           setErrorMessage(errorMsg);
-          
+
           // Show toast for server errors
           if (axiosError.response.status >= 500) {
             toast.error('Server error. Please try again later.');
@@ -155,7 +160,7 @@ const Signup = () => {
         setErrorMessage(errorMsg);
         toast.error('An unexpected error occurred. Please try again.');
       }
-      
+
       setIsSubmitting(false);
     }
   };
@@ -258,14 +263,18 @@ const Signup = () => {
             </div>
 
             <div>
-              <input
-                type="tel"
+              <PhoneInput
                 id="phoneNumber"
                 name="phoneNumber"
                 value={formData.phoneNumber}
-                onChange={handleChange}
+                onChange={(value) => {
+                  setLocalFormData(prev => ({
+                    ...prev,
+                    phoneNumber: value
+                  }));
+                  if (errorMessage) setErrorMessage('');
+                }}
                 placeholder='Phone'
-                className='w-full h-12.5 bg-white border border-boldblue rounded-lg py-4 pl-5 text-boldblue text-sm font-medium focus:outline focus:outline-boldblue placeholder:font-medium'
                 required
               />
             </div>
