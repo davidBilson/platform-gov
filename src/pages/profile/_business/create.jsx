@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { FaSearch } from "react-icons/fa";
 import { IoMdImages } from "react-icons/io";
 import { MdEdit } from "react-icons/md";
+import { useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '@/store/useAuth';
 import { useRouter } from 'next/router';
 import { toast } from "react-toastify";
@@ -45,7 +46,7 @@ const CreateBusinessProfile = () => {
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState({});
   const [showStateDropdown, setShowStateDropdown] = useState({});
-  
+
   // Legal Agreement States
   const [pendingSubmission, setPendingSubmission] = useState(false);
   const [showLegalAgreement, setShowLegalAgreement] = useState(false);
@@ -53,6 +54,7 @@ const CreateBusinessProfile = () => {
 
   const { userId } = useAuthStore();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -262,6 +264,10 @@ const CreateBusinessProfile = () => {
         } else {
           toast.success('Profile created successfully!');
         }
+        // Invalidate profile picture query to update navbar
+        if (userId) {
+          queryClient.invalidateQueries({ queryKey: ['profilePicture', userId] });
+        }
       } else {
         toast.error(data.message || 'Failed to save profile');
       }
@@ -288,7 +294,7 @@ const CreateBusinessProfile = () => {
       handleSubmitProfile();
       return;
     }
-    
+
     // Otherwise, show legal agreement first
     setPendingSubmission(true);
     legalSetterOnce();
@@ -316,7 +322,7 @@ const CreateBusinessProfile = () => {
       <section className='h-screen w-full fixed top-0 left-0 z-50  flex items-center justify-end'>
         <section className='w-full h-screen  p-4 md:p-7.5 overflow-y-auto'>
           <div className='w-full max-w-275 m-auto pb-32 md:pb-64 flex items-center justify-center h-full'>
-          <DotLoader />
+            <DotLoader />
           </div>
         </section>
       </section>
@@ -327,13 +333,13 @@ const CreateBusinessProfile = () => {
     <>
       {/* Legal Agreement Modal */}
       {showLegalAgreement && (
-        <Legalagreement 
-          setShowLegalAgreement={setShowLegalAgreement} 
-          acceptedLegalAgreement={acceptedLegalAgreement} 
-          setAcceptedLegalAgreement={setAcceptedLegalAgreement} 
+        <Legalagreement
+          setShowLegalAgreement={setShowLegalAgreement}
+          acceptedLegalAgreement={acceptedLegalAgreement}
+          setAcceptedLegalAgreement={setAcceptedLegalAgreement}
         />
       )}
-      
+
       <section className='p-6'>
         <section className='w-full max-w-275 m-auto pb-32'>
           <div className='mb-6'>

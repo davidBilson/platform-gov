@@ -1,6 +1,7 @@
 "use client"
 import React, { useState, useRef, useEffect, ChangeEvent } from "react";
 import { useRouter } from 'next/router';
+import { useQueryClient } from '@tanstack/react-query';
 import useAuthStore from '@/store/useAuth';
 import { ProfileFormData, WorkHistory, Degree } from "@/types/profile";
 // API
@@ -11,7 +12,6 @@ import { handleTextAreaInput, handleInputChange, handleProfileImageChange, addTa
 
 import { ProfessionalFieldsAndAreasOfExpertise152 } from "@/utils/feedFilter/152ProfessionalFieldsAndAreasOfExpertise";
 import { certificatesAndEducationList } from "@/utils/feedFilter/CertificatesAndEducationList";
-// UI Components
 import Legalagreement from "@/components/ui/legal-agreement";
 import { toast } from "react-toastify";
 
@@ -32,6 +32,7 @@ import { DepartmentAgencySection } from "@/components/profile/editProfile/contra
 const CreateFreelancerProfile = () => {
 
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { userId, name, email } = useAuthStore();
 
   const [formData, setFormData] = useState<ProfileFormData>({
@@ -327,7 +328,10 @@ const CreateFreelancerProfile = () => {
       router,
       fetchUserProfile
     );
-    fetchUserProfile();
+    // Invalidate profile picture query to update navbar after profile is saved
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: ['profilePicture', userId] });
+    }
   };
 
   useEffect(() => {
